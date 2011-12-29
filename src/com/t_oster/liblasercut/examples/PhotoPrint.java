@@ -26,6 +26,7 @@ import com.t_oster.liblasercut.LaserProperty;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.drivers.EpilogCutter;
+import com.t_oster.liblasercut.drivers.EpilogZing;
 import com.t_oster.liblasercut.utils.BufferedImageAdapter;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
@@ -168,7 +169,7 @@ public class PhotoPrint {
         if (JOptionPane.showConfirmDialog(
                 null, prev, "Waehlen Sie einen Algorithmus aus", JOptionPane.OK_CANCEL_OPTION)
                 == JOptionPane.OK_OPTION) {
-            EpilogCutter instance = new EpilogCutter("137.226.56.228");
+            EpilogCutter instance = new EpilogZing("137.226.56.228");
             //JComboBox material = new JComboBox();
             //for (MaterialProperty mp : instance.getMaterialPropertys()) {
             //    material.addItem(mp);

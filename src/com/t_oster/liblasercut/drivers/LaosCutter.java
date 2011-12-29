@@ -30,7 +30,10 @@ import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -39,6 +42,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.net.tftp.TFTP;
+import org.apache.commons.net.tftp.TFTPClient;
 
 /**
  * This class implements a driver for the LAOS Lasercutter board.
@@ -57,7 +62,34 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
   private static final String SETTING_FLIPX = "X axis goes right to left (yes/no)";
   private static final String SETTING_MMPERSTEP = "mm per Step (for SimpleMode)";
-  
+  private static final String SETTING_TFTP = "Use TFTP instead of TCP";
+
+  @Override
+  public String getModelName()
+  {
+    return "LAOS";
+  }
+  protected boolean useTftp = true;
+
+  /**
+   * Get the value of useTftp
+   *
+   * @return the value of useTftp
+   */
+  public boolean isUseTftp()
+  {
+    return useTftp;
+  }
+
+  /**
+   * Set the value of useTftp
+   *
+   * @param useTftp new value of useTftp
+   */
+  public void setUseTftp(boolean useTftp)
+  {
+    this.useTftp = useTftp;
+  }
   protected boolean flipXaxis = false;
 
   /**
@@ -142,7 +174,6 @@ public class LaosCutter extends LaserCutter
   {
     this.port = port;
   }
-
   protected double mmPerStep = 0.006323126711476225;
 
   /**
@@ -167,7 +198,7 @@ public class LaosCutter extends LaserCutter
 
   private int px2steps(double px, double dpi)
   {
-    return (int) (Util.px2mm(px, dpi)/this.mmPerStep);
+    return (int) (Util.px2mm(px, dpi) / this.mmPerStep);
   }
 
   private byte[] generateVectorGCode(VectorPart vp, int resolution) throws UnsupportedEncodingException
@@ -217,16 +248,16 @@ public class LaosCutter extends LaserCutter
     if (this.isSimpleMode())
     {
       out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
-    } 
+    }
     else
     {
       out.printf(Locale.US, "G0 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
     }
   }
-
   private int currentPower = -1;
   private int currentSpeed = -1;
   private int currentFrequency = -1;
+
   private void line(PrintStream out, int x, int y, int power, int speed, int frequency, int resolution)
   {
     if (this.isSimpleMode())
@@ -284,9 +315,9 @@ public class LaosCutter extends LaserCutter
           lineStart.x += 1;
         }
         //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size()-1) == 0)
+        while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0)
         {
-          bytes.remove(bytes.size()-1);
+          bytes.remove(bytes.size() - 1);
         }
         if (bytes.size() > 0)
         {
@@ -301,42 +332,42 @@ public class LaosCutter extends LaserCutter
               {
                 if (old == 0)
                 {
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 else
                 {
-                  line(out, lineStart.x+pix-1, lineStart.y, prop.getPower()*(0xFF&old)/255, prop.getSpeed(), prop.getFrequency(), resolution);
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  line(out, lineStart.x + pix - 1, lineStart.y, prop.getPower() * (0xFF & old) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 old = bytes.get(pix);
               }
             }
             //last point is also not "white"
-            line(out, lineStart.x+bytes.size()-1, lineStart.y, prop.getPower()*(0xFF&bytes.get(bytes.size()-1))/255, prop.getSpeed(), prop.getFrequency(), resolution);
+            line(out, lineStart.x + bytes.size() - 1, lineStart.y, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
           }
           else
           {
             //move to the last nonempty point of the line
-            move(out, lineStart.x+bytes.size()-1, lineStart.y, resolution);
-            byte old = bytes.get(bytes.size()-1);
-            for (int pix=bytes.size()-1; pix >=0; pix--)
+            move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+            byte old = bytes.get(bytes.size() - 1);
+            for (int pix = bytes.size() - 1; pix >= 0; pix--)
             {
               if (bytes.get(pix) != old || pix == 0)
               {
                 if (old == 0)
                 {
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 else
                 {
-                  line(out, lineStart.x+pix+1, lineStart.y, prop.getPower()*(0xFF&old)/255, prop.getSpeed(), prop.getFrequency(), resolution);
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  line(out, lineStart.x + pix + 1, lineStart.y, prop.getPower() * (0xFF & old) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 old = bytes.get(pix);
               }
             }
             //last point is also not "white"
-            line(out, lineStart.x, lineStart.y, prop.getPower()*(0xFF&bytes.get(0))/255, prop.getSpeed(), prop.getFrequency(), resolution);
+            line(out, lineStart.x, lineStart.y, prop.getPower() * (0xFF & bytes.get(0)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
           }
         }
         dirRight = !dirRight;
@@ -344,7 +375,7 @@ public class LaosCutter extends LaserCutter
     }
     return result.toByteArray();
   }
-  
+
   private byte[] generatePseudoRasterGCode(RasterPart rp, int resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -371,7 +402,7 @@ public class LaosCutter extends LaserCutter
         BlackWhiteRaster bwr = rp.getImages()[raster];
         List<Byte> bytes = new LinkedList<Byte>();
         boolean lookForStart = true;
-        for (int x=0;x<bwr.getWidth();x++)
+        for (int x = 0; x < bwr.getWidth(); x++)
         {
           if (lookForStart)
           {
@@ -382,7 +413,7 @@ public class LaosCutter extends LaserCutter
             }
             else
             {
-              lineStart.x+=1;
+              lineStart.x += 1;
             }
           }
           else
@@ -391,9 +422,9 @@ public class LaosCutter extends LaserCutter
           }
         }
         //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size()-1) == 0)
+        while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0)
         {
-          bytes.remove(bytes.size()-1);
+          bytes.remove(bytes.size() - 1);
         }
         if (bytes.size() > 0)
         {
@@ -408,42 +439,42 @@ public class LaosCutter extends LaserCutter
               {
                 if (old == 0)
                 {
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 else
                 {
-                  line(out, lineStart.x+pix-1, lineStart.y, prop.getPower()*(0xFF&old)/255, prop.getSpeed(), prop.getFrequency(), resolution);
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  line(out, lineStart.x + pix - 1, lineStart.y, prop.getPower() * (0xFF & old) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 old = bytes.get(pix);
               }
             }
             //last point is also not "white"
-            line(out, lineStart.x+bytes.size()-1, lineStart.y, prop.getPower()*(0xFF&bytes.get(bytes.size()-1))/255, prop.getSpeed(), prop.getFrequency(), resolution);
+            line(out, lineStart.x + bytes.size() - 1, lineStart.y, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
           }
           else
           {
             //move to the last nonempty point of the line
-            move(out, lineStart.x+bytes.size()-1, lineStart.y, resolution);
-            byte old = bytes.get(bytes.size()-1);
-            for (int pix=bytes.size()-1; pix >=0; pix--)
+            move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+            byte old = bytes.get(bytes.size() - 1);
+            for (int pix = bytes.size() - 1; pix >= 0; pix--)
             {
               if (bytes.get(pix) != old || pix == 0)
               {
                 if (old == 0)
                 {
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 else
                 {
-                  line(out, lineStart.x+pix+1, lineStart.y, prop.getPower()*(0xFF&old)/255, prop.getSpeed(), prop.getFrequency(), resolution);
-                  move(out, lineStart.x+pix, lineStart.y, resolution);
+                  line(out, lineStart.x + pix + 1, lineStart.y, prop.getPower() * (0xFF & old) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
+                  move(out, lineStart.x + pix, lineStart.y, resolution);
                 }
                 old = bytes.get(pix);
               }
             }
             //last point is also not "white"
-            line(out, lineStart.x, lineStart.y, prop.getPower()*(0xFF&bytes.get(0))/255, prop.getSpeed(), prop.getFrequency(), resolution);
+            line(out, lineStart.x, lineStart.y, prop.getPower() * (0xFF & bytes.get(0)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
           }
         }
         dirRight = !dirRight;
@@ -465,7 +496,7 @@ public class LaosCutter extends LaserCutter
     }
     return result.toByteArray();
   }
-  
+
   private byte[] generateShutdownCode() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -488,17 +519,26 @@ public class LaosCutter extends LaserCutter
     }
     return result.toByteArray();
   }
-  
+
   @Override
   public void sendJob(LaserJob job) throws IllegalJobException, Exception
   {
     this.currentFrequency = -1;
     this.currentPower = -1;
     this.currentSpeed = -1;
-    Socket connection = new Socket();
-    connection.connect(new InetSocketAddress(hostname, port), 3000);
-    BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
-    //TODO: 
+    BufferedOutputStream out;
+    ByteArrayOutputStream buffer = null;
+    if (!useTftp)
+    {
+      Socket connection = new Socket();
+      connection.connect(new InetSocketAddress(hostname, port), 3000);
+      out = new BufferedOutputStream(connection.getOutputStream());
+    }
+    else
+    {
+      buffer = new ByteArrayOutputStream();
+      out = new BufferedOutputStream(buffer);
+    }
     out.write(this.generateInitializationCode());
     if (job.contains3dRaster())
     {
@@ -514,6 +554,13 @@ public class LaosCutter extends LaserCutter
     }
     out.write(this.generateShutdownCode());
     out.close();
+    if (this.isUseTftp())
+    {
+      TFTPClient tftp = new TFTPClient();
+      tftp.setDefaultTimeout(60000);
+      tftp.open(this.getPort());
+      tftp.sendFile(job.getName(), TFTP.ASCII_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
+    }
   }
   private List<Integer> resolutions;
 
@@ -538,6 +585,7 @@ public class LaosCutter extends LaserCutter
    *
    * @return the value of bedWidth
    */
+  @Override
   public double getBedWidth()
   {
     return bedWidth;
@@ -559,6 +607,7 @@ public class LaosCutter extends LaserCutter
    *
    * @return the value of bedHeight
    */
+  @Override
   public double getBedHeight()
   {
     return bedHeight;
@@ -588,6 +637,7 @@ public class LaosCutter extends LaserCutter
       settingAttributes.add(SETTING_BEDHEIGHT);
       settingAttributes.add(SETTING_FLIPX);
       settingAttributes.add(SETTING_MMPERSTEP);
+      settingAttributes.add(SETTING_TFTP);
     }
     return settingAttributes;
   }
@@ -623,6 +673,10 @@ public class LaosCutter extends LaserCutter
     {
       return "" + this.getMmPerStep();
     }
+    else if (SETTING_TFTP.equals(attribute))
+    {
+      return this.isUseTftp() ? "yes" : "no";
+    }
     return null;
   }
 
@@ -657,6 +711,10 @@ public class LaosCutter extends LaserCutter
     {
       this.setMmPerStep(Double.parseDouble(value));
     }
+    else if (SETTING_TFTP.contains(attribute))
+    {
+      this.setUseTftp("yes".equals(value));
+    }
   }
 
   @Override
@@ -676,6 +734,7 @@ public class LaosCutter extends LaserCutter
     clone.bedWidth = bedWidth;
     clone.flipXaxis = flipXaxis;
     clone.mmPerStep = mmPerStep;
+    clone.useTftp = useTftp;
     return clone;
   }
 }
