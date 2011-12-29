@@ -27,6 +27,7 @@ package com.t_oster.liblasercut.drivers;
 import com.t_oster.liblasercut.*;
 import com.t_oster.liblasercut.platform.Util;
 import com.t_oster.liblasercut.platform.Point;
+import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,16 +49,13 @@ import java.util.LinkedList;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class EpilogCutter extends LaserCutter
+public abstract class EpilogCutter extends LaserCutter
 {
 
   public static boolean SIMULATE_COMMUNICATION = false;
   public static final int NETWORK_TIMEOUT = 3000;
   /* Resolutions in DPI */
-  private static final int[] RESOLUTIONS = new int[]
-  {
-    300, 500, 600, 1000
-  };
+  
   private static final int MINFOCUS = -500;//Minimal focus value (not mm)
   private static final int MAXFOCUS = 500;//Maximal focus value (not mm)
   private static final double FOCUSWIDTH = 0.0252;//How much mm/unit the focus values are
@@ -344,15 +342,9 @@ public class EpilogCutter extends LaserCutter
     disconnect();
   }
 
-  public List<Integer> getResolutions()
-  {
-    List<Integer> result = new LinkedList();
-    for (int r : RESOLUTIONS)
-    {
-      result.add(r);
-    }
-    return result;
-  }
+  @Override
+  abstract public List<Integer> getResolutions();
+  
 
   /**
    * Encodes the given line of the given image in TIFF Packbyte encoding
@@ -738,17 +730,6 @@ public class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public EpilogCutter clone()
-  {
-    EpilogCutter result = new EpilogCutter();
-    result.hostname = hostname;
-    result.port = port;
-    result.bedHeight = bedHeight;
-    result.bedWidth = bedWidth;
-    return result;
-  }
-
-  @Override
   public String getSettingValue(String attribute)
   {
     if ("Hostname".equals(attribute))
@@ -958,4 +939,5 @@ public class EpilogCutter extends LaserCutter
   {
     return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
   }
+  
 }
