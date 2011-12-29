@@ -559,7 +559,7 @@ public class LaosCutter extends LaserCutter
       TFTPClient tftp = new TFTPClient();
       tftp.setDefaultTimeout(60000);
       tftp.open(this.getPort());
-      tftp.sendFile(job.getName(), TFTP.ASCII_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
+      tftp.sendFile(job.getName()+".lgc", TFTP.ASCII_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
     }
   }
   private List<Integer> resolutions;
