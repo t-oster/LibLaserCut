@@ -71,4 +71,11 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <target name="-post-jar">
+    <jar jarfile="dist/LibLaserCutWithDeps.jar">
+        <zipfileset src="${dist.jar}" excludes="META-INF/*" />
+        <zipfileset src="lib/commons-net-3.0.1.jar" excludes="META-INF/*" />
+    </jar>
+</target>
 </project>
