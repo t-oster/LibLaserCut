@@ -27,7 +27,6 @@ package com.t_oster.liblasercut.drivers;
 import com.t_oster.liblasercut.*;
 import com.t_oster.liblasercut.platform.Util;
 import com.t_oster.liblasercut.platform.Point;
-import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,7 +48,7 @@ import java.util.LinkedList;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public abstract class EpilogCutter extends LaserCutter
+abstract class EpilogCutter extends LaserCutter
 {
 
   public static boolean SIMULATE_COMMUNICATION = false;
@@ -315,29 +314,41 @@ public abstract class EpilogCutter extends LaserCutter
     }
   }
 
-  public void sendJob(LaserJob job) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
+  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
+    pl.progressChanged(this, 0);
+    pl.taskChanged(this, "checking job");
     //Perform santiy checks
     checkJob(job);
     if (job.contains3dRaster() && job.containsRaster())
     {//Raster and 3d Raster may not be in the same job. Send 2
-      this.realSendJob(new LaserJob("(1/2)" + job.getTitle(), job.getName(), job.getUser(), job.getResolution(), job.getRaster3dPart(), null, null));
-      this.realSendJob(new LaserJob("(2/2)" + job.getTitle(), job.getName(), job.getUser(), job.getResolution(), null, job.getVectorPart(), job.getRasterPart()));
+      pl.taskChanged(this, "sending job 1/2");
+      this.realSendJob(new LaserJob("(1/2)" + job.getTitle(), job.getName(), job.getUser(), job.getResolution(), job.getRaster3dPart(), null, null), pl);
+      pl.taskChanged(this, "sending job 2/2");
+      this.realSendJob(new LaserJob("(2/2)" + job.getTitle(), job.getName(), job.getUser(), job.getResolution(), null, job.getVectorPart(), job.getRasterPart()), pl);
     }
     else
     {
-      this.realSendJob(job);
+      pl.taskChanged(this, "sending job");
+      this.realSendJob(job, pl);
     }
+    pl.progressChanged(this, 100);
   }
 
-  private void realSendJob(LaserJob job) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
+  private void realSendJob(LaserJob job, ProgressListener pl) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
     //Generate all the data
+    pl.taskChanged(this, "generating data");
     byte[] pjlData = generatePjlData(job);
+    pl.progressChanged(this, 40);
     //connect to lasercutter
+    pl.taskChanged(this, "connecting");
     connect();
+    pl.progressChanged(this, 60);
     //send job
+    pl.taskChanged(this, "sending");
     sendPjlJob(job, pjlData);
+    pl.progressChanged(this, 90);
     //disconnect
     disconnect();
   }

@@ -34,11 +34,35 @@ public abstract class LaserCutter implements Cloneable
   /**
    * Performs sanity checks on the LaserJob and sends it to the Cutter
    * @param job
+   * @param pl A ProgressListener to give feedback about the progress
    * @throws IllegalJobException if the Job didn't pass the SanityCheck
    * @throws Exception  if there is a Problem with the Communication or Queue
    */
-  public abstract void sendJob(LaserJob job) throws IllegalJobException, Exception;
+  public abstract void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception;
 
+  /**
+   * This calls sendJob(job, pl) with a default progress listener, which
+   * just dumps everythong on the command line
+   * @param job
+   * @throws IllegalJobException
+   * @throws Exception 
+   */
+  public void sendJob(LaserJob job) throws IllegalJobException, Exception
+  {
+    this.sendJob(job, new ProgressListener(){
+      @Override
+      public void progressChanged(Object source, int percent)
+      {
+        System.out.println(""+percent+"%");
+      }
+      @Override
+      public void taskChanged(Object source, String taskName)
+      {
+        System.out.println(taskName+"...");
+      }  
+    });
+  }
+  
   /**
    * Returns the available Resolutions in DPI
    * @return 

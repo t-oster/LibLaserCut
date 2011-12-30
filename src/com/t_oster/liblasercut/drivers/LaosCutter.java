@@ -23,6 +23,7 @@ import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.LaserProperty;
+import com.t_oster.liblasercut.ProgressListener;
 import com.t_oster.liblasercut.Raster3dPart;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
@@ -521,8 +522,9 @@ public class LaosCutter extends LaserCutter
   }
 
   @Override
-  public void sendJob(LaserJob job) throws IllegalJobException, Exception
+  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
   {
+    pl.progressChanged(this, 0);
     this.currentFrequency = -1;
     this.currentPower = -1;
     this.currentSpeed = -1;
@@ -530,37 +532,47 @@ public class LaosCutter extends LaserCutter
     ByteArrayOutputStream buffer = null;
     if (!useTftp)
     {
+      pl.taskChanged(this, "connecting");
       Socket connection = new Socket();
       connection.connect(new InetSocketAddress(hostname, port), 3000);
       out = new BufferedOutputStream(connection.getOutputStream());
+      pl.taskChanged(this, "sending");
     }
     else
     {
       buffer = new ByteArrayOutputStream();
       out = new BufferedOutputStream(buffer);
+      pl.taskChanged(this, "buffering");
     }
     out.write(this.generateInitializationCode());
+    pl.progressChanged(this, 20);
     if (job.contains3dRaster())
     {
       out.write(this.generatePseudoRaster3dGCode(job.getRaster3dPart(), job.getResolution()));
     }
+    pl.progressChanged(this, 40);
     if (job.containsRaster())
     {
       out.write(this.generatePseudoRasterGCode(job.getRasterPart(), job.getResolution()));
     }
+    pl.progressChanged(this, 60);
     if (job.containsVector())
     {
       out.write(this.generateVectorGCode(job.getVectorPart(), job.getResolution()));
     }
+    pl.progressChanged(this, 80);
     out.write(this.generateShutdownCode());
     out.close();
     if (this.isUseTftp())
     {
+      pl.taskChanged(this, "connecting");
       TFTPClient tftp = new TFTPClient();
       tftp.setDefaultTimeout(60000);
       tftp.open(this.getPort());
+      pl.taskChanged(this, "sending");
       tftp.sendFile(job.getName()+".lgc", TFTP.ASCII_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
     }
+    pl.progressChanged(this, 100);
   }
   private List<Integer> resolutions;
 
