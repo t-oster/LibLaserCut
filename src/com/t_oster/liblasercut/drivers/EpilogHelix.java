@@ -53,7 +53,7 @@ public class EpilogHelix extends EpilogCutter
   
   private static final int[] RESOLUTIONS = new int[]
   {
-    75, 300, 600, 1200
+     75, 150, 200, 300, 400, 600, 1200
   };
   
   @Override
