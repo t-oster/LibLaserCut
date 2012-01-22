@@ -30,6 +30,7 @@ import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -570,7 +571,9 @@ public class LaosCutter extends LaserCutter
       tftp.setDefaultTimeout(60000);
       tftp.open(this.getPort());
       pl.taskChanged(this, "sending");
-      tftp.sendFile(job.getName()+".lgc", TFTP.ASCII_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
+      tftp.sendFile(job.getName()+".lgc", TFTP.OCTET_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
+      tftp.close();
+      pl.taskChanged(this, "sent.");
     }
     pl.progressChanged(this, 100);
   }
