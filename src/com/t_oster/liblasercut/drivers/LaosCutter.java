@@ -569,10 +569,13 @@ public class LaosCutter extends LaserCutter
       pl.taskChanged(this, "connecting");
       TFTPClient tftp = new TFTPClient();
       tftp.setDefaultTimeout(60000);
-      tftp.open(this.getPort());
+      //open a local UDP socket
+      tftp.open();
       pl.taskChanged(this, "sending");
-      tftp.sendFile(job.getName()+".lgc", TFTP.OCTET_MODE, new ByteArrayInputStream(buffer.toByteArray()), this.getHostname());
+      ByteArrayInputStream bain = new ByteArrayInputStream(buffer.toByteArray());
+      tftp.sendFile(job.getName()+".lgc", TFTP.BINARY_MODE, bain, this.getHostname(), this.getPort());
       tftp.close();
+      bain.close();
       pl.taskChanged(this, "sent.");
     }
     pl.progressChanged(this, 100);
