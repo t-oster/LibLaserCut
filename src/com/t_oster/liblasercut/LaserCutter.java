@@ -22,6 +22,7 @@
  */
 package com.t_oster.liblasercut;
 
+import com.t_oster.liblasercut.platform.Util;
 import java.util.List;
 
 /**
@@ -31,6 +32,63 @@ import java.util.List;
 public abstract class LaserCutter implements Cloneable
 {
 
+  /**
+   * Checks the given job. It throws exceptions if
+   * - job size is bigger than laser bed size
+   * - job resolution is not supported
+   * This method is supposed to be used (in addition of own sanity checks)
+   * as a sanity check inside the sendJob mehtod
+   * 
+   * @param job
+   * @throws IllegalJobException 
+   */
+  protected void checkJob(LaserJob job) throws IllegalJobException
+  {
+    boolean pass = false;
+    for (int i : this.getResolutions())
+    {
+      if (i == job.getResolution())
+      {
+        pass = true;
+        break;
+      }
+    }
+    if (!pass)
+    {
+      throw new IllegalJobException("Resoluiton of " + job.getResolution() + " is not supported");
+    }
+    if (job.containsVector())
+    {
+      double w = Util.px2mm(job.getVectorPart().getWidth(), job.getResolution());
+      double h = Util.px2mm(job.getVectorPart().getHeight(), job.getResolution());
+
+      if (w > this.getBedWidth() || h > this.getBedHeight())
+      {
+        throw new IllegalJobException("The Job is too big (" + w + "x" + h + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
+      }
+    }
+    if (job.containsRaster())
+    {
+      double w = Util.px2mm(job.getRasterPart().getWidth(), job.getResolution());
+      double h = Util.px2mm(job.getRasterPart().getHeight(), job.getResolution());
+
+      if (w > this.getBedWidth() || h > this.getBedHeight())
+      {
+        throw new IllegalJobException("The Job is too big (" + w + "mm x" + h + "mm) for the Laser bed (" + this.getBedWidth() + "mm x" + this.getBedHeight() + "mm)");
+      }
+    }
+    if (job.contains3dRaster())
+    {
+      double w = Util.px2mm(job.getRaster3dPart().getWidth(), job.getResolution());
+      double h = Util.px2mm(job.getRaster3dPart().getHeight(), job.getResolution());
+
+      if (w > this.getBedWidth() || h > this.getBedHeight())
+      {
+        throw new IllegalJobException("The Job is too big (" + w + "x" + h + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
+      }
+    }
+  }
+  
   /**
    * Performs sanity checks on the LaserJob and sends it to the Cutter
    * @param job

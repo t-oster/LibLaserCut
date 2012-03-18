@@ -25,24 +25,16 @@
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.*;
-import com.t_oster.liblasercut.platform.Util;
 import com.t_oster.liblasercut.platform.Point;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -105,7 +97,7 @@ abstract class EpilogCutter extends LaserCutter
     {
       return;
     }
-    int result = -1;
+    int result;
     out.flush();
     for (int i = 0; i < timeout * 10; i++)
     {
@@ -180,7 +172,7 @@ abstract class EpilogCutter extends LaserCutter
 
   private void sendPjlJob(LaserJob job, byte[] pjlData) throws UnknownHostException, UnsupportedEncodingException, IOException, Exception
   {
-    String localhost = null;
+    String localhost;
     try
     {
       localhost = java.net.InetAddress.getLocalHost().getHostName();
@@ -237,31 +229,12 @@ abstract class EpilogCutter extends LaserCutter
     }
   }
 
-  private void checkJob(LaserJob job) throws IllegalJobException
+  @Override
+  protected void checkJob(LaserJob job) throws IllegalJobException
   {
-    boolean pass = false;
-    for (int i : this.getResolutions())
-    {
-      if (i == job.getResolution())
-      {
-        pass = true;
-        break;
-      }
-    }
-    if (!pass)
-    {
-      throw new IllegalJobException("Resoluiton of " + job.getResolution() + " is not supported");
-    }
+    super.checkJob(job);
     if (job.containsVector())
     {
-      double w = Util.px2mm(job.getVectorPart().getWidth(), job.getResolution());
-      double h = Util.px2mm(job.getVectorPart().getHeight(), job.getResolution());
-
-      if (w > this.getBedWidth() || h > this.getBedHeight())
-      {
-        throw new IllegalJobException("The Job is too big (" + w + "x" + h + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
-      }
-
       for (VectorCommand cmd : job.getVectorPart().getCommandList())
       {
         if (cmd.getType() == VectorCommand.CmdType.SETFOCUS)
@@ -276,13 +249,6 @@ abstract class EpilogCutter extends LaserCutter
     }
     if (job.containsRaster())
     {
-      double w = Util.px2mm(job.getRasterPart().getWidth(), job.getResolution());
-      double h = Util.px2mm(job.getRasterPart().getHeight(), job.getResolution());
-
-      if (w > this.getBedWidth() || h > this.getBedHeight())
-      {
-        throw new IllegalJobException("The Job is too big (" + w + "mm x" + h + "mm) for the Laser bed (" + this.getBedWidth() + "mm x" + this.getBedHeight() + "mm)");
-      }
       for (int i = 0; i < job.getRasterPart().getRasterCount(); i++)
       {
         float focus = job.getRasterPart().getLaserProperty(i) == null ? 0 : job.getRasterPart().getLaserProperty(i).getFocus();
@@ -295,13 +261,6 @@ abstract class EpilogCutter extends LaserCutter
     }
     if (job.contains3dRaster())
     {
-      double w = Util.px2mm(job.getRaster3dPart().getWidth(), job.getResolution());
-      double h = Util.px2mm(job.getRaster3dPart().getHeight(), job.getResolution());
-
-      if (w > this.getBedWidth() || h > this.getBedHeight())
-      {
-        throw new IllegalJobException("The Job is too big (" + w + "x" + h + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
-      }
       for (int i = 0; i < job.getRaster3dPart().getRasterCount(); i++)
       {
         float focus = job.getRaster3dPart().getLaserProperty(i) == null ? 0 : job.getRaster3dPart().getLaserProperty(i).getFocus();
@@ -314,6 +273,7 @@ abstract class EpilogCutter extends LaserCutter
     }
   }
 
+  @Override
   public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
     pl.progressChanged(this, 0);

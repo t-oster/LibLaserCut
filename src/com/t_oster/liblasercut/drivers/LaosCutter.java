@@ -30,12 +30,9 @@ import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -535,6 +532,8 @@ public class LaosCutter extends LaserCutter
     this.currentSpeed = -1;
     BufferedOutputStream out;
     ByteArrayOutputStream buffer = null;
+    pl.taskChanged(this, "checking job");
+    checkJob(job);
     if (!useTftp)
     {
       pl.taskChanged(this, "connecting");
