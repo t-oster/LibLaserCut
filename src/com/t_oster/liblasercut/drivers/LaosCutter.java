@@ -572,7 +572,7 @@ public class LaosCutter extends LaserCutter
     {
       pl.taskChanged(this, "connecting");
       TFTPClient tftp = new TFTPClient();
-      tftp.setDefaultTimeout(60000);
+      tftp.setDefaultTimeout(5000);
       //open a local UDP socket
       tftp.open();
       pl.taskChanged(this, "sending");
