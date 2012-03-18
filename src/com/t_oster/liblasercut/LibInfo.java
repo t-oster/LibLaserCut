@@ -29,7 +29,7 @@ import com.t_oster.liblasercut.drivers.LaosCutter;
  */
 public class LibInfo
 {
-  private static String VERSION = "1.3";
+  private static String VERSION = "1.4";
   
   public static String getVersion()
   {

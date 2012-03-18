@@ -134,7 +134,7 @@ public class LaosCutter extends LaserCutter
   {
     this.simpleMode = simpleMode;
   }
-  protected String hostname = "localhost";
+  protected String hostname = "192.168.1.111";
 
   /**
    * Get the value of hostname
@@ -155,7 +155,7 @@ public class LaosCutter extends LaserCutter
   {
     this.hostname = hostname;
   }
-  protected int port = 515;
+  protected int port = 69;
 
   /**
    * Get the value of port
@@ -176,7 +176,7 @@ public class LaosCutter extends LaserCutter
   {
     this.port = port;
   }
-  protected double mmPerStep = 0.006323126711476225;
+  protected double mmPerStep = 0.001;
 
   /**
    * Get the value of mmPerStep
@@ -211,6 +211,10 @@ public class LaosCutter extends LaserCutter
     int speed = 50;
     int frequency = 500;
     double focus = 0;
+    //reset saved values, so the first ones get verbosed
+    this.currentPower = -1;
+    this.currentSpeed = -1;
+    this.currentFrequency = -1;
     for (VectorCommand cmd : vp.getCommandList())
     {
       switch (cmd.getType())
@@ -506,7 +510,7 @@ public class LaosCutter extends LaserCutter
     //back to origin and shutdown
     if (this.isSimpleMode())
     {
-      out.printf("0 0 0\n");
+      //out.printf("0 0 0\n");
       //Set focus to 0
       out.printf(Locale.US, "2 %d\n", 0);
     }
@@ -650,7 +654,7 @@ public class LaosCutter extends LaserCutter
       settingAttributes = new LinkedList<String>();
       settingAttributes.add(SETTING_HOSTNAME);
       settingAttributes.add(SETTING_PORT);
-      settingAttributes.add(SETTING_GCODE);
+      //settingAttributes.add(SETTING_GCODE);
       settingAttributes.add(SETTING_BEDWIDTH);
       settingAttributes.add(SETTING_BEDHEIGHT);
       settingAttributes.add(SETTING_FLIPX);
