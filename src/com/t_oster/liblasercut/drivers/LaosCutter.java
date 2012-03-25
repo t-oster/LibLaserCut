@@ -131,7 +131,7 @@ public class LaosCutter extends LaserCutter
   {
     this.simpleMode = simpleMode;
   }
-  protected String hostname = "192.168.1.111";
+  protected String hostname = "192.168.123.111";
 
   /**
    * Get the value of hostname
@@ -599,7 +599,7 @@ public class LaosCutter extends LaserCutter
     }
     return resolutions;
   }
-  protected double bedWidth = 600;
+  protected double bedWidth = 250;
 
   /**
    * Get the value of bedWidth
@@ -621,7 +621,7 @@ public class LaosCutter extends LaserCutter
   {
     this.bedWidth = bedWidth;
   }
-  protected double bedHeight = 300;
+  protected double bedHeight = 280;
 
   /**
    * Get the value of bedHeight
