@@ -18,11 +18,7 @@
  **/
 package com.t_oster.liblasercut;
 
-import com.t_oster.liblasercut.dithering.Average;
-import com.t_oster.liblasercut.dithering.DitheringAlgorithm;
-import com.t_oster.liblasercut.dithering.FloydSteinberg;
-import com.t_oster.liblasercut.dithering.Ordered;
-import com.t_oster.liblasercut.dithering.Random;
+import com.t_oster.liblasercut.dithering.*;
 
 /**
  *
@@ -37,6 +33,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation
     AVERAGE,
     RANDOM,
     ORDERED,
+    GRID,
   }
   private int width;
   private int height;
@@ -54,6 +51,8 @@ public class BlackWhiteRaster extends TimeIntensiveOperation
         return new Random();
       case ORDERED:
         return new Ordered();
+      case GRID:
+        return new Grid();
       default:
         throw new IllegalArgumentException("Desired Dithering Algorithm ("+alg+") does not exist");
     }
