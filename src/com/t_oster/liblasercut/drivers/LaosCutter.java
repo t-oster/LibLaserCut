@@ -576,7 +576,7 @@ public class LaosCutter extends LaserCutter
       tftp.open();
       pl.taskChanged(this, "sending");
       ByteArrayInputStream bain = new ByteArrayInputStream(buffer.toByteArray());
-      tftp.sendFile(job.getName()+".lgc", TFTP.BINARY_MODE, bain, this.getHostname(), this.getPort());
+      tftp.sendFile(job.getName().replace(" ", "") +".lgc", TFTP.BINARY_MODE, bain, this.getHostname(), this.getPort());
       tftp.close();
       bain.close();
       pl.taskChanged(this, "sent.");
