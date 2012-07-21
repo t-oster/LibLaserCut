@@ -62,7 +62,33 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_FLIPX = "X axis goes right to left (yes/no)";
   private static final String SETTING_MMPERSTEP = "mm per Step (for SimpleMode)";
   private static final String SETTING_TFTP = "Use TFTP instead of TCP";
+  private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
 
+  private double addSpacePerRasterLine = 5;
+
+  /**
+   * Get the value of addSpacePerRasterLine
+   *
+   * @return the value of addSpacePerRasterLine
+   */
+  public double getAddSpacePerRasterLine()
+  {
+    return addSpacePerRasterLine;
+  }
+
+  /**
+   * Set the value of addSpacePerRasterLine
+   * This is a space (in mm) for the laserhead to gain
+   * speed before the first 'black' pixel in every line
+   *
+   * @param addSpacePerRasterLine new value of addSpacePerRasterLine
+   */
+  public void setAddSpacePerRasterLine(double addSpacePerRasterLine)
+  {
+    this.addSpacePerRasterLine = addSpacePerRasterLine;
+  }
+
+  
   @Override
   public String getModelName()
   {
@@ -433,6 +459,8 @@ public class LaosCutter extends LaserCutter
         {
           if (dirRight)
           {
+            //add some space to the left
+            move(out, Math.max(0, (int) (lineStart.x-Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
             //move to the first nonempyt point of the line
             move(out, lineStart.x, lineStart.y, resolution);
             byte old = bytes.get(0);
@@ -454,9 +482,13 @@ public class LaosCutter extends LaserCutter
             }
             //last point is also not "white"
             line(out, lineStart.x + bytes.size() - 1, lineStart.y, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
+            //add some space to the right
+            move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
           }
           else
           {
+            //add some space to the right
+            move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
             //move to the last nonempty point of the line
             move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
             byte old = bytes.get(bytes.size() - 1);
@@ -478,6 +510,8 @@ public class LaosCutter extends LaserCutter
             }
             //last point is also not "white"
             line(out, lineStart.x, lineStart.y, prop.getPower() * (0xFF & bytes.get(0)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
+            //add some space to the left
+            move(out, Math.max(0, (int) (lineStart.x-Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
           }
         }
         dirRight = !dirRight;
@@ -659,6 +693,7 @@ public class LaosCutter extends LaserCutter
       settingAttributes.add(SETTING_FLIPX);
       settingAttributes.add(SETTING_MMPERSTEP);
       settingAttributes.add(SETTING_TFTP);
+      settingAttributes.add(SETTING_RASTER_WHITESPACE);
     }
     return settingAttributes;
   }
@@ -666,7 +701,11 @@ public class LaosCutter extends LaserCutter
   @Override
   public String getSettingValue(String attribute)
   {
-    if (SETTING_HOSTNAME.equals(attribute))
+    if (SETTING_RASTER_WHITESPACE.equals(attribute))
+    {
+      return "" + this.getAddSpacePerRasterLine();
+    }
+    else if (SETTING_HOSTNAME.equals(attribute))
     {
       return this.getHostname();
     }
@@ -704,7 +743,11 @@ public class LaosCutter extends LaserCutter
   @Override
   public void setSettingValue(String attribute, String value)
   {
-    if (SETTING_HOSTNAME.equals(attribute))
+    if (SETTING_RASTER_WHITESPACE.equals(attribute))
+    {
+      this.setAddSpacePerRasterLine(Double.parseDouble(value));
+    }
+    else if (SETTING_HOSTNAME.equals(attribute))
     {
       this.setHostname(value);
     }
@@ -756,6 +799,7 @@ public class LaosCutter extends LaserCutter
     clone.flipXaxis = flipXaxis;
     clone.mmPerStep = mmPerStep;
     clone.useTftp = useTftp;
+    clone.addSpacePerRasterLine = addSpacePerRasterLine;
     return clone;
   }
 }
