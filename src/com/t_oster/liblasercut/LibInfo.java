@@ -21,6 +21,7 @@ package com.t_oster.liblasercut;
 import com.t_oster.liblasercut.drivers.EpilogHelix;
 import com.t_oster.liblasercut.drivers.EpilogZing;
 import com.t_oster.liblasercut.drivers.LaosCutter;
+import com.t_oster.liblasercut.drivers.Lasersaur;
 
 /**
  * This class contains Version information
@@ -29,7 +30,7 @@ import com.t_oster.liblasercut.drivers.LaosCutter;
  */
 public class LibInfo
 {
-  private static String VERSION = "1.5.1";
+  private static String VERSION = "1.6";
   
   public static String getVersion()
   {
@@ -41,7 +42,8 @@ public class LibInfo
     return new Class[]{
       EpilogZing.class,
       EpilogHelix.class,
-      LaosCutter.class
+      LaosCutter.class,
+      Lasersaur.class
     };
   }
 }
