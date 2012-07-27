@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import purejavacomm.CommPort;
+import purejavacomm.CommPortIdentifier;
 
 /**
  * This class implements a driver for the LAOS Lasercutter board. Currently it
@@ -386,9 +388,15 @@ public class Lasersaur extends LaserCutter {
     ByteArrayOutputStream buffer = null;
     pl.taskChanged(this, "checking job");
     checkJob(job);
-    buffer = new ByteArrayOutputStream();
-    out = new BufferedOutputStream(buffer);
-    pl.taskChanged(this, "buffering");
+    pl.taskChanged(this, "connecting");
+    CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(this.getComPort());
+    if (cpi == null)
+    {
+      throw new Exception("Error: Could not Open COM-Port '"+this.getComPort()+"'");
+    }
+    CommPort port = cpi.open("VisiCut", 10000);
+    out = new BufferedOutputStream(port.getOutputStream());
+    pl.taskChanged(this, "sending");
     out.write(this.generateInitializationCode());
     pl.progressChanged(this, 20);
     if (job.contains3dRaster()) {
@@ -405,7 +413,7 @@ public class Lasersaur extends LaserCutter {
     pl.progressChanged(this, 80);
     out.write(this.generateShutdownCode());
     out.close();
-    System.out.write(buffer.toByteArray());
+    port.close();
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
