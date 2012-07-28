@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
+import purejavacomm.SerialPort;
 
 /**
  * This class implements a driver for the LAOS Lasercutter board. Currently it
@@ -385,16 +386,26 @@ public class Lasersaur extends LaserCutter {
     this.currentPower = -1;
     this.currentSpeed = -1;
     BufferedOutputStream out;
-    ByteArrayOutputStream buffer = null;
     pl.taskChanged(this, "checking job");
     checkJob(job);
     pl.taskChanged(this, "connecting");
     CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(this.getComPort());
     if (cpi == null)
     {
+      throw new Exception("Error: No such COM-Port '"+this.getComPort()+"'");
+    }
+    CommPort tmp = cpi.open("VisiCut", 10000);
+    if (tmp == null)
+    {
       throw new Exception("Error: Could not Open COM-Port '"+this.getComPort()+"'");
     }
-    CommPort port = cpi.open("VisiCut", 10000);
+    if (!(tmp instanceof SerialPort))
+    {
+      throw new Exception("Port '"+this.getComPort()+"' is not a serial port.");
+    }
+    SerialPort port = (SerialPort) tmp;
+    port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+    port.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
     out = new BufferedOutputStream(port.getOutputStream());
     pl.taskChanged(this, "sending");
     out.write(this.generateInitializationCode());
