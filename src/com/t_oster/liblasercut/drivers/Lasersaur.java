@@ -25,12 +25,10 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
+import purejavacomm.NoSuchPortException;
 import purejavacomm.SerialPort;
 
 /**
@@ -389,7 +387,19 @@ public class Lasersaur extends LaserCutter {
     pl.taskChanged(this, "checking job");
     checkJob(job);
     pl.taskChanged(this, "connecting");
-    CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(this.getComPort());
+    CommPortIdentifier cpi = null;
+    //since the CommPortIdentifier.getPortIdentifier(String name) method
+    //is not working as expected, we have to manually find our port.
+    Enumeration en = CommPortIdentifier.getPortIdentifiers();
+    while (en.hasMoreElements())
+    {
+      Object o = en.nextElement();
+      if (o instanceof CommPortIdentifier && ((CommPortIdentifier) o).getName().equals(this.getComPort()))
+      {
+        cpi = (CommPortIdentifier) o;
+        break;
+      }
+    }
     if (cpi == null)
     {
       throw new Exception("Error: No such COM-Port '"+this.getComPort()+"'");
