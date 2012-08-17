@@ -728,6 +728,7 @@ abstract class EpilogCutter extends LaserCutter
    *
    * @return the value of bedWidth
    */
+  @Override
   public double getBedWidth()
   {
     return bedWidth;
@@ -749,6 +750,7 @@ abstract class EpilogCutter extends LaserCutter
    *
    * @return the value of bedHeight
    */
+  @Override
   public double getBedHeight()
   {
     return bedHeight;
