@@ -50,9 +50,10 @@ abstract class EpilogCutter extends LaserCutter
   private static final int MINFOCUS = -500;//Minimal focus value (not mm)
   private static final int MAXFOCUS = 500;//Maximal focus value (not mm)
   private static final double FOCUSWIDTH = 0.0252;//How much mm/unit the focus values are
-  private String hostname;
+  private String hostname = "10.0.0.1";
   private int port = 515;
   private Socket connection;
+  private boolean autofocus = false;
   private InputStream in;
   private OutputStream out;
 
@@ -68,7 +69,6 @@ abstract class EpilogCutter extends LaserCutter
 
   public EpilogCutter()
   {
-    this("localhost");
   }
 
   public EpilogCutter(String hostname)
@@ -86,6 +86,16 @@ abstract class EpilogCutter extends LaserCutter
     this.hostname = hostname;
   }
 
+  public boolean isAutoFocus()
+  {
+    return this.autofocus;
+  }
+  
+  public void setAutoFocus(boolean af)
+  {
+    this.autofocus = af;
+  }
+  
   private void waitForResponse(int expected) throws IOException, Exception
   {
     waitForResponse(expected, 3);
@@ -130,8 +140,16 @@ abstract class EpilogCutter extends LaserCutter
     /* Print the printer job language header. */
     out.printf("\033%%-12345X@PJL JOB NAME=%s\r\n", job.getTitle());
     out.printf("\033E@PJL ENTER LANGUAGE=PCL\r\n");
-    /* Set autofocus off. */
-    out.printf("\033&y0A");
+    if (this.isAutoFocus())
+    {
+      /* Set autofocus on. */
+      out.printf("\033&y1A");  
+    }
+    else
+    {
+      /* Set autofocus off. */
+      out.printf("\033&y0A");  
+    }
     /* Set focus to 0. */
     out.printf("\033&y0C");
     /* UNKNOWN */
@@ -707,6 +725,10 @@ abstract class EpilogCutter extends LaserCutter
     {
       return this.getHostname();
     }
+    else if ("AutoFocus".equals(attribute))
+    {
+      return "" + this.isAutoFocus();
+    }
     else if ("Port".equals(attribute))
     {
       return "" + this.getPort();
@@ -773,6 +795,10 @@ abstract class EpilogCutter extends LaserCutter
     {
       this.setHostname(value);
     }
+    else if ("AutoFocus".endsWith(attribute))
+    {
+      this.setAutoFocus(Boolean.parseBoolean(value));
+    }
     else if ("Port".equals(attribute))
     {
       this.setPort(Integer.parseInt(value));
@@ -788,7 +814,7 @@ abstract class EpilogCutter extends LaserCutter
   }
   private String[] attributes = new String[]
   {
-    "Hostname", "Port", "BedWidth", "BedHeight"
+    "Hostname", "Port", "BedWidth", "BedHeight", "AutoFocus"
   };
 
   @Override

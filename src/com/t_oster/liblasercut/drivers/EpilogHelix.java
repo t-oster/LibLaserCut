@@ -37,7 +37,6 @@ public class EpilogHelix extends EpilogCutter
   
   public EpilogHelix()
   {
-    
   }
   
   public EpilogHelix(String hostname)
@@ -75,6 +74,7 @@ public class EpilogHelix extends EpilogCutter
     result.setPort(this.getPort());
     result.setBedHeight(this.getBedHeight());
     result.setBedWidth(this.getBedWidth());
+    result.setAutoFocus(this.isAutoFocus());
     return result;
   }
 
