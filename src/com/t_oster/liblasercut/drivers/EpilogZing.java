@@ -78,4 +78,64 @@ public class EpilogZing extends EpilogCutter
     return result;
   }
 
+  //We need this methods for XMLEncoder to work properly
+  @Override
+  public boolean isAutoFocus()
+  {
+    return super.isAutoFocus();
+  }
+  
+  @Override
+  public void setAutoFocus(boolean b)
+  {
+    super.setAutoFocus(b);
+  }
+  
+  @Override
+  public void setBedHeight(double bh)
+  {
+    super.setBedHeight(bh);
+  }
+  
+  @Override
+  public double getBedHeight()
+  {
+    return super.getBedHeight();
+  }
+  
+  @Override
+  public void setBedWidth(double bh)
+  {
+    super.setBedWidth(bh);
+  }
+  
+  @Override
+  public double getBedWidth()
+  {
+    return super.getBedWidth();
+  }
+  
+  @Override
+  public void setHostname(String host)
+  {
+    super.setHostname(host);
+  }
+  
+  @Override
+  public String getHostname()
+  {
+    return super.getHostname();
+  }
+  
+  @Override
+  public int getPort()
+  {
+    return super.getPort();
+  }
+  
+  @Override
+  public void setPort(int p)
+  {
+    super.setPort(p);
+  }
 }
