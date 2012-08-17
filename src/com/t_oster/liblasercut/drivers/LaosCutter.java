@@ -507,7 +507,7 @@ public class LaosCutter extends LaserCutter
 
   /**
    * This Method takes a raster-line represented by a list of bytes, 
-   * where: byte0 ist the left-most byte, in one byte, the LSB is the
+   * where: byte0 ist the left-most byte, in one byte, the MSB is the
    * left-most bit, 0 representing laser off, 1 representing laser on.
    * The Output List of longs, where each value is the unsigned dword
    * of 4 bytes of the input each, where the first dword is the leftmost
@@ -520,25 +520,29 @@ public class LaosCutter extends LaserCutter
    * @param outputLeftToRight
    * @return 
    */
-  private List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
+  public List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
   {
     List<Long> result = new ArrayList<Long>();
     int s = line.size();
+    for (int i=0;i<s;i++)
+    {
+      line.set(i, (byte) (Integer.reverse(0xFF&line.get(i))>>>24));
+    }
     for(int i=0; i<s; i+=4)
     {
       result.add(
-        (((long) (i+3 < s ? line.get(i+3) : 0))<<24) 
-        + (((long) (i+2 < s ? line.get(i+2) : 0))<<16)
-        + (((long) (i+1 < s ? line.get(i+1) : 0))<<8)
-        + line.get(i)
+        (((long) (i+3 < s ? 0xFF&line.get(i+3) : 0))<<24) 
+        + (((long) (i+2 < s ? 0xFF&line.get(i+2) : 0))<<16)
+        + (((long) (i+1 < s ? 0xFF&line.get(i+1) : 0))<<8)
+        + ((long) (0xFF&line.get(i)))
         );
     }
     if (!outputLeftToRight)
     {
       Collections.reverse(result);
       for(int i=0;i<result.size();i++)
-      {
-        result.set(i, Long.reverse(result.get(i)));
+      {   
+        result.set(i, Long.reverse(result.get(i)) >>> 32);
       }
     }
     return result;

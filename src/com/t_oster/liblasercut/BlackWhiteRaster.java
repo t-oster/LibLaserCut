@@ -109,8 +109,8 @@ public class BlackWhiteRaster extends TimeIntensiveOperation
   }
 
   /**
-   * Returns the Byte where every bit represents one pixel 1=white and 0=black
-   * NOTE THAT THE BITORDER IS [BBWWWWWW] = 0b11111100;
+   * Returns the Byte where every bit represents one pixel 0=white and 1=black
+   * NOTE THAT THE BITORDER IS [BBBBBBWW] = 0b11111100;
    * @param x the x index of the byte, meaning 0 is the first 8 pixels (0-7), 1 
    * the pixels 8-15 ...
    * @param y the y offset
