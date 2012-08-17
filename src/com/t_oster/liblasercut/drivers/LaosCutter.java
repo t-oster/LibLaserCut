@@ -30,14 +30,12 @@ import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -56,14 +54,50 @@ public class LaosCutter extends LaserCutter
 
   private static final String SETTING_HOSTNAME = "Hostname / IP";
   private static final String SETTING_PORT = "Port";
-  private static final String SETTING_GCODE = "Use GCode (yes/no)";
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
   private static final String SETTING_FLIPX = "X axis goes right to left (yes/no)";
   private static final String SETTING_MMPERSTEP = "mm per Step (for SimpleMode)";
   private static final String SETTING_TFTP = "Use TFTP instead of TCP";
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
+  private static final String SETTING_NATIVERASTER = "Use native (LAOS) rastermode";
+  private static final String SETTING_UNIDIR = "Engrave unidirectional";
+  
+  private boolean unidir = false;
+  
+  public void setEngraveUnidirectional(boolean uni)
+  {
+    this.unidir = uni;
+  }
+  
+  public boolean isEngraveUnidirectional()
+  {
+    return this.unidir;
+  }
+  
+  private boolean useLaosRastermode = false;
 
+  /**
+   * Get the value of useLaosRastermode
+   *
+   * @return the value of useLaosRastermode
+   */
+  public boolean isUseLaosRastermode()
+  {
+    return useLaosRastermode;
+  }
+
+  /**
+   * Set the value of useLaosRastermode
+   *
+   * @param useLaosRastermode new value of useLaosRastermode
+   */
+  public void setUseLaosRastermode(boolean useLaosRastermode)
+  {
+    this.useLaosRastermode = useLaosRastermode;
+  }
+
+  
   private double addSpacePerRasterLine = 5;
 
   /**
@@ -136,27 +170,7 @@ public class LaosCutter extends LaserCutter
   {
     this.flipXaxis = flipXaxis;
   }
-  protected boolean simpleMode = true;
-
-  /**
-   * Get the value of simpleMode
-   *
-   * @return the value of simpleMode
-   */
-  public boolean isSimpleMode()
-  {
-    return simpleMode;
-  }
-
-  /**
-   * Set the value of simpleMode
-   *
-   * @param simpleMode new value of simpleMode
-   */
-  public void setSimpleMode(boolean simpleMode)
-  {
-    this.simpleMode = simpleMode;
-  }
+  
   protected String hostname = "192.168.123.111";
 
   /**
@@ -252,14 +266,7 @@ public class LaosCutter extends LaserCutter
           power = cmd.getPower();
           break;
         case SETFOCUS:
-          if (this.isSimpleMode())
-          {
-            out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(cmd.getFocus(), resolution));
-          }
-          else
-          {
-            focus = cmd.getFocus();
-          }
+          out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(cmd.getFocus(), resolution));
           break;
         case SETSPEED:
           speed = cmd.getSpeed();
@@ -274,14 +281,7 @@ public class LaosCutter extends LaserCutter
 
   private void move(PrintStream out, int x, int y, int resolution)
   {
-    if (this.isSimpleMode())
-    {
-      out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
-    }
-    else
-    {
-      out.printf(Locale.US, "G0 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
-    }
+    out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
   }
   private int currentPower = -1;
   private int currentSpeed = -1;
@@ -289,29 +289,22 @@ public class LaosCutter extends LaserCutter
 
   private void line(PrintStream out, int x, int y, int power, int speed, int frequency, int resolution)
   {
-    if (this.isSimpleMode())
+    if (currentPower != power)
     {
-      if (currentPower != power)
-      {
-        out.printf("7 101 %d\n", power * 100);
-        currentPower = power;
-      }
-      if (currentSpeed != speed)
-      {
-        out.printf("7 100 %d\n", speed * 100);
-        currentSpeed = speed;
-      }
-      if (currentFrequency != frequency)
-      {
-        out.printf("7 102 %d\n", frequency);
-        currentFrequency = frequency;
-      }
-      out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
+      out.printf("7 101 %d\n", power * 100);
+      currentPower = power;
     }
-    else
-    {//Frequency???
-      out.printf(Locale.US, "G1 X%f Y%f E%d F%d\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution), power, speed);
+    if (currentSpeed != speed)
+    {
+      out.printf("7 100 %d\n", speed * 100);
+      currentSpeed = speed;
     }
+    if (currentFrequency != frequency)
+    {
+      out.printf("7 102 %d\n", frequency);
+      currentFrequency = frequency;
+    }
+    out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
   }
 
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, int resolution) throws UnsupportedEncodingException
@@ -324,14 +317,7 @@ public class LaosCutter extends LaserCutter
       Point rasterStart = rp.getRasterStart(raster);
       LaserProperty prop = rp.getLaserProperty(raster);
       //Set focus
-      if (this.isSimpleMode())
-      {
-        out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
-      }
-      else
-      {
-        //TODO: Focus in GCode????
-      }
+      out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
       for (int line = 0; line < rp.getRasterHeight(raster); line++)
       {
         Point lineStart = rasterStart.clone();
@@ -399,7 +385,10 @@ public class LaosCutter extends LaserCutter
             line(out, lineStart.x, lineStart.y, prop.getPower() * (0xFF & bytes.get(0)) / 255, prop.getSpeed(), prop.getFrequency(), resolution);
           }
         }
-        dirRight = !dirRight;
+        if (!this.isEngraveUnidirectional())
+        {
+          dirRight = !dirRight;
+        }
       }
     }
     return result.toByteArray();
@@ -415,14 +404,7 @@ public class LaosCutter extends LaserCutter
       Point rasterStart = rp.getRasterStart(raster);
       LaserProperty prop = rp.getLaserProperty(raster);
       //Set focus
-      if (this.isSimpleMode())
-      {
-        out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
-      }
-      else
-      {
-        //TODO: Focus in GCode????
-      }
+      out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
       for (int line = 0; line < rp.getRasterHeight(raster); line++)
       {
         Point lineStart = rasterStart.clone();
@@ -514,23 +496,139 @@ public class LaosCutter extends LaserCutter
             move(out, Math.max(0, (int) (lineStart.x-Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
           }
         }
-        dirRight = !dirRight;
+        if (!this.isEngraveUnidirectional())
+        {
+          dirRight = !dirRight;
+        }
       }
     }
     return result.toByteArray();
   }
 
+  /**
+   * This Method takes a raster-line represented by a list of bytes, 
+   * where: byte0 ist the left-most byte, in one byte, the LSB is the
+   * left-most bit, 0 representing laser off, 1 representing laser on.
+   * The Output List of longs, where each value is the unsigned dword
+   * of 4 bytes of the input each, where the first dword is the leftmost
+   * dword and the LSB is the leftmost bit. If outputLeftToRight is false,
+   * the first dword is the rightmost dword and the LSB of each dword is the
+   * the Output is padded with zeroes on the right side, if leftToRight is true,
+   * on the left-side otherwise
+   * rightmost bit
+   * @param line
+   * @param outputLeftToRight
+   * @return 
+   */
+  private List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
+  {
+    List<Long> result = new ArrayList<Long>();
+    int s = line.size();
+    for(int i=0; i<s; i+=4)
+    {
+      result.add(
+        (((long) (i+3 < s ? line.get(i+3) : 0))<<24) 
+        + (((long) (i+2 < s ? line.get(i+2) : 0))<<16)
+        + (((long) (i+1 < s ? line.get(i+1) : 0))<<8)
+        + line.get(i)
+        );
+    }
+    if (!outputLeftToRight)
+    {
+      Collections.reverse(result);
+      for(int i=0;i<result.size();i++)
+      {
+        result.set(i, Long.reverse(result.get(i)));
+      }
+    }
+    return result;
+  }
+  
+  private byte[] generateLaosRasterCode(RasterPart rp, int resolution) throws UnsupportedEncodingException, IOException
+  {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    boolean dirRight = true;
+    for (int raster = 0; raster < rp.getRasterCount(); raster++)
+    {
+      Point rasterStart = rp.getRasterStart(raster);
+      LaserProperty prop = rp.getLaserProperty(raster);
+      //Set focus
+      out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
+      for (int line = 0; line < rp.getRasterHeight(raster); line++)
+      {
+        Point lineStart = rasterStart.clone();
+        lineStart.y += line;
+        List<Byte> bytes = rp.getRasterLine(raster, line);
+        //remove heading zeroes
+        while (bytes.size() > 0 && bytes.get(0) == 0)
+        {
+          lineStart.x += 8;
+          bytes.remove(0);
+        }
+        //remove trailing zeroes
+        while (bytes.size() > 0 && bytes.get(bytes.size()-1) == 0)
+        {
+          bytes.remove(bytes.size()-1);
+        }
+        if (bytes.size() > 0)
+        {
+          //add space on the left side
+          int space = (int) Util.mm2px(this.getAddSpacePerRasterLine(), resolution);
+          while (space > 0 && lineStart.x >= 8)
+          {
+            bytes.add(0, (byte) 0);
+            space -= 8;
+            lineStart.x -=8;
+          }
+          //add space on the right side
+          space = (int) Util.mm2px(this.getAddSpacePerRasterLine(), resolution);
+          int max = (int) Util.mm2px(this.getBedWidth(), resolution);
+          while (space > 0 && lineStart.x+(8*bytes.size()) < max-8)
+          {
+            bytes.add((byte) 0);
+            space -= 8;
+          }    
+          if (dirRight)
+          {
+            //move to the first point of the line
+            move(out, lineStart.x, lineStart.y, resolution);         
+            List<Long> dwords = this.byteLineToDwords(bytes, true);
+            out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
+            for(Long d:dwords)
+            {
+              out.print(" "+d);
+            }
+            out.printf("\n");
+            line(out, lineStart.x + (dwords.size()*32), lineStart.y, prop.getPower(), prop.getSpeed(), prop.getFrequency(), resolution);
+          }
+          else
+          {
+            //move to the first point of the line
+            List<Long> dwords = this.byteLineToDwords(bytes, false);
+            move(out, lineStart.x+(dwords.size()*32), lineStart.y, resolution);         
+            out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
+            for(Long d:dwords)
+            {
+              out.printf(" "+d);
+            }
+            out.printf("\n");
+            line(out, lineStart.x, lineStart.y, prop.getPower(), prop.getSpeed(), prop.getFrequency(), resolution);  
+          }
+        }
+        if (!this.isEngraveUnidirectional())
+        {
+          dirRight = !dirRight;
+        }
+      }
+    }
+    return result.toByteArray();
+  }
+  
   private byte[] generateInitializationCode() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    if (!this.isSimpleMode())
-    {
-      out.print("G28\n");//move to origin
-      out.print("G21\n");//units to mm
-      out.print("M106\n");//ventilaton on
-      out.print("M151 100\n");//air pressure on
-    }
     return result.toByteArray();
   }
 
@@ -539,21 +637,9 @@ public class LaosCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     //back to origin and shutdown
-    if (this.isSimpleMode())
-    {
-      //out.printf("0 0 0\n");
-      //Set focus to 0
-      out.printf(Locale.US, "2 %d\n", 0);
-    }
-    else
-    {
-      out.printf(Locale.US, "G0 X%f Y%f\n", 0, 0);
-      out.print("G28\n");
-      out.print("M107\n");
-      out.print("M151 0\n");
-      out.print("M0\n");
-      //TODO: Set focus to 0 in GCod??
-    }
+    //out.printf("0 0 0\n");
+    //Set focus to 0
+    out.printf(Locale.US, "2 %d\n", 0);
     return result.toByteArray();
   }
 
@@ -591,7 +677,14 @@ public class LaosCutter extends LaserCutter
     pl.progressChanged(this, 40);
     if (job.containsRaster())
     {
-      out.write(this.generatePseudoRasterGCode(job.getRasterPart(), job.getResolution()));
+      if (this.isUseLaosRastermode())
+      {
+        out.write(this.generateLaosRasterCode(job.getRasterPart(), job.getResolution()));
+      }
+      else
+      {
+        out.write(this.generatePseudoRasterGCode(job.getRasterPart(), job.getResolution()));
+      }
     }
     pl.progressChanged(this, 60);
     if (job.containsVector())
@@ -687,7 +780,8 @@ public class LaosCutter extends LaserCutter
       settingAttributes = new LinkedList<String>();
       settingAttributes.add(SETTING_HOSTNAME);
       settingAttributes.add(SETTING_PORT);
-      //settingAttributes.add(SETTING_GCODE);
+      settingAttributes.add(SETTING_NATIVERASTER);
+      settingAttributes.add(SETTING_UNIDIR);
       settingAttributes.add(SETTING_BEDWIDTH);
       settingAttributes.add(SETTING_BEDHEIGHT);
       settingAttributes.add(SETTING_FLIPX);
@@ -705,6 +799,14 @@ public class LaosCutter extends LaserCutter
     {
       return "" + this.getAddSpacePerRasterLine();
     }
+    else if (SETTING_NATIVERASTER.equals(attribute))
+    {
+      return this.isUseLaosRastermode() ? "yes" : "no";
+    }
+    else if (SETTING_UNIDIR.equals(attribute))
+    {
+      return this.isEngraveUnidirectional() ? "yes" : "no";
+    }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
       return this.getHostname();
@@ -716,10 +818,6 @@ public class LaosCutter extends LaserCutter
     else if (SETTING_PORT.equals(attribute))
     {
       return "" + this.getPort();
-    }
-    else if (SETTING_GCODE.equals(attribute))
-    {
-      return this.isSimpleMode() ? "no" : "yes";
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
@@ -747,6 +845,14 @@ public class LaosCutter extends LaserCutter
     {
       this.setAddSpacePerRasterLine(Double.parseDouble(value));
     }
+    else if (SETTING_NATIVERASTER.equals(attribute))
+    {
+      this.setUseLaosRastermode("yes".equals(value));
+    }
+    else if (SETTING_UNIDIR.endsWith(attribute))
+    {
+      this.setEngraveUnidirectional("yes".equals(value));
+    }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
       this.setHostname(value);
@@ -754,10 +860,6 @@ public class LaosCutter extends LaserCutter
     else if (SETTING_PORT.equals(attribute))
     {
       this.setPort(Integer.parseInt(value));
-    }
-    else if (SETTING_GCODE.equals(attribute))
-    {
-      this.setSimpleMode(!"yes".equals(value));
     }
     else if (SETTING_FLIPX.equals(attribute))
     {
@@ -793,13 +895,14 @@ public class LaosCutter extends LaserCutter
     LaosCutter clone = new LaosCutter();
     clone.hostname = hostname;
     clone.port = port;
-    clone.simpleMode = simpleMode;
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
     clone.flipXaxis = flipXaxis;
     clone.mmPerStep = mmPerStep;
     clone.useTftp = useTftp;
     clone.addSpacePerRasterLine = addSpacePerRasterLine;
+    clone.unidir = unidir;
+    clone.useLaosRastermode = useLaosRastermode;
     return clone;
   }
 }
