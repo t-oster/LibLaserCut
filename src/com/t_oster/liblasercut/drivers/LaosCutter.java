@@ -75,7 +75,7 @@ public class LaosCutter extends LaserCutter
     return this.unidir;
   }
   
-  private boolean useLaosRastermode = false;
+  private boolean useLaosRastermode = true;
 
   /**
    * Get the value of useLaosRastermode

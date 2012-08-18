@@ -1,0 +1,9 @@
+Version 1.7:
+- LAOS:
+  - Support for LAOS native bitmap-marking instead of raster-to-vector conversion (default)
+  - New option: "unidirectional bitmap marking" marks only left-to-right
+- Epilog:
+  - Fix: Epilog Zing and Helix did not remember hostname,port,ip and bed-size (in visicut)
+- Lasersaur:
+  - Experimental driver added (UNTESTET)
+
