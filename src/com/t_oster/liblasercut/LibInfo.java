@@ -30,7 +30,7 @@ import com.t_oster.liblasercut.drivers.Lasersaur;
  */
 public class LibInfo
 {
-  private static String VERSION = "1.6";
+  private static String VERSION = "1.7";
   
   public static String getVersion()
   {
