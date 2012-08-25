@@ -172,7 +172,7 @@ public class LaosCutter extends LaserCutter
     this.flipXaxis = flipXaxis;
   }
   
-  protected boolean flipYaxis = false;
+  protected boolean flipYaxis = true;
 
   /**
    * Get the value of flipYaxis
@@ -934,7 +934,7 @@ public class LaosCutter extends LaserCutter
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
     clone.flipXaxis = flipXaxis;
-    clone.flipXaxis = flipYaxis;
+    clone.flipYaxis = flipYaxis;
     clone.mmPerStep = mmPerStep;
     clone.useTftp = useTftp;
     clone.addSpacePerRasterLine = addSpacePerRasterLine;
