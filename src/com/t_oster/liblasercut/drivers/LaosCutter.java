@@ -57,6 +57,7 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
   private static final String SETTING_FLIPX = "X axis goes right to left (yes/no)";
+  private static final String SETTING_FLIPY = "Y axis goes bottom to top (yes/no)";
   private static final String SETTING_MMPERSTEP = "mm per Step (for SimpleMode)";
   private static final String SETTING_TFTP = "Use TFTP instead of TCP";
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
@@ -171,6 +172,28 @@ public class LaosCutter extends LaserCutter
     this.flipXaxis = flipXaxis;
   }
   
+  protected boolean flipYaxis = false;
+
+  /**
+   * Get the value of flipYaxis
+   *
+   * @return the value of flipYaxis
+   */
+  public boolean isFlipYaxis()
+  {
+    return flipYaxis;
+  }
+
+  /**
+   * Set the value of flipYaxis
+   *
+   * @param flipYaxis new value of flipYaxis
+   */
+  public void setFlipYaxis(boolean flipYaxis)
+  {
+    this.flipYaxis = flipYaxis;
+  }
+  
   protected String hostname = "192.168.123.111";
 
   /**
@@ -281,7 +304,7 @@ public class LaosCutter extends LaserCutter
 
   private void move(PrintStream out, int x, int y, int resolution)
   {
-    out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
+    out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
   private int currentPower = -1;
   private int currentSpeed = -1;
@@ -304,7 +327,7 @@ public class LaosCutter extends LaserCutter
       out.printf("7 102 %d\n", frequency);
       currentFrequency = frequency;
     }
-    out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(y, resolution));
+    out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
 
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, int resolution) throws UnsupportedEncodingException
@@ -789,6 +812,7 @@ public class LaosCutter extends LaserCutter
       settingAttributes.add(SETTING_BEDWIDTH);
       settingAttributes.add(SETTING_BEDHEIGHT);
       settingAttributes.add(SETTING_FLIPX);
+      settingAttributes.add(SETTING_FLIPY);
       settingAttributes.add(SETTING_MMPERSTEP);
       settingAttributes.add(SETTING_TFTP);
       settingAttributes.add(SETTING_RASTER_WHITESPACE);
@@ -818,6 +842,10 @@ public class LaosCutter extends LaserCutter
     else if (SETTING_FLIPX.equals(attribute))
     {
       return this.isFlipXaxis() ? "yes" : "no";
+    }
+    else if (SETTING_FLIPY.equals(attribute))
+    {
+      return this.isFlipYaxis() ? "yes" : "no";
     }
     else if (SETTING_PORT.equals(attribute))
     {
@@ -869,6 +897,10 @@ public class LaosCutter extends LaserCutter
     {
       this.setFlipXaxis("yes".equals(value));
     }
+    else if (SETTING_FLIPY.equals(attribute))
+    {
+      this.setFlipYaxis("yes".equals(value));
+    }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
       this.setBedWidth(Double.parseDouble(value));
@@ -902,6 +934,7 @@ public class LaosCutter extends LaserCutter
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
     clone.flipXaxis = flipXaxis;
+    clone.flipXaxis = flipYaxis;
     clone.mmPerStep = mmPerStep;
     clone.useTftp = useTftp;
     clone.addSpacePerRasterLine = addSpacePerRasterLine;
