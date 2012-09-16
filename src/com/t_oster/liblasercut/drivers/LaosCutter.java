@@ -748,12 +748,18 @@ public class LaosCutter extends LaserCutter
       //according to mm/step
       resolutions = Arrays.asList(new Integer[]
         {
-          500
+          100,
+          200,
+          300,
+          500,
+          600,
+          1000,
+          1200
         });
     }
     return resolutions;
   }
-  protected double bedWidth = 250;
+  protected double bedWidth = 300;
 
   /**
    * Get the value of bedWidth
@@ -775,7 +781,7 @@ public class LaosCutter extends LaserCutter
   {
     this.bedWidth = bedWidth;
   }
-  protected double bedHeight = 280;
+  protected double bedHeight = 210;
 
   /**
    * Get the value of bedHeight
@@ -807,13 +813,13 @@ public class LaosCutter extends LaserCutter
       settingAttributes = new LinkedList<String>();
       settingAttributes.add(SETTING_HOSTNAME);
       settingAttributes.add(SETTING_PORT);
-      settingAttributes.add(SETTING_NATIVERASTER);
+      //settingAttributes.add(SETTING_NATIVERASTER);
       settingAttributes.add(SETTING_UNIDIR);
       settingAttributes.add(SETTING_BEDWIDTH);
       settingAttributes.add(SETTING_BEDHEIGHT);
-      settingAttributes.add(SETTING_FLIPX);
-      settingAttributes.add(SETTING_FLIPY);
-      settingAttributes.add(SETTING_MMPERSTEP);
+      //settingAttributes.add(SETTING_FLIPX);
+      //settingAttributes.add(SETTING_FLIPY);
+      //settingAttributes.add(SETTING_MMPERSTEP);
       settingAttributes.add(SETTING_TFTP);
       settingAttributes.add(SETTING_RASTER_WHITESPACE);
     }
