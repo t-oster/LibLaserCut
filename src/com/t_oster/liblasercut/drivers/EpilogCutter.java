@@ -86,6 +86,7 @@ abstract class EpilogCutter extends LaserCutter
     this.hostname = hostname;
   }
 
+  @Override
   public boolean isAutoFocus()
   {
     return this.autofocus;
