@@ -18,8 +18,6 @@
  **/
 package com.t_oster.liblasercut;
 
-import java.util.List;
-
 /**
  * The LaserProperty holds all the parameters for parts of the LaserJob.
  * The Frequency value is ignored for Engraving operations
@@ -45,6 +43,14 @@ public interface LaserProperty extends Cloneable
   public abstract Object getProperty(String name);
   
   public abstract void setProperty(String name, Object value);
+  
+  /**
+   * If name is a name of a vaild property, return the class
+   * of this property's objects. else return null
+   * @param name
+   * @return 
+   */
+  public abstract Class getPropertyClass(String name);
   
   /**
    * returns the minimum value of this property if it is

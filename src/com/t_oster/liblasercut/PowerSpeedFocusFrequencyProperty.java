@@ -119,6 +119,16 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   }
   
   @Override
+  public Class getPropertyClass(String name)
+  {
+    if ("frequency".equals(name))
+    {
+      return Integer.class;
+    }
+    return super.getPropertyClass(name);
+  }
+  
+  @Override
   public PowerSpeedFocusFrequencyProperty clone()
   {
     PowerSpeedFocusFrequencyProperty p = new PowerSpeedFocusFrequencyProperty();

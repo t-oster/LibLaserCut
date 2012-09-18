@@ -192,6 +192,20 @@ public class PowerSpeedFocusProperty implements LaserProperty
     }
   }
 
+  @Override 
+  public Class getPropertyClass(String name)
+  {
+    if ("power".equals(name)||"speed".equals(name))
+    {
+      return Integer.class;
+    }
+    else if ("focus".equals(name))
+    {
+      return Float.class;
+    }
+    return null;
+  }
+  
   @Override
   public Object[] getPossibleValues(String name)
   {

@@ -225,4 +225,14 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   {
     return null;
   }
+
+  @Override
+  public Class getPropertyClass(String name)
+  {
+    if ("power".equals(name)||"speed".equals(name)||"focus".equals(name)||"frequency".equals(name))
+    {
+      return Float.class;
+    }
+    return null;
+  }
 }
