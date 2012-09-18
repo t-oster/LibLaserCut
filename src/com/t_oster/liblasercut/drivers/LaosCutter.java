@@ -277,9 +277,9 @@ public class LaosCutter extends LaserCutter
     this.mmPerStep = mmPerStep;
   }
 
-  private float px2steps(double px, double dpi)
+  private int px2steps(double px, double dpi)
   {
-    return (float) (Util.px2mm(px, dpi) / this.mmPerStep);
+    return (int) (Util.px2mm(px, dpi) / this.mmPerStep);
   }
 
   private byte[] generateVectorGCode(VectorPart vp, int resolution) throws UnsupportedEncodingException
