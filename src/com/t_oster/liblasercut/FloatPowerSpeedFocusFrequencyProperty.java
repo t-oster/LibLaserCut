@@ -150,11 +150,11 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      this.setPower((Integer) value);
+      this.setPower((Float) value);
     }
     else if ("speed".equals(name))
     {
-      this.setSpeed((Integer) value);
+      this.setSpeed((Float) value);
     }
     else if ("focus".equals(name))
     {
