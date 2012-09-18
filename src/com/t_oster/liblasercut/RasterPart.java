@@ -23,8 +23,8 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -51,16 +51,6 @@ public class RasterPart
   public LaserProperty getCurrentLaserProperty()
   {
     return this.curProp;
-  }
-
-  public void setPower(int power)
-  {
-    this.curProp.setPower(power);
-  }
-
-  public void setSpeed(int speed)
-  {
-    this.curProp.setSpeed(speed);
   }
 
   /**

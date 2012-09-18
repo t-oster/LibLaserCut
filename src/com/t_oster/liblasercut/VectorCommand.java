@@ -32,29 +32,14 @@ public class VectorCommand
   public static enum CmdType
   {
 
-    SETSPEED,
-    SETPOWER,
-    SETFREQUENCY,
-    SETFOCUS,
+    SETPROPERTY,
     MOVETO,
     LINETO
   }
   private CmdType type;
   private int[] operands;
   private float foperand;
-
-  public VectorCommand(CmdType type, float f)
-  {
-    if (type == CmdType.SETFOCUS)
-    {
-      this.type = type;
-      this.foperand = f;
-    }
-    else
-    {
-      throw new IllegalArgumentException("Wrong number of Parameters for " + type.toString());
-    }
-  }
+  private LaserProperty property;
   
   public VectorCommand(CmdType type, int x, int y)
   {
@@ -69,6 +54,18 @@ public class VectorCommand
     else
     {
       throw new IllegalArgumentException("Wrong number of Parameters for " + type.toString());
+    }
+  }
+  
+  public VectorCommand(CmdType type, LaserProperty p)
+  {
+    if (type == CmdType.SETPROPERTY)
+    {
+      this.property = p;
+    }
+    else
+    {
+      throw new IllegalArgumentException("Only valid for SETPROPERTY");
     }
   }
 
@@ -94,56 +91,17 @@ public class VectorCommand
     }
     throw new UnsupportedOperationException("getX not supported for " + type.toString());
   }
-
-  public VectorCommand(CmdType type, int operand1)
+  
+  public LaserProperty getProperty()
   {
-    if (type == CmdType.SETSPEED || type == CmdType.SETPOWER || type == CmdType.SETFREQUENCY)
+    if (this.type == CmdType.SETPROPERTY)
     {
-      this.type = type;
-      operands = new int[]
-      {
-        operand1
-      };
+      return this.property;
     }
     else
     {
-      throw new IllegalArgumentException("Wrong number of Parameters for " + type.toString());
+      throw new UnsupportedOperationException("Only valid for PROPERTY");
     }
   }
-
-  public int getPower()
-  {
-    if (type == CmdType.SETPOWER)
-    {
-      return operands[0];
-    }
-    throw new UnsupportedOperationException("getPower is not Applicable for " + type.toString());
-  }
-
-  public int getSpeed()
-  {
-    if (type == CmdType.SETSPEED)
-    {
-      return operands[0];
-    }
-    throw new UnsupportedOperationException("getSpeed is not Applicable for " + type.toString());
-  }
-
-  public int getFrequency()
-  {
-    if (type == CmdType.SETFREQUENCY)
-    {
-      return operands[0];
-    }
-    throw new UnsupportedOperationException("getFrequency is not Applicable for " + type.toString());
-  }
-
-  public float getFocus()
-  {
-    if (type == CmdType.SETFOCUS)
-    {
-      return foperand;
-    }
-    throw new UnsupportedOperationException("getFocus is not Applicable for " + type.toString());
-  }
+  
 }
