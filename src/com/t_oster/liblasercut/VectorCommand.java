@@ -61,6 +61,7 @@ public class VectorCommand
   {
     if (type == CmdType.SETPROPERTY)
     {
+      this.type = type;
       this.property = p;
     }
     else

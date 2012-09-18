@@ -41,8 +41,13 @@ public class VectorPart
 
   public VectorPart(LaserProperty initialProperty)
   {
+    if (initialProperty == null)
+    {
+      throw new IllegalArgumentException("Initial Property must not be null");
+    }
     commands = new LinkedList<VectorCommand>();
-    this.setProperty(initialProperty);
+    this.currentCuttingProperty = initialProperty;
+    commands.add(new VectorCommand(VectorCommand.CmdType.SETPROPERTY, initialProperty));
   }
 
   public LaserProperty getCurrentCuttingProperty()
