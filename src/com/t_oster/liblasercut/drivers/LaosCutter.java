@@ -322,16 +322,16 @@ public class LaosCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  private void move(PrintStream out, int x, int y, int resolution)
+  private void move(PrintStream out, float x, float y, int resolution)
   {
-    out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
+    out.printf("0 %f %f\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
   private float currentPower = -1;
   private float currentSpeed = -1;
   private float currentFocus = 0;
   private float currentFrequency = -1;
 
-  private void line(PrintStream out, int x, int y, float power, float speed, float frequency, int resolution)
+  private void line(PrintStream out, float x, float y, float power, float speed, float frequency, int resolution)
   {
     if (currentPower != power)
     {
