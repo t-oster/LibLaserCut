@@ -162,18 +162,10 @@ public class Lasersaur extends LaserCutter {
           y = cmd.getY();
           line(out, x, y, resolution);
           break;
-        case SETPOWER:
-          setPower(out, cmd.getPower());
-          break;
-        case SETFOCUS:
-          float focus = cmd.getFocus();
-          break;
-        case SETSPEED:
-          int speed = cmd.getSpeed();
-          setSpeed(out, speed);
-          break;
-        case SETFREQUENCY:
-          int frequency = cmd.getFrequency();
+        case SETPROPERTY:
+          PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
+          setPower(out, p.getPower());
+          setSpeed(out, p.getSpeed());
           break;
       }
     }
@@ -211,7 +203,7 @@ public class Lasersaur extends LaserCutter {
     boolean dirRight = true;
     for (int raster = 0; raster < rp.getRasterCount(); raster++) {
       Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
+      PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty(raster);
       setSpeed(out, prop.getSpeed());
       for (int line = 0; line < rp.getRasterHeight(raster); line++) {
         Point lineStart = rasterStart.clone();
@@ -279,7 +271,7 @@ public class Lasersaur extends LaserCutter {
     boolean dirRight = true;
     for (int raster = 0; raster < rp.getRasterCount(); raster++) {
       Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
+      PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty(raster);
       setSpeed(out, prop.getSpeed());
       setPower(out, prop.getPower());
       for (int line = 0; line < rp.getRasterHeight(raster); line++) {

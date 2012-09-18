@@ -26,12 +26,8 @@ import java.util.List;
  * 
  * @author oster
  */
-public abstract class LaserProperty implements Cloneable
+public interface LaserProperty extends Cloneable
 {
-  
-  public LaserProperty()
-  {
-  }
 
   /**
    * Returns the names of possible propertys,
@@ -63,6 +59,5 @@ public abstract class LaserProperty implements Cloneable
   
   public abstract Object[] getPossibleValues(String name);
   
-  @Override
   public abstract LaserProperty clone();
 }

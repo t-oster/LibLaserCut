@@ -178,11 +178,20 @@ public abstract class LaserCutter implements Cloneable
    */
   public abstract int estimateJobDuration(LaserJob job);
   
-  public abstract LaserProperty getLaserPropertyForVectorPart();
+  public LaserProperty getLaserPropertyForVectorPart()
+  {
+    return new PowerSpeedFocusFrequencyProperty();
+  }
   
-  public abstract LaserProperty getLaserPropertyForRasterPart();
+  public LaserProperty getLaserPropertyForRasterPart()
+  {
+    return new PowerSpeedFocusProperty();
+  }
   
-  public abstract LaserProperty getLaserPropertyForRaster3dPart();
+  public LaserProperty getLaserPropertyForRaster3dPart()
+  {
+    return new PowerSpeedFocusProperty();
+  }
   
   public abstract String getModelName();
   

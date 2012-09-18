@@ -395,12 +395,12 @@ abstract class EpilogCutter extends LaserCutter
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    PowerSpeedFoc curprop = new LaserProperty();
+    PowerSpeedFocusProperty curprop = null;
     if (rp != null && rp.getRasterCount() > 0)
     {
       if (rp.getRasterCount() > 0)
       {
-        curprop = rp.getLaserProperty(0);
+        curprop = (PowerSpeedFocusProperty) rp.getLaserProperty(0);
       }
       /* Raster Orientation: Printed in current direction */
       out.printf("\033*r0F");
@@ -429,7 +429,7 @@ abstract class EpilogCutter extends LaserCutter
 
       for (int i = 0; rp != null && i < rp.getRasterCount(); i++)
       {
-        LaserProperty newprop = rp.getLaserProperty(i);
+        PowerSpeedFocusProperty newprop = (PowerSpeedFocusProperty) rp.getLaserProperty(i);
         if (newprop.getPower() != curprop.getPower())
         {
           /* Raster power */
@@ -510,14 +510,14 @@ abstract class EpilogCutter extends LaserCutter
   private byte[] generateRasterPCL(LaserJob job, RasterPart rp) throws UnsupportedEncodingException, IOException
   {
 
-    LaserProperty curprop = null;
+    PowerSpeedFocusProperty curprop = null;
     if (rp != null && rp.getRasterCount() > 0)
     {
-      curprop = rp.getLaserProperty(0);
+      curprop = (PowerSpeedFocusProperty) rp.getLaserProperty(0);
     }
-    if (curprop == null)
+    else
     {
-      curprop = new LaserProperty();
+      curprop = new PowerSpeedFocusProperty();
     }
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
@@ -549,7 +549,7 @@ abstract class EpilogCutter extends LaserCutter
     for (int i = 0; rp != null && i < rp.getRasterCount(); i++)
     {
       //TODO: Test if new Settings are applied
-      LaserProperty newprop = rp.getLaserProperty(i);
+      PowerSpeedFocusProperty newprop = (PowerSpeedFocusProperty) rp.getLaserProperty(i);
       if (newprop.getPower() != curprop.getPower())
       {
         /* Raster power */
@@ -645,6 +645,10 @@ abstract class EpilogCutter extends LaserCutter
 
     if (vp != null)
     {
+      Integer currentPower = null;
+      Integer currentSpeed = null;
+      Integer currentFrequency = null;
+      Float currentFocus = null;
       int sx = job.getStartX();
       int sy = job.getStartY();
       VectorCommand.CmdType lastType = null;
@@ -656,24 +660,29 @@ abstract class EpilogCutter extends LaserCutter
         }
         switch (cmd.getType())
         {
-          case SETFOCUS:
+          case SETPROPERTY:
           {
-            out.printf("WF%d;", mm2focus(cmd.getFocus()));
-            break;
-          }
-          case SETFREQUENCY:
-          {
-            out.printf("XR%04d;", cmd.getFrequency());
-            break;
-          }
-          case SETPOWER:
-          {
-            out.printf("YP%03d;", cmd.getPower());
-            break;
-          }
-          case SETSPEED:
-          {
-            out.printf("ZS%03d;", cmd.getSpeed());
+            PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
+            if (currentFocus == null || !currentFocus.equals(p.getFocus()))
+            {
+              out.printf("WF%d;", mm2focus(p.getFocus()));
+              currentFocus = p.getFocus();
+            }
+            if (currentFrequency == null || !currentFrequency.equals(p.getFrequency()))
+            {
+              out.printf("XR%04d;", p.getFrequency());
+              currentFrequency = p.getFrequency();
+            }
+            if (currentPower == null || !currentPower.equals(p.getPower()))
+            {
+              out.printf("YP%03d;", p.getPower());
+              currentPower = p.getPower();
+            }
+            if (currentSpeed == null || !currentSpeed.equals(p.getSpeed()))
+            {
+              out.printf("ZS%03d;", p.getSpeed());
+              currentSpeed = p.getSpeed();
+            }
             break;
           }
           case MOVETO:
@@ -861,7 +870,7 @@ abstract class EpilogCutter extends LaserCutter
         Point sp = rp.getRasterStart(i);
         result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
           (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER_LINESPEED * rp.getLaserProperty(i).getSpeed()) / 100;
+        double linespeed = ((double) RASTER_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty(i)).getSpeed()) / 100;
         BlackWhiteRaster bwr = rp.getImages()[i];
         for (int y = 0; y < bwr.getHeight(); y++)
         {//Find any black point
@@ -896,7 +905,7 @@ abstract class EpilogCutter extends LaserCutter
         Point sp = rp.getRasterStart(i);
         result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
           (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER3D_LINESPEED * rp.getLaserProperty(i).getSpeed()) / 100;
+        double linespeed = ((double) RASTER3D_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty(i)).getSpeed()) / 100;
         GreyscaleRaster gsr = rp.getImages()[i];
         for (int y = 0; y < gsr.getHeight(); y++)
         {//Check if
@@ -927,9 +936,9 @@ abstract class EpilogCutter extends LaserCutter
       {
         switch (cmd.getType())
         {
-          case SETSPEED:
+          case SETPROPERTY:
           {
-            speed = VECTOR_LINESPEED * cmd.getSpeed() / 100;
+            speed = VECTOR_LINESPEED * ((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).getSpeed() / 100;
             break;
           }
           case MOVETO:

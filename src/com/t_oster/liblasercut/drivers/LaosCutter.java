@@ -19,6 +19,7 @@
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.BlackWhiteRaster;
+import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
@@ -65,6 +66,24 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_UNIDIR = "Engrave unidirectional";
   
   private boolean unidir = false;
+  
+  @Override
+  public FloatPowerSpeedFocusFrequencyProperty getLaserPropertyForVectorPart()
+  {
+    return new FloatPowerSpeedFocusFrequencyProperty();
+  }
+  
+  @Override
+  public FloatPowerSpeedFocusFrequencyProperty getLaserPropertyForRasterPart()
+  {
+    return new FloatPowerSpeedFocusFrequencyProperty();
+  }
+  
+  @Override
+  public FloatPowerSpeedFocusFrequencyProperty getLaserPropertyForRaster3dPart()
+  {
+    return new FloatPowerSpeedFocusFrequencyProperty();
+  }
   
   public void setEngraveUnidirectional(boolean uni)
   {
@@ -258,9 +277,9 @@ public class LaosCutter extends LaserCutter
     this.mmPerStep = mmPerStep;
   }
 
-  private int px2steps(double px, double dpi)
+  private float px2steps(double px, double dpi)
   {
-    return (int) (Util.px2mm(px, dpi) / this.mmPerStep);
+    return (float) (Util.px2mm(px, dpi) / this.mmPerStep);
   }
 
   private byte[] generateVectorGCode(VectorPart vp, int resolution) throws UnsupportedEncodingException
@@ -285,18 +304,19 @@ public class LaosCutter extends LaserCutter
         case LINETO:
           line(out, cmd.getX(), cmd.getY(), power, speed, frequency, resolution);
           break;
-        case SETPOWER:
-          power = cmd.getPower();
+        case SETPROPERTY:
+        {
+          FloatPowerSpeedFocusFrequencyProperty p = (FloatPowerSpeedFocusFrequencyProperty) cmd.getProperty();
+          currentPower = p.getPower();
+          currentSpeed = p.getSpeed();
+          currentFrequency = p.getFrequency();
+          if (currentFocus != p.getFocus())
+          {
+            out.printf(Locale.US, "2 %f\n", (float) Util.mm2px(p.getFocus(), resolution));
+            currentFocus = p.getFocus();
+          }
           break;
-        case SETFOCUS:
-          out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(cmd.getFocus(), resolution));
-          break;
-        case SETSPEED:
-          speed = cmd.getSpeed();
-          break;
-        case SETFREQUENCY:
-          frequency = cmd.getFrequency();
-          break;
+        }
       }
     }
     return result.toByteArray();
@@ -306,28 +326,29 @@ public class LaosCutter extends LaserCutter
   {
     out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
-  private int currentPower = -1;
-  private int currentSpeed = -1;
-  private int currentFrequency = -1;
+  private float currentPower = -1;
+  private float currentSpeed = -1;
+  private float currentFocus = 0;
+  private float currentFrequency = -1;
 
-  private void line(PrintStream out, int x, int y, int power, int speed, int frequency, int resolution)
+  private void line(PrintStream out, int x, int y, float power, float speed, float frequency, int resolution)
   {
     if (currentPower != power)
     {
-      out.printf("7 101 %d\n", power * 100);
+      out.printf("7 101 %f\n", power * 100);
       currentPower = power;
     }
     if (currentSpeed != speed)
     {
-      out.printf("7 100 %d\n", speed * 100);
+      out.printf("7 100 %f\n", speed * 100);
       currentSpeed = speed;
     }
     if (currentFrequency != frequency)
     {
-      out.printf("7 102 %d\n", frequency);
+      out.printf("7 102 %f\n", frequency);
       currentFrequency = frequency;
     }
-    out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
+    out.printf("1 %f %f\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
 
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, int resolution) throws UnsupportedEncodingException
@@ -338,7 +359,7 @@ public class LaosCutter extends LaserCutter
     for (int raster = 0; raster < rp.getRasterCount(); raster++)
     {
       Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
+      FloatPowerSpeedFocusFrequencyProperty prop = (FloatPowerSpeedFocusFrequencyProperty) rp.getLaserProperty(raster);
       //Set focus
       out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
       for (int line = 0; line < rp.getRasterHeight(raster); line++)
@@ -425,7 +446,7 @@ public class LaosCutter extends LaserCutter
     for (int raster = 0; raster < rp.getRasterCount(); raster++)
     {
       Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
+      FloatPowerSpeedFocusFrequencyProperty prop = (FloatPowerSpeedFocusFrequencyProperty) rp.getLaserProperty(raster);
       //Set focus
       out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
       for (int line = 0; line < rp.getRasterHeight(raster); line++)
@@ -579,7 +600,7 @@ public class LaosCutter extends LaserCutter
     for (int raster = 0; raster < rp.getRasterCount(); raster++)
     {
       Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
+      FloatPowerSpeedFocusFrequencyProperty prop = (FloatPowerSpeedFocusFrequencyProperty) rp.getLaserProperty(raster);
       //Set focus
       out.printf(Locale.US, "2 %d\n", (int) Util.mm2px(prop.getFocus(), resolution));
       for (int line = 0; line < rp.getRasterHeight(raster); line++)

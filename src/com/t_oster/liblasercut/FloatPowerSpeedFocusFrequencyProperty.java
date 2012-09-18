@@ -24,14 +24,15 @@ package com.t_oster.liblasercut;
  * 
  * @author oster
  */
-public class PowerSpeedFocusProperty implements LaserProperty
+public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
 {
 
-  private int power = 20;
-  private int speed = 100;
+  private float power = 20;
+  private float speed = 100;
   private float focus = 0;
+  private float frequency = 500;
 
-  public PowerSpeedFocusProperty()
+  public FloatPowerSpeedFocusFrequencyProperty()
   {
   }
 
@@ -40,14 +41,14 @@ public class PowerSpeedFocusProperty implements LaserProperty
    * In 3d-Raster mode, the intensity is scaled to this power setting
    * @param power 
    */
-  public void setPower(int power)
+  public void setPower(float power)
   {
     power = power < 0 ? 0 : power;
     power = power > 100 ? 100 : power;
     this.power = power;
   }
 
-  public int getPower()
+  public float getPower()
   {
     return power;
   }
@@ -56,14 +57,14 @@ public class PowerSpeedFocusProperty implements LaserProperty
    * Sets the speed for the Laser. Valid values is from 0 to 100
    * @param speed 
    */
-  public void setSpeed(int speed)
+  public void setSpeed(float speed)
   {
     speed = speed < 0 ? 0 : speed;
     speed = speed > 100 ? 100 : speed;
     this.speed = speed;
   }
 
-  public int getSpeed()
+  public float getSpeed()
   {
     return speed;
   }
@@ -89,18 +90,29 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     return this.focus;
   }
+  
+  public void setFrequency(float f)
+  {
+    this.frequency = f;
+  }
+  
+  public float getFrequency()
+  {
+    return this.frequency;
+  }
 
   @Override
-  public PowerSpeedFocusProperty clone()
+  public FloatPowerSpeedFocusFrequencyProperty clone()
   {
-    PowerSpeedFocusProperty p = new PowerSpeedFocusProperty();
+    FloatPowerSpeedFocusFrequencyProperty p = new FloatPowerSpeedFocusFrequencyProperty();
+    p.focus = focus;
+    p.frequency = frequency;
     p.power = power;
     p.speed = speed;
-    p.focus = focus;
     return p;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed", "focus"};
+  private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
   
   @Override
   public String[] getPropertyNames()
@@ -113,15 +125,19 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Integer) this.getPower();
+      return (Float) this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Integer) this.getSpeed();
+      return (Float) this.getSpeed();
     }
     else if ("focus".equals(name))
     {
       return (Float) this.getFocus();
+    }
+    else if ("frequency".equals(name))
+    {
+      return (Float) this.getFrequency();
     }
     else
     {
@@ -144,6 +160,10 @@ public class PowerSpeedFocusProperty implements LaserProperty
     {
       this.setFocus((Float) value);
     }
+    else if ("frequency".equals(name))
+    {
+      this.setFrequency((Float) value);
+    }
     else
     {
       throw new IllegalArgumentException("Unknown setting '"+name+"'");
@@ -155,13 +175,17 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
   if ("power".equals(name))
     {
-      return (Integer) 0;
+      return (Float) 0f;
     }
     else if ("speed".equals(name))
     {
-      return (Integer) 0;
+      return (Float) 0f;
     }
     else if ("focus".equals(name))
+    {
+      return null;
+    }
+    else if ("frequency".equals(name))
     {
       return null;
     }
@@ -176,13 +200,17 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Integer) 100;
+      return (Float) 100f;
     }
     else if ("speed".equals(name))
     {
-      return (Integer) 100;
+      return (Float) 100f;
     }
     else if ("focus".equals(name))
+    {
+      return null;
+    }
+    else if ("frequency".equals(name))
     {
       return null;
     }

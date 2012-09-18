@@ -33,22 +33,6 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   {
   }
 
-  public PowerSpeedFocusFrequencyProperty(int power, int speed)
-  {
-      this(power, speed, 0, 5000);
-  }
-  
-  public PowerSpeedFocusFrequencyProperty(int power, int speed, float focus)
-  {
-    this(power, speed, focus, 5000);
-  }
-
-  public PowerSpeedFocusFrequencyProperty(int power, int speed, float focus, int frequency)
-  {
-    super(power, speed, focus);
-    this.frequency = frequency;
-  }
-
   public void setFrequency(int frequency)
   {
     frequency = frequency < 100 ? 100 : frequency;
@@ -137,6 +121,11 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   @Override
   public PowerSpeedFocusFrequencyProperty clone()
   {
-    return new PowerSpeedFocusFrequencyProperty(this.getPower(), this.getSpeed(), this.getFocus(), frequency);
+    PowerSpeedFocusFrequencyProperty p = new PowerSpeedFocusFrequencyProperty();
+    p.frequency = this.frequency;
+    p.setPower(getPower());
+    p.setSpeed(getSpeed());
+    p.setFocus(getFocus());
+    return p;
   }
 }

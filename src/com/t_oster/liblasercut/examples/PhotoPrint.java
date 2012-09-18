@@ -23,6 +23,8 @@ import com.t_oster.liblasercut.BlackWhiteRaster.DitherAlgorithm;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.LaserProperty;
+import com.t_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
+import com.t_oster.liblasercut.PowerSpeedFocusProperty;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.drivers.EpilogZing;
@@ -175,11 +177,11 @@ public class PhotoPrint {
             //}
             //JOptionPane.showMessageDialog(null, material);
             //TODO: repair Material Selection
-            RasterPart rp = new RasterPart(new LaserProperty());
+            RasterPart rp = new RasterPart(new PowerSpeedFocusProperty());
             rp.addImage(new BlackWhiteRaster(new BufferedImageAdapter(outImg), BlackWhiteRaster.DitherAlgorithm.AVERAGE), new Point(0, 0));
             VectorPart vp = null;
             if (cbCut.isSelected()) {
-                vp = new VectorPart(new LaserProperty());
+                vp = new VectorPart(new PowerSpeedFocusFrequencyProperty());
                 vp.moveto(0, 0);
                 vp.lineto(outImg.getWidth(), 0);
                 vp.lineto(outImg.getWidth(), outImg.getHeight());
