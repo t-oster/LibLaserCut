@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class VectorPart
+public class VectorPart extends JobPart
 {
 
   private LaserProperty currentCuttingProperty;
@@ -104,21 +104,27 @@ public class VectorPart
     checkMax(x, y);
   }
 
-  /**
-   * Returns the Width of the CuttingPart in Pixels
-   * @return 
-   */
-  public int getWidth()
+  @Override
+  public int getMinX()
   {
-    return maxX - minX;
+    return minX;
+  }
+  
+  @Override
+  public int getMaxX()
+  {
+    return maxX;
   }
 
-  /**
-   * Returns the height of the CuttingPart in Pixels
-   * @return 
-   */
-  public int getHeight()
+  @Override
+  public int getMinY()
   {
-    return maxY - minY;
+    return minY;
+  }
+  
+  @Override
+  public int getMaxY()
+  {
+    return maxY;
   }
 }

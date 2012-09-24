@@ -412,18 +412,25 @@ public class Lasersaur extends LaserCutter {
     pl.taskChanged(this, "sending");
     out.write(this.generateInitializationCode());
     pl.progressChanged(this, 20);
-    if (job.contains3dRaster()) {
-      out.write(this.generatePseudoRaster3dGCode(job.getRaster3dPart(), job.getResolution()));
+    int i = 0;
+    int max = job.getParts().size();
+    for (JobPart p : job.getParts())
+    {
+      if (p instanceof Raster3dPart)
+      {
+        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, job.getResolution()));
+      }
+      else if (p instanceof RasterPart)
+      {
+        out.write(this.generatePseudoRasterGCode((RasterPart) p, job.getResolution()));
+      }
+      else if (p instanceof VectorPart)
+      {
+        out.write(this.generateVectorGCode((VectorPart) p, job.getResolution()));
+      }
+      i++;
+      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
-    pl.progressChanged(this, 40);
-    if (job.containsRaster()) {
-      out.write(this.generatePseudoRasterGCode(job.getRasterPart(), job.getResolution()));
-    }
-    pl.progressChanged(this, 60);
-    if (job.containsVector()) {
-      out.write(this.generateVectorGCode(job.getVectorPart(), job.getResolution()));
-    }
-    pl.progressChanged(this, 80);
     out.write(this.generateShutdownCode());
     out.close();
     port.close();

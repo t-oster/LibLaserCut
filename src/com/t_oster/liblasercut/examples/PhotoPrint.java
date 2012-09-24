@@ -189,7 +189,9 @@ public class PhotoPrint {
                 vp.lineto(0, 0);
             }
 
-            LaserJob job = new LaserJob("PhotoPrint", "123", "bla", dpi, null, vp, rp);
+            LaserJob job = new LaserJob("PhotoPrint", "123", "bla", dpi);
+            job.addPart(rp);
+            job.addPart(vp);
             instance.sendJob(job);
             JOptionPane.showMessageDialog(null, "Please press START on the Lasercutter");
         }

@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class RasterPart
+public class RasterPart extends JobPart
 {
 
   private LaserProperty curProp;
@@ -81,38 +81,52 @@ public class RasterPart
     return this.images.size();
   }
 
-  /**
-   * Returns the full width of the complete raster Part
-   * @return
-   */
-  public int getWidth()
+  @Override
+  public int getMinX()
   {
     int minx = 0;
-    int maxx = 0;
     for (int i = 0; i < this.getRasterCount(); i++)
     {
       Point start = this.getRasterStart(i);
       minx = Math.min(minx, start.x);
+    }
+    return minx;
+  }
+  
+  @Override
+  public int getMaxX()
+  {
+    int maxx = 0;
+    for (int i = 0; i < this.getRasterCount(); i++)
+    {
+      Point start = this.getRasterStart(i);
       maxx = Math.max(maxx, start.x + this.getRasterWidth(i));
     }
-    return maxx - minx;
+    return maxx;
   }
 
-  /**
-   * Returns the full height of the complete raster Part
-   * @return
-   */
-  public int getHeight()
+  @Override
+  public int getMinY()
   {
     int miny = 0;
-    int maxy = 0;
     for (int i = 0; i < this.getRasterCount(); i++)
     {
       Point start = this.getRasterStart(i);
       miny = Math.min(miny, start.y);
+    }
+    return miny;
+  }
+  
+  @Override
+  public int getMaxY()
+  {
+    int maxy = 0;
+    for (int i = 0; i < this.getRasterCount(); i++)
+    {
+      Point start = this.getRasterStart(i);
       maxy = Math.max(maxy, start.y + this.getRasterHeight(i));
     }
-    return maxy - miny;
+    return maxy;
   }
 
   /**

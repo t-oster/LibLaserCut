@@ -20,6 +20,7 @@ package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
 import com.t_oster.liblasercut.IllegalJobException;
+import com.t_oster.liblasercut.JobPart;
 import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.ProgressListener;
@@ -596,21 +597,25 @@ public class LaosCutter extends LaserCutter
     }
     out.write(this.generateInitializationCode());
     pl.progressChanged(this, 20);
-    if (job.contains3dRaster())
+    int i = 0;
+    int max = job.getParts().size();
+    for (JobPart p : job.getParts())
     {
-      out.write(this.generatePseudoRaster3dGCode(job.getRaster3dPart(), job.getResolution()));
+      if (p instanceof Raster3dPart)
+      {
+        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, job.getResolution()));
+      }
+      else if (p instanceof RasterPart)
+      {
+        out.write(this.generateLaosRasterCode((RasterPart) p, job.getResolution()));
+      }
+      else if (p instanceof VectorPart)
+      {
+        out.write(this.generateVectorGCode((VectorPart) p, job.getResolution()));
+      }
+      i++;
+      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
-    pl.progressChanged(this, 40);
-    if (job.containsRaster())
-    {
-      out.write(this.generateLaosRasterCode(job.getRasterPart(), job.getResolution()));
-    }
-    pl.progressChanged(this, 60);
-    if (job.containsVector())
-    {
-      out.write(this.generateVectorGCode(job.getVectorPart(), job.getResolution()));
-    }
-    pl.progressChanged(this, 80);
     out.write(this.generateShutdownCode());
     out.close();
     if (this.isUseTftp())

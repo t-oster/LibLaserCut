@@ -1,6 +1,6 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  * 
  *     VisiCut is free software: you can redistribute it and/or modify
@@ -18,32 +18,18 @@
  **/
 package com.t_oster.liblasercut;
 
-import com.t_oster.liblasercut.drivers.EpilogHelix;
-import com.t_oster.liblasercut.drivers.EpilogZing;
-import com.t_oster.liblasercut.drivers.LaosCutter;
-import com.t_oster.liblasercut.drivers.Lasersaur;
-
 /**
- * This class contains Version information
- * etc from the Library
+ *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class LibInfo
-{
-  private static String VERSION = "2";
+public abstract class JobPart {
+
+  public abstract int getMinX();
+
+  public abstract int getMinY();
   
-  public static String getVersion()
-  {
-    return VERSION;
-  }
+  public abstract int getMaxX();
   
-  public static Class[] getSupportedDrivers()
-  {
-    return new Class[]{
-      EpilogZing.class,
-      EpilogHelix.class,
-      LaosCutter.class,
-      Lasersaur.class
-    };
-  }
+  public abstract int getMaxY();
+
 }

@@ -57,34 +57,17 @@ public abstract class LaserCutter implements Cloneable
     {
       throw new IllegalJobException("Resoluiton of " + job.getResolution() + " is not supported");
     }
-    if (job.containsVector())
+    for(JobPart p : job.getParts())
     {
-      double w = Util.px2mm(job.getVectorPart().getWidth(), job.getResolution());
-      double h = Util.px2mm(job.getVectorPart().getHeight(), job.getResolution());
-
-      if (w > this.getBedWidth() || h > this.getBedHeight())
+      if (p.getMinX() < 0 || p.getMinY() < 0)
       {
-        throw new IllegalJobException("The Job is too big (" + w + "x" + h + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
+        throw new IllegalJobException("The Job exceeds the laser-bed on the top or left edge");
       }
-    }
-    if (job.containsRaster())
-    {
-      double w = Util.px2mm(job.getRasterPart().getWidth(), job.getResolution());
-      double h = Util.px2mm(job.getRasterPart().getHeight(), job.getResolution());
-
-      if (w > this.getBedWidth() || h > this.getBedHeight())
+      double maxX = Util.px2mm(p.getMaxX(), job.getResolution());
+      double maxY = Util.px2mm(p.getMaxY(), job.getResolution());
+      if (maxX > this.getBedWidth() || maxY > this.getBedHeight())
       {
-        throw new IllegalJobException("The Job is too big (" + w + "mm x" + h + "mm) for the Laser bed (" + this.getBedWidth() + "mm x" + this.getBedHeight() + "mm)");
-      }
-    }
-    if (job.contains3dRaster())
-    {
-      double w = Util.px2mm(job.getRaster3dPart().getWidth(), job.getResolution());
-      double h = Util.px2mm(job.getRaster3dPart().getHeight(), job.getResolution());
-
-      if (w > this.getBedWidth() || h > this.getBedHeight())
-      {
-        throw new IllegalJobException("The Job is too big (" + w + "x" + h + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
+        throw new IllegalJobException("The Job is too big (" + maxX + "x" + maxY + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
       }
     }
   }

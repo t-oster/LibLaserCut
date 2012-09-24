@@ -22,6 +22,9 @@
  */
 package com.t_oster.liblasercut;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
@@ -35,19 +38,14 @@ public class LaserJob
   private int resolution;
   private int startX = 0;
   private int startY = 0;
-  private VectorPart vPart;
-  private Raster3dPart r3dPart;
-  private RasterPart rPart;
+  private List<JobPart> parts = new LinkedList<JobPart>();
 
-  public LaserJob(String title, String name, String user, int resolution, Raster3dPart r3dp, VectorPart vp, RasterPart rp)
+  public LaserJob(String title, String name, String user, int resolution)
   {
     this.title = title;
     this.name = name;
     this.user = user;
     this.resolution = resolution;
-    this.vPart = vp;
-    this.r3dPart = r3dp;
-    this.rPart = rp;
   }
 
   public void setStartPoint(int x, int y)
@@ -81,38 +79,23 @@ public class LaserJob
     return user;
   }
 
-  public boolean contains3dRaster()
-  {
-    return r3dPart != null && r3dPart.getRasterCount() > 0;
-  }
-
-  public boolean containsVector()
-  {
-    return vPart != null && vPart.getCommandList().length > 3;//every vector part starts with 3 commands
-  }
-
-  public boolean containsRaster()
-  {
-    return rPart != null && rPart.getRasterCount() > 0;
-  }
-
   public int getResolution()
   {
     return resolution;
   }
 
-  public VectorPart getVectorPart()
+  public void addPart(JobPart p)
   {
-    return vPart;
+    this.parts.add(p);
   }
-
-  public Raster3dPart getRaster3dPart()
+  
+  public void removePart(JobPart p)
   {
-    return r3dPart;
+    this.parts.remove(p);
   }
-
-  public RasterPart getRasterPart()
+  
+  public List<JobPart> getParts()
   {
-    return rPart;
+    return parts;
   }
 }
