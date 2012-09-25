@@ -278,7 +278,7 @@ abstract class EpilogCutter extends LaserCutter
         RasterPart rp = ((RasterPart) p);
         for (int i = 0; i < rp.getRasterCount(); i++)
         {
-          if (rp.getLaserProperty(i) != null && !(rp.getLaserProperty(i) instanceof PowerSpeedFocusFrequencyProperty))
+          if (rp.getLaserProperty(i) != null && !(rp.getLaserProperty(i) instanceof PowerSpeedFocusProperty))
           {
             throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
           }
@@ -295,7 +295,7 @@ abstract class EpilogCutter extends LaserCutter
         Raster3dPart rp = (Raster3dPart) p;
         for (int i = 0; i < rp.getRasterCount(); i++)
         {
-          if (rp.getLaserProperty(i) != null && !(rp.getLaserProperty(i) instanceof PowerSpeedFocusFrequencyProperty))
+          if (rp.getLaserProperty(i) != null && !(rp.getLaserProperty(i) instanceof PowerSpeedFocusProperty))
           {
             throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
           }
