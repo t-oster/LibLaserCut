@@ -849,6 +849,12 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
+  public boolean canEstimateJobDuration()
+  {
+    return true;
+  }
+  
+  @Override
   public int estimateJobDuration(LaserJob job)
   {
     double VECTOR_MOVESPEED_X = 20000d / 4.5;

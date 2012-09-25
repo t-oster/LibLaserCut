@@ -814,12 +814,6 @@ public class LaosCutter extends LaserCutter
   }
 
   @Override
-  public int estimateJobDuration(LaserJob job)
-  {
-    return 10000;
-  }
-
-  @Override
   public LaserCutter clone()
   {
     LaosCutter clone = new LaosCutter();

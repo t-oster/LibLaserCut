@@ -545,11 +545,6 @@ public class Lasersaur extends LaserCutter {
   }
 
   @Override
-  public int estimateJobDuration(LaserJob job) {
-    return 10000;
-  }
-
-  @Override
   public LaserCutter clone() {
     Lasersaur clone = new Lasersaur();
     clone.comPort = comPort;

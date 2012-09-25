@@ -154,12 +154,26 @@ public abstract class LaserCutter implements Cloneable
   public abstract void setSettingValue(String attribute, String value);
   
   /**
+   * Override this method, return true and override the
+   * estimateJobDuration-method to allow Programs to use
+   * your driver to estimate the duration of a job before
+   * executing
+   * @return 
+   */
+  public boolean canEstimateJobDuration()
+  {
+    return false;
+  }
+  /**
    * Returns an estimated time, how long the job would take
    * in seconds
    * @param job
    * @return 
    */
-  public abstract int estimateJobDuration(LaserJob job);
+  public int estimateJobDuration(LaserJob job)
+  {
+    throw new RuntimeException("Method not implemented");
+  }
   
   public LaserProperty getLaserPropertyForVectorPart()
   {
