@@ -310,6 +310,25 @@ abstract class EpilogCutter extends LaserCutter
     }
   }
 
+  public void realSendJob(LaserJob job, ProgressListener pl, int number, int count) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
+  {
+    String nb = count > 1 ? "("+number+"/"+count+")" : "";
+    pl.taskChanged(this, "generating"+nb);
+    //Generate all the data
+    byte[] pjlData = generatePjlData(job);
+    pl.progressChanged(this, (int) ((double) 40*number/count));
+    //connect to lasercutter
+    pl.taskChanged(this, "connecting"+nb);
+    connect();
+    pl.progressChanged(this, (int) ((double) 60*number/count));
+    //send job
+    pl.taskChanged(this, "sending"+nb);
+    sendPjlJob(job, pjlData);
+    pl.progressChanged(this, (int) ((double) 90*number/count));
+    //disconnect
+    disconnect();
+  }
+  
   @Override
   public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
@@ -317,20 +336,51 @@ abstract class EpilogCutter extends LaserCutter
     pl.taskChanged(this, "checking job");
     //Perform santiy checks
     checkJob(job);
-    pl.taskChanged(this, "generating data");
-    //Generate all the data
-    byte[] pjlData = generatePjlData(job);
-    pl.progressChanged(this, 40);
-    //connect to lasercutter
-    pl.taskChanged(this, "connecting");
-    connect();
-    pl.progressChanged(this, 60);
-    //send job
-    pl.taskChanged(this, "sending");
-    sendPjlJob(job, pjlData);
-    pl.progressChanged(this, 90);
-    //disconnect
-    disconnect();
+    //split the job because epilog doesn't support many combinations
+    List<List<JobPart>> jobs = new LinkedList<List<JobPart>>();
+    List<JobPart> toDo = job.getParts();
+    while(!toDo.isEmpty())
+    {
+      List<JobPart> currentSplit = new LinkedList<JobPart>();
+      if (toDo.get(0) instanceof VectorPart)
+      {//we need an empty rasterPart before
+        currentSplit.add(new RasterPart(this.getLaserPropertyForRasterPart()));
+      }
+      else if (toDo.get(0) instanceof RasterPart)
+      {
+        currentSplit.add(toDo.get(0));
+        toDo.remove(0);
+      }
+      else if (toDo.get(0) instanceof Raster3dPart)
+      {
+        //we need an empty raster part with the same property
+        currentSplit.add(new RasterPart(((Raster3dPart) toDo.get(0)).getLaserProperty(0)));
+        currentSplit.add(toDo.get(0));
+        toDo.remove(0);
+        //and nothing else in that part
+        jobs.add(currentSplit);
+        continue;
+      }
+      //add all following vector parts
+      while (!toDo.isEmpty() && toDo.get(0) instanceof VectorPart)
+      {
+        currentSplit.add(toDo.get(0));
+        toDo.remove(0);
+      }
+      jobs.add(currentSplit);
+    }
+    int number = 0;
+    int size = jobs.size();
+    for(List<JobPart> current : jobs)
+    {
+      number++;
+      LaserJob j = new LaserJob("("+number+"/"+size+")"+job.getTitle(), job.getName(), job.getUser(), job.getResolution());
+      for (JobPart p:current)
+      {
+        j.addPart(p);
+      }
+      this.realSendJob(j, pl, number, size);
+    }
     pl.progressChanged(this, 100);
   }
 
@@ -708,6 +758,7 @@ abstract class EpilogCutter extends LaserCutter
     PrintStream wrt = new PrintStream(pjlJob, true, "US-ASCII");
 
     wrt.write(generatePjlHeader(job));
+    wrt.write(generateRasterPCL(job, null));
     for (JobPart p : job.getParts())
     {
       if (p instanceof VectorPart)
