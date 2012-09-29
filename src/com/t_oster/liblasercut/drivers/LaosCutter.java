@@ -370,7 +370,7 @@ public class LaosCutter extends LaserCutter
     }
     else
     {
-      throw new RuntimeException("The Laos driver only accepts LaosCutter properties");
+      throw new RuntimeException("The Laos driver only accepts LaosCutter properties (was "+p.getClass().toString()+")");
     } 
   }
   

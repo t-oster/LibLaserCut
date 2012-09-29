@@ -127,5 +127,15 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
     }
   }
 
+  @Override
+  public LaosCutterProperty clone()
+  {
+    LaosCutterProperty result = new LaosCutterProperty();
+    for (String s:this.getPropertyNames())
+    {
+      result.setProperty(s, this.getProperty(s));
+    }
+    return result;
+  }
   
 }
