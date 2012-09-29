@@ -316,7 +316,7 @@ public class LaosCutter extends LaserCutter
     }
   }
   
-  private float currentFrequency = -1;
+  private int currentFrequency = -1;
   private void setFrequency(PrintStream out, int frequency)
   {
     if (currentFrequency != frequency)
