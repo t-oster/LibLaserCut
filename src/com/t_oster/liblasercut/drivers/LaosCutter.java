@@ -361,12 +361,12 @@ public class LaosCutter extends LaserCutter
     if (p instanceof LaosCutterProperty)
     {
       LaosCutterProperty prop = (LaosCutterProperty) p;
-      setPower(out, prop.getPower());
-      setSpeed(out, prop.getSpeed());
-      setFrequency(out, prop.getFrequency());
       setFocus(out, prop.getFocus());
       setVentilation(out, prop.getVentilation());
       setPurge(out, prop.getPurge());
+      setSpeed(out, prop.getSpeed());
+      setPower(out, prop.getPower());
+      setFrequency(out, prop.getFrequency());
     }
     else
     {
