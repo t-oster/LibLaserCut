@@ -177,8 +177,7 @@ public class PhotoPrint {
             //}
             //JOptionPane.showMessageDialog(null, material);
             //TODO: repair Material Selection
-            RasterPart rp = new RasterPart(new PowerSpeedFocusProperty());
-            rp.addImage(new BlackWhiteRaster(new BufferedImageAdapter(outImg), BlackWhiteRaster.DitherAlgorithm.AVERAGE), new Point(0, 0));
+            RasterPart rp = new RasterPart(new BlackWhiteRaster(new BufferedImageAdapter(outImg), BlackWhiteRaster.DitherAlgorithm.AVERAGE), new PowerSpeedFocusProperty(), new Point(0, 0));
             VectorPart vp = null;
             if (cbCut.isSelected()) {
                 vp = new VectorPart(new PowerSpeedFocusFrequencyProperty());

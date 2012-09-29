@@ -30,7 +30,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   private float power = 20;
   private float speed = 100;
   private float focus = 0;
-  private float frequency = 500;
+  private int frequency = 500;
 
   public FloatPowerSpeedFocusFrequencyProperty()
   {
@@ -91,12 +91,12 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     return this.focus;
   }
   
-  public void setFrequency(float f)
+  public void setFrequency(int f)
   {
     this.frequency = f;
   }
   
-  public float getFrequency()
+  public int getFrequency()
   {
     return this.frequency;
   }
@@ -137,7 +137,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     }
     else if ("frequency".equals(name))
     {
-      return (Float) this.getFrequency();
+      return (Integer) this.getFrequency();
     }
     else
     {
@@ -162,7 +162,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     }
     else if ("frequency".equals(name))
     {
-      this.setFrequency((Float) value);
+      this.setFrequency((Integer) value);
     }
     else
     {
@@ -229,9 +229,13 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   @Override
   public Class getPropertyClass(String name)
   {
-    if ("power".equals(name)||"speed".equals(name)||"focus".equals(name)||"frequency".equals(name))
+    if ("power".equals(name)||"speed".equals(name)||"focus".equals(name))
     {
       return Float.class;
+    }
+    else if ("frequency".equals(name))
+    {
+      return Integer.class;
     }
     return null;
   }

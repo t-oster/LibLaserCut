@@ -33,101 +33,39 @@ import java.util.List;
 public class Raster3dPart extends JobPart
 {
 
-  private LaserProperty curProp;
-  private List<GreyscaleRaster> images = new LinkedList<GreyscaleRaster>();
-  private List<LaserProperty> properties = new LinkedList<LaserProperty>();
-  private List<Point> starts = new LinkedList<Point>();
+  private GreyscaleRaster image = null;
+  private LaserProperty property = null;
+  private Point start = null;
 
-  public Raster3dPart(LaserProperty initialLaserProperty)
+  public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset)
   {
-    this.curProp = initialLaserProperty;
-  }
-
-  public void setCurrentLaserProperty(LaserProperty eng)
-  {
-    this.curProp = eng;
-  }
-
-  public LaserProperty getCurrentLaserProperty()
-  {
-    return this.curProp;
-  }
-
-  /**
-   * Adds the given Image to this RasterPart The Image must be in sRGB Format.
-   * The grey value of every pixel is mapped to the LaserPower (scaled to the
-   * LaserPower in the current engraving property)
-   *
-   * @param img
-   */
-  public void addImage(GreyscaleRaster img, Point start)
-  {
-    this.addImage(img, curProp, start);
-  }
-
-  public void addImage(GreyscaleRaster img, LaserProperty prop, Point start)
-  {
-    this.images.add(img);
-    this.properties.add(prop);
-    this.starts.add(start);
-  }
-
-  /**
-   * Returns the number of Rasters, this rasterpart contains
-   *
-   * @return
-   */
-  public int getRasterCount()
-  {
-    return this.images.size();
+    this.image = image;
+    this.property = laserProperty;
+    this.start = offset;
   }
 
   @Override
   public int getMinX()
   {
-    int minx = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      minx = Math.min(minx, start.x);
-    }
-    return minx;
+    return start.x;
   }
 
   @Override
   public int getMaxX()
   {
-    int maxx = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      maxx = Math.max(maxx, start.x + this.getRasterWidth(i));
-    }
-    return maxx;
+    return start.x+image.getWidth();
   }
 
   @Override
   public int getMinY()
   {
-    int miny = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      miny = Math.min(miny, start.y);
-    }
-    return miny;
+    return start.y;
   }
   
   @Override
   public int getMaxY()
   {
-    int maxy = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      maxy = Math.max(maxy, start.y + this.getRasterHeight(i));
-    }
-    return maxy;
+    return start.y + image.getHeight();
   }
 
   /**
@@ -136,9 +74,9 @@ public class Raster3dPart extends JobPart
    * @param raster the raster which upper left corner is to determine
    * @return
    */
-  public Point getRasterStart(int raster)
+  public Point getRasterStart()
   {
-    return this.starts.get(raster);
+    return this.start;
   }
 
   /**
@@ -149,51 +87,39 @@ public class Raster3dPart extends JobPart
    * @param line
    * @return
    */
-  public List<Byte> getRasterLine(int raster, int line)
+  public List<Byte> getRasterLine(int line)
   {
-    GreyscaleRaster img = this.images.get(raster);
     List<Byte> result = new LinkedList<Byte>();
-    for (int x = 0; x < img.getWidth(); x++)
+    for (int x = 0; x < image.getWidth(); x++)
     {
       //TOTEST: Black white (byte converssion)
-      result.add((byte) img.getGreyScale(x, line));
+      result.add((byte) image.getGreyScale(x, line));
     }
     return result;
   }
 
-  public int getRasterWidth(int raster)
+  public int getRasterWidth()
   {
-    return this.images.get(raster).getWidth();
+    return this.image.getWidth();
   }
 
-  public int getRasterHeight(int raster)
+  public int getRasterHeight()
   {
-    return this.images.get(raster).getHeight();
+    return this.image.getHeight();
   }
 
-  public LaserProperty getLaserProperty(int raster)
+  public LaserProperty getLaserProperty()
   {
-    return this.properties.get(raster);
+    return this.property;
   }
 
-  public GreyscaleRaster[] getImages()
+  public List<Byte> getInvertedRasterLine(int line)
   {
-    return this.images.toArray(new GreyscaleRaster[0]);
-  }
-
-  public LaserProperty[] getPropertys()
-  {
-    return this.properties.toArray(new LaserProperty[0]);
-  }
-
-  public List<Byte> getInvertedRasterLine(int raster, int line)
-  {
-    GreyscaleRaster img = this.images.get(raster);
     List<Byte> result = new LinkedList<Byte>();
-    for (int x = 0; x < img.getWidth(); x++)
+    for (int x = 0; x < image.getWidth(); x++)
     {
       //TOTEST: Black white (byte converssion)
-      result.add((byte) (255 - img.getGreyScale(x, line)));
+      result.add((byte) (255 - image.getGreyScale(x, line)));
     }
     return result;
   }

@@ -33,100 +33,39 @@ import java.util.List;
 public class RasterPart extends JobPart
 {
 
-  private LaserProperty curProp;
-  private List<BlackWhiteRaster> images = new LinkedList<BlackWhiteRaster>();
-  private List<LaserProperty> properties = new LinkedList<LaserProperty>();
-  private List<Point> starts = new LinkedList<Point>();
+  BlackWhiteRaster image = null;
+  LaserProperty property = null;
+  Point start = null;
 
-  public RasterPart(LaserProperty initialLaserProperty)
+  public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset)
   {
-    this.curProp = initialLaserProperty;
-  }
-
-  public void setCurrentLaserProperty(LaserProperty eng)
-  {
-    this.curProp = eng;
-  }
-
-  public LaserProperty getCurrentLaserProperty()
-  {
-    return this.curProp;
-  }
-
-  /**
-   * Adds the given Image to this RasterPart
-   * The Image must be in sRGB Format. The grey value of every pixel
-   * is mapped to the LaserPower (scaled to the LaserPower in the
-   * current engraving property)
-   * @param img 
-   */
-  public void addImage(BlackWhiteRaster img, Point start)
-  {
-    this.addImage(img, curProp, start);
-  }
-
-  public void addImage(BlackWhiteRaster img, LaserProperty prop, Point start)
-  {
-    this.images.add(img);
-    this.properties.add(prop.clone());
-    this.starts.add(start);
-  }
-
-  /**
-   * Returns the number of Rasters, this rasterpart contains
-   * @return 
-   */
-  public int getRasterCount()
-  {
-    return this.images.size();
+    this.image = image;
+    this.property = laserProperty;
+    this.start = offset;
   }
 
   @Override
   public int getMinX()
   {
-    int minx = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      minx = Math.min(minx, start.x);
-    }
-    return minx;
+    return this.start.x;
   }
   
   @Override
   public int getMaxX()
   {
-    int maxx = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      maxx = Math.max(maxx, start.x + this.getRasterWidth(i));
-    }
-    return maxx;
+    return this.start.x + this.image.getWidth();
   }
 
   @Override
   public int getMinY()
   {
-    int miny = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      miny = Math.min(miny, start.y);
-    }
-    return miny;
+    return start.y;
   }
   
   @Override
   public int getMaxY()
   {
-    int maxy = 0;
-    for (int i = 0; i < this.getRasterCount(); i++)
-    {
-      Point start = this.getRasterStart(i);
-      maxy = Math.max(maxy, start.y + this.getRasterHeight(i));
-    }
-    return maxy;
+    return start.y+image.getHeight();
   }
 
   /**
@@ -134,9 +73,9 @@ public class RasterPart extends JobPart
    * @param raster the raster which upper left corner is to determine
    * @return 
    */
-  public Point getRasterStart(int raster)
+  public Point getRasterStart()
   {
-    return this.starts.get(raster);
+    return this.start;
   }
 
   /**
@@ -147,39 +86,34 @@ public class RasterPart extends JobPart
    * @param line
    * @return 
    */
-  public List<Byte> getRasterLine(int raster, int line)
+  public List<Byte> getRasterLine(int line)
   {
-    BlackWhiteRaster img = this.images.get(raster);
     List<Byte> result = new LinkedList<Byte>();
-    for (int x = 0; x < (img.getWidth() + 7) / 8; x++)
+    for (int x = 0; x < (image.getWidth() + 7) / 8; x++)
     {
-      result.add(img.getByte(x, line));
+      result.add(image.getByte(x, line));
     }
     return result;
   }
 
-  public int getRasterWidth(int raster)
+  public boolean isBlack(int x, int y)
   {
-    return this.images.get(raster).getWidth();
-  }
-
-  public int getRasterHeight(int raster)
-  {
-    return this.images.get(raster).getHeight();
-  }
-
-  public BlackWhiteRaster[] getImages()
-  {
-    return this.images.toArray(new BlackWhiteRaster[0]);
-  }
-
-  public LaserProperty getLaserProperty(int raster)
-  {
-      return this.properties.get(raster);
+    return this.image.isBlack(x, y);
   }
   
-  public LaserProperty[] getPropertys()
+  public int getRasterWidth()
   {
-    return this.properties.toArray(new LaserProperty[0]);
+    return this.image.getWidth();
   }
+
+  public int getRasterHeight()
+  {
+    return this.image.getHeight();
+  }
+
+  public LaserProperty getLaserProperty()
+  {
+      return this.property;
+  }
+  
 }

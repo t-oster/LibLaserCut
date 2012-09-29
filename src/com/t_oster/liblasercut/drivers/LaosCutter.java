@@ -18,11 +18,11 @@
  **/
 package com.t_oster.liblasercut.drivers;
 
-import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.JobPart;
 import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
+import com.t_oster.liblasercut.LaserProperty;
 import com.t_oster.liblasercut.ProgressListener;
 import com.t_oster.liblasercut.Raster3dPart;
 import com.t_oster.liblasercut.RasterPart;
@@ -66,21 +66,21 @@ public class LaosCutter extends LaserCutter
   private boolean unidir = false;
   
   @Override
-  public FloatPowerSpeedFocusFrequencyProperty getLaserPropertyForVectorPart()
+  public LaosCutterProperty getLaserPropertyForVectorPart()
   {
-    return new FloatPowerSpeedFocusFrequencyProperty();
+    return new LaosCutterProperty();
   }
   
   @Override
-  public FloatPowerSpeedFocusFrequencyProperty getLaserPropertyForRasterPart()
+  public LaosCutterProperty getLaserPropertyForRasterPart()
   {
-    return new FloatPowerSpeedFocusFrequencyProperty();
+    return new LaosCutterProperty();
   }
   
   @Override
-  public FloatPowerSpeedFocusFrequencyProperty getLaserPropertyForRaster3dPart()
+  public LaosCutterProperty getLaserPropertyForRaster3dPart()
   {
-    return new FloatPowerSpeedFocusFrequencyProperty();
+    return new LaosCutterProperty();
   }
   
   public void setEngraveUnidirectional(boolean uni)
@@ -261,11 +261,6 @@ public class LaosCutter extends LaserCutter
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    //reset saved values, so the first ones get verbosed
-    float currentPower = -1;
-    float currentSpeed = -1;
-    int currentFrequency = -1;
-    float currentFocus = -1;
     for (VectorCommand cmd : vp.getCommandList())
     {
       switch (cmd.getType())
@@ -278,27 +273,7 @@ public class LaosCutter extends LaserCutter
           break;
         case SETPROPERTY:
         {
-          FloatPowerSpeedFocusFrequencyProperty p = (FloatPowerSpeedFocusFrequencyProperty) cmd.getProperty();
-          if (p.getPower() != currentPower)
-          {
-            currentPower = p.getPower();
-            setPower(out, currentPower);
-          }
-          if (p.getSpeed() != currentSpeed)
-          {
-            currentSpeed = p.getSpeed();
-            setSpeed(out, currentSpeed);
-          }
-          if (p.getFrequency() != currentFrequency)
-          {
-            currentFrequency = (int) p.getFrequency();
-            setFrequency(out, currentFrequency);
-          }
-          if (p.getFocus() != currentFocus)
-          {
-            currentFocus = p.getFocus();
-            setFocus(out, currentFocus);
-          }
+          this.setCurrentProperty(out, cmd.getProperty());
           break;
         }
       }
@@ -311,24 +286,92 @@ public class LaosCutter extends LaserCutter
     out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
   
+  private void loadBitmapLine(PrintStream out, List<Long> dwords)
+  {
+    out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
+    for(Long d:dwords)
+    {
+      out.printf(" "+d);
+    }
+    out.printf("\n");
+  }
+  
+  private float currentPower = -1;
   private void setPower(PrintStream out, float power)
   {
-    out.printf("7 101 %d\n", (int) (power * 100));
+    if (currentPower != power)
+    {
+      out.printf("7 101 %d\n", (int) (power * 100));
+      currentPower = power;
+    }
   }
   
+  private float currentSpeed = -1;
   private void setSpeed(PrintStream out, float speed)
   {
-    out.printf("7 100 %d\n", (int) (speed * 100));
+    if (currentSpeed != speed)
+    {
+      out.printf("7 100 %d\n", (int) (speed * 100));
+      currentSpeed = speed;
+    }
   }
   
+  private float currentFrequency = -1;
   private void setFrequency(PrintStream out, int frequency)
   {
-    out.printf("7 102 %d\n", frequency);
+    if (currentFrequency != frequency)
+    {
+      out.printf("7 102 %d\n", frequency);
+      currentFrequency = frequency;
+    }
   }
   
+  private float currentFocus = 0;
   private void setFocus(PrintStream out, float focus)
   {
-    out.printf(Locale.US, "2 %d\n", (int) (focus/this.mmPerStep));
+    if (currentFocus != focus)
+    {
+      out.printf(Locale.US, "2 %d\n", (int) (focus/this.mmPerStep));
+      currentFocus = focus;
+    }
+  }
+  
+  private Boolean currentVentilation = null;
+  private void setVentilation(PrintStream out, boolean ventilation)
+  {
+    if (currentVentilation == null || !currentVentilation.equals(ventilation))
+    {
+      out.printf(Locale.US, "7 6 %d\n", ventilation ? 1 : 0);
+      currentVentilation = ventilation;
+    }
+  }
+  
+  private Boolean currentPurge = null;
+  private void setPurge(PrintStream out, boolean purge)
+  {
+    if (currentPurge == null || !currentPurge.equals(purge))
+    {
+      out.printf(Locale.US, "7 7 %d\n", purge ? 1 : 0);
+      currentPurge = purge;
+    }
+  }
+  
+  private void setCurrentProperty(PrintStream out, LaserProperty p)
+  {
+    if (p instanceof LaosCutterProperty)
+    {
+      LaosCutterProperty prop = (LaosCutterProperty) p;
+      setPower(out, prop.getPower());
+      setSpeed(out, prop.getSpeed());
+      setFrequency(out, prop.getFrequency());
+      setFocus(out, prop.getFocus());
+      setVentilation(out, prop.getVentilation());
+      setPurge(out, prop.getPurge());
+    }
+    else
+    {
+      throw new RuntimeException("The Laos driver only accepts LaosCutter properties");
+    } 
   }
   
   private void line(PrintStream out, float x, float y, int resolution)
@@ -341,89 +384,83 @@ public class LaosCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
-    for (int raster = 0; raster < rp.getRasterCount(); raster++)
+    Point rasterStart = rp.getRasterStart();
+    this.setCurrentProperty(out, rp.getLaserProperty());
+    float maxPower = this.currentPower;
+    for (int line = 0; line < rp.getRasterHeight(); line++)
     {
-      Point rasterStart = rp.getRasterStart(raster);
-      FloatPowerSpeedFocusFrequencyProperty prop = (FloatPowerSpeedFocusFrequencyProperty) rp.getLaserProperty(raster);
-      setPower(out, prop.getPower());
-      setSpeed(out, prop.getSpeed());
-      setFrequency(out, (int) prop.getFrequency());
-      setFocus(out, prop.getFocus());
-      for (int line = 0; line < rp.getRasterHeight(raster); line++)
+      Point lineStart = rasterStart.clone();
+      lineStart.y += line;
+      List<Byte> bytes = rp.getRasterLine(line);
+      //remove heading zeroes
+      while (bytes.size() > 0 && bytes.get(0) == 0)
       {
-        Point lineStart = rasterStart.clone();
-        lineStart.y += line;
-        List<Byte> bytes = rp.getRasterLine(raster, line);
-        //remove heading zeroes
-        while (bytes.size() > 0 && bytes.get(0) == 0)
+        bytes.remove(0);
+        lineStart.x += 1;
+      }
+      //remove trailing zeroes
+      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0)
+      {
+        bytes.remove(bytes.size() - 1);
+      }
+      if (bytes.size() > 0)
+      {
+        if (dirRight)
         {
-          bytes.remove(0);
-          lineStart.x += 1;
-        }
-        //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0)
-        {
-          bytes.remove(bytes.size() - 1);
-        }
-        if (bytes.size() > 0)
-        {
-          if (dirRight)
+          //move to the first nonempyt point of the line
+          move(out, lineStart.x, lineStart.y, resolution);
+          byte old = bytes.get(0);
+          for (int pix = 0; pix < bytes.size(); pix++)
           {
-            //move to the first nonempyt point of the line
-            move(out, lineStart.x, lineStart.y, resolution);
-            byte old = bytes.get(0);
-            for (int pix = 0; pix < bytes.size(); pix++)
+            if (bytes.get(pix) != old)
             {
-              if (bytes.get(pix) != old)
+              if (old == 0)
               {
-                if (old == 0)
-                {
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                else
-                {
-                  setPower(out, prop.getPower() * (0xFF & old) / 255);
-                  line(out, lineStart.x + pix - 1, lineStart.y, resolution);
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                old = bytes.get(pix);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
               }
-            }
-            //last point is also not "white"
-            setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-            line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          }
-          else
-          {
-            //move to the last nonempty point of the line
-            move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-            byte old = bytes.get(bytes.size() - 1);
-            for (int pix = bytes.size() - 1; pix >= 0; pix--)
-            {
-              if (bytes.get(pix) != old || pix == 0)
+              else
               {
-                if (old == 0)
-                {
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                else
-                {
-                  setPower(out, prop.getPower() * (0xFF & old) / 255);
-                  line(out, lineStart.x + pix + 1, lineStart.y, resolution);
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                old = bytes.get(pix);
+                setPower(out, maxPower * (0xFF & old) / 255);
+                line(out, lineStart.x + pix - 1, lineStart.y, resolution);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
               }
+              old = bytes.get(pix);
             }
-            //last point is also not "white"
-            setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
-            line(out, lineStart.x, lineStart.y, resolution);
           }
+          //last point is also not "white"
+          setPower(out, maxPower * (0xFF & bytes.get(bytes.size() - 1)) / 255);
+          line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
         }
-        if (!this.isEngraveUnidirectional())
+        else
         {
-          dirRight = !dirRight;
+          //move to the last nonempty point of the line
+          move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+          byte old = bytes.get(bytes.size() - 1);
+          for (int pix = bytes.size() - 1; pix >= 0; pix--)
+          {
+            if (bytes.get(pix) != old || pix == 0)
+            {
+              if (old == 0)
+              {
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              }
+              else
+              {
+                setPower(out, maxPower * (0xFF & old) / 255);
+                line(out, lineStart.x + pix + 1, lineStart.y, resolution);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              }
+              old = bytes.get(pix);
+            }
+          }
+          //last point is also not "white"
+          setPower(out, maxPower * (0xFF & bytes.get(0)) / 255);
+          line(out, lineStart.x, lineStart.y, resolution);
         }
+      }
+      if (!this.isEngraveUnidirectional())
+      {
+        dirRight = !dirRight;
       }
     }
     return result.toByteArray();
@@ -477,79 +514,62 @@ public class LaosCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
-    for (int raster = 0; raster < rp.getRasterCount(); raster++)
+    Point rasterStart = rp.getRasterStart();
+    this.setCurrentProperty(out, rp.getLaserProperty());
+    for (int line = 0; line < rp.getRasterHeight(); line++)
     {
-      Point rasterStart = rp.getRasterStart(raster);
-      FloatPowerSpeedFocusFrequencyProperty prop = (FloatPowerSpeedFocusFrequencyProperty) rp.getLaserProperty(raster);
-      setPower(out, prop.getPower());
-      setSpeed(out, prop.getSpeed());
-      setFrequency(out, (int) prop.getFrequency());
-      setFocus(out, prop.getFocus());
-      for (int line = 0; line < rp.getRasterHeight(raster); line++)
+      Point lineStart = rasterStart.clone();
+      lineStart.y += line;
+      List<Byte> bytes = rp.getRasterLine(line);
+      //remove heading zeroes
+      while (bytes.size() > 0 && bytes.get(0) == 0)
       {
-        Point lineStart = rasterStart.clone();
-        lineStart.y += line;
-        List<Byte> bytes = rp.getRasterLine(raster, line);
-        //remove heading zeroes
-        while (bytes.size() > 0 && bytes.get(0) == 0)
+        lineStart.x += 8;
+        bytes.remove(0);
+      }
+      //remove trailing zeroes
+      while (bytes.size() > 0 && bytes.get(bytes.size()-1) == 0)
+      {
+        bytes.remove(bytes.size()-1);
+      }
+      if (bytes.size() > 0)
+      {
+        //add space on the left side
+        int space = (int) Util.mm2px(this.getAddSpacePerRasterLine(), resolution);
+        while (space > 0 && lineStart.x >= 8)
         {
-          lineStart.x += 8;
-          bytes.remove(0);
+          bytes.add(0, (byte) 0);
+          space -= 8;
+          lineStart.x -=8;
         }
-        //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size()-1) == 0)
+        //add space on the right side
+        space = (int) Util.mm2px(this.getAddSpacePerRasterLine(), resolution);
+        int max = (int) Util.mm2px(this.getBedWidth(), resolution);
+        while (space > 0 && lineStart.x+(8*bytes.size()) < max-8)
         {
-          bytes.remove(bytes.size()-1);
-        }
-        if (bytes.size() > 0)
+          bytes.add((byte) 0);
+          space -= 8;
+        }    
+        if (dirRight)
         {
-          //add space on the left side
-          int space = (int) Util.mm2px(this.getAddSpacePerRasterLine(), resolution);
-          while (space > 0 && lineStart.x >= 8)
-          {
-            bytes.add(0, (byte) 0);
-            space -= 8;
-            lineStart.x -=8;
-          }
-          //add space on the right side
-          space = (int) Util.mm2px(this.getAddSpacePerRasterLine(), resolution);
-          int max = (int) Util.mm2px(this.getBedWidth(), resolution);
-          while (space > 0 && lineStart.x+(8*bytes.size()) < max-8)
-          {
-            bytes.add((byte) 0);
-            space -= 8;
-          }    
-          if (dirRight)
-          {
-            //move to the first point of the line
-            move(out, lineStart.x, lineStart.y, resolution);         
-            List<Long> dwords = this.byteLineToDwords(bytes, true);
-            out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
-            for(Long d:dwords)
-            {
-              out.print(" "+d);
-            }
-            out.printf("\n");
-            line(out, lineStart.x + (dwords.size()*32), lineStart.y, resolution);
-          }
-          else
-          {
-            //move to the first point of the line
-            List<Long> dwords = this.byteLineToDwords(bytes, false);
-            move(out, lineStart.x+(dwords.size()*32), lineStart.y, resolution);         
-            out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
-            for(Long d:dwords)
-            {
-              out.printf(" "+d);
-            }
-            out.printf("\n");
-            line(out, lineStart.x, lineStart.y, resolution);  
-          }
+          //move to the first point of the line
+          move(out, lineStart.x, lineStart.y, resolution);         
+          List<Long> dwords = this.byteLineToDwords(bytes, true);
+          loadBitmapLine(out, dwords);
+          line(out, lineStart.x + (dwords.size()*32), lineStart.y, resolution);
         }
-        if (!this.isEngraveUnidirectional())
+        else
         {
-          dirRight = !dirRight;
+          //move to the first point of the line
+          List<Long> dwords = this.byteLineToDwords(bytes, false);
+          move(out, lineStart.x+(dwords.size()*32), lineStart.y, resolution);         
+          loadBitmapLine(out, dwords);
+          line(out, lineStart.x, lineStart.y, resolution);  
         }
+      }
+      if (!this.isEngraveUnidirectional())
+      {
+        dirRight = !dirRight;
       }
     }
     return result.toByteArray();
@@ -566,35 +586,14 @@ public class LaosCutter extends LaserCutter
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    //back to origin and shutdown
-    //out.printf("0 0 0\n");
-    //Set focus to 0
-    out.printf(Locale.US, "2 %d\n", 0);
+    this.setFocus(out, 0f);
+    this.setVentilation(out, false);
+    this.setPurge(out, false);
     return result.toByteArray();
   }
 
-  @Override
-  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
+  protected void writeJobCode(LaserJob job, OutputStream out, ProgressListener pl) throws UnsupportedEncodingException, IOException
   {
-    pl.progressChanged(this, 0);
-    BufferedOutputStream out;
-    ByteArrayOutputStream buffer = null;
-    pl.taskChanged(this, "checking job");
-    checkJob(job);
-    if (!useTftp)
-    {
-      pl.taskChanged(this, "connecting");
-      Socket connection = new Socket();
-      connection.connect(new InetSocketAddress(hostname, port), 3000);
-      out = new BufferedOutputStream(connection.getOutputStream());
-      pl.taskChanged(this, "sending");
-    }
-    else
-    {
-      buffer = new ByteArrayOutputStream();
-      out = new BufferedOutputStream(buffer);
-      pl.taskChanged(this, "buffering");
-    }
     out.write(this.generateInitializationCode());
     pl.progressChanged(this, 20);
     int i = 0;
@@ -618,6 +617,31 @@ public class LaosCutter extends LaserCutter
     }
     out.write(this.generateShutdownCode());
     out.close();
+  }
+  
+  @Override
+  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
+  {
+    pl.progressChanged(this, 0);
+    BufferedOutputStream out;
+    ByteArrayOutputStream buffer = null;
+    pl.taskChanged(this, "checking job");
+    checkJob(job);
+    if (!useTftp)
+    {
+      pl.taskChanged(this, "connecting");
+      Socket connection = new Socket();
+      connection.connect(new InetSocketAddress(hostname, port), 3000);
+      out = new BufferedOutputStream(connection.getOutputStream());
+      pl.taskChanged(this, "sending");
+    }
+    else
+    {
+      buffer = new ByteArrayOutputStream();
+      out = new BufferedOutputStream(buffer);
+      pl.taskChanged(this, "buffering");
+    }
+    this.writeJobCode(job, out, pl);
     if (this.isUseTftp())
     {
       pl.taskChanged(this, "connecting");
