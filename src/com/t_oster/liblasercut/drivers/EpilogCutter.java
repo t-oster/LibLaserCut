@@ -822,7 +822,7 @@ abstract class EpilogCutter extends LaserCutter
       this.setBedHeight(Double.parseDouble(value));
     }
   }
-  private String[] attributes = new String[]
+  private static String[] attributes = new String[]
   {
     "Hostname", "Port", "BedWidth", "BedHeight", "AutoFocus"
   };
