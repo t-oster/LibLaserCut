@@ -257,7 +257,7 @@ public class LaosCutter extends LaserCutter
     return (int) (Util.px2mm(px, dpi) / this.mmPerStep);
   }
 
-  private byte[] generateVectorGCode(VectorPart vp, int resolution) throws UnsupportedEncodingException
+  private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
@@ -281,7 +281,7 @@ public class LaosCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  private void move(PrintStream out, float x, float y, int resolution)
+  private void move(PrintStream out, float x, float y, double resolution)
   {
     out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
@@ -374,12 +374,12 @@ public class LaosCutter extends LaserCutter
     } 
   }
   
-  private void line(PrintStream out, float x, float y, int resolution)
+  private void line(PrintStream out, float x, float y, double resolution)
   {
     out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
 
-  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, int resolution) throws UnsupportedEncodingException
+  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
@@ -509,7 +509,7 @@ public class LaosCutter extends LaserCutter
     return result;
   }
   
-  private byte[] generateLaosRasterCode(RasterPart rp, int resolution) throws UnsupportedEncodingException, IOException
+  private byte[] generateLaosRasterCode(RasterPart rp, double resolution) throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
@@ -602,15 +602,15 @@ public class LaosCutter extends LaserCutter
     {
       if (p instanceof Raster3dPart)
       {
-        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, job.getResolution()));
+        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, p.getDPI()));
       }
       else if (p instanceof RasterPart)
       {
-        out.write(this.generateLaosRasterCode((RasterPart) p, job.getResolution()));
+        out.write(this.generateLaosRasterCode((RasterPart) p, p.getDPI()));
       }
       else if (p instanceof VectorPart)
       {
-        out.write(this.generateVectorGCode((VectorPart) p, job.getResolution()));
+        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       }
       i++;
       pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
@@ -658,24 +658,24 @@ public class LaosCutter extends LaserCutter
     }
     pl.progressChanged(this, 100);
   }
-  private List<Integer> resolutions;
+  private List<Double> resolutions;
 
   @Override
-  public List<Integer> getResolutions()
+  public List<Double> getResolutions()
   {
     if (resolutions == null)
     {
       //TODO: Calculate possible resolutions
       //according to mm/step
-      resolutions = Arrays.asList(new Integer[]
+      resolutions = Arrays.asList(new Double[]
         {
-          100,
-          200,
-          300,
-          500,
-          600,
-          1000,
-          1200
+          100d,
+          200d,
+          300d,
+          500d,
+          600d,
+          1000d,
+          1200d
         });
     }
     return resolutions;

@@ -35,17 +35,15 @@ public class LaserJob
   private String title;
   private String name;
   private String user;
-  private int resolution;
   private int startX = 0;
   private int startY = 0;
   private List<JobPart> parts = new LinkedList<JobPart>();
 
-  public LaserJob(String title, String name, String user, int resolution)
+  public LaserJob(String title, String name, String user)
   {
     this.title = title;
     this.name = name;
     this.user = user;
-    this.resolution = resolution;
   }
 
   public void setStartPoint(int x, int y)
@@ -77,11 +75,6 @@ public class LaserJob
   public String getUser()
   {
     return user;
-  }
-
-  public int getResolution()
-  {
-    return resolution;
   }
 
   public void addPart(JobPart p)

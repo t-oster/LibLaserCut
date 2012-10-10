@@ -50,16 +50,16 @@ public class EpilogZing extends EpilogCutter
     return "Epilog ZING";
   }
   
-  private static final int[] RESOLUTIONS = new int[]
+  private static final double[] RESOLUTIONS = new double[]
   {
     300, 500, 600, 1000
   };
   
   @Override
-  public List<Integer> getResolutions()
+  public List<Double> getResolutions()
   {
-    List<Integer> result = new LinkedList();
-    for (int r : RESOLUTIONS)
+    List<Double> result = new LinkedList();
+    for (double r : RESOLUTIONS)
     {
       result.add(r);
     }

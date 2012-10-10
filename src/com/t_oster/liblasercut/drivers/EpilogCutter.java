@@ -134,7 +134,7 @@ abstract class EpilogCutter extends LaserCutter
 
   }
 
-  private byte[] generatePjlHeader(LaserJob job) throws UnsupportedEncodingException
+  private byte[] generatePjlHeader(LaserJob job, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
@@ -164,13 +164,11 @@ abstract class EpilogCutter extends LaserCutter
      */
     out.printf("\033&l0Z");
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033&u%dD", job.getResolution());
+    out.printf("\033&u%dD", resolution);
     /* X position = 0 */
     out.printf("\033*p0X");
     /* Y position = 0 */
     out.printf("\033*p0Y");
-    /* PCL/RasterGraphics resolution. */
-    out.printf("\033*t%dR", job.getResolution());
     return result.toByteArray();
   }
 
@@ -361,7 +359,7 @@ abstract class EpilogCutter extends LaserCutter
     for(List<JobPart> current : jobs)
     {
       number++;
-      LaserJob j = new LaserJob("("+number+"/"+size+")"+job.getTitle(), job.getName(), job.getUser(), job.getResolution());
+      LaserJob j = new LaserJob("("+number+"/"+size+")"+job.getTitle(), job.getName(), job.getUser());
       for (JobPart p:current)
       {
         j.addPart(p);
@@ -373,7 +371,7 @@ abstract class EpilogCutter extends LaserCutter
 
 
   @Override
-  abstract public List<Integer> getResolutions();
+  abstract public List<Double> getResolutions();
   
 
   /**
@@ -418,13 +416,15 @@ abstract class EpilogCutter extends LaserCutter
     return result;
   }
 
-  private byte[] generateRaster3dPCL(LaserJob job, Raster3dPart rp) throws UnsupportedEncodingException, IOException
+  private byte[] generateRaster3dPCL(Raster3dPart rp) throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     if (rp != null)
     {
       PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
+      /* PCL/RasterGraphics resolution. */
+      out.printf("\033*t%dR", rp.getDPI());
       /* Raster Orientation: Printed in current direction */
       out.printf("\033*r0F");
       /* Raster power */
@@ -507,12 +507,15 @@ abstract class EpilogCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  private byte[] generateRasterPCL(LaserJob job, RasterPart rp) throws UnsupportedEncodingException, IOException
+  private byte[] generateRasterPCL(RasterPart rp) throws UnsupportedEncodingException, IOException
   {
 
     PowerSpeedFocusProperty prop = rp == null ? new PowerSpeedFocusProperty() : (PowerSpeedFocusProperty) rp.getLaserProperty();
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
+    //TODO: Test if the resolution settings have an effect
+    /* PCL/RasterGraphics resolution. */
+    out.printf("\033*t%dR", rp.getDPI());
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
@@ -600,11 +603,15 @@ abstract class EpilogCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  private byte[] generateVectorPCL(LaserJob job, VectorPart vp) throws UnsupportedEncodingException
+  private byte[] generateVectorPCL(VectorPart vp) throws UnsupportedEncodingException
   {
-
+    //TODO: Test if the resolution settings have an effect
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
+    /* Resolution of the print. Number of Units/Inch*/
+    out.printf("\033&u%dD", vp.getDPI());
+    /* PCL/RasterGraphics resolution. */
+    out.printf("\033*t%dR", vp.getDPI());
     out.printf("\033*r0F");
     out.printf("\033*r%dT", vp == null ? 500 : vp.getMaxY());// if not dummy, then job.getHeight());
     out.printf("\033*r%dS", vp == null ? 500 : vp.getMaxX());// if not dummy then job.getWidth());
@@ -619,8 +626,8 @@ abstract class EpilogCutter extends LaserCutter
       Integer currentSpeed = null;
       Integer currentFrequency = null;
       Float currentFocus = null;
-      int sx = job.getStartX();
-      int sy = job.getStartY();
+      int sx = 0;
+      int sy = 0;
       VectorCommand.CmdType lastType = null;
       for (VectorCommand cmd : vp.getCommandList())
       {
@@ -687,25 +694,24 @@ abstract class EpilogCutter extends LaserCutter
     ByteArrayOutputStream pjlJob = new ByteArrayOutputStream();
     PrintStream wrt = new PrintStream(pjlJob, true, "US-ASCII");
 
-    wrt.write(generatePjlHeader(job));
-    wrt.write(generateRasterPCL(job, null));
+    wrt.write(generatePjlHeader(job, job.getParts().get(0).getDPI()));
     if (! (job.getParts().get(0) instanceof RasterPart))
     {//we need an empty raster part as begin of all jobs
-      wrt.write(generateRasterPCL(job, null));
+      wrt.write(generateRasterPCL(null));
     }
     for (JobPart p : job.getParts())
     {
       if (p instanceof VectorPart)
       {
-        wrt.write(generateVectorPCL(job, (VectorPart) p));
+        wrt.write(generateVectorPCL((VectorPart) p));
       }
       else if (p instanceof RasterPart)
       {
-        wrt.write(generateRasterPCL(job, (RasterPart) p));
+        wrt.write(generateRasterPCL((RasterPart) p));
       }
       else if (p instanceof Raster3dPart)
       {
-        wrt.write(generateRaster3dPCL(job, (Raster3dPart) p));
+        wrt.write(generateRaster3dPCL((Raster3dPart) p));
       }
     }
     wrt.write(generatePjlFooter());
