@@ -50,16 +50,16 @@ public class EpilogHelix extends EpilogCutter
     return "Epilog Helix";
   }
   
-  private static final int[] RESOLUTIONS = new int[]
+  private static final double[] RESOLUTIONS = new double[]
   {
      75, 150, 200, 300, 400, 600, 1200
   };
   
   @Override
-  public List<Integer> getResolutions()
+  public List<Double> getResolutions()
   {
-    List<Integer> result = new LinkedList();
-    for (int r : RESOLUTIONS)
+    List<Double> result = new LinkedList();
+    for (double r : RESOLUTIONS)
     {
       result.add(r);
     }

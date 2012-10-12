@@ -24,6 +24,8 @@ package com.t_oster.liblasercut;
  */
 public abstract class JobPart {
 
+  public abstract double getDPI();
+    
   public abstract int getMinX();
 
   public abstract int getMinY();

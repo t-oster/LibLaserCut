@@ -146,7 +146,7 @@ public class Lasersaur extends LaserCutter {
     this.comPort = comPort;
   }
 
-  private byte[] generateVectorGCode(VectorPart vp, int resolution) throws UnsupportedEncodingException {
+  private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     for (VectorCommand cmd : vp.getCommandList()) {
@@ -196,7 +196,7 @@ public class Lasersaur extends LaserCutter {
     out.printf(Locale.US, "G1 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
   }
 
-  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, int resolution) throws UnsupportedEncodingException {
+  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
@@ -262,7 +262,7 @@ public class Lasersaur extends LaserCutter {
     return result.toByteArray();
   }
 
-  private byte[] generatePseudoRasterGCode(RasterPart rp, int resolution) throws UnsupportedEncodingException {
+  private byte[] generatePseudoRasterGCode(RasterPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
@@ -411,15 +411,15 @@ public class Lasersaur extends LaserCutter {
     {
       if (p instanceof Raster3dPart)
       {
-        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, job.getResolution()));
+        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, p.getDPI()));
       }
       else if (p instanceof RasterPart)
       {
-        out.write(this.generatePseudoRasterGCode((RasterPart) p, job.getResolution()));
+        out.write(this.generatePseudoRasterGCode((RasterPart) p, p.getDPI()));
       }
       else if (p instanceof VectorPart)
       {
-        out.write(this.generateVectorGCode((VectorPart) p, job.getResolution()));
+        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       }
       i++;
       pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
@@ -430,13 +430,13 @@ public class Lasersaur extends LaserCutter {
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
-  private List<Integer> resolutions;
+  private List<Double> resolutions;
 
   @Override
-  public List<Integer> getResolutions() {
+  public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Integer[]{
-                500
+      resolutions = Arrays.asList(new Double[]{
+                500d
               });
     }
     return resolutions;

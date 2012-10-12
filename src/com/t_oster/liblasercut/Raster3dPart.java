@@ -36,14 +36,22 @@ public class Raster3dPart extends JobPart
   private GreyscaleRaster image = null;
   private LaserProperty property = null;
   private Point start = null;
+  private double resolution = 500;
 
-  public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset)
+  public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {
     this.image = image;
+    this.resolution = resolution;
     this.property = laserProperty;
     this.start = offset;
   }
 
+  @Override
+  public double getDPI()
+  {
+      return resolution;
+  }
+  
   @Override
   public int getMinX()
   {

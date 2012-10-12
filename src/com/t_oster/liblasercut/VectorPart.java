@@ -37,19 +37,28 @@ public class VectorPart extends JobPart
   private int maxY;
   private int minX;
   private int minY;
+  private double resolution = 500;
   private List<VectorCommand> commands;
 
-  public VectorPart(LaserProperty initialProperty)
+  public VectorPart(LaserProperty initialProperty, double resolution)
   {
     if (initialProperty == null)
     {
       throw new IllegalArgumentException("Initial Property must not be null");
     }
+    this.resolution = resolution;
     commands = new LinkedList<VectorCommand>();
     this.currentCuttingProperty = initialProperty;
     commands.add(new VectorCommand(VectorCommand.CmdType.SETPROPERTY, initialProperty));
+    
   }
 
+  @Override
+  public double getDPI()
+  {
+    return resolution;
+  }
+  
   public LaserProperty getCurrentCuttingProperty()
   {
     return currentCuttingProperty;

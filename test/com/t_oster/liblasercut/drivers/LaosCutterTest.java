@@ -50,13 +50,13 @@ public class LaosCutterTest extends LaosCutter{
   public void testVectorCode() throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    LaserJob job = new LaserJob("test", "test", "test", 500);
+    LaserJob job = new LaserJob("test", "test", "test");
     LaosCutterProperty prop = new LaosCutterProperty();
     prop.setPower(50.62f);
     prop.setSpeed(100f);
     prop.setFrequency(333);
     prop.setFocus(1f);
-    VectorPart vp = new VectorPart(prop);
+    VectorPart vp = new VectorPart(prop, 500);
     vp.moveto(10, 10);
     vp.lineto(0, 0);
     job.addPart(vp);

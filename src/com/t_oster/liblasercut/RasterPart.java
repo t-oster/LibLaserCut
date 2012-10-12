@@ -36,14 +36,22 @@ public class RasterPart extends JobPart
   BlackWhiteRaster image = null;
   LaserProperty property = null;
   Point start = null;
+  double resolution = 500;
 
-  public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset)
+  public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {
     this.image = image;
     this.property = laserProperty;
     this.start = offset;
+    this.resolution = resolution;
   }
 
+  @Override
+  public double getDPI()
+  {
+      return resolution;
+  }
+  
   @Override
   public int getMinX()
   {
