@@ -25,6 +25,7 @@ package com.t_oster.liblasercut.dithering;
 public class Random extends DitheringAlgorithm
 {
 
+  @Override
   protected void doDithering()
   {
     int width = src.getWidth();
@@ -40,5 +41,16 @@ public class Random extends DitheringAlgorithm
       }
       setProgress((100 * pixelcount++) / (height));
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    return new Random();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return "Random";
   }
 }

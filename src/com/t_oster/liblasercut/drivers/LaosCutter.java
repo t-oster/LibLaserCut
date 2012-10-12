@@ -724,38 +724,35 @@ public class LaosCutter extends LaserCutter
   {
     this.bedHeight = bedHeight;
   }
-  private List<String> settingAttributes;
+  private static String[] settingAttributes = new String[]{
+    SETTING_HOSTNAME,
+    SETTING_PORT,
+    SETTING_UNIDIR,
+    SETTING_BEDWIDTH,
+    SETTING_BEDHEIGHT,
+    //SETTING_FLIPX,
+    //SETTING_FLIPY,
+    //SETTING_MMPERSTEP,
+    SETTING_TFTP,
+    SETTING_RASTER_WHITESPACE,
+  };
 
   @Override
-  public List<String> getSettingAttributes()
+  public String[] getPropertyKeys()
   {
-    if (settingAttributes == null)
-    {
-      settingAttributes = new LinkedList<String>();
-      settingAttributes.add(SETTING_HOSTNAME);
-      settingAttributes.add(SETTING_PORT);
-      settingAttributes.add(SETTING_UNIDIR);
-      settingAttributes.add(SETTING_BEDWIDTH);
-      settingAttributes.add(SETTING_BEDHEIGHT);
-      //settingAttributes.add(SETTING_FLIPX);
-      //settingAttributes.add(SETTING_FLIPY);
-      //settingAttributes.add(SETTING_MMPERSTEP);
-      settingAttributes.add(SETTING_TFTP);
-      settingAttributes.add(SETTING_RASTER_WHITESPACE);
-    }
     return settingAttributes;
   }
 
   @Override
-  public String getSettingValue(String attribute)
+  public Object getProperty(String attribute)
   {
     if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
-      return "" + this.getAddSpacePerRasterLine();
+      return (Double) this.getAddSpacePerRasterLine();
     }
     else if (SETTING_UNIDIR.equals(attribute))
     {
-      return this.isEngraveUnidirectional() ? "yes" : "no";
+      return (Boolean) this.isEngraveUnidirectional();
     }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
@@ -763,77 +760,77 @@ public class LaosCutter extends LaserCutter
     }
     else if (SETTING_FLIPX.equals(attribute))
     {
-      return this.isFlipXaxis() ? "yes" : "no";
+      return (Boolean) this.isFlipXaxis();
     }
     else if (SETTING_FLIPY.equals(attribute))
     {
-      return this.isFlipYaxis() ? "yes" : "no";
+      return (Boolean) this.isFlipYaxis();
     }
     else if (SETTING_PORT.equals(attribute))
     {
-      return "" + this.getPort();
+      return (Integer) this.getPort();
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
-      return "" + this.getBedWidth();
+      return (Double) this.getBedWidth();
     }
     else if (SETTING_BEDHEIGHT.equals(attribute))
     {
-      return "" + this.getBedHeight();
+      return (Double) this.getBedHeight();
     }
     else if (SETTING_MMPERSTEP.equals(attribute))
     {
-      return "" + this.getMmPerStep();
+      return (Double) this.getMmPerStep();
     }
     else if (SETTING_TFTP.equals(attribute))
     {
-      return this.isUseTftp() ? "yes" : "no";
+      return (Boolean) this.isUseTftp();
     }
     return null;
   }
 
   @Override
-  public void setSettingValue(String attribute, String value)
+  public void setProperty(String attribute, Object value)
   {
     if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
-      this.setAddSpacePerRasterLine(Double.parseDouble(value));
+      this.setAddSpacePerRasterLine((Double) value);
     }
     else if (SETTING_UNIDIR.endsWith(attribute))
     {
-      this.setEngraveUnidirectional("yes".equals(value));
+      this.setEngraveUnidirectional((Boolean) value);
     }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
-      this.setHostname(value);
+      this.setHostname((String) value);
     }
     else if (SETTING_PORT.equals(attribute))
     {
-      this.setPort(Integer.parseInt(value));
+      this.setPort((Integer) value);
     }
     else if (SETTING_FLIPX.equals(attribute))
     {
-      this.setFlipXaxis("yes".equals(value));
+      this.setFlipXaxis((Boolean) value);
     }
     else if (SETTING_FLIPY.equals(attribute))
     {
-      this.setFlipYaxis("yes".equals(value));
+      this.setFlipYaxis((Boolean) value);
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
-      this.setBedWidth(Double.parseDouble(value));
+      this.setBedWidth((Double) value);
     }
     else if (SETTING_BEDHEIGHT.equals(attribute))
     {
-      this.setBedHeight(Double.parseDouble(value));
+      this.setBedHeight((Double) value);
     }
     else if (SETTING_MMPERSTEP.equals(attribute))
     {
-      this.setMmPerStep(Double.parseDouble(value));
+      this.setMmPerStep((Double) value);
     }
     else if (SETTING_TFTP.contains(attribute))
     {
-      this.setUseTftp("yes".equals(value));
+      this.setUseTftp((Boolean) value);
     }
   }
 

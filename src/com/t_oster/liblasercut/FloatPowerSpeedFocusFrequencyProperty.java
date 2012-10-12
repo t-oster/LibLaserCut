@@ -115,7 +115,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
   
   @Override
-  public String[] getPropertyNames()
+  public String[] getPropertyKeys()
   {
     return propertyNames;
   }
@@ -139,10 +139,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     {
       return (Integer) this.getFrequency();
     }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }
+    return null;
   }
 
   @Override
@@ -226,17 +223,4 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     return null;
   }
 
-  @Override
-  public Class getPropertyClass(String name)
-  {
-    if ("power".equals(name)||"speed".equals(name)||"focus".equals(name))
-    {
-      return Float.class;
-    }
-    else if ("frequency".equals(name))
-    {
-      return Integer.class;
-    }
-    return null;
-  }
 }

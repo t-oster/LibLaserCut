@@ -31,7 +31,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -730,7 +729,7 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public String getSettingValue(String attribute)
+  public Object getProperty(String attribute)
   {
     if ("Hostname".equals(attribute))
     {
@@ -738,19 +737,19 @@ abstract class EpilogCutter extends LaserCutter
     }
     else if ("AutoFocus".equals(attribute))
     {
-      return "" + this.isAutoFocus();
+      return (Boolean) this.isAutoFocus();
     }
     else if ("Port".equals(attribute))
     {
-      return "" + this.getPort();
+      return (Integer) this.getPort();
     }
     else if ("BedWidth".equals(attribute))
     {
-      return "" + this.getBedWidth();
+      return (Double) this.getBedWidth();
     }
     else if ("BedHeight".equals(attribute))
     {
-      return "" + this.getBedHeight();
+      return (Double) this.getBedHeight();
     }
     return null;
   }
@@ -800,27 +799,27 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public void setSettingValue(String attribute, String value)
+  public void setProperty(String attribute, Object value)
   {
     if ("Hostname".equals(attribute))
     {
-      this.setHostname(value);
+      this.setHostname((String) value);
     }
     else if ("AutoFocus".endsWith(attribute))
     {
-      this.setAutoFocus(Boolean.parseBoolean(value));
+      this.setAutoFocus((Boolean) value);
     }
     else if ("Port".equals(attribute))
     {
-      this.setPort(Integer.parseInt(value));
+      this.setPort((Integer) value);
     }
     else if ("BedWidth".equals(attribute))
     {
-      this.setBedWidth(Double.parseDouble(value));
+      this.setBedWidth((Double) value);
     }
     else if ("BedHeight".equals(attribute))
     {
-      this.setBedHeight(Double.parseDouble(value));
+      this.setBedHeight((Double) value);
     }
   }
   private static String[] attributes = new String[]
@@ -829,9 +828,9 @@ abstract class EpilogCutter extends LaserCutter
   };
 
   @Override
-  public List<String> getSettingAttributes()
+  public String[] getPropertyKeys()
   {
-    return Arrays.asList(attributes);
+    return attributes;
   }
 
   @Override

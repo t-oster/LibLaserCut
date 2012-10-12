@@ -25,6 +25,7 @@ package com.t_oster.liblasercut.dithering;
 public class Ordered extends DitheringAlgorithm
 {
 
+  @Override
   protected void doDithering()
   {
     int width = src.getWidth();
@@ -93,5 +94,16 @@ public class Ordered extends DitheringAlgorithm
         }
       }
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    return new Ordered();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return "Ordered";
   }
 }

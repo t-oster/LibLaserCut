@@ -24,33 +24,8 @@ package com.t_oster.liblasercut;
  * 
  * @author oster
  */
-public interface LaserProperty extends Cloneable
+public interface LaserProperty extends Cloneable, Customizable
 {
-
-  /**
-   * Returns the names of possible propertys,
-   * e.g. for epilog-cutter this is power, speed and frequency
-   * @return 
-   */
-  public abstract String[] getPropertyNames();
-  
-  /**
-   * returns the value for this property
-   * May be of String, Boolean, Integer, Double or Float
-   * @param name
-   * @return 
-   */
-  public abstract Object getProperty(String name);
-  
-  public abstract void setProperty(String name, Object value);
-  
-  /**
-   * If name is a name of a vaild property, return the class
-   * of this property's objects. else return null
-   * @param name
-   * @return 
-   */
-  public abstract Class getPropertyClass(String name);
   
   /**
    * returns the minimum value of this property if it is

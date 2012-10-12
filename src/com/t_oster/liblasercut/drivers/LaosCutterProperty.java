@@ -70,9 +70,9 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   }
 
   @Override
-  public String[] getPropertyNames()
+  public String[] getPropertyKeys()
   {
-    String[] s = super.getPropertyNames();
+    String[] s = super.getPropertyKeys();
     String[] result = new String[s.length+2];
     System.arraycopy(s, 0, result, 0, s.length);
     result[s.length] = "ventilation";
@@ -115,23 +115,10 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   }
 
   @Override
-  public Class getPropertyClass(String name)
-  {
-    if ("ventilation".equals(name) || "purge".equals(name))
-    {
-      return Boolean.class;
-    }
-    else
-    {
-      return super.getPropertyClass(name);
-    }
-  }
-
-  @Override
   public LaosCutterProperty clone()
   {
     LaosCutterProperty result = new LaosCutterProperty();
-    for (String s:this.getPropertyNames())
+    for (String s:this.getPropertyKeys())
     {
       result.setProperty(s, this.getProperty(s));
     }

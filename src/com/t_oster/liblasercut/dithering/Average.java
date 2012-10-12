@@ -25,6 +25,7 @@ package com.t_oster.liblasercut.dithering;
 public class Average extends  DitheringAlgorithm
 {
   
+    @Override
   protected void doDithering()
   {
     long lumTotal = 0;
@@ -50,5 +51,16 @@ public class Average extends  DitheringAlgorithm
       }
       setProgress((100 * pixelcount++) / (2 * height));
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    return new Average();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return "Average Dithering";
   }
 }

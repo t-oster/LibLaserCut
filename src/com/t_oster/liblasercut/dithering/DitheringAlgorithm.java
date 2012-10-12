@@ -19,6 +19,7 @@
 package com.t_oster.liblasercut.dithering;
 
 import com.t_oster.liblasercut.BlackWhiteRaster;
+import com.t_oster.liblasercut.Customizable;
 import com.t_oster.liblasercut.GreyscaleRaster;
 import com.t_oster.liblasercut.TimeIntensiveOperation;
 
@@ -26,7 +27,7 @@ import com.t_oster.liblasercut.TimeIntensiveOperation;
  *
 * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public abstract class DitheringAlgorithm extends TimeIntensiveOperation
+public abstract class DitheringAlgorithm extends TimeIntensiveOperation implements Customizable, Cloneable
 {
   
   protected GreyscaleRaster src;
@@ -67,4 +68,24 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation
   }
   
   protected abstract void doDithering();
+  
+  @Override
+  public String[] getPropertyKeys() {
+    return new String[0];
+  }
+
+  @Override
+  public void setProperty(String key, Object value) {
+  }
+
+  @Override
+  public Object getProperty(String key) {
+    return null;
+  }
+  
+  @Override
+  public abstract DitheringAlgorithm clone();
+  
+  @Override
+  public abstract String toString();
 }

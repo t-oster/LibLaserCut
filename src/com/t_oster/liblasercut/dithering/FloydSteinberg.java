@@ -25,6 +25,7 @@ package com.t_oster.liblasercut.dithering;
 public class FloydSteinberg extends DitheringAlgorithm
 {
 
+  @Override
   protected void doDithering()
   {
     int pixelcount = 0;
@@ -74,5 +75,16 @@ public class FloydSteinberg extends DitheringAlgorithm
       }
       setProgress((100 * pixelcount++) / (src.getHeight()));
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    return new FloydSteinberg();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return "Floyd-Steinberg";
   }
 }

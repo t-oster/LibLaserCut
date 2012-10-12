@@ -48,7 +48,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
   
   @Override
-  public String[] getPropertyNames()
+  public String[] getPropertyKeys()
   {
     return propertyNames;
   }
@@ -116,16 +116,6 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
     {
       return super.getPossibleValues(name);
     }
-  }
-  
-  @Override
-  public Class getPropertyClass(String name)
-  {
-    if ("frequency".equals(name))
-    {
-      return Integer.class;
-    }
-    return super.getPropertyClass(name);
   }
   
   @Override

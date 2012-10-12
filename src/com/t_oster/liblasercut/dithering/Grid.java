@@ -25,9 +25,49 @@ package com.t_oster.liblasercut.dithering;
 public class Grid extends DitheringAlgorithm
 {
 
+  private static String[] properties = new String[]{"Blocksize", "Blockdistance"};
+  
+  @Override
+  public String[] getPropertyKeys()
+  {
+    return properties;
+  }
+  
+  @Override
+  public void setProperty(String key, Object value)
+  {
+    if (properties[0].equals(key))
+    {
+      this.blocksize = (Integer) value;
+    }
+    else if (properties[1].equals(key))
+    {
+      this.blockdistance = (Integer) value;
+    }
+    else
+    {
+      throw new IllegalArgumentException("No such key "+key);
+    }
+  }
+  
+  @Override
+  public Object getProperty(String key)
+  {
+    if (properties[0].equals(key))
+    {
+      return (Integer) this.blocksize;
+    }
+    else if (properties[1].equals(key))
+    {
+      return (Integer) this.blockdistance;
+    }
+    throw new IllegalArgumentException("No such key "+key);
+  }
+  
   protected int blocksize = 10;
   protected int blockdistance = 5;
 
+  @Override
   protected void doDithering()
   {
     long lumTotal = 0;
@@ -62,5 +102,19 @@ public class Grid extends DitheringAlgorithm
       }
       setProgress((100 * pixelcount++) / (2 * height));
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    Grid clone = new Grid();
+    clone.blockdistance = blockdistance;
+    clone.blocksize = blocksize;
+    return clone;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return "Grid";
   }
 }

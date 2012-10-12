@@ -18,6 +18,9 @@
  **/
 package com.t_oster.liblasercut;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 /**
  * The LaserProperty holds all the parameters for parts of the LaserJob.
  * The Frequency value is ignored for Engraving operations
@@ -103,7 +106,7 @@ public class PowerSpeedFocusProperty implements LaserProperty
   private static String[] propertyNames = new String[]{"power", "speed", "focus"};
   
   @Override
-  public String[] getPropertyNames()
+  public String[] getPropertyKeys()
   {
     return propertyNames;
   }
@@ -123,10 +126,7 @@ public class PowerSpeedFocusProperty implements LaserProperty
     {
       return (Float) this.getFocus();
     }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }
+    return null;
   }
 
   @Override
@@ -190,20 +190,6 @@ public class PowerSpeedFocusProperty implements LaserProperty
     {
       throw new IllegalArgumentException("Unknown setting '"+name+"'");
     }
-  }
-
-  @Override 
-  public Class getPropertyClass(String name)
-  {
-    if ("power".equals(name)||"speed".equals(name))
-    {
-      return Integer.class;
-    }
-    else if ("focus".equals(name))
-    {
-      return Float.class;
-    }
-    return null;
   }
   
   @Override

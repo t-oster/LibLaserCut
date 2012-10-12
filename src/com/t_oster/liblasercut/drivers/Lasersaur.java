@@ -28,7 +28,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
-import purejavacomm.NoSuchPortException;
 import purejavacomm.SerialPort;
 
 /**
@@ -482,59 +481,57 @@ public class Lasersaur extends LaserCutter {
   public void setBedHeight(double bedHeight) {
     this.bedHeight = bedHeight;
   }
-  private List<String> settingAttributes;
+  private static String[] settingAttributes = new String[]{
+    SETTING_BEDWIDTH,
+    SETTING_BEDHEIGHT,
+    SETTING_FLIPX,
+    SETTING_COMPORT,
+    SETTING_LASER_RATE,
+    SETTING_SEEK_RATE,
+    SETTING_RASTER_WHITESPACE,
+  };
 
   @Override
-  public List<String> getSettingAttributes() {
-    if (settingAttributes == null) {
-      settingAttributes = new LinkedList<String>();
-      settingAttributes.add(SETTING_BEDWIDTH);
-      settingAttributes.add(SETTING_BEDHEIGHT);
-      settingAttributes.add(SETTING_FLIPX);
-      settingAttributes.add(SETTING_COMPORT);
-      settingAttributes.add(SETTING_LASER_RATE);
-      settingAttributes.add(SETTING_SEEK_RATE);
-      settingAttributes.add(SETTING_RASTER_WHITESPACE);
-    }
+  public String[] getPropertyKeys() {
     return settingAttributes;
   }
 
   @Override
-  public String getSettingValue(String attribute) {
+  public Object getProperty(String attribute) {
     if (SETTING_RASTER_WHITESPACE.equals(attribute)) {
-      return "" + this.getAddSpacePerRasterLine();
+      return this.getAddSpacePerRasterLine();
     } else if (SETTING_COMPORT.equals(attribute)) {
       return this.getComPort();
     } else if (SETTING_FLIPX.equals(attribute)) {
-      return this.isFlipXaxis() ? "yes" : "no";
+      return this.isFlipXaxis();
     } else if (SETTING_LASER_RATE.equals(attribute)) {
-      return "" + this.getLaserRate();
+      return this.getLaserRate();
     } else if (SETTING_SEEK_RATE.equals(attribute)) {
-      return "" + this.getSeekRate();
+      return this.getSeekRate();
     } else if (SETTING_BEDWIDTH.equals(attribute)) {
-      return "" + this.getBedWidth();
+      return this.getBedWidth();
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
-      return "" + this.getBedHeight();
+      return this.getBedHeight();
     }
     return null;
   }
 
   @Override
-  public void setSettingValue(String attribute, String value) {
+  public void setProperty(String attribute, Object value) {
     if (SETTING_RASTER_WHITESPACE.equals(attribute)) {
-      this.setAddSpacePerRasterLine(Double.parseDouble(value));
+      this.setAddSpacePerRasterLine((Double) value);
     } else if (SETTING_COMPORT.equals(attribute)) {
-      this.setComPort(value);
+      this.setComPort((String) value);
     } else if (SETTING_LASER_RATE.equals(attribute)) {
-      this.setLaserRate(Double.parseDouble(value));
+      this.setLaserRate((Double) value);
     } else if (SETTING_SEEK_RATE.equals(attribute)) {
-      this.setSeekRate(Double.parseDouble(value));
+      this.setSeekRate((Double) value);
     } else if (SETTING_FLIPX.equals(attribute)) {
-      this.setFlipXaxis("yes".equals(value));
+      this.setFlipXaxis((Boolean) value);
     } else if (SETTING_BEDWIDTH.equals(attribute)) {
-      this.setBedWidth(Double.parseDouble(value));
+      this.setBedWidth((Double) value);
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
-      this.setBedHeight(Double.parseDouble(value));
+      this.setBedHeight((Double) value);
     }
   }
 

@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public abstract class LaserCutter implements Cloneable
+public abstract class LaserCutter implements Cloneable, Customizable
 {
 
   /**
@@ -131,27 +131,6 @@ public abstract class LaserCutter implements Cloneable
    * @return 
    */
   public abstract double getBedHeight();
-  
-  /**
-   * Returns a List of Attributes, needed for 
-   * configuring the Lasercutter (eg. IP, Port...)
-   * @return 
-   */
-  public abstract List<String> getSettingAttributes();
-  
-  /**
-   * Returns the <value> of the setting <attribute>
-   * @param attribute
-   * @return 
-   */
-  public abstract String getSettingValue(String attribute);
-  
-  /**
-   * Sets the setting named <attribute> to <value>
-   * @param attribute
-   * @param value 
-   */
-  public abstract void setSettingValue(String attribute, String value);
   
   /**
    * Override this method, return true and override the
