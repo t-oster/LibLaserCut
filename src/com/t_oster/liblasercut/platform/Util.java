@@ -28,6 +28,12 @@ package com.t_oster.liblasercut.platform;
  */
 public class Util {
 
+    public static double dpi2dpmm(double dpi)
+    {
+      //TODO: check
+      return dpi / 25.4;
+    }
+  
     public static double inch2mm(double inch) {
         return inch * 25.4;
     }
