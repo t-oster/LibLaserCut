@@ -132,7 +132,7 @@ public class VectorOptimizer
   {
     List<Element> opt = this.sort(this.divide(vp));
     LaserProperty cp = opt.get(0).prop;
-    VectorPart result = new VectorPart(opt.get(0).prop);
+    VectorPart result = new VectorPart(opt.get(0).prop, vp.getDPI());
     for (Element e : opt)
     {
       if (!e.prop.equals(cp))
