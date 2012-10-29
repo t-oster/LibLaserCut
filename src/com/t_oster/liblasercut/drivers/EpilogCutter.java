@@ -506,6 +506,42 @@ abstract class EpilogCutter extends LaserCutter
     return result.toByteArray();
   }
 
+  private byte[] generateDummyRaster(JobPart jp) throws UnsupportedEncodingException
+  {
+    PowerSpeedFocusProperty prop = new PowerSpeedFocusProperty();
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    //TODO: Test if the resolution settings have an effect
+    /* PCL/RasterGraphics resolution. */
+    out.printf("\033*t%dR", (int) jp.getDPI());
+    /* Raster Orientation: Printed in current direction */
+    out.printf("\033*r0F");
+    /* Raster power */
+    out.printf("\033&y%dP", prop.getPower());
+    /* Raster speed */
+    out.printf("\033&z%dS", prop.getSpeed());
+    /* Focus */
+    out.printf("\033&y%dA", mm2focus(prop.getFocus()));
+
+    out.printf("\033*r%dT", jp.getMaxY());//height);
+    out.printf("\033*r%dS", jp.getMaxX());//width);
+        /* Raster compression:
+     *  2 = TIFF encoding
+     *  7 = TIFF encoding, 3d-mode,
+     *
+     * Wahrscheinlich:
+     * 2M = Bitweise, also 1=dot 0=nodot (standard raster)
+     * 7MLT = Byteweise 0= no power 100=full power (3d raster)
+     */
+    out.printf("\033*b2M");
+    /* Raster direction (1 = up, 0=down) */
+    out.printf("\033&y%dO", 0);
+    /* start at current position */
+    out.printf("\033*r1A");
+    out.printf("\033*rC");       // end raster
+    return result.toByteArray();
+  }
+  
   private byte[] generateRasterPCL(RasterPart rp) throws UnsupportedEncodingException, IOException
   {
 
@@ -696,7 +732,7 @@ abstract class EpilogCutter extends LaserCutter
     wrt.write(generatePjlHeader(job, job.getParts().get(0).getDPI()));
     if (! (job.getParts().get(0) instanceof RasterPart))
     {//we need an empty raster part as begin of all jobs
-      wrt.write(generateRasterPCL(null));
+      wrt.write(generateDummyRaster(job.getParts().get(0)));
     }
     for (JobPart p : job.getParts())
     {
