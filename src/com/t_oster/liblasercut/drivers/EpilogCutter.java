@@ -368,10 +368,8 @@ abstract class EpilogCutter extends LaserCutter
     pl.progressChanged(this, 100);
   }
 
-
   @Override
   abstract public List<Double> getResolutions();
-  
 
   /**
    * Encodes the given line of the given image in TIFF Packbyte encoding
@@ -511,7 +509,6 @@ abstract class EpilogCutter extends LaserCutter
     PowerSpeedFocusProperty prop = new PowerSpeedFocusProperty();
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    //TODO: Test if the resolution settings have an effect
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) jp.getDPI());
     /* Raster Orientation: Printed in current direction */
@@ -583,7 +580,7 @@ abstract class EpilogCutter extends LaserCutter
         List<Byte> line = rp.getRasterLine(y);
         //Remove leading zeroes, but keep track of the offset
         int jump = 0;
-        while (false && line.size() > 0 && line.get(0) == 0)
+        while (line.size() > 0 && line.get(0) == 0)
         {
           line.remove(0);
           jump++;
@@ -636,20 +633,23 @@ abstract class EpilogCutter extends LaserCutter
     return result.toByteArray();
   }
 
+  private byte[] generateDummyVector(double dpi) throws UnsupportedEncodingException
+  {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    out.printf("\033%%1B");// Start HLGL
+    out.printf("IN;PU0,0;");
+    //Reset Focus to 0
+    out.printf("WF%d;", 0);
+    return result.toByteArray();
+  }
+  
   private byte[] generateVectorPCL(VectorPart vp) throws UnsupportedEncodingException
   {
     //TODO: Test if the resolution settings have an effect
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033&u%dD", (int) vp.getDPI());
-    /* PCL/RasterGraphics resolution. */
-    out.printf("\033*t%dR", (int) vp.getDPI());
-    out.printf("\033*r0F");
-    out.printf("\033*r%dT", vp.getMaxY());// if not dummy, then job.getHeight());
-    out.printf("\033*r%dS", vp.getMaxX());// if not dummy then job.getWidth());
-    out.printf("\033*r1A");
-    out.printf("\033*rC");
     out.printf("\033%%1B");// Start HLGL
     out.printf("IN;PU0,0;");
 
@@ -746,6 +746,10 @@ abstract class EpilogCutter extends LaserCutter
       {
         wrt.write(generateRaster3dPCL((Raster3dPart) p));
       }
+    }
+    if (! (job.getParts().get(job.getParts().size()-1) instanceof VectorPart))
+    {
+      wrt.write(generateDummyVector(job.getParts().get(job.getParts().size()-1).getDPI()));
     }
     wrt.write(generatePjlFooter());
     /* Pad out the remainder of the file with 0 characters. */
