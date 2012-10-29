@@ -358,7 +358,7 @@ abstract class EpilogCutter extends LaserCutter
     for(List<JobPart> current : jobs)
     {
       number++;
-      LaserJob j = new LaserJob("("+number+"/"+size+")"+job.getTitle(), job.getName(), job.getUser());
+      LaserJob j = new LaserJob((size > 1 ? "("+number+"/"+size+")" : "" )+job.getTitle(), job.getName(), job.getUser());
       for (JobPart p:current)
       {
         j.addPart(p);
