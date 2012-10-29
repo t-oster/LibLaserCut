@@ -544,11 +544,9 @@ abstract class EpilogCutter extends LaserCutter
   
   private byte[] generateRasterPCL(RasterPart rp) throws UnsupportedEncodingException, IOException
   {
-
-    PowerSpeedFocusProperty prop = rp == null ? new PowerSpeedFocusProperty() : (PowerSpeedFocusProperty) rp.getLaserProperty();
+    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    //TODO: Test if the resolution settings have an effect
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) rp.getDPI());
     /* Raster Orientation: Printed in current direction */
@@ -560,8 +558,8 @@ abstract class EpilogCutter extends LaserCutter
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-    out.printf("\033*r%dT", rp != null ? rp.getMaxY() : 10);//height);
-    out.printf("\033*r%dS", rp != null ? rp.getMaxX() : 10);//width);
+    out.printf("\033*r%dT", rp.getMaxY());//height);
+    out.printf("\033*r%dS", rp.getMaxX());//width);
         /* Raster compression:
      *  2 = TIFF encoding
      *  7 = TIFF encoding, 3d-mode,
@@ -585,7 +583,7 @@ abstract class EpilogCutter extends LaserCutter
         List<Byte> line = rp.getRasterLine(y);
         //Remove leading zeroes, but keep track of the offset
         int jump = 0;
-        while (line.size() > 0 && line.get(0) == 0)
+        while (false && line.size() > 0 && line.get(0) == 0)
         {
           line.remove(0);
           jump++;
@@ -648,8 +646,8 @@ abstract class EpilogCutter extends LaserCutter
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) vp.getDPI());
     out.printf("\033*r0F");
-    out.printf("\033*r%dT", vp == null ? 500 : vp.getMaxY());// if not dummy, then job.getHeight());
-    out.printf("\033*r%dS", vp == null ? 500 : vp.getMaxX());// if not dummy then job.getWidth());
+    out.printf("\033*r%dT", vp.getMaxY());// if not dummy, then job.getHeight());
+    out.printf("\033*r%dS", vp.getMaxX());// if not dummy then job.getWidth());
     out.printf("\033*r1A");
     out.printf("\033*rC");
     out.printf("\033%%1B");// Start HLGL
