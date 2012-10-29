@@ -163,7 +163,7 @@ abstract class EpilogCutter extends LaserCutter
      */
     out.printf("\033&l0Z");
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033&u%dD", resolution);
+    out.printf("\033&u%dD", (int) resolution);
     /* X position = 0 */
     out.printf("\033*p0X");
     /* Y position = 0 */
@@ -423,7 +423,7 @@ abstract class EpilogCutter extends LaserCutter
     {
       PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
       /* PCL/RasterGraphics resolution. */
-      out.printf("\033*t%dR", rp.getDPI());
+      out.printf("\033*t%dR", (int) rp.getDPI());
       /* Raster Orientation: Printed in current direction */
       out.printf("\033*r0F");
       /* Raster power */
@@ -514,7 +514,7 @@ abstract class EpilogCutter extends LaserCutter
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     //TODO: Test if the resolution settings have an effect
     /* PCL/RasterGraphics resolution. */
-    out.printf("\033*t%dR", rp.getDPI());
+    out.printf("\033*t%dR", (int) rp.getDPI());
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
@@ -608,9 +608,9 @@ abstract class EpilogCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033&u%dD", vp.getDPI());
+    out.printf("\033&u%dD", (int) vp.getDPI());
     /* PCL/RasterGraphics resolution. */
-    out.printf("\033*t%dR", vp.getDPI());
+    out.printf("\033*t%dR", (int) vp.getDPI());
     out.printf("\033*r0F");
     out.printf("\033*r%dT", vp == null ? 500 : vp.getMaxY());// if not dummy, then job.getHeight());
     out.printf("\033*r%dS", vp == null ? 500 : vp.getMaxX());// if not dummy then job.getWidth());
