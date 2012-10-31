@@ -339,13 +339,16 @@ abstract class EpilogCutter extends LaserCutter
         toDo.remove(0);
       }
       else
-      {//vector parts can be prepended by one raster part
+      {//vector parts can be prepended by one raster part, but one job has
+       //to have the same resolution everywhere (??? if you have time, feel
+       //free to experiment)
+        double currentDpi = toDo.get(0).getDPI();
         if (toDo.get(0) instanceof RasterPart)
         {
           currentSplit.add(toDo.get(0));
           toDo.remove(0);
         }
-        while (!toDo.isEmpty() && toDo.get(0) instanceof VectorPart)
+        while (!toDo.isEmpty() && toDo.get(0) instanceof VectorPart && toDo.get(0).getDPI() == currentDpi)
         {
           currentSplit.add(toDo.get(0));
           toDo.remove(0);

@@ -52,7 +52,7 @@ public class EpilogZing extends EpilogCutter
   
   private static final double[] RESOLUTIONS = new double[]
   {
-    300, 500, 600, 1000
+    100, 200, 250, 400, 500, 1000
   };
   
   @Override
