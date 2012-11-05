@@ -18,6 +18,9 @@
  */
 package com.t_oster.liblasercut.dithering;
 
+import com.t_oster.liblasercut.BlackWhiteRaster;
+import com.t_oster.liblasercut.GreyscaleRaster;
+
 /**
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
@@ -26,13 +29,13 @@ public class Grid extends DitheringAlgorithm
 {
 
   private static String[] properties = new String[]{"Blocksize", "Blockdistance"};
-  
+
   @Override
   public String[] getPropertyKeys()
   {
     return properties;
   }
-  
+
   @Override
   public void setProperty(String key, Object value)
   {
@@ -49,7 +52,7 @@ public class Grid extends DitheringAlgorithm
       throw new IllegalArgumentException("No such key "+key);
     }
   }
-  
+
   @Override
   public Object getProperty(String key)
   {
@@ -63,12 +66,12 @@ public class Grid extends DitheringAlgorithm
     }
     throw new IllegalArgumentException("No such key "+key);
   }
-  
+
   protected int blocksize = 10;
   protected int blockdistance = 5;
 
   @Override
-  protected void doDithering()
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
   {
     long lumTotal = 0;
     int pixelcount = 0;
@@ -93,11 +96,11 @@ public class Grid extends DitheringAlgorithm
           && x % (blocksize + blockdistance) <= blocksize
           && src.getGreyScale(x, y) < thresh)
         {
-          this.setBlack(x, y, true);
+          this.setBlack(src, target, x, y, true);
         }
         else
         {
-          this.setBlack(x, y, false);
+          this.setBlack(src, target, x, y, false);
         }
       }
       setProgress((100 * pixelcount++) / (2 * height));
@@ -111,7 +114,7 @@ public class Grid extends DitheringAlgorithm
     clone.blocksize = blocksize;
     return clone;
   }
-  
+
   @Override
   public String toString()
   {

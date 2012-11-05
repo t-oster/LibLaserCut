@@ -2,17 +2,17 @@
  * This file is part of VisiCut.
  * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
- * 
+ *
  *     VisiCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *    VisiCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
@@ -29,11 +29,8 @@ import com.t_oster.liblasercut.TimeIntensiveOperation;
  */
 public abstract class DitheringAlgorithm extends TimeIntensiveOperation implements Customizable, Cloneable
 {
-  
-  protected GreyscaleRaster src;
-  protected BlackWhiteRaster target;
 
-  protected void setBlack(int x, int y, boolean black)
+  protected void setBlack(GreyscaleRaster src, BlackWhiteRaster target, int x, int y, boolean black)
   {
     if (target != null)
     {
@@ -47,28 +44,23 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
 
   public BlackWhiteRaster dither(GreyscaleRaster input)
   {
-    src = input;
-    target = new BlackWhiteRaster(input.getWidth(), input.getHeight());
-    doDithering();
+    BlackWhiteRaster target = new BlackWhiteRaster(input.getWidth(), input.getHeight());
+    doDithering(input, target);
     return target;
   }
 
   public void ditherDirect(GreyscaleRaster input)
   {
-    src = input;
-    target = null;
-    doDithering();
+    doDithering(input, null);
   }
-  
+
   public void ditherDirect(GreyscaleRaster input, BlackWhiteRaster output)
   {
-    src = input;
-    target = output;
-    doDithering();
+    doDithering(input, output);
   }
-  
-  protected abstract void doDithering();
-  
+
+  protected abstract void doDithering(GreyscaleRaster src, BlackWhiteRaster target);
+
   @Override
   public String[] getPropertyKeys() {
     return new String[0];
@@ -82,10 +74,10 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
   public Object getProperty(String key) {
     return null;
   }
-  
+
   @Override
   public abstract DitheringAlgorithm clone();
-  
+
   @Override
   public abstract String toString();
 }
