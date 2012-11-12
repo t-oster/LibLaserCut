@@ -1,22 +1,25 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
- * 
+ *
  *     VisiCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *    VisiCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 package com.t_oster.liblasercut.dithering;
+
+import com.t_oster.liblasercut.BlackWhiteRaster;
+import com.t_oster.liblasercut.GreyscaleRaster;
 
 /**
  *
@@ -25,7 +28,8 @@ package com.t_oster.liblasercut.dithering;
 public class FloydSteinberg extends DitheringAlgorithm
 {
 
-  protected void doDithering()
+  @Override
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
   {
     int pixelcount = 0;
     /**
@@ -53,7 +57,7 @@ public class FloydSteinberg extends DitheringAlgorithm
 
       for (int x = 0; x < input.length; x++)
       {
-        this.setBlack(x, y, input[x][0] <= 127);
+        this.setBlack(src, target, x, y, input[x][0] <= 127);
         int error = input[x][0] - ((input[x][0] <= 127) ? 0 : 255);
         if (x + 1 < input.length)
         {
@@ -74,5 +78,16 @@ public class FloydSteinberg extends DitheringAlgorithm
       }
       setProgress((100 * pixelcount++) / (src.getHeight()));
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    return new FloydSteinberg();
+  }
+
+  @Override
+  public String toString()
+  {
+    return "Floyd-Steinberg";
   }
 }

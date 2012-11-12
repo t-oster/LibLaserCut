@@ -1,5 +1,5 @@
 /**
- * This file is part of VisiCut. Copyright (C) 2011 Thomas Oster
+ * This file is part of VisiCut. Copyright (C) 2012 Thomas Oster
  * <thomas.oster@rwth-aachen.de> RWTH Aachen University - 52062 Aachen, Germany
  *
  * VisiCut is free software: you can redistribute it and/or modify it under the
@@ -28,7 +28,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
-import purejavacomm.NoSuchPortException;
 import purejavacomm.SerialPort;
 
 /**
@@ -147,7 +146,7 @@ public class Lasersaur extends LaserCutter {
     this.comPort = comPort;
   }
 
-  private byte[] generateVectorGCode(VectorPart vp, int resolution) throws UnsupportedEncodingException {
+  private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     for (VectorCommand cmd : vp.getCommandList()) {
@@ -162,18 +161,10 @@ public class Lasersaur extends LaserCutter {
           y = cmd.getY();
           line(out, x, y, resolution);
           break;
-        case SETPOWER:
-          setPower(out, cmd.getPower());
-          break;
-        case SETFOCUS:
-          float focus = cmd.getFocus();
-          break;
-        case SETSPEED:
-          int speed = cmd.getSpeed();
-          setSpeed(out, speed);
-          break;
-        case SETFREQUENCY:
-          int frequency = cmd.getFrequency();
+        case SETPROPERTY:
+          PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
+          setPower(out, p.getPower());
+          setSpeed(out, p.getSpeed());
           break;
       }
     }
@@ -205,157 +196,151 @@ public class Lasersaur extends LaserCutter {
     out.printf(Locale.US, "G1 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
   }
 
-  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, int resolution) throws UnsupportedEncodingException {
+  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
-    for (int raster = 0; raster < rp.getRasterCount(); raster++) {
-      Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
-      setSpeed(out, prop.getSpeed());
-      for (int line = 0; line < rp.getRasterHeight(raster); line++) {
-        Point lineStart = rasterStart.clone();
-        lineStart.y += line;
-        List<Byte> bytes = rp.getRasterLine(raster, line);
-        //remove heading zeroes
-        while (bytes.size() > 0 && bytes.get(0) == 0) {
-          bytes.remove(0);
-          lineStart.x += 1;
-        }
-        //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
-          bytes.remove(bytes.size() - 1);
-        }
-        if (bytes.size() > 0) {
-          if (dirRight) {
-            //move to the first nonempyt point of the line
-            move(out, lineStart.x, lineStart.y, resolution);
-            byte old = bytes.get(0);
-            for (int pix = 0; pix < bytes.size(); pix++) {
-              if (bytes.get(pix) != old) {
-                if (old == 0) {
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                } else {
-                  setPower(out, prop.getPower() * (0xFF & old) / 255);
-                  line(out, lineStart.x + pix - 1, lineStart.y, resolution);
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                old = bytes.get(pix);
-              }
-            }
-            //last point is also not "white"
-            setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-            line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          } else {
-            //move to the last nonempty point of the line
-            move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-            byte old = bytes.get(bytes.size() - 1);
-            for (int pix = bytes.size() - 1; pix >= 0; pix--) {
-              if (bytes.get(pix) != old || pix == 0) {
-                if (old == 0) {
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                } else {
-                  setPower(out, prop.getPower() * (0xFF & old) / 255);
-                  line(out, lineStart.x + pix + 1, lineStart.y, resolution);
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                old = bytes.get(pix);
-              }
-            }
-            //last point is also not "white"
-            setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
-            line(out, lineStart.x, lineStart.y, resolution);
-          }
-        }
-        dirRight = !dirRight;
+    Point rasterStart = rp.getRasterStart();
+    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
+    setSpeed(out, prop.getSpeed());
+    for (int line = 0; line < rp.getRasterHeight(); line++) {
+      Point lineStart = rasterStart.clone();
+      lineStart.y += line;
+      List<Byte> bytes = rp.getRasterLine(line);
+      //remove heading zeroes
+      while (bytes.size() > 0 && bytes.get(0) == 0) {
+        bytes.remove(0);
+        lineStart.x += 1;
       }
+      //remove trailing zeroes
+      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
+        bytes.remove(bytes.size() - 1);
+      }
+      if (bytes.size() > 0) {
+        if (dirRight) {
+          //move to the first nonempyt point of the line
+          move(out, lineStart.x, lineStart.y, resolution);
+          byte old = bytes.get(0);
+          for (int pix = 0; pix < bytes.size(); pix++) {
+            if (bytes.get(pix) != old) {
+              if (old == 0) {
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              } else {
+                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                line(out, lineStart.x + pix - 1, lineStart.y, resolution);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              }
+              old = bytes.get(pix);
+            }
+          }
+          //last point is also not "white"
+          setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
+          line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+        } else {
+          //move to the last nonempty point of the line
+          move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+          byte old = bytes.get(bytes.size() - 1);
+          for (int pix = bytes.size() - 1; pix >= 0; pix--) {
+            if (bytes.get(pix) != old || pix == 0) {
+              if (old == 0) {
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              } else {
+                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                line(out, lineStart.x + pix + 1, lineStart.y, resolution);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              }
+              old = bytes.get(pix);
+            }
+          }
+          //last point is also not "white"
+          setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
+          line(out, lineStart.x, lineStart.y, resolution);
+        }
+      }
+      dirRight = !dirRight;
     }
     return result.toByteArray();
   }
 
-  private byte[] generatePseudoRasterGCode(RasterPart rp, int resolution) throws UnsupportedEncodingException {
+  private byte[] generatePseudoRasterGCode(RasterPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
-    for (int raster = 0; raster < rp.getRasterCount(); raster++) {
-      Point rasterStart = rp.getRasterStart(raster);
-      LaserProperty prop = rp.getLaserProperty(raster);
-      setSpeed(out, prop.getSpeed());
-      setPower(out, prop.getPower());
-      for (int line = 0; line < rp.getRasterHeight(raster); line++) {
-        Point lineStart = rasterStart.clone();
-        lineStart.y += line;
-        //Convert BlackWhite line into line of 0 and 255 bytes
-        BlackWhiteRaster bwr = rp.getImages()[raster];
-        List<Byte> bytes = new LinkedList<Byte>();
-        boolean lookForStart = true;
-        for (int x = 0; x < bwr.getWidth(); x++) {
-          if (lookForStart) {
-            if (bwr.isBlack(x, line)) {
-              lookForStart = false;
-              bytes.add((byte) 255);
-            } else {
-              lineStart.x += 1;
-            }
+    Point rasterStart = rp.getRasterStart();
+    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
+    setSpeed(out, prop.getSpeed());
+    setPower(out, prop.getPower());
+    for (int line = 0; line < rp.getRasterHeight(); line++) {
+      Point lineStart = rasterStart.clone();
+      lineStart.y += line;
+      List<Byte> bytes = new LinkedList<Byte>();
+      boolean lookForStart = true;
+      for (int x = 0; x < rp.getRasterWidth(); x++) {
+        if (lookForStart) {
+          if (rp.isBlack(x, line)) {
+            lookForStart = false;
+            bytes.add((byte) 255);
           } else {
-            bytes.add(bwr.isBlack(x, line) ? (byte) 255 : (byte) 0);
+            lineStart.x += 1;
           }
+        } else {
+          bytes.add(rp.isBlack(x, line) ? (byte) 255 : (byte) 0);
         }
-        //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
-          bytes.remove(bytes.size() - 1);
-        }
-        if (bytes.size() > 0) {
-          if (dirRight) {
-            //add some space to the left
-            move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-            //move to the first nonempyt point of the line
-            move(out, lineStart.x, lineStart.y, resolution);
-            byte old = bytes.get(0);
-            for (int pix = 0; pix < bytes.size(); pix++) {
-              if (bytes.get(pix) != old) {
-                if (old == 0) {
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                } else {
-                  setPower(out, prop.getPower() * (0xFF & old) / 255);
-                  line(out, lineStart.x + pix - 1, lineStart.y, resolution);
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                old = bytes.get(pix);
-              }
-            }
-            //last point is also not "white"
-            setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-            line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-            //add some space to the right
-            move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-          } else {
-            //add some space to the right
-            move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-            //move to the last nonempty point of the line
-            move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-            byte old = bytes.get(bytes.size() - 1);
-            for (int pix = bytes.size() - 1; pix >= 0; pix--) {
-              if (bytes.get(pix) != old || pix == 0) {
-                if (old == 0) {
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                } else {
-                  setPower(out, prop.getPower() * (0xFF & old) / 255);
-                  line(out, lineStart.x + pix + 1, lineStart.y, resolution);
-                  move(out, lineStart.x + pix, lineStart.y, resolution);
-                }
-                old = bytes.get(pix);
-              }
-            }
-            //last point is also not "white"
-            setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
-            line(out, lineStart.x, lineStart.y, resolution);
-            //add some space to the left
-            move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-          }
-        }
-        dirRight = !dirRight;
       }
+      //remove trailing zeroes
+      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
+        bytes.remove(bytes.size() - 1);
+      }
+      if (bytes.size() > 0) {
+        if (dirRight) {
+          //add some space to the left
+          move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
+          //move to the first nonempyt point of the line
+          move(out, lineStart.x, lineStart.y, resolution);
+          byte old = bytes.get(0);
+          for (int pix = 0; pix < bytes.size(); pix++) {
+            if (bytes.get(pix) != old) {
+              if (old == 0) {
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              } else {
+                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                line(out, lineStart.x + pix - 1, lineStart.y, resolution);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              }
+              old = bytes.get(pix);
+            }
+          }
+          //last point is also not "white"
+          setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
+          line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+          //add some space to the right
+          move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
+        } else {
+          //add some space to the right
+          move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
+          //move to the last nonempty point of the line
+          move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
+          byte old = bytes.get(bytes.size() - 1);
+          for (int pix = bytes.size() - 1; pix >= 0; pix--) {
+            if (bytes.get(pix) != old || pix == 0) {
+              if (old == 0) {
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              } else {
+                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                line(out, lineStart.x + pix + 1, lineStart.y, resolution);
+                move(out, lineStart.x + pix, lineStart.y, resolution);
+              }
+              old = bytes.get(pix);
+            }
+          }
+          //last point is also not "white"
+          setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
+          line(out, lineStart.x, lineStart.y, resolution);
+          //add some space to the left
+          move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
+        }
+      }
+      dirRight = !dirRight;
     }
     return result.toByteArray();
   }
@@ -420,31 +405,38 @@ public class Lasersaur extends LaserCutter {
     pl.taskChanged(this, "sending");
     out.write(this.generateInitializationCode());
     pl.progressChanged(this, 20);
-    if (job.contains3dRaster()) {
-      out.write(this.generatePseudoRaster3dGCode(job.getRaster3dPart(), job.getResolution()));
+    int i = 0;
+    int max = job.getParts().size();
+    for (JobPart p : job.getParts())
+    {
+      if (p instanceof Raster3dPart)
+      {
+        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, p.getDPI()));
+      }
+      else if (p instanceof RasterPart)
+      {
+        out.write(this.generatePseudoRasterGCode((RasterPart) p, p.getDPI()));
+      }
+      else if (p instanceof VectorPart)
+      {
+        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
+      }
+      i++;
+      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
-    pl.progressChanged(this, 40);
-    if (job.containsRaster()) {
-      out.write(this.generatePseudoRasterGCode(job.getRasterPart(), job.getResolution()));
-    }
-    pl.progressChanged(this, 60);
-    if (job.containsVector()) {
-      out.write(this.generateVectorGCode(job.getVectorPart(), job.getResolution()));
-    }
-    pl.progressChanged(this, 80);
     out.write(this.generateShutdownCode());
     out.close();
     port.close();
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
-  private List<Integer> resolutions;
+  private List<Double> resolutions;
 
   @Override
-  public List<Integer> getResolutions() {
+  public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Integer[]{
-                500
+      resolutions = Arrays.asList(new Double[]{
+                500d
               });
     }
     return resolutions;
@@ -489,65 +481,58 @@ public class Lasersaur extends LaserCutter {
   public void setBedHeight(double bedHeight) {
     this.bedHeight = bedHeight;
   }
-  private List<String> settingAttributes;
+  private static String[] settingAttributes = new String[]{
+    SETTING_BEDWIDTH,
+    SETTING_BEDHEIGHT,
+    SETTING_FLIPX,
+    SETTING_COMPORT,
+    SETTING_LASER_RATE,
+    SETTING_SEEK_RATE,
+    SETTING_RASTER_WHITESPACE,
+  };
 
   @Override
-  public List<String> getSettingAttributes() {
-    if (settingAttributes == null) {
-      settingAttributes = new LinkedList<String>();
-      settingAttributes.add(SETTING_BEDWIDTH);
-      settingAttributes.add(SETTING_BEDHEIGHT);
-      settingAttributes.add(SETTING_FLIPX);
-      settingAttributes.add(SETTING_COMPORT);
-      settingAttributes.add(SETTING_LASER_RATE);
-      settingAttributes.add(SETTING_SEEK_RATE);
-      settingAttributes.add(SETTING_RASTER_WHITESPACE);
-    }
+  public String[] getPropertyKeys() {
     return settingAttributes;
   }
 
   @Override
-  public String getSettingValue(String attribute) {
+  public Object getProperty(String attribute) {
     if (SETTING_RASTER_WHITESPACE.equals(attribute)) {
-      return "" + this.getAddSpacePerRasterLine();
+      return this.getAddSpacePerRasterLine();
     } else if (SETTING_COMPORT.equals(attribute)) {
       return this.getComPort();
     } else if (SETTING_FLIPX.equals(attribute)) {
-      return this.isFlipXaxis() ? "yes" : "no";
+      return this.isFlipXaxis();
     } else if (SETTING_LASER_RATE.equals(attribute)) {
-      return "" + this.getLaserRate();
+      return this.getLaserRate();
     } else if (SETTING_SEEK_RATE.equals(attribute)) {
-      return "" + this.getSeekRate();
+      return this.getSeekRate();
     } else if (SETTING_BEDWIDTH.equals(attribute)) {
-      return "" + this.getBedWidth();
+      return this.getBedWidth();
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
-      return "" + this.getBedHeight();
+      return this.getBedHeight();
     }
     return null;
   }
 
   @Override
-  public void setSettingValue(String attribute, String value) {
+  public void setProperty(String attribute, Object value) {
     if (SETTING_RASTER_WHITESPACE.equals(attribute)) {
-      this.setAddSpacePerRasterLine(Double.parseDouble(value));
+      this.setAddSpacePerRasterLine((Double) value);
     } else if (SETTING_COMPORT.equals(attribute)) {
-      this.setComPort(value);
+      this.setComPort((String) value);
     } else if (SETTING_LASER_RATE.equals(attribute)) {
-      this.setLaserRate(Double.parseDouble(value));
+      this.setLaserRate((Double) value);
     } else if (SETTING_SEEK_RATE.equals(attribute)) {
-      this.setSeekRate(Double.parseDouble(value));
+      this.setSeekRate((Double) value);
     } else if (SETTING_FLIPX.equals(attribute)) {
-      this.setFlipXaxis("yes".equals(value));
+      this.setFlipXaxis((Boolean) value);
     } else if (SETTING_BEDWIDTH.equals(attribute)) {
-      this.setBedWidth(Double.parseDouble(value));
+      this.setBedWidth((Double) value);
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
-      this.setBedHeight(Double.parseDouble(value));
+      this.setBedHeight((Double) value);
     }
-  }
-
-  @Override
-  public int estimateJobDuration(LaserJob job) {
-    return 10000;
   }
 
   @Override

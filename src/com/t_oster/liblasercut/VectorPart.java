@@ -1,6 +1,6 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  * 
  *     VisiCut is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class VectorPart
+public class VectorPart extends JobPart
 {
 
   private LaserProperty currentCuttingProperty;
@@ -37,69 +37,42 @@ public class VectorPart
   private int maxY;
   private int minX;
   private int minY;
+  private double resolution = 500;
   private List<VectorCommand> commands;
 
-  public VectorPart(LaserProperty initialProperty)
+  public VectorPart(LaserProperty initialProperty, double resolution)
   {
-    this.currentCuttingProperty = initialProperty.clone();
+    if (initialProperty == null)
+    {
+      throw new IllegalArgumentException("Initial Property must not be null");
+    }
+    this.resolution = resolution;
     commands = new LinkedList<VectorCommand>();
-    commands.add(new VectorCommand(VectorCommand.CmdType.SETPOWER, currentCuttingProperty.getPower()));
-    commands.add(new VectorCommand(VectorCommand.CmdType.SETSPEED, currentCuttingProperty.getSpeed()));
-    commands.add(new VectorCommand(VectorCommand.CmdType.SETFREQUENCY, currentCuttingProperty.getFrequency()));
+    this.currentCuttingProperty = initialProperty;
+    commands.add(new VectorCommand(VectorCommand.CmdType.SETPROPERTY, initialProperty));
+    
   }
 
+  @Override
+  public double getDPI()
+  {
+    return resolution;
+  }
+  
   public LaserProperty getCurrentCuttingProperty()
   {
     return currentCuttingProperty;
   }
 
-  public void setCurrentCuttingProperty(LaserProperty cp)
+  public void setProperty(LaserProperty cp)
   {
-    this.setFrequency(cp.getFrequency());
-    this.setPower(cp.getPower());
-    this.setSpeed(cp.getSpeed());
-    this.setFocus(cp.getFocus());
+    this.currentCuttingProperty = cp;
+    commands.add(new VectorCommand(VectorCommand.CmdType.SETPROPERTY, cp));
   }
 
   public VectorCommand[] getCommandList()
   {
     return commands.toArray(new VectorCommand[0]);
-  }
-
-  public void setSpeed(int speed)
-  {
-    if (speed != this.currentCuttingProperty.getSpeed())
-    {
-      commands.add(new VectorCommand(VectorCommand.CmdType.SETSPEED, speed));
-      this.currentCuttingProperty.setSpeed(speed);
-    }
-  }
-
-  public void setPower(int power)
-  {
-    if (power != this.currentCuttingProperty.getPower())
-    {
-      commands.add(new VectorCommand(VectorCommand.CmdType.SETPOWER, power));
-      this.currentCuttingProperty.setPower(power);
-    }
-  }
-
-  public void setFrequency(int frequency)
-  {
-    if (frequency != this.currentCuttingProperty.getFrequency())
-    {
-      commands.add(new VectorCommand(VectorCommand.CmdType.SETFREQUENCY, frequency));
-      this.currentCuttingProperty.setFrequency(frequency);
-    }
-  }
-
-  public void setFocus(float focus)
-  {
-    if (focus != this.currentCuttingProperty.getFocus())
-    {
-      commands.add(new VectorCommand(VectorCommand.CmdType.SETFOCUS, focus));
-      this.currentCuttingProperty.setFocus(focus);
-    }
   }
 
   private void checkMin(int x, int y)
@@ -140,21 +113,27 @@ public class VectorPart
     checkMax(x, y);
   }
 
-  /**
-   * Returns the Width of the CuttingPart in Pixels
-   * @return 
-   */
-  public int getWidth()
+  @Override
+  public int getMinX()
   {
-    return maxX - minX;
+    return minX;
+  }
+  
+  @Override
+  public int getMaxX()
+  {
+    return maxX;
   }
 
-  /**
-   * Returns the height of the CuttingPart in Pixels
-   * @return 
-   */
-  public int getHeight()
+  @Override
+  public int getMinY()
   {
-    return maxY - minY;
+    return minY;
+  }
+  
+  @Override
+  public int getMaxY()
+  {
+    return maxY;
   }
 }

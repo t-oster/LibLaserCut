@@ -1,6 +1,6 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  * 
  *     VisiCut is free software: you can redistribute it and/or modify
@@ -22,7 +22,8 @@ import com.t_oster.liblasercut.BlackWhiteRaster;
 import com.t_oster.liblasercut.BlackWhiteRaster.DitherAlgorithm;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.LaserJob;
-import com.t_oster.liblasercut.LaserProperty;
+import com.t_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
+import com.t_oster.liblasercut.PowerSpeedFocusProperty;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.drivers.EpilogZing;
@@ -175,11 +176,10 @@ public class PhotoPrint {
             //}
             //JOptionPane.showMessageDialog(null, material);
             //TODO: repair Material Selection
-            RasterPart rp = new RasterPart(new LaserProperty());
-            rp.addImage(new BlackWhiteRaster(new BufferedImageAdapter(outImg), BlackWhiteRaster.DitherAlgorithm.AVERAGE), new Point(0, 0));
+            RasterPart rp = new RasterPart(new BlackWhiteRaster(new BufferedImageAdapter(outImg), BlackWhiteRaster.DitherAlgorithm.AVERAGE), new PowerSpeedFocusProperty(), new Point(0, 0), dpi);
             VectorPart vp = null;
             if (cbCut.isSelected()) {
-                vp = new VectorPart(new LaserProperty());
+                vp = new VectorPart(new PowerSpeedFocusFrequencyProperty(), dpi);
                 vp.moveto(0, 0);
                 vp.lineto(outImg.getWidth(), 0);
                 vp.lineto(outImg.getWidth(), outImg.getHeight());
@@ -187,7 +187,9 @@ public class PhotoPrint {
                 vp.lineto(0, 0);
             }
 
-            LaserJob job = new LaserJob("PhotoPrint", "123", "bla", dpi, null, vp, rp);
+            LaserJob job = new LaserJob("PhotoPrint", "123", "bla");
+            job.addPart(rp);
+            job.addPart(vp);
             instance.sendJob(job);
             JOptionPane.showMessageDialog(null, "Please press START on the Lasercutter");
         }

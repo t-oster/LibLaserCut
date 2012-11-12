@@ -1,6 +1,6 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  * 
  *     VisiCut is free software: you can redistribute it and/or modify
@@ -58,7 +58,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation
     }
   }
   
-  public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm, ProgressListener listener)
+  public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg, ProgressListener listener)
   {
     if (listener != null)
     {
@@ -67,17 +67,26 @@ public class BlackWhiteRaster extends TimeIntensiveOperation
     this.width = src.getWidth();
     this.height = src.getHeight();
     raster = new byte[(src.getWidth() + 7) / 8][src.getHeight()];
-    DitheringAlgorithm alg = BlackWhiteRaster.getDitheringAlgorithm(dither_algorithm);
     if (listener != null)
     {
       alg.addProgressListener(listener);
     }
     alg.ditherDirect(src, this);
   }
+  
+  public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm, ProgressListener listener)
+  {
+    this(src, BlackWhiteRaster.getDitheringAlgorithm(dither_algorithm), listener);
+  }
 
   public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm)
   {
     this(src, dither_algorithm, null);
+  }
+  
+  public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg)
+  {
+    this(src, alg, null);
   }
 
   public BlackWhiteRaster(int width, int height, byte[][] raster)

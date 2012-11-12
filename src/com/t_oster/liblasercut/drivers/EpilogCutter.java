@@ -1,6 +1,6 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  * 
  *     VisiCut is free software: you can redistribute it and/or modify
@@ -31,7 +31,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,6 +85,7 @@ abstract class EpilogCutter extends LaserCutter
     this.hostname = hostname;
   }
 
+  @Override
   public boolean isAutoFocus()
   {
     return this.autofocus;
@@ -133,7 +133,7 @@ abstract class EpilogCutter extends LaserCutter
 
   }
 
-  private byte[] generatePjlHeader(LaserJob job) throws UnsupportedEncodingException
+  private byte[] generatePjlHeader(LaserJob job, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
@@ -163,13 +163,11 @@ abstract class EpilogCutter extends LaserCutter
      */
     out.printf("\033&l0Z");
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033&u%dD", job.getResolution());
+    out.printf("\033&u%dD", (int) resolution);
     /* X position = 0 */
     out.printf("\033*p0X");
     /* Y position = 0 */
     out.printf("\033*p0Y");
-    /* PCL/RasterGraphics resolution. */
-    out.printf("\033*t%dR", job.getResolution());
     return result.toByteArray();
   }
 
@@ -251,37 +249,49 @@ abstract class EpilogCutter extends LaserCutter
   protected void checkJob(LaserJob job) throws IllegalJobException
   {
     super.checkJob(job);
-    if (job.containsVector())
+    for (JobPart p : job.getParts())
     {
-      for (VectorCommand cmd : job.getVectorPart().getCommandList())
+      if (p instanceof VectorPart)
       {
-        if (cmd.getType() == VectorCommand.CmdType.SETFOCUS)
+        for (VectorCommand cmd : ((VectorPart) p).getCommandList())
         {
-          if (mm2focus(cmd.getFocus()) > MAXFOCUS || (mm2focus(cmd.getFocus())) < MINFOCUS)
+          if (cmd.getType() == VectorCommand.CmdType.SETPROPERTY)
           {
-            throw new IllegalJobException("Illegal Focus value. This Lasercutter supports values between"
-              + focus2mm(MINFOCUS) + "mm to " + focus2mm(MAXFOCUS) + "mm.");
+            if (!(cmd.getProperty() instanceof PowerSpeedFocusFrequencyProperty))
+            {
+              throw new IllegalJobException("This driver expects Power,Speed,Frequency and Focus as settings");
+            }
+            float focus = ((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).getFocus();
+            if (mm2focus(focus) > MAXFOCUS || (mm2focus(focus)) < MINFOCUS)
+            {
+              throw new IllegalJobException("Illegal Focus value. This Lasercutter supports values between"
+                + focus2mm(MINFOCUS) + "mm to " + focus2mm(MAXFOCUS) + "mm.");
+            }
           }
         }
       }
-    }
-    if (job.containsRaster())
-    {
-      for (int i = 0; i < job.getRasterPart().getRasterCount(); i++)
+      if (p instanceof RasterPart)
       {
-        float focus = job.getRasterPart().getLaserProperty(i) == null ? 0 : job.getRasterPart().getLaserProperty(i).getFocus();
+        RasterPart rp = ((RasterPart) p);
+        if (rp.getLaserProperty() != null && !(rp.getLaserProperty() instanceof PowerSpeedFocusProperty))
+        {
+          throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
+        }
+        float focus = rp.getLaserProperty() == null ? 0 : ((PowerSpeedFocusProperty) rp.getLaserProperty()).getFocus();
         if (mm2focus(focus) > MAXFOCUS || (mm2focus(focus)) < MINFOCUS)
         {
           throw new IllegalJobException("Illegal Focus value. This Lasercutter supports values between"
             + focus2mm(MINFOCUS) + "mm to " + focus2mm(MAXFOCUS) + "mm.");
         }
       }
-    }
-    if (job.contains3dRaster())
-    {
-      for (int i = 0; i < job.getRaster3dPart().getRasterCount(); i++)
+      if (p instanceof Raster3dPart)
       {
-        float focus = job.getRaster3dPart().getLaserProperty(i) == null ? 0 : job.getRaster3dPart().getLaserProperty(i).getFocus();
+        Raster3dPart rp = (Raster3dPart) p;
+        if (rp.getLaserProperty() != null && !(rp.getLaserProperty() instanceof PowerSpeedFocusProperty))
+        {
+          throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
+        }
+        float focus = rp.getLaserProperty() == null ? 0 : ((PowerSpeedFocusProperty) rp.getLaserProperty()).getFocus();
         if (mm2focus(focus) > MAXFOCUS || (mm2focus(focus)) < MINFOCUS)
         {
           throw new IllegalJobException("Illegal Focus value. This Lasercutter supports values between"
@@ -291,6 +301,25 @@ abstract class EpilogCutter extends LaserCutter
     }
   }
 
+  public void realSendJob(LaserJob job, ProgressListener pl, int number, int count) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
+  {
+    String nb = count > 1 ? "("+number+"/"+count+")" : "";
+    pl.taskChanged(this, "generating"+nb);
+    //Generate all the data
+    byte[] pjlData = generatePjlData(job);
+    pl.progressChanged(this, (int) ((double) 40*number/count));
+    //connect to lasercutter
+    pl.taskChanged(this, "connecting"+nb);
+    connect();
+    pl.progressChanged(this, (int) ((double) 60*number/count));
+    //send job
+    pl.taskChanged(this, "sending"+nb);
+    sendPjlJob(job, pjlData);
+    pl.progressChanged(this, (int) ((double) 90*number/count));
+    //disconnect
+    disconnect();
+  }
+  
   @Override
   public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
@@ -298,42 +327,52 @@ abstract class EpilogCutter extends LaserCutter
     pl.taskChanged(this, "checking job");
     //Perform santiy checks
     checkJob(job);
-    if (job.contains3dRaster() && job.containsRaster())
-    {//Raster and 3d Raster may not be in the same job. Send 2
-      pl.taskChanged(this, "sending job 1/2");
-      this.realSendJob(new LaserJob("(1/2)" + job.getTitle(), job.getName(), job.getUser(), job.getResolution(), job.getRaster3dPart(), null, null), pl);
-      pl.taskChanged(this, "sending job 2/2");
-      this.realSendJob(new LaserJob("(2/2)" + job.getTitle(), job.getName(), job.getUser(), job.getResolution(), null, job.getVectorPart(), job.getRasterPart()), pl);
-    }
-    else
+    //split the job because epilog doesn't support many combinations
+    List<List<JobPart>> jobs = new LinkedList<List<JobPart>>();
+    List<JobPart> toDo = job.getParts();
+    while(!toDo.isEmpty())
     {
-      pl.taskChanged(this, "sending job");
-      this.realSendJob(job, pl);
+      List<JobPart> currentSplit = new LinkedList<JobPart>();
+      if (toDo.get(0) instanceof Raster3dPart)
+      {//raster3d part stands alone
+        currentSplit.add(toDo.get(0));
+        toDo.remove(0);
+      }
+      else
+      {//vector parts can be prepended by one raster part, but one job has
+       //to have the same resolution everywhere (??? if you have time, feel
+       //free to experiment)
+        double currentDpi = toDo.get(0).getDPI();
+        if (toDo.get(0) instanceof RasterPart)
+        {
+          currentSplit.add(toDo.get(0));
+          toDo.remove(0);
+        }
+        while (!toDo.isEmpty() && toDo.get(0) instanceof VectorPart && toDo.get(0).getDPI() == currentDpi)
+        {
+          currentSplit.add(toDo.get(0));
+          toDo.remove(0);
+        }
+      }
+      jobs.add(currentSplit);
+    }
+    int number = 0;
+    int size = jobs.size();
+    for(List<JobPart> current : jobs)
+    {
+      number++;
+      LaserJob j = new LaserJob((size > 1 ? "("+number+"/"+size+")" : "" )+job.getTitle(), job.getName(), job.getUser());
+      for (JobPart p:current)
+      {
+        j.addPart(p);
+      }
+      this.realSendJob(j, pl, number, size);
     }
     pl.progressChanged(this, 100);
   }
 
-  private void realSendJob(LaserJob job, ProgressListener pl) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
-  {
-    //Generate all the data
-    pl.taskChanged(this, "generating data");
-    byte[] pjlData = generatePjlData(job);
-    pl.progressChanged(this, 40);
-    //connect to lasercutter
-    pl.taskChanged(this, "connecting");
-    connect();
-    pl.progressChanged(this, 60);
-    //send job
-    pl.taskChanged(this, "sending");
-    sendPjlJob(job, pjlData);
-    pl.progressChanged(this, 90);
-    //disconnect
-    disconnect();
-  }
-
   @Override
-  abstract public List<Integer> getResolutions();
-  
+  abstract public List<Double> getResolutions();
 
   /**
    * Encodes the given line of the given image in TIFF Packbyte encoding
@@ -377,28 +416,26 @@ abstract class EpilogCutter extends LaserCutter
     return result;
   }
 
-  private byte[] generateRaster3dPCL(LaserJob job, Raster3dPart rp) throws UnsupportedEncodingException, IOException
+  private byte[] generateRaster3dPCL(Raster3dPart rp) throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    LaserProperty curprop = new LaserProperty();
-    if (rp != null && rp.getRasterCount() > 0)
+    if (rp != null)
     {
-      if (rp.getRasterCount() > 0)
-      {
-        curprop = rp.getLaserProperty(0);
-      }
+      PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
+      /* PCL/RasterGraphics resolution. */
+      out.printf("\033*t%dR", (int) rp.getDPI());
       /* Raster Orientation: Printed in current direction */
       out.printf("\033*r0F");
       /* Raster power */
-      out.printf("\033&y%dP", curprop.getPower());
+      out.printf("\033&y%dP", prop.getPower());
       /* Raster speed */
-      out.printf("\033&z%dS", curprop.getSpeed());
+      out.printf("\033&z%dS", prop.getSpeed());
       /* Focus */
-      out.printf("\033&y%dA", mm2focus(curprop.getFocus()));
+      out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-      out.printf("\033*r%dT", rp != null ? rp.getHeight() : 10);//height);
-      out.printf("\033*r%dS", rp != null ? rp.getWidth() : 10);//width);
+      out.printf("\033*r%dT", rp != null ? rp.getMaxY() : 10);//height);
+      out.printf("\033*r%dS", rp != null ? rp.getMaxX() : 10);//width);
             /* Raster compression:
        *  2 = TIFF encoding
        *  7 = TIFF encoding, 3d-mode,
@@ -412,112 +449,117 @@ abstract class EpilogCutter extends LaserCutter
       out.printf("\033&y%dO", 0);
       /* start at current position */
       out.printf("\033*r1A");
-
-      for (int i = 0; rp != null && i < rp.getRasterCount(); i++)
+      Point sp = rp.getRasterStart();
+      boolean leftToRight = true;
+      for (int y = 0; y < rp.getRasterHeight(); y++)
       {
-        LaserProperty newprop = rp.getLaserProperty(i);
-        if (newprop.getPower() != curprop.getPower())
-        {
-          /* Raster power */
-          out.printf("\033&y%dP", newprop.getPower());
+        List<Byte> line = rp.getInvertedRasterLine(y);
+        for (int n = 0; n < line.size(); n++)
+        {//Apperantly the other power settings are ignored, so we have to scale
+          int x = line.get(n);
+          x = x >= 0 ? x : 256 + x;
+          int scalex = x * prop.getPower() / 100;
+          byte bx = (byte) (scalex < 128 ? scalex : scalex - 256);
+          line.set(n, bx);
         }
-        if (newprop.getSpeed() != curprop.getSpeed())
-        {
-          /* Raster speed */
-          out.printf("\033&z%dS", newprop.getSpeed());
-        }
-        if (newprop.getFocus() != curprop.getFocus())
-        {
-          /* Focus  */
-          out.printf("\033&y%dA", mm2focus(newprop.getFocus()));
-        }
-        curprop = newprop;
-        Point sp = rp.getRasterStart(i);
-        boolean leftToRight = true;
-        for (int y = 0; y < rp.getRasterHeight(i); y++)
-        {
+        //Remove leading zeroes, but keep track of the offset
+        int jump = 0;
 
-          List<Byte> line = rp.getInvertedRasterLine(i, y);
-          for (int n = 0; n < line.size(); n++)
-          {//Apperantly the other power settings are ignored, so we have to scale
-            int x = line.get(n);
-            x = x >= 0 ? x : 256 + x;
-            int scalex = x * curprop.getPower() / 100;
-            byte bx = (byte) (scalex < 128 ? scalex : scalex - 256);
-            line.set(n, bx);
-          }
-          //Remove leading zeroes, but keep track of the offset
-          int jump = 0;
-
-          while (line.size() > 0 && line.get(0) == 0)
+        while (line.size() > 0 && line.get(0) == 0)
+        {
+          line.remove(0);
+          jump++;
+        }
+        if (line.size() > 0)
+        {
+          out.printf("\033*p%dX", sp.x + jump);
+          out.printf("\033*p%dY", sp.y + y);
+          if (leftToRight)
           {
-            line.remove(0);
-            jump++;
+            out.printf("\033*b%dA", line.size());
           }
-          if (line.size() > 0)
+          else
           {
-            out.printf("\033*p%dX", sp.x + jump);
-            out.printf("\033*p%dY", sp.y + y);
-            if (leftToRight)
-            {
-              out.printf("\033*b%dA", line.size());
-            }
-            else
-            {
-              out.printf("\033*b%dA", -line.size());
-              Collections.reverse(line);
-            }
-            line = encode(line);
-            int len = line.size();
-            int pcks = len / 8;
-            if (len % 8 > 0)
-            {
-              pcks++;
-            }
-            out.printf("\033*b%dW", pcks * 8);
-            for (byte s : line)
-            {
-              out.write(s);
-            }
-            for (int k = 0; k < 8 - (len % 8); k++)
-            {
-              out.write((byte) 128);
-            }
-            leftToRight = !leftToRight;
+            out.printf("\033*b%dA", -line.size());
+            Collections.reverse(line);
           }
+          line = encode(line);
+          int len = line.size();
+          int pcks = len / 8;
+          if (len % 8 > 0)
+          {
+            pcks++;
+          }
+          out.printf("\033*b%dW", pcks * 8);
+          for (byte s : line)
+          {
+            out.write(s);
+          }
+          for (int k = 0; k < 8 - (len % 8); k++)
+          {
+            out.write((byte) 128);
+          }
+          leftToRight = !leftToRight;
         }
-
       }
       out.printf("\033*rC");       // end raster
     }
     return result.toByteArray();
   }
 
-  private byte[] generateRasterPCL(LaserJob job, RasterPart rp) throws UnsupportedEncodingException, IOException
+  private byte[] generateDummyRaster(JobPart jp) throws UnsupportedEncodingException
   {
-
-    LaserProperty curprop = null;
-    if (rp != null && rp.getRasterCount() > 0)
-    {
-      curprop = rp.getLaserProperty(0);
-    }
-    if (curprop == null)
-    {
-      curprop = new LaserProperty();
-    }
+    PowerSpeedFocusProperty prop = new PowerSpeedFocusProperty();
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
+    /* PCL/RasterGraphics resolution. */
+    out.printf("\033*t%dR", (int) jp.getDPI());
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
-    out.printf("\033&y%dP", curprop.getPower());
+    out.printf("\033&y%dP", prop.getPower());
     /* Raster speed */
-    out.printf("\033&z%dS", curprop.getSpeed());
+    out.printf("\033&z%dS", prop.getSpeed());
     /* Focus */
-    out.printf("\033&y%dA", mm2focus(curprop.getFocus()));
+    out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-    out.printf("\033*r%dT", rp != null ? rp.getHeight() : 10);//height);
-    out.printf("\033*r%dS", rp != null ? rp.getWidth() : 10);//width);
+    out.printf("\033*r%dT", jp.getMaxY());//height);
+    out.printf("\033*r%dS", jp.getMaxX());//width);
+        /* Raster compression:
+     *  2 = TIFF encoding
+     *  7 = TIFF encoding, 3d-mode,
+     *
+     * Wahrscheinlich:
+     * 2M = Bitweise, also 1=dot 0=nodot (standard raster)
+     * 7MLT = Byteweise 0= no power 100=full power (3d raster)
+     */
+    out.printf("\033*b2M");
+    /* Raster direction (1 = up, 0=down) */
+    out.printf("\033&y%dO", 0);
+    /* start at current position */
+    out.printf("\033*r1A");
+    out.printf("\033*rC");       // end raster
+    return result.toByteArray();
+  }
+  
+  private byte[] generateRasterPCL(RasterPart rp) throws UnsupportedEncodingException, IOException
+  {
+    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    /* PCL/RasterGraphics resolution. */
+    out.printf("\033*t%dR", (int) rp.getDPI());
+    /* Raster Orientation: Printed in current direction */
+    out.printf("\033*r0F");
+    /* Raster power */
+    out.printf("\033&y%dP", prop.getPower());
+    /* Raster speed */
+    out.printf("\033&z%dS", prop.getSpeed());
+    /* Focus */
+    out.printf("\033&y%dA", mm2focus(prop.getFocus()));
+
+    out.printf("\033*r%dT", rp.getMaxY());//height);
+    out.printf("\033*r%dS", rp.getMaxX());//width);
         /* Raster compression:
      *  2 = TIFF encoding
      *  7 = TIFF encoding, 3d-mode,
@@ -532,35 +574,15 @@ abstract class EpilogCutter extends LaserCutter
     /* start at current position */
     out.printf("\033*r1A");
 
-    for (int i = 0; rp != null && i < rp.getRasterCount(); i++)
+    if (rp != null)
     {
-      //TODO: Test if new Settings are applied
-      LaserProperty newprop = rp.getLaserProperty(i);
-      if (newprop.getPower() != curprop.getPower())
-      {
-        /* Raster power */
-        out.printf("\033&y%dP", newprop.getPower());
-      }
-      if (newprop.getSpeed() != curprop.getSpeed())
-      {
-        /* Raster speed */
-        out.printf("\033&z%dS", newprop.getSpeed());
-      }
-      if (newprop.getFocus() != curprop.getFocus())
-      {
-        /* Focus  */
-        out.printf("\033&y%dA", mm2focus(newprop.getFocus()));
-      }
-      curprop = newprop;
-      Point sp = rp.getRasterStart(i);
+      Point sp = rp.getRasterStart();
       boolean leftToRight = true;
-      for (int y = 0; y < rp.getRasterHeight(i); y++)
+      for (int y = 0; y < rp.getRasterHeight(); y++)
       {
-
-        List<Byte> line = rp.getRasterLine(i, y);
+        List<Byte> line = rp.getRasterLine(y);
         //Remove leading zeroes, but keep track of the offset
         int jump = 0;
-
         while (line.size() > 0 && line.get(0) == 0)
         {
           line.remove(0);
@@ -609,30 +631,39 @@ abstract class EpilogCutter extends LaserCutter
           leftToRight = !leftToRight;
         }
       }
-
     }
     out.printf("\033*rC");       // end raster
     return result.toByteArray();
   }
 
-  private byte[] generateVectorPCL(LaserJob job, VectorPart vp) throws UnsupportedEncodingException
+  private byte[] generateDummyVector(double dpi) throws UnsupportedEncodingException
   {
-
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-
-    out.printf("\033*r0F");
-    out.printf("\033*r%dT", vp == null ? 500 : vp.getHeight());// if not dummy, then job.getHeight());
-    out.printf("\033*r%dS", vp == null ? 500 : vp.getWidth());// if not dummy then job.getWidth());
-    out.printf("\033*r1A");
-    out.printf("\033*rC");
+    out.printf("\033%%1B");// Start HLGL
+    out.printf("IN;PU0,0;");
+    //Reset Focus to 0
+    out.printf("WF%d;", 0);
+    return result.toByteArray();
+  }
+  
+  private byte[] generateVectorPCL(VectorPart vp) throws UnsupportedEncodingException
+  {
+    //TODO: Test if the resolution settings have an effect
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    /* Resolution of the print. Number of Units/Inch*/
     out.printf("\033%%1B");// Start HLGL
     out.printf("IN;PU0,0;");
 
     if (vp != null)
     {
-      int sx = job.getStartX();
-      int sy = job.getStartY();
+      Integer currentPower = null;
+      Integer currentSpeed = null;
+      Integer currentFrequency = null;
+      Float currentFocus = null;
+      int sx = 0;
+      int sy = 0;
       VectorCommand.CmdType lastType = null;
       for (VectorCommand cmd : vp.getCommandList())
       {
@@ -642,24 +673,29 @@ abstract class EpilogCutter extends LaserCutter
         }
         switch (cmd.getType())
         {
-          case SETFOCUS:
+          case SETPROPERTY:
           {
-            out.printf("WF%d;", mm2focus(cmd.getFocus()));
-            break;
-          }
-          case SETFREQUENCY:
-          {
-            out.printf("XR%04d;", cmd.getFrequency());
-            break;
-          }
-          case SETPOWER:
-          {
-            out.printf("YP%03d;", cmd.getPower());
-            break;
-          }
-          case SETSPEED:
-          {
-            out.printf("ZS%03d;", cmd.getSpeed());
+            PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
+            if (currentFocus == null || !currentFocus.equals(p.getFocus()))
+            {
+              out.printf("WF%d;", mm2focus(p.getFocus()));
+              currentFocus = p.getFocus();
+            }
+            if (currentFrequency == null || !currentFrequency.equals(p.getFrequency()))
+            {
+              out.printf("XR%04d;", p.getFrequency());
+              currentFrequency = p.getFrequency();
+            }
+            if (currentPower == null || !currentPower.equals(p.getPower()))
+            {
+              out.printf("YP%03d;", p.getPower());
+              currentPower = p.getPower();
+            }
+            if (currentSpeed == null || !currentSpeed.equals(p.getSpeed()))
+            {
+              out.printf("ZS%03d;", p.getSpeed());
+              currentSpeed = p.getSpeed();
+            }
             break;
           }
           case MOVETO:
@@ -694,10 +730,30 @@ abstract class EpilogCutter extends LaserCutter
     ByteArrayOutputStream pjlJob = new ByteArrayOutputStream();
     PrintStream wrt = new PrintStream(pjlJob, true, "US-ASCII");
 
-    wrt.write(generatePjlHeader(job));
-    wrt.write(generateRasterPCL(job, job.getRasterPart()));
-    wrt.write(generateRaster3dPCL(job, job.getRaster3dPart()));
-    wrt.write(generateVectorPCL(job, job.getVectorPart()));
+    wrt.write(generatePjlHeader(job, job.getParts().get(0).getDPI()));
+    if (! (job.getParts().get(0) instanceof RasterPart))
+    {//we need an empty raster part as begin of all jobs
+      wrt.write(generateDummyRaster(job.getParts().get(0)));
+    }
+    for (JobPart p : job.getParts())
+    {
+      if (p instanceof VectorPart)
+      {
+        wrt.write(generateVectorPCL((VectorPart) p));
+      }
+      else if (p instanceof RasterPart)
+      {
+        wrt.write(generateRasterPCL((RasterPart) p));
+      }
+      else if (p instanceof Raster3dPart)
+      {
+        wrt.write(generateRaster3dPCL((Raster3dPart) p));
+      }
+    }
+    if (! (job.getParts().get(job.getParts().size()-1) instanceof VectorPart))
+    {
+      wrt.write(generateDummyVector(job.getParts().get(job.getParts().size()-1).getDPI()));
+    }
     wrt.write(generatePjlFooter());
     /* Pad out the remainder of the file with 0 characters. */
     for (int i = 0; i < 4096; i++)
@@ -719,7 +775,7 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public String getSettingValue(String attribute)
+  public Object getProperty(String attribute)
   {
     if ("Hostname".equals(attribute))
     {
@@ -727,19 +783,19 @@ abstract class EpilogCutter extends LaserCutter
     }
     else if ("AutoFocus".equals(attribute))
     {
-      return "" + this.isAutoFocus();
+      return (Boolean) this.isAutoFocus();
     }
     else if ("Port".equals(attribute))
     {
-      return "" + this.getPort();
+      return (Integer) this.getPort();
     }
     else if ("BedWidth".equals(attribute))
     {
-      return "" + this.getBedWidth();
+      return (Double) this.getBedWidth();
     }
     else if ("BedHeight".equals(attribute))
     {
-      return "" + this.getBedHeight();
+      return (Double) this.getBedHeight();
     }
     return null;
   }
@@ -789,40 +845,46 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public void setSettingValue(String attribute, String value)
+  public void setProperty(String attribute, Object value)
   {
     if ("Hostname".equals(attribute))
     {
-      this.setHostname(value);
+      this.setHostname((String) value);
     }
     else if ("AutoFocus".endsWith(attribute))
     {
-      this.setAutoFocus(Boolean.parseBoolean(value));
+      this.setAutoFocus((Boolean) value);
     }
     else if ("Port".equals(attribute))
     {
-      this.setPort(Integer.parseInt(value));
+      this.setPort((Integer) value);
     }
     else if ("BedWidth".equals(attribute))
     {
-      this.setBedWidth(Double.parseDouble(value));
+      this.setBedWidth((Double) value);
     }
     else if ("BedHeight".equals(attribute))
     {
-      this.setBedHeight(Double.parseDouble(value));
+      this.setBedHeight((Double) value);
     }
   }
-  private String[] attributes = new String[]
+  private static String[] attributes = new String[]
   {
     "Hostname", "Port", "BedWidth", "BedHeight", "AutoFocus"
   };
 
   @Override
-  public List<String> getSettingAttributes()
+  public String[] getPropertyKeys()
   {
-    return Arrays.asList(attributes);
+    return attributes;
   }
 
+  @Override
+  public boolean canEstimateJobDuration()
+  {
+    return true;
+  }
+  
   @Override
   public int estimateJobDuration(LaserJob job)
   {
@@ -839,22 +901,21 @@ abstract class EpilogCutter extends LaserCutter
     Point p = new Point(0, 0);
 
     double result = 0;//usual offset
-    if (job.containsRaster())
+    for (JobPart jp : job.getParts())
     {
-      RasterPart rp = job.getRasterPart();
-      for (int i = 0; i < rp.getRasterCount(); i++)
-      {//Time to move to Start Position
-        Point sp = rp.getRasterStart(i);
+      if (jp instanceof RasterPart)
+      {
+        RasterPart rp = (RasterPart) jp;
+        Point sp = rp.getRasterStart();
         result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
           (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER_LINESPEED * rp.getLaserProperty(i).getSpeed()) / 100;
-        BlackWhiteRaster bwr = rp.getImages()[i];
-        for (int y = 0; y < bwr.getHeight(); y++)
+        double linespeed = ((double) RASTER_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
+        for (int y = 0; y < rp.getRasterHeight(); y++)
         {//Find any black point
           boolean lineEmpty = true;
-          for (int x = 0; x < bwr.getWidth(); x++)
+          for (byte b : rp.getRasterLine(y))
           {
-            if (bwr.isBlack(x, y))
+            if (b != 0)
             {
               lineEmpty = false;
               break;
@@ -862,7 +923,7 @@ abstract class EpilogCutter extends LaserCutter
           }
           if (!lineEmpty)
           {
-            int w = bwr.getWidth();
+            int w = rp.getRasterWidth();
             result += (double) RASTER_LINEOFFSET + (double) w / linespeed;
             p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
             p.y = sp.y + y;
@@ -873,23 +934,19 @@ abstract class EpilogCutter extends LaserCutter
           }
         }
       }
-    }
-    if (job.contains3dRaster())
-    {
-      Raster3dPart rp = job.getRaster3dPart();
-      for (int i = 0; i < rp.getRasterCount(); i++)
-      {//Time to move to Start Position
-        Point sp = rp.getRasterStart(i);
+      if (jp instanceof Raster3dPart)
+      {
+        Raster3dPart rp = (Raster3dPart) jp;
+        Point sp = rp.getRasterStart();
         result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
           (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER3D_LINESPEED * rp.getLaserProperty(i).getSpeed()) / 100;
-        GreyscaleRaster gsr = rp.getImages()[i];
-        for (int y = 0; y < gsr.getHeight(); y++)
+        double linespeed = ((double) RASTER3D_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
+        for (int y = 0; y < rp.getRasterHeight(); y++)
         {//Check if
           boolean lineEmpty = true;
-          for (int x = 0; x < gsr.getWidth(); x++)
+          for (byte b : rp.getRasterLine(y))
           {
-            if (gsr.getGreyScale(x, y) != 0)
+            if (b != 0)
             {
               lineEmpty = false;
               break;
@@ -897,37 +954,37 @@ abstract class EpilogCutter extends LaserCutter
           }
           if (!lineEmpty)
           {
-            int w = gsr.getWidth();
+            int w = rp.getRasterWidth();
             result += (double) RASTER3D_LINEOFFSET + (double) w / linespeed;
             p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
             p.y = sp.y + y;
           }
         }
       }
-    }
-    if (job.containsVector())
-    {
-      double speed = VECTOR_LINESPEED;
-      VectorPart vp = job.getVectorPart();
-      for (VectorCommand cmd : vp.getCommandList())
+      if (jp instanceof VectorPart)
       {
-        switch (cmd.getType())
+        double speed = VECTOR_LINESPEED;
+        VectorPart vp = (VectorPart) jp;
+        for (VectorCommand cmd : vp.getCommandList())
         {
-          case SETSPEED:
+          switch (cmd.getType())
           {
-            speed = VECTOR_LINESPEED * cmd.getSpeed() / 100;
-            break;
+            case SETPROPERTY:
+            {
+              speed = VECTOR_LINESPEED * ((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).getSpeed() / 100;
+              break;
+            }
+            case MOVETO:
+              result += Math.max((double) (p.x - cmd.getX()) / VECTOR_MOVESPEED_X,
+                (double) (p.y - cmd.getY()) / VECTOR_MOVESPEED_Y);
+              p = new Point(cmd.getX(), cmd.getY());
+              break;
+            case LINETO:
+              double dist = distance(cmd.getX(), cmd.getY(), p);
+              p = new Point(cmd.getX(), cmd.getY());
+              result += dist / speed;
+              break;
           }
-          case MOVETO:
-            result += Math.max((double) (p.x - cmd.getX()) / VECTOR_MOVESPEED_X,
-              (double) (p.y - cmd.getY()) / VECTOR_MOVESPEED_Y);
-            p = new Point(cmd.getX(), cmd.getY());
-            break;
-          case LINETO:
-            double dist = distance(cmd.getX(), cmd.getY(), p);
-            p = new Point(cmd.getX(), cmd.getY());
-            result += dist / speed;
-            break;
         }
       }
     }

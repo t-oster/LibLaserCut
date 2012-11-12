@@ -1,6 +1,6 @@
 /**
  * This file is part of VisiCut.
- * Copyright (C) 2011 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  * 
  *     VisiCut is free software: you can redistribute it and/or modify
@@ -22,6 +22,9 @@
  */
 package com.t_oster.liblasercut;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
@@ -32,22 +35,15 @@ public class LaserJob
   private String title;
   private String name;
   private String user;
-  private int resolution;
   private int startX = 0;
   private int startY = 0;
-  private VectorPart vPart;
-  private Raster3dPart r3dPart;
-  private RasterPart rPart;
+  private List<JobPart> parts = new LinkedList<JobPart>();
 
-  public LaserJob(String title, String name, String user, int resolution, Raster3dPart r3dp, VectorPart vp, RasterPart rp)
+  public LaserJob(String title, String name, String user)
   {
     this.title = title;
     this.name = name;
     this.user = user;
-    this.resolution = resolution;
-    this.vPart = vp;
-    this.r3dPart = r3dp;
-    this.rPart = rp;
   }
 
   public void setStartPoint(int x, int y)
@@ -81,38 +77,18 @@ public class LaserJob
     return user;
   }
 
-  public boolean contains3dRaster()
+  public void addPart(JobPart p)
   {
-    return r3dPart != null && r3dPart.getRasterCount() > 0;
+    this.parts.add(p);
   }
-
-  public boolean containsVector()
+  
+  public void removePart(JobPart p)
   {
-    return vPart != null && vPart.getCommandList().length > 3;//every vector part starts with 3 commands
+    this.parts.remove(p);
   }
-
-  public boolean containsRaster()
+  
+  public List<JobPart> getParts()
   {
-    return rPart != null && rPart.getRasterCount() > 0;
-  }
-
-  public int getResolution()
-  {
-    return resolution;
-  }
-
-  public VectorPart getVectorPart()
-  {
-    return vPart;
-  }
-
-  public Raster3dPart getRaster3dPart()
-  {
-    return r3dPart;
-  }
-
-  public RasterPart getRasterPart()
-  {
-    return rPart;
+    return parts;
   }
 }

@@ -1,5 +1,5 @@
 /**
- * This file is part of VisiCut. Copyright (C) 2011 Thomas Oster
+ * This file is part of VisiCut. Copyright (C) 2012 Thomas Oster
  * <thomas.oster@rwth-aachen.de> RWTH Aachen University - 52062 Aachen, Germany
  *
  * VisiCut is free software: you can redistribute it and/or modify it under the
@@ -18,6 +18,9 @@
  */
 package com.t_oster.liblasercut.dithering;
 
+import com.t_oster.liblasercut.BlackWhiteRaster;
+import com.t_oster.liblasercut.GreyscaleRaster;
+
 /**
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
@@ -25,10 +28,50 @@ package com.t_oster.liblasercut.dithering;
 public class Grid extends DitheringAlgorithm
 {
 
+  private static String[] properties = new String[]{"Blocksize", "Blockdistance"};
+
+  @Override
+  public String[] getPropertyKeys()
+  {
+    return properties;
+  }
+
+  @Override
+  public void setProperty(String key, Object value)
+  {
+    if (properties[0].equals(key))
+    {
+      this.blocksize = (Integer) value;
+    }
+    else if (properties[1].equals(key))
+    {
+      this.blockdistance = (Integer) value;
+    }
+    else
+    {
+      throw new IllegalArgumentException("No such key "+key);
+    }
+  }
+
+  @Override
+  public Object getProperty(String key)
+  {
+    if (properties[0].equals(key))
+    {
+      return (Integer) this.blocksize;
+    }
+    else if (properties[1].equals(key))
+    {
+      return (Integer) this.blockdistance;
+    }
+    throw new IllegalArgumentException("No such key "+key);
+  }
+
   protected int blocksize = 10;
   protected int blockdistance = 5;
 
-  protected void doDithering()
+  @Override
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
   {
     long lumTotal = 0;
     int pixelcount = 0;
@@ -53,14 +96,28 @@ public class Grid extends DitheringAlgorithm
           && x % (blocksize + blockdistance) <= blocksize
           && src.getGreyScale(x, y) < thresh)
         {
-          this.setBlack(x, y, true);
+          this.setBlack(src, target, x, y, true);
         }
         else
         {
-          this.setBlack(x, y, false);
+          this.setBlack(src, target, x, y, false);
         }
       }
       setProgress((100 * pixelcount++) / (2 * height));
     }
+  }
+
+  @Override
+  public DitheringAlgorithm clone() {
+    Grid clone = new Grid();
+    clone.blockdistance = blockdistance;
+    clone.blocksize = blocksize;
+    return clone;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "Grid";
   }
 }
