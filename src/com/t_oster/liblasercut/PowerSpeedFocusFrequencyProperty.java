@@ -35,7 +35,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
 
   public void setFrequency(int frequency)
   {
-    frequency = frequency < 100 ? 100 : frequency;
+    frequency = frequency < 10 ? 10 : frequency;
     frequency = frequency > 5000 ? 5000 : frequency;
     this.frequency = frequency;
   }
