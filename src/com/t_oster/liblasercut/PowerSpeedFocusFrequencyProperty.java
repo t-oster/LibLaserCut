@@ -128,4 +128,30 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
     p.setFocus(getFocus());
     return p;
   }
+
+    @Override
+    public int hashCode() {
+        int hash = 7*frequency + super.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PowerSpeedFocusFrequencyProperty other = (PowerSpeedFocusFrequencyProperty) obj;
+        if (this.frequency != other.frequency) {
+            return false;
+        }
+        return super.equals(obj);
+    }
+  
+  public String toString()
+  {
+      return "PowerSpeedFocusFrequencyProperty(power="+getPower()+",speed="+getSpeed()+",focus="+getFocus()+",frequency="+getFrequency()+")";
+  }
 }
