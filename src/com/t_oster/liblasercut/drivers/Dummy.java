@@ -83,9 +83,9 @@ public class Dummy extends LaserCutter {
             }
             System.out.println(((PowerSpeedFocusProperty) rp.getLaserProperty()).toString());
           }
-        System.out.println("end of job.");
-        pl.progressChanged(this, 100);
       }
+      System.out.println("end of job.");
+      pl.progressChanged(this, 100);
   }
   
   @Override
