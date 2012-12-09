@@ -124,5 +124,33 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
     }
     return result;
   }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LaosCutterProperty other = (LaosCutterProperty) obj;
+        if (this.ventilation != other.ventilation) {
+            return false;
+        }
+        if (this.purge != other.purge) {
+            return false;
+        }
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + (this.ventilation ? 1 : 0);
+        hash = 97 * hash + (this.purge ? 1 : 0);
+        hash = 97 * hash + super.hashCode();
+        return hash;
+    }
+  
   
 }
