@@ -18,10 +18,7 @@
  **/
 package com.t_oster.liblasercut;
 
-import com.t_oster.liblasercut.drivers.EpilogHelix;
-import com.t_oster.liblasercut.drivers.EpilogZing;
-import com.t_oster.liblasercut.drivers.LaosCutter;
-import com.t_oster.liblasercut.drivers.Lasersaur;
+import com.t_oster.liblasercut.drivers.*;
 
 /**
  * This class contains Version information
@@ -43,7 +40,8 @@ public class LibInfo
       EpilogZing.class,
       EpilogHelix.class,
       LaosCutter.class,
-      Lasersaur.class
+      Lasersaur.class,
+      Dummy.class
     };
   }
 }
