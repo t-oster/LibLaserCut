@@ -1,6 +1,7 @@
 /**
  * This file is part of VisiCut. Copyright (C) 2012 Thomas Oster
  * <thomas.oster@rwth-aachen.de> RWTH Aachen University - 52062 Aachen, Germany
+ * and others.
  *
  * VisiCut is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free
@@ -21,17 +22,17 @@ package com.t_oster.liblasercut.drivers;
 import com.t_oster.liblasercut.*;
 import java.io.BufferedOutputStream;
 import java.util.*;
-import java.lang.System;
 
 /**
- * This class implements a driver for the LAOS Lasercutter board. Currently it
- * supports the simple code and the G-Code, which may be used in the future.
- *
- * @author Thomas Oster <thomas.oster@rwth-aachen.de>
+ * This class implements a dummy driver that accepts laserjobs and prints debug information about them.
+ * You can use it to test the VisiCut GUI without having a real lasercutter.
+ * 
+ * @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public class Dummy extends LaserCutter {
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
+  private static final String SETTING_RUNTIME = "Fake estimated run-time in seconds (-1 to disable)";
   @Override
   public String getModelName() {
     return "Dummy";
@@ -47,6 +48,8 @@ public class Dummy extends LaserCutter {
     pl.taskChanged(this, "sending");
     pl.taskChanged(this, "sent.");
     System.out.println("dummy-driver got LaserJob: ");
+    // TODO don't just print the parts and settins, but also the commands
+    // TODO if you have too much time, also implement some preview output (svg animation???) - would be nice for testing optimisations
      for (JobPart p : job.getParts())
         {
           if (p instanceof VectorPart)
@@ -91,14 +94,21 @@ public class Dummy extends LaserCutter {
   @Override
   public int estimateJobDuration(LaserJob job)
   {
-      return 1234;
+      // instead of really calculating some duration, just print the number configured from the settings
+      // if <0, act as if the driver can not calculate a job duration
+      if (!canEstimateJobDuration()) {
+          throw new RuntimeException("cannot estimate job duration (dummy driver: fake runtime is set to negative value)");
+      }
+      // return bogus value to test codepaths of GUI 
+      return fakeRunTime;
   }
   
   private List<Double> resolutions;
   
+  protected int fakeRunTime = -1;
   @Override
   public boolean canEstimateJobDuration() {
-        return true;
+        return (fakeRunTime >= 0);
     }
 
   @Override
@@ -152,7 +162,8 @@ public class Dummy extends LaserCutter {
   }
   private static String[] settingAttributes = new String[]{
     SETTING_BEDWIDTH,
-    SETTING_BEDHEIGHT
+    SETTING_BEDHEIGHT,
+    SETTING_RUNTIME
   };
 
   @Override
@@ -166,6 +177,8 @@ public class Dummy extends LaserCutter {
       return this.getBedWidth();
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
       return this.getBedHeight();
+    } else if (SETTING_RUNTIME.equals(attribute)) {
+      return this.fakeRunTime;
     }
     return null;
   }
@@ -176,7 +189,10 @@ public class Dummy extends LaserCutter {
       this.setBedWidth((Double) value);
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
       this.setBedHeight((Double) value);
+    } else if (SETTING_RUNTIME.equals(attribute)) {
+       this.fakeRunTime=Integer.parseInt(value.toString());
     }
+      
   }
 
   @Override
@@ -184,6 +200,7 @@ public class Dummy extends LaserCutter {
     Dummy clone = new Dummy();
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
+    clone.fakeRunTime = this.fakeRunTime;
     return clone;
   }
 }
