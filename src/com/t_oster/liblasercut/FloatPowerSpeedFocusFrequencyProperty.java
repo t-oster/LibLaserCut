@@ -215,12 +215,47 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     {
       throw new IllegalArgumentException("Unknown setting '"+name+"'");
     }
-  }
+  }  
 
   @Override
   public Object[] getPossibleValues(String name)
   {
     return null;
   }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FloatPowerSpeedFocusFrequencyProperty other = (FloatPowerSpeedFocusFrequencyProperty) obj;
+        if (Float.floatToIntBits(this.power) != Float.floatToIntBits(other.power)) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.speed) != Float.floatToIntBits(other.speed)) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
+            return false;
+        }
+        if (this.frequency != other.frequency) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Float.floatToIntBits(this.power);
+        hash = 67 * hash + Float.floatToIntBits(this.speed);
+        hash = 67 * hash + Float.floatToIntBits(this.focus);
+        hash = 67 * hash + this.frequency;
+        return hash;
+    }
+  
 
 }

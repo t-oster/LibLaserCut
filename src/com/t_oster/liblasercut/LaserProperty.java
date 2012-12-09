@@ -41,4 +41,9 @@ public interface LaserProperty extends Cloneable, Customizable
   public abstract Object[] getPossibleValues(String name);
   
   public abstract LaserProperty clone();
+  
+  // Please override equals so that it works well
+  // Otherwise there is trouble in the GUI when it tries to compare laser settings
+  @Override
+  public abstract boolean equals(Object obj);
 }

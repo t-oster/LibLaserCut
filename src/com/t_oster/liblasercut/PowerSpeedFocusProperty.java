@@ -197,4 +197,42 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     return null;
   }
+  
+  @Override
+  public String toString()
+  {
+      return "PowerSpeedFocusFrequencyProperty(power="+getPower()+",speed="+getSpeed()+",focus="+getFocus()+")";
+  }
+  
+  
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + this.power;
+        hash = 71 * hash + this.speed;
+        hash = 71 * hash + Float.floatToIntBits(this.focus);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PowerSpeedFocusProperty other = (PowerSpeedFocusProperty) obj;
+        if (this.power != other.power) {
+            return false;
+        }
+        if (this.speed != other.speed) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
+            return false;
+        }
+        return true;
+    }
 }
