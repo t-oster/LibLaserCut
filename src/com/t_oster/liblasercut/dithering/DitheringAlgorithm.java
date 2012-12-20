@@ -22,6 +22,8 @@ import com.t_oster.liblasercut.BlackWhiteRaster;
 import com.t_oster.liblasercut.Customizable;
 import com.t_oster.liblasercut.GreyscaleRaster;
 import com.t_oster.liblasercut.TimeIntensiveOperation;
+import com.t_oster.liblasercut.platform.Util;
+import java.util.Arrays;
 
 /**
  *
@@ -91,18 +93,14 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
     final DitheringAlgorithm other = (DitheringAlgorithm) o;
     String[] own = this.getPropertyKeys();
     String[] ot = other.getPropertyKeys();
-    if (own.length != ot.length)
+    if (!Arrays.deepEquals(own, ot))
     {
       return false;
     }
     for (int i = 0; i < own.length; i++)
     {
       String key = own[i];
-      if (!key.equals(ot[i]))
-      {
-        return false;
-      }
-      else if (!getProperty(key).equals(other.getProperty(key)))
+      if (!Util.differ(getProperty(key),other.getProperty(key)))
       {
         return false;
       }
