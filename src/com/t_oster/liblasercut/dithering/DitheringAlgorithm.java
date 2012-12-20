@@ -80,4 +80,43 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
 
   @Override
   public abstract String toString();
+  
+  @Override
+  public boolean equals(Object o)
+  {
+    if (o == null || !getClass().equals(o.getClass()))
+    {
+      return false;
+    }
+    final DitheringAlgorithm other = (DitheringAlgorithm) o;
+    String[] own = this.getPropertyKeys();
+    String[] ot = other.getPropertyKeys();
+    if (own.length != ot.length)
+    {
+      return false;
+    }
+    for (int i = 0; i < own.length; i++)
+    {
+      String key = own[i];
+      if (!key.equals(ot[i]))
+      {
+        return false;
+      }
+      else if (!getProperty(key).equals(other.getProperty(key)))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    for (String key : this.getPropertyKeys())
+    {
+      hash += this.getProperty(key).hashCode();
+    }
+    return hash;
+  }
 }
