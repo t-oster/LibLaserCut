@@ -16,10 +16,6 @@
  * along with VisiCut. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
@@ -35,7 +31,7 @@ public class Raster3dPart extends JobPart
 
   private GreyscaleRaster image = null;
   private LaserProperty property = null;
-  private Point start = null;
+  protected Point start = null;
   private double resolution = 500;
 
   public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
@@ -51,7 +47,7 @@ public class Raster3dPart extends JobPart
   {
       return resolution;
   }
-  
+
   @Override
   public int getMinX()
   {
@@ -69,7 +65,7 @@ public class Raster3dPart extends JobPart
   {
     return start.y;
   }
-  
+
   @Override
   public int getMaxY()
   {

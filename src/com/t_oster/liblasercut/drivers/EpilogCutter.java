@@ -2,17 +2,17 @@
  * This file is part of VisiCut.
  * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
- * 
+ *
  *     VisiCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *    VisiCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
@@ -45,7 +45,7 @@ abstract class EpilogCutter extends LaserCutter
   public static boolean SIMULATE_COMMUNICATION = false;
   public static final int NETWORK_TIMEOUT = 3000;
   /* Resolutions in DPI */
-  
+
   private static final int MINFOCUS = -500;//Minimal focus value (not mm)
   private static final int MAXFOCUS = 500;//Maximal focus value (not mm)
   private static final double FOCUSWIDTH = 0.0252;//How much mm/unit the focus values are
@@ -90,12 +90,12 @@ abstract class EpilogCutter extends LaserCutter
   {
     return this.autofocus;
   }
-  
+
   public void setAutoFocus(boolean af)
   {
     this.autofocus = af;
   }
-  
+
   private void waitForResponse(int expected) throws IOException, Exception
   {
     waitForResponse(expected, 3);
@@ -143,12 +143,12 @@ abstract class EpilogCutter extends LaserCutter
     if (this.isAutoFocus())
     {
       /* Set autofocus on. */
-      out.printf("\033&y1A");  
+      out.printf("\033&y1A");
     }
     else
     {
       /* Set autofocus off. */
-      out.printf("\033&y0A");  
+      out.printf("\033&y0A");
     }
     /* Set focus to 0. */
     out.printf("\033&y0C");
@@ -303,6 +303,7 @@ abstract class EpilogCutter extends LaserCutter
 
   public void realSendJob(LaserJob job, ProgressListener pl, int number, int count) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
+    job.applyStartPoint();
     String nb = count > 1 ? "("+number+"/"+count+")" : "";
     pl.taskChanged(this, "generating"+nb);
     //Generate all the data
@@ -319,7 +320,7 @@ abstract class EpilogCutter extends LaserCutter
     //disconnect
     disconnect();
   }
-  
+
   @Override
   public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
@@ -362,6 +363,7 @@ abstract class EpilogCutter extends LaserCutter
     {
       number++;
       LaserJob j = new LaserJob((size > 1 ? "("+number+"/"+size+")" : "" )+job.getTitle(), job.getName(), job.getUser());
+      j.setStartPoint(job.getStartX(), job.getStartY());
       for (JobPart p:current)
       {
         j.addPart(p);
@@ -541,7 +543,7 @@ abstract class EpilogCutter extends LaserCutter
     out.printf("\033*rC");       // end raster
     return result.toByteArray();
   }
-  
+
   private byte[] generateRasterPCL(RasterPart rp) throws UnsupportedEncodingException, IOException
   {
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
@@ -646,7 +648,7 @@ abstract class EpilogCutter extends LaserCutter
     out.printf("WF%d;", 0);
     return result.toByteArray();
   }
-  
+
   private byte[] generateVectorPCL(VectorPart vp) throws UnsupportedEncodingException
   {
     //TODO: Test if the resolution settings have an effect
@@ -662,8 +664,6 @@ abstract class EpilogCutter extends LaserCutter
       Integer currentSpeed = null;
       Integer currentFrequency = null;
       Float currentFocus = null;
-      int sx = 0;
-      int sy = 0;
       VectorCommand.CmdType lastType = null;
       for (VectorCommand cmd : vp.getCommandList())
       {
@@ -700,18 +700,18 @@ abstract class EpilogCutter extends LaserCutter
           }
           case MOVETO:
           {
-            out.printf("PU%d,%d;", cmd.getX() - sx, cmd.getY() - sy);
+            out.printf("PU%d,%d;", cmd.getX(), cmd.getY());
             break;
           }
           case LINETO:
           {
             if (lastType == null || lastType != VectorCommand.CmdType.LINETO)
             {
-              out.printf("PD%d,%d", cmd.getX() - sx, cmd.getY() - sy);
+              out.printf("PD%d,%d", cmd.getX(), cmd.getY());
             }
             else
             {
-              out.printf(",%d,%d", cmd.getX() - sx, cmd.getY() - sy);
+              out.printf(",%d,%d", cmd.getX(), cmd.getY());
             }
             break;
           }
@@ -884,7 +884,7 @@ abstract class EpilogCutter extends LaserCutter
   {
     return true;
   }
-  
+
   @Override
   public int estimateJobDuration(LaserJob job)
   {
@@ -995,5 +995,5 @@ abstract class EpilogCutter extends LaserCutter
   {
     return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
   }
-  
+
 }
