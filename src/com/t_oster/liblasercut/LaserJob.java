@@ -22,7 +22,6 @@
  */
 package com.t_oster.liblasercut;
 
-import com.sun.java_cup.internal.runtime.virtual_parse_stack;
 import com.t_oster.liblasercut.platform.Util;
 import java.util.LinkedList;
 import java.util.List;
