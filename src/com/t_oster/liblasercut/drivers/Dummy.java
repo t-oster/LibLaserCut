@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * This class implements a dummy driver that accepts laserjobs and prints debug information about them.
  * You can use it to test the VisiCut GUI without having a real lasercutter.
- * 
+ *
  * @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public class Dummy extends LaserCutter {
@@ -45,6 +45,7 @@ public class Dummy extends LaserCutter {
     BufferedOutputStream out;
     pl.taskChanged(this, "checking job");
     checkJob(job);
+    job.applyStartPoint();
     pl.taskChanged(this, "sending");
     pl.taskChanged(this, "sent.");
     System.out.println("dummy-driver got LaserJob: ");
@@ -90,7 +91,7 @@ public class Dummy extends LaserCutter {
       System.out.println("end of job.");
       pl.progressChanged(this, 100);
   }
-  
+
   @Override
   public int estimateJobDuration(LaserJob job)
   {
@@ -99,12 +100,12 @@ public class Dummy extends LaserCutter {
       if (!canEstimateJobDuration()) {
           throw new RuntimeException("cannot estimate job duration (dummy driver: fake runtime is set to negative value)");
       }
-      // return bogus value to test codepaths of GUI 
+      // return bogus value to test codepaths of GUI
       return fakeRunTime;
   }
-  
+
   private List<Double> resolutions;
-  
+
   protected int fakeRunTime = -1;
   @Override
   public boolean canEstimateJobDuration() {
@@ -192,7 +193,7 @@ public class Dummy extends LaserCutter {
     } else if (SETTING_RUNTIME.equals(attribute)) {
        this.fakeRunTime=Integer.parseInt(value.toString());
     }
-      
+
   }
 
   @Override

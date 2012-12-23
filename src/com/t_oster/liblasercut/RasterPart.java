@@ -2,24 +2,20 @@
  * This file is part of VisiCut.
  * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
- * 
+ *
  *     VisiCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *    VisiCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
@@ -51,13 +47,13 @@ public class RasterPart extends JobPart
   {
       return resolution;
   }
-  
+
   @Override
   public int getMinX()
   {
     return this.start.x;
   }
-  
+
   @Override
   public int getMaxX()
   {
@@ -69,7 +65,7 @@ public class RasterPart extends JobPart
   {
     return start.y;
   }
-  
+
   @Override
   public int getMaxY()
   {
@@ -79,7 +75,7 @@ public class RasterPart extends JobPart
   /**
    * Returns the upper left point of the given raster
    * @param raster the raster which upper left corner is to determine
-   * @return 
+   * @return
    */
   public Point getRasterStart()
   {
@@ -92,7 +88,7 @@ public class RasterPart extends JobPart
    * 1 when black or 0 when white
    * @param raster
    * @param line
-   * @return 
+   * @return
    */
   public List<Byte> getRasterLine(int line)
   {
@@ -108,7 +104,7 @@ public class RasterPart extends JobPart
   {
     return this.image.isBlack(x, y);
   }
-  
+
   public int getRasterWidth()
   {
     return this.image.getWidth();
@@ -123,5 +119,5 @@ public class RasterPart extends JobPart
   {
       return this.property;
   }
-  
+
 }

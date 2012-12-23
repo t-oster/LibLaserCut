@@ -2,17 +2,17 @@
  * This file is part of VisiCut.
  * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
- * 
+ *
  *     VisiCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *    VisiCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
@@ -46,7 +46,7 @@ import org.apache.commons.net.tftp.TFTPClient;
  * This class implements a driver for the LAOS Lasercutter board.
  * Currently it supports the simple code and the G-Code, which may be used in
  * the future.
- * 
+ *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public class LaosCutter extends LaserCutter
@@ -62,37 +62,37 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_TFTP = "Use TFTP instead of TCP";
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
   private static final String SETTING_UNIDIR = "Engrave unidirectional";
-  
+
   private boolean unidir = false;
-  
+
   @Override
   public LaosCutterProperty getLaserPropertyForVectorPart()
   {
     return new LaosCutterProperty();
   }
-  
+
   @Override
   public LaosCutterProperty getLaserPropertyForRasterPart()
   {
     return new LaosCutterProperty();
   }
-  
+
   @Override
   public LaosCutterProperty getLaserPropertyForRaster3dPart()
   {
     return new LaosCutterProperty();
   }
-  
+
   public void setEngraveUnidirectional(boolean uni)
   {
     this.unidir = uni;
   }
-  
+
   public boolean isEngraveUnidirectional()
   {
     return this.unidir;
   }
-  
+
   private double addSpacePerRasterLine = 5;
 
   /**
@@ -117,7 +117,7 @@ public class LaosCutter extends LaserCutter
     this.addSpacePerRasterLine = addSpacePerRasterLine;
   }
 
-  
+
   @Override
   public String getModelName()
   {
@@ -165,7 +165,7 @@ public class LaosCutter extends LaserCutter
   {
     this.flipXaxis = flipXaxis;
   }
-  
+
   protected boolean flipYaxis = true;
 
   /**
@@ -187,7 +187,7 @@ public class LaosCutter extends LaserCutter
   {
     this.flipYaxis = flipYaxis;
   }
-  
+
   protected String hostname = "192.168.123.111";
 
   /**
@@ -285,7 +285,7 @@ public class LaosCutter extends LaserCutter
   {
     out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
-  
+
   private void loadBitmapLine(PrintStream out, List<Long> dwords)
   {
     out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
@@ -295,7 +295,7 @@ public class LaosCutter extends LaserCutter
     }
     out.printf("\n");
   }
-  
+
   private float currentPower = -1;
   private void setPower(PrintStream out, float power)
   {
@@ -305,7 +305,7 @@ public class LaosCutter extends LaserCutter
       currentPower = power;
     }
   }
-  
+
   private float currentSpeed = -1;
   private void setSpeed(PrintStream out, float speed)
   {
@@ -315,7 +315,7 @@ public class LaosCutter extends LaserCutter
       currentSpeed = speed;
     }
   }
-  
+
   private int currentFrequency = -1;
   private void setFrequency(PrintStream out, int frequency)
   {
@@ -325,7 +325,7 @@ public class LaosCutter extends LaserCutter
       currentFrequency = frequency;
     }
   }
-  
+
   private float currentFocus = 0;
   private void setFocus(PrintStream out, float focus)
   {
@@ -335,7 +335,7 @@ public class LaosCutter extends LaserCutter
       currentFocus = focus;
     }
   }
-  
+
   private Boolean currentVentilation = null;
   private void setVentilation(PrintStream out, boolean ventilation)
   {
@@ -345,7 +345,7 @@ public class LaosCutter extends LaserCutter
       currentVentilation = ventilation;
     }
   }
-  
+
   private Boolean currentPurge = null;
   private void setPurge(PrintStream out, boolean purge)
   {
@@ -355,7 +355,7 @@ public class LaosCutter extends LaserCutter
       currentPurge = purge;
     }
   }
-  
+
   private void setCurrentProperty(PrintStream out, LaserProperty p)
   {
     if (p instanceof LaosCutterProperty)
@@ -371,9 +371,9 @@ public class LaosCutter extends LaserCutter
     else
     {
       throw new RuntimeException("The Laos driver only accepts LaosCutter properties (was "+p.getClass().toString()+")");
-    } 
+    }
   }
-  
+
   private void line(PrintStream out, float x, float y, double resolution)
   {
     out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
@@ -467,7 +467,7 @@ public class LaosCutter extends LaserCutter
   }
 
   /**
-   * This Method takes a raster-line represented by a list of bytes, 
+   * This Method takes a raster-line represented by a list of bytes,
    * where: byte0 ist the left-most byte, in one byte, the MSB is the
    * left-most bit, 0 representing laser off, 1 representing laser on.
    * The Output List of longs, where each value is the unsigned dword
@@ -479,7 +479,7 @@ public class LaosCutter extends LaserCutter
    * rightmost bit
    * @param line
    * @param outputLeftToRight
-   * @return 
+   * @return
    */
   public List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
   {
@@ -492,7 +492,7 @@ public class LaosCutter extends LaserCutter
     for(int i=0; i<s; i+=4)
     {
       result.add(
-        (((long) (i+3 < s ? 0xFF&line.get(i+3) : 0))<<24) 
+        (((long) (i+3 < s ? 0xFF&line.get(i+3) : 0))<<24)
         + (((long) (i+2 < s ? 0xFF&line.get(i+2) : 0))<<16)
         + (((long) (i+1 < s ? 0xFF&line.get(i+1) : 0))<<8)
         + ((long) (0xFF&line.get(i)))
@@ -502,13 +502,13 @@ public class LaosCutter extends LaserCutter
     {
       Collections.reverse(result);
       for(int i=0;i<result.size();i++)
-      {   
+      {
         result.set(i, Long.reverse(result.get(i)) >>> 32);
       }
     }
     return result;
   }
-  
+
   private byte[] generateLaosRasterCode(RasterPart rp, double resolution) throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -549,11 +549,11 @@ public class LaosCutter extends LaserCutter
         {
           bytes.add((byte) 0);
           space -= 8;
-        }    
+        }
         if (dirRight)
         {
           //move to the first point of the line
-          move(out, lineStart.x, lineStart.y, resolution);         
+          move(out, lineStart.x, lineStart.y, resolution);
           List<Long> dwords = this.byteLineToDwords(bytes, true);
           loadBitmapLine(out, dwords);
           line(out, lineStart.x + (dwords.size()*32), lineStart.y, resolution);
@@ -562,9 +562,9 @@ public class LaosCutter extends LaserCutter
         {
           //move to the first point of the line
           List<Long> dwords = this.byteLineToDwords(bytes, false);
-          move(out, lineStart.x+(dwords.size()*32), lineStart.y, resolution);         
+          move(out, lineStart.x+(dwords.size()*32), lineStart.y, resolution);
           loadBitmapLine(out, dwords);
-          line(out, lineStart.x, lineStart.y, resolution);  
+          line(out, lineStart.x, lineStart.y, resolution);
         }
       }
       if (!this.isEngraveUnidirectional())
@@ -574,7 +574,7 @@ public class LaosCutter extends LaserCutter
     }
     return result.toByteArray();
   }
-  
+
   private byte[] generateInitializationCode() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -618,7 +618,7 @@ public class LaosCutter extends LaserCutter
     out.write(this.generateShutdownCode());
     out.close();
   }
-  
+
   @Override
   public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
   {
@@ -627,6 +627,7 @@ public class LaosCutter extends LaserCutter
     ByteArrayOutputStream buffer = null;
     pl.taskChanged(this, "checking job");
     checkJob(job);
+    job.applyStartPoint();
     if (!useTftp)
     {
       pl.taskChanged(this, "connecting");

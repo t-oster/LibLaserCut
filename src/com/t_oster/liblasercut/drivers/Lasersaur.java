@@ -371,6 +371,7 @@ public class Lasersaur extends LaserCutter {
     BufferedOutputStream out;
     pl.taskChanged(this, "checking job");
     checkJob(job);
+    job.applyStartPoint();
     pl.taskChanged(this, "connecting");
     CommPortIdentifier cpi = null;
     //since the CommPortIdentifier.getPortIdentifier(String name) method
