@@ -62,8 +62,10 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_TFTP = "Use TFTP instead of TCP";
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
   private static final String SETTING_UNIDIR = "Engrave unidirectional";
+  private static final String SETTING_DEBUGFILE = "Debug output file";
 
   private boolean unidir = false;
+  private String debugFilename = "";
 
   @Override
   public LaosCutterProperty getLaserPropertyForVectorPart()
@@ -622,6 +624,12 @@ public class LaosCutter extends LaserCutter
   @Override
   public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
   {
+    currentFrequency = -1;
+    currentPower = -1;
+    currentSpeed = -1;
+    currentFocus = 0;
+    currentPurge = false;
+    currentVentilation = false;
     pl.progressChanged(this, 0);
     BufferedOutputStream out;
     ByteArrayOutputStream buffer = null;
@@ -655,6 +663,13 @@ public class LaosCutter extends LaserCutter
       tftp.sendFile(job.getName().replace(" ", "") +".lgc", TFTP.BINARY_MODE, bain, this.getHostname(), this.getPort());
       tftp.close();
       bain.close();
+      if (debugFilename != null && !"".equals(debugFilename))
+      {
+        pl.taskChanged(this, "writing "+debugFilename);
+        FileOutputStream o = new FileOutputStream(new File(debugFilename));
+        o.write(buffer.toByteArray());
+        o.close();
+      }
       pl.taskChanged(this, "sent.");
     }
     pl.progressChanged(this, 100);
@@ -736,6 +751,7 @@ public class LaosCutter extends LaserCutter
     //SETTING_MMPERSTEP,
     SETTING_TFTP,
     SETTING_RASTER_WHITESPACE,
+    SETTING_DEBUGFILE
   };
 
   @Override
@@ -747,7 +763,11 @@ public class LaosCutter extends LaserCutter
   @Override
   public Object getProperty(String attribute)
   {
-    if (SETTING_RASTER_WHITESPACE.equals(attribute))
+    if (SETTING_DEBUGFILE.equals(attribute))
+    {
+      return this.debugFilename;
+    }
+    else if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
       return (Double) this.getAddSpacePerRasterLine();
     }
@@ -793,6 +813,10 @@ public class LaosCutter extends LaserCutter
   @Override
   public void setProperty(String attribute, Object value)
   {
+    if (SETTING_DEBUGFILE.equals(attribute))
+    {
+      this.debugFilename = value != null ? (String) value : "";
+    }
     if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
       this.setAddSpacePerRasterLine((Double) value);
@@ -841,6 +865,7 @@ public class LaosCutter extends LaserCutter
     LaosCutter clone = new LaosCutter();
     clone.hostname = hostname;
     clone.port = port;
+    clone.debugFilename = debugFilename;
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
     clone.flipXaxis = flipXaxis;
