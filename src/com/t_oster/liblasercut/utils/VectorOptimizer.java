@@ -4,6 +4,9 @@ import com.t_oster.liblasercut.LaserProperty;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
+import com.t_oster.liblasercut.platform.Rectangle;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,8 +19,8 @@ public class VectorOptimizer
   public enum OrderStrategy
   {
     FILE,
-    //INNER_FIRST,
-    NEAREST
+    NEAREST,
+    INNER_FIRST
   }
 
   class Element
@@ -39,11 +42,42 @@ public class VectorOptimizer
         moves = inv;
       }
     }
+    
+   
+    
     Point getEnd()
     {
       return moves.isEmpty() ? start : moves.get(moves.size()-1);
     }
+    
+    /** 
+     * compute bounding box of moves, including start point
+     * @return Rectangle 
+     */
+    Rectangle boundingBox() {
+      if (start == null) { // TODO may this happen?
+        return null;
+      }
+      Rectangle bb=new Rectangle(start.x,start.y,start.x,start.y);
+      for (Point p: moves) {
+        bb.add(p);
+      }
+      return bb;
+    }
+    
+    /**
+     * test if this Element represents a closed path (polygon)
+     * @return true if start equals end, false otherwise
+     */
+    boolean isClosedPath() {
+      if ((start == null) || moves.isEmpty()) {
+        return false;
+      }
+      return getEnd().equals(start);
+    }
   }
+  
+
 
   private OrderStrategy strategy = OrderStrategy.FILE;
 
@@ -165,6 +199,144 @@ public class VectorOptimizer
           }
         }
         break;
+      }
+      case INNER_FIRST: {
+        /** cut inside parts first, outside parts later
+         * this algorithm is very robust, it works even for unconnected paths that are split into individual lines (e.g. from some DXF imports)
+         * it is not completely perfect, as it only considers the bounding-box and not the individual path
+         * 
+         * see below for documentation of the inner workings
+         */
+        
+        // helper classes:
+        abstract class ElementValueComparator implements Comparator<Element> {
+          /**
+           * get one integer from the element
+           * order ascending by this integer
+           * inside objects should have the lowest values
+           */
+          abstract int getValue(Element e);
+          
+          /**
+           * compare by getValue()
+           */
+          @Override
+          public int compare(Element a, Element b) {            
+            Integer av = new Integer(getValue(a));
+            Integer bv = new Integer(getValue(b));
+            return av.compareTo(bv);
+          }
+          
+        }
+        
+        class XMinComparator extends ElementValueComparator {
+          // compare by XMin a>b
+          @Override
+          int getValue(Element e) {
+            return -e.boundingBox().getXMin();
+          }
+        }
+        
+        class YMinComparator extends ElementValueComparator {
+          // compare by YMin a>b
+          @Override
+          int getValue(Element e) {
+            return -e.boundingBox().getYMin();
+          }
+        }
+        
+        class XMaxComparator extends ElementValueComparator {
+          // compare by XMax a<b
+          @Override
+          int getValue(Element e) {
+            return e.boundingBox().getXMax();
+          }
+        }
+        
+        class YMaxComparator extends ElementValueComparator {
+          // compare by YMax a<b
+          @Override
+          int getValue(Element e) {
+            return e.boundingBox().getYMax();
+          }
+        }
+        result.addAll(e);
+        /**
+         * HEURISTIC:
+         * this algorithm is based on the following observation:
+         * let I and O be rectangles, I inside O
+         * for explanations, assume that:
+         * - the X-axis goes from left to right
+         * - the Y-axis goes from bottom to top
+         * 
+         *         ---------------- O: outside rectangle
+         *         |              |
+         *         |    ----      |
+         * y axis  |    |in| I    |
+         * ^       |    ----      |
+         * |       |              |
+         * |       ----------------
+         * |
+         *  ------> x axis
+         * 
+         * look at each border:
+         *  right border: I.getXMax() < O.getXMax()
+         *   left border: I.getXMin() > O.getXMin()
+         *    top border: I.getYMax() < O.getYMax()
+         * bottom border: I.getYMin() > O.getYMin()
+         * 
+         * If we now SORT BY ymax ASCENDING, ymin DESCENDING, xmax ASCENDING, xmin DESCENDING
+         *           (higher sorting priority listed first)
+         * we get the rectangles sorted inside-out:
+         * 1. I
+         * 2. O
+         * 
+         * Because we sort by four values, this still works if 
+         * the two rectangles start at the same corner and have the same width,
+         * but only differ in height.
+         *  
+         * If each rectangle is split into four separate lines
+         * (e.g. because of a bad DXF import),
+         * this still mostly works:
+         *  1. O: bottom line
+         *  2. I: bottom
+         *  3. I: top, left, right (both have same YMax, but top has a higher YMin)
+         *  4: O: top, left, right (both have same YMax, but top has a higher YMin)
+         * 
+         * TRADEOFFS AND LIMITATIONS:
+         * This algorithm does not work for paths that have the same bounding-box
+         * (e.g. a circle inscribed to a square)
+         * 
+         * For concave polygons with the same bounding-box,
+         * many simple Polygon-inside-Polygon algorithms also fail 
+         * (or have a useless definition of "inside" that matches the misbehaviour):
+         * Draw a concave polygon, remove one point at a concave edge.
+         * The resulting polygon is clearly outside the original, although every edge of it is inside the original!
+         * 
+         * FUTURE WORK:
+         * It would also be nice to sort intersecting polygons, where one polygon
+         * is "90% inside" and "10% outside" the other.
+         * Real-world example:_A circular hole at the border of a rectangle.
+         * Due to rounding errors, it may appear slightly outside the rectangle.
+         * Mathematically, it is neither fully inside nor fully outside, but the
+         * user clearly wants it to be counted as "inside".
+         * 
+         * POSSIBLE LIBRARIES:
+         * http://sourceforge.net/projects/geom-java/
+         * http://sourceforge.net/projects/jts-topo-suite
+         * 
+         * USEFUL METHODS:
+         * Element.isClosedPath()
+         */
+        
+        // do the work:
+        Collections.sort(result,new XMinComparator());
+        Collections.sort(result,new YMinComparator());
+        Collections.sort(result,new XMaxComparator());
+        Collections.sort(result,new YMaxComparator());
+        
+        // the result is now mostly sorted
+        // TODO somehow sort by intersecting area
       }
     }
     return result;

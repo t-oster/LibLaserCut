@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html 
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:svg="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink">
+<head>
+<title>VisiCut SVG debug view</title>
+</head>
+<style>
+.done{stroke:black;}
+.todo{stroke:grey; fill:none;}
+</style>
+<script>
+<![CDATA[
+var maximum=0;
+function load(n) {
+	// get maximum
+	var i=0;
+	while (true) {
+		var obj=document.getElementById('visicut-'+i);
+		if (obj==null) {
+			// end of elements reached
+			break;
+		}
+		i++;
+		maximum=i;
+	}
+	document.getElementById('slider').max=maximum;
+}
+function showUntil(n) {
+	for (var i=0; i<n; i++) {
+		document.getElementById('visicut-'+i).setAttribute('class','done');
+	}
+	var i=n;
+	while (true) {
+		var obj=document.getElementById('visicut-'+i);
+		if (obj==null) {
+			// end of elements reached
+			break;
+		}
+		obj.setAttribute('class','todo');
+		i++;
+	}
+}
+]]>
+</script>
+<body onload="load()">
+
+<h1>VisiCut debug output</h1>
+<div style="display:block; width:100%;">
+  Slide to see individual steps. Please use this with Chrome or another browser that supports &lt;input type=&quot;range&quot;&gt; (not Firefox).<br/>
+Start <input id="slider" type="range" value="0" min="0" max="0" onchange="showUntil(this.value)" style="width:60%"/> End
+</div>
+
+
+<!-- REPLACE THIS WITH SVG -->
+
+</body>
+</html>
