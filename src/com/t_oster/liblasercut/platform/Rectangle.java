@@ -26,25 +26,40 @@ package com.t_oster.liblasercut.platform;
 public class Rectangle {
   private int x1, x2, y1, y2;
 
+  /**
+   * integer interval helper class
+   * represents the set { min, min+1, ..., max }
+   * 
+   * min must be < max
+   */
   private class Interval
   {
 
-    private int x1,x2;
+    private int min,max;
 
-    private Interval(int x1, int x2)
+    private Interval(int min, int max)
     {
-      this.x1 = x1;
-      this.x2 = x2;
+      this.min = min;
+      this.max = max;
+      if (min>max) {
+        throw new RuntimeException("Interval: min must be < max");
+      }
     }
 
+    /**
+     * @return true if the other interval is equal or is a subset
+     */
     private boolean isSubsetOf(Interval o)
     {
-      return o.x1 <= x1 && o.x2 >= x2;
+      return o.min <= min && o.max >= max;
     }
 
+    /**
+     * @return true if the other interval has at least one element in common with this
+     */
     private boolean intersects(Interval o)
     {
-      return (o.x1 >= x1 && o.x1 <= x2) || (o.x2 >= x1 && o.x2 <= x2);
+      return (o.min >= min && o.min <= max) || (o.max >= min && o.max <= max);
     }
 
   }
