@@ -26,6 +26,29 @@ package com.t_oster.liblasercut.platform;
 public class Rectangle {
   private int x1, x2, y1, y2;
 
+  private class Interval
+  {
+
+    private int x1,x2;
+
+    private Interval(int x1, int x2)
+    {
+      this.x1 = x1;
+      this.x2 = x2;
+    }
+
+    private boolean isSubsetOf(Interval o)
+    {
+      return o.x1 <= x1 && o.x2 >= x2;
+    }
+
+    private boolean intersects(Interval o)
+    {
+      return (o.x1 >= x1 && o.x1 <= x2) || (o.x2 >= x1 && o.x2 <= x2);
+    }
+
+  }
+
   /**
    * construct a rectangle with the corners (x1,y1) and (x2,y2)
    */
@@ -108,14 +131,14 @@ public class Rectangle {
   /**
    * X interval from left to right
    */
-  public Interval getXInterval() {
+  private Interval getXInterval() {
     return new Interval(x1,x2);
   }
 
   /**
    * Y interval from top to bottom
    */
-  public Interval getYInterval() {
+  private Interval getYInterval() {
     return new Interval(y1,y2);
   }
 
