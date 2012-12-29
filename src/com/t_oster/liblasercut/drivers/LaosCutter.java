@@ -303,13 +303,6 @@ public class LaosCutter extends LaserCutter
   {
     if (currentPower != power)
     {
-      if (currentPower == -1)
-      {
-        //Workaround. There seems to be a bug in LAOS, which causes the first
-        //Power line to be ignored. Thus we send it twice
-        //see http://http://redmine.laoslaser.org/issues/63
-        out.printf("7 101 %d\n", (int) (power * 100));
-      }
       out.printf("7 101 %d\n", (int) (power * 100));
       currentPower = power;
     }
@@ -318,13 +311,6 @@ public class LaosCutter extends LaserCutter
   private float currentSpeed = -1;
   private void setSpeed(PrintStream out, float speed)
   {
-    if (currentSpeed == -1)
-    {
-      //Workaround. There seems to be a bug in LAOS, which causes the first
-      //speed line to be ignored. Thus we send it twice
-      //see http://http://redmine.laoslaser.org/issues/63
-      out.printf("7 100 %d\n", (int) (speed * 100));
-    }
     if (currentSpeed != speed)
     {
       out.printf("7 100 %d\n", (int) (speed * 100));
@@ -595,14 +581,6 @@ public class LaosCutter extends LaserCutter
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    //some dummy power speed output, so that the real ones are not ignored
-    //Workaround. There seems to be a bug in LAOS, which causes the first
-    //Power line to be ignored. Thus we send it twice
-    //see http://http://redmine.laoslaser.org/issues/63
-    this.setSpeed(out, 1);
-    this.setPower(out, 1);
-    this.setSpeed(out, 2);
-    this.setPower(out, 2);
     return result.toByteArray();
   }
 
