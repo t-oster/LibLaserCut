@@ -86,6 +86,10 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
   @Override
   public boolean equals(Object o)
   {
+    if (this == o)
+    {
+      return true;
+    }
     if (o == null || !getClass().equals(o.getClass()))
     {
       return false;
@@ -111,8 +115,10 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
   @Override
   public int hashCode() {
     int hash = 7;
+    hash += this.getClass().hashCode();
     for (String key : this.getPropertyKeys())
     {
+      hash += key.hashCode();
       hash += this.getProperty(key).hashCode();
     }
     return hash;
