@@ -51,10 +51,9 @@ abstract class EpilogCutter extends LaserCutter
   private static final double FOCUSWIDTH = 0.0252;//How much mm/unit the focus values are
   private String hostname = "10.0.0.1";
   private int port = 515;
-  private Socket connection;
   private boolean autofocus = false;
-  private InputStream in;
-  private OutputStream out;
+  private transient InputStream in;
+  private transient OutputStream out;
 
   private int mm2focus(float mm)
   {
@@ -229,7 +228,7 @@ abstract class EpilogCutter extends LaserCutter
     }
     else
     {
-      connection = new Socket();
+      Socket connection = new Socket();
       connection.connect(new InetSocketAddress(hostname, port), NETWORK_TIMEOUT);
       in = new BufferedInputStream(connection.getInputStream());
       out = new BufferedOutputStream(connection.getOutputStream());
