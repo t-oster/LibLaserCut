@@ -26,8 +26,22 @@ import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
  */
 public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   
+  private boolean hidePurge = false;
+  private boolean hideVentilation = false;
+    
   private boolean ventilation = true;
 
+  public LaosCutterProperty(boolean hidePurge, boolean hideVentilation)
+  {
+    this.hidePurge = hidePurge;
+    this.hideVentilation = hideVentilation;
+  }
+  
+  public LaosCutterProperty()
+  {
+    this(false, false);
+  }
+  
   /**
    * Get the value of ventilation
    *
@@ -73,10 +87,21 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   public String[] getPropertyKeys()
   {
     String[] s = super.getPropertyKeys();
-    String[] result = new String[s.length+2];
+    if (this.hidePurge && this.hideVentilation)
+    {
+      return s;
+    }
+    String[] result = new String[s.length+ (this.hidePurge ? 0 : 1) + (this.hideVentilation ? 0 : 1)];
     System.arraycopy(s, 0, result, 0, s.length);
-    result[s.length] = "ventilation";
-    result[s.length+1] = "purge";
+    int i = s.length;
+    if (!this.hideVentilation)
+    {
+      result[i++] = "ventilation";
+    }
+    if (!this.hidePurge)
+    {
+      result[i++] = "purge";
+    }
     return result;
   }
 
