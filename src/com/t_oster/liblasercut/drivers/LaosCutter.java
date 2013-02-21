@@ -65,6 +65,19 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_DEBUGFILE = "Debug output file";
   private static final String SETTING_SUPPORTS_PURGE = "Supports purge";
   private static final String SETTING_SUPPORTS_VENTILATION = "Supports ventilation";
+  private static final String SETTING_SUPPORTS_FOCUS = "Supports focus (Z-axis movement)";
+
+  private boolean supportsFocus = false;
+
+  public boolean isSupportsFocus()
+  {
+    return supportsFocus;
+  }
+
+  public void setSupportsFocus(boolean supportsFocus)
+  {
+    this.supportsFocus = supportsFocus;
+  }
 
   private boolean supportsPurge = false;
 
@@ -96,19 +109,19 @@ public class LaosCutter extends LaserCutter
   @Override
   public LaosCutterProperty getLaserPropertyForVectorPart()
   {
-    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation);
+    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus);
   }
 
   @Override
   public LaosCutterProperty getLaserPropertyForRasterPart()
   {
-    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation);
+    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus);
   }
 
   @Override
   public LaosCutterProperty getLaserPropertyForRaster3dPart()
   {
-    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation);
+    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus);
   }
 
   public void setEngraveUnidirectional(boolean uni)
@@ -389,7 +402,10 @@ public class LaosCutter extends LaserCutter
     if (p instanceof LaosCutterProperty)
     {
       LaosCutterProperty prop = (LaosCutterProperty) p;
-      setFocus(out, prop.getFocus());
+      if (this.supportsFocus)
+      {
+        setFocus(out, prop.getFocus());
+      }
       if (this.supportsVentilation)
       {
         setVentilation(out, prop.getVentilation());
@@ -783,6 +799,7 @@ public class LaosCutter extends LaserCutter
     //SETTING_MMPERSTEP,
     SETTING_SUPPORTS_VENTILATION,
     SETTING_SUPPORTS_PURGE,
+    SETTING_SUPPORTS_FOCUS,
     SETTING_TFTP,
     SETTING_RASTER_WHITESPACE,
     SETTING_DEBUGFILE
@@ -812,6 +829,10 @@ public class LaosCutter extends LaserCutter
     else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
     {
       return (Boolean) this.supportsVentilation;
+    }
+    else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
+    {
+      return (Boolean) this.supportsFocus;
     }
     else if (SETTING_UNIDIR.equals(attribute))
     {
@@ -859,17 +880,21 @@ public class LaosCutter extends LaserCutter
     {
       this.debugFilename = value != null ? (String) value : "";
     }
-    if (SETTING_RASTER_WHITESPACE.equals(attribute))
+    else if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
       this.setAddSpacePerRasterLine((Double) value);
     }
-    if (SETTING_SUPPORTS_PURGE.equals(attribute))
+    else if (SETTING_SUPPORTS_PURGE.equals(attribute))
     {
       this.setSupportsPurge((Boolean) value);
     }
-    if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
+    else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
     {
       this.setSupportsVentilation((Boolean) value);
+    }
+    else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
+    {
+      this.setSupportsFocus((Boolean) value);
     }
     else if (SETTING_UNIDIR.endsWith(attribute))
     {
@@ -926,6 +951,7 @@ public class LaosCutter extends LaserCutter
     clone.unidir = unidir;
     clone.supportsPurge = supportsPurge;
     clone.supportsVentilation = supportsVentilation;
+    clone.supportsFocus = supportsFocus;
     return clone;
   }
 

@@ -19,6 +19,8 @@
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  *
@@ -28,18 +30,20 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   
   private boolean hidePurge = false;
   private boolean hideVentilation = false;
+  private boolean hideFocus = false;
     
   private boolean ventilation = true;
 
-  public LaosCutterProperty(boolean hidePurge, boolean hideVentilation)
+  public LaosCutterProperty(boolean hidePurge, boolean hideVentilation, boolean hideFocus)
   {
     this.hidePurge = hidePurge;
     this.hideVentilation = hideVentilation;
+    this.hideFocus = hideFocus;
   }
   
   public LaosCutterProperty()
   {
-    this(false, false);
+    this(false, false, false);
   }
   
   /**
@@ -86,23 +90,21 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   @Override
   public String[] getPropertyKeys()
   {
-    String[] s = super.getPropertyKeys();
-    if (this.hidePurge && this.hideVentilation)
+    LinkedList<String> result = new LinkedList<String>();
+    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    if (this.hideFocus)
     {
-      return s;
+      result.remove("focus");
     }
-    String[] result = new String[s.length+ (this.hidePurge ? 0 : 1) + (this.hideVentilation ? 0 : 1)];
-    System.arraycopy(s, 0, result, 0, s.length);
-    int i = s.length;
     if (!this.hideVentilation)
     {
-      result[i++] = "ventilation";
+      result.add("ventilation");
     }
     if (!this.hidePurge)
     {
-      result[i++] = "purge";
+      result.add("purge");
     }
-    return result;
+    return result.toArray(new String[0]);
   }
 
   @Override
