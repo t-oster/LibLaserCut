@@ -1,20 +1,20 @@
 /**
- * This file is part of VisiCut.
- * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * This file is part of LibLaserCut.
+ * Copyright (C) 2011 - 2013 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  *
- *     VisiCut is free software: you can redistribute it and/or modify
+ *     LibLaserCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *    VisiCut is distributed in the hope that it will be useful,
+ *     LibLaserCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
  *
  *     You should have received a copy of the GNU Lesser General Public License
- *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with LibLaserCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 package com.t_oster.liblasercut.drivers;
 
@@ -63,26 +63,65 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
   private static final String SETTING_UNIDIR = "Engrave unidirectional";
   private static final String SETTING_DEBUGFILE = "Debug output file";
+  private static final String SETTING_SUPPORTS_PURGE = "Supports purge";
+  private static final String SETTING_SUPPORTS_VENTILATION = "Supports ventilation";
+  private static final String SETTING_SUPPORTS_FOCUS = "Supports focus (Z-axis movement)";
 
+  private boolean supportsFocus = false;
+
+  public boolean isSupportsFocus()
+  {
+    return supportsFocus;
+  }
+
+  public void setSupportsFocus(boolean supportsFocus)
+  {
+    this.supportsFocus = supportsFocus;
+  }
+
+  private boolean supportsPurge = false;
+
+  public boolean isSupportsPurge()
+  {
+    return supportsPurge;
+  }
+
+  public void setSupportsPurge(boolean supportsPurge)
+  {
+    this.supportsPurge = supportsPurge;
+  }
+
+    private boolean supportsVentilation = false;
+
+  public boolean isSupportsVentilation()
+  {
+    return supportsVentilation;
+  }
+
+  public void setSupportsVentilation(boolean supportsVentilation)
+  {
+    this.supportsVentilation = supportsVentilation;
+  }
+  
   private boolean unidir = false;
   private String debugFilename = "";
 
   @Override
   public LaosCutterProperty getLaserPropertyForVectorPart()
   {
-    return new LaosCutterProperty();
+    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus);
   }
 
   @Override
   public LaosCutterProperty getLaserPropertyForRasterPart()
   {
-    return new LaosCutterProperty();
+    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus);
   }
 
   @Override
   public LaosCutterProperty getLaserPropertyForRaster3dPart()
   {
-    return new LaosCutterProperty();
+    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus);
   }
 
   public void setEngraveUnidirectional(boolean uni)
@@ -303,13 +342,6 @@ public class LaosCutter extends LaserCutter
   {
     if (currentPower != power)
     {
-      if (currentPower == -1)
-      {
-        //Workaround. There seems to be a bug in LAOS, which causes the first
-        //Power line to be ignored. Thus we send it twice
-        //see http://http://redmine.laoslaser.org/issues/63
-        out.printf("7 101 %d\n", (int) (power * 100));
-      }
       out.printf("7 101 %d\n", (int) (power * 100));
       currentPower = power;
     }
@@ -370,9 +402,18 @@ public class LaosCutter extends LaserCutter
     if (p instanceof LaosCutterProperty)
     {
       LaosCutterProperty prop = (LaosCutterProperty) p;
-      setFocus(out, prop.getFocus());
-      setVentilation(out, prop.getVentilation());
-      setPurge(out, prop.getPurge());
+      if (this.supportsFocus)
+      {
+        setFocus(out, prop.getFocus());
+      }
+      if (this.supportsVentilation)
+      {
+        setVentilation(out, prop.getVentilation());
+      }
+      if (this.supportsPurge)
+      {
+        setPurge(out, prop.getPurge());
+      }
       setSpeed(out, prop.getSpeed());
       setPower(out, prop.getPower());
       setFrequency(out, prop.getFrequency());
@@ -756,6 +797,9 @@ public class LaosCutter extends LaserCutter
     //SETTING_FLIPX,
     //SETTING_FLIPY,
     //SETTING_MMPERSTEP,
+    SETTING_SUPPORTS_VENTILATION,
+    SETTING_SUPPORTS_PURGE,
+    SETTING_SUPPORTS_FOCUS,
     SETTING_TFTP,
     SETTING_RASTER_WHITESPACE,
     SETTING_DEBUGFILE
@@ -777,6 +821,18 @@ public class LaosCutter extends LaserCutter
     else if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
       return (Double) this.getAddSpacePerRasterLine();
+    }
+    else if (SETTING_SUPPORTS_PURGE.equals(attribute))
+    {
+      return (Boolean) this.supportsPurge;
+    }
+    else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
+    {
+      return (Boolean) this.supportsVentilation;
+    }
+    else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
+    {
+      return (Boolean) this.supportsFocus;
     }
     else if (SETTING_UNIDIR.equals(attribute))
     {
@@ -824,9 +880,21 @@ public class LaosCutter extends LaserCutter
     {
       this.debugFilename = value != null ? (String) value : "";
     }
-    if (SETTING_RASTER_WHITESPACE.equals(attribute))
+    else if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
       this.setAddSpacePerRasterLine((Double) value);
+    }
+    else if (SETTING_SUPPORTS_PURGE.equals(attribute))
+    {
+      this.setSupportsPurge((Boolean) value);
+    }
+    else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
+    {
+      this.setSupportsVentilation((Boolean) value);
+    }
+    else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
+    {
+      this.setSupportsFocus((Boolean) value);
     }
     else if (SETTING_UNIDIR.endsWith(attribute))
     {
@@ -881,6 +949,9 @@ public class LaosCutter extends LaserCutter
     clone.useTftp = useTftp;
     clone.addSpacePerRasterLine = addSpacePerRasterLine;
     clone.unidir = unidir;
+    clone.supportsPurge = supportsPurge;
+    clone.supportsVentilation = supportsVentilation;
+    clone.supportsFocus = supportsFocus;
     return clone;
   }
 

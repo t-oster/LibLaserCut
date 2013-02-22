@@ -1,24 +1,26 @@
 /**
- * This file is part of VisiCut.
- * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * This file is part of LibLaserCut.
+ * Copyright (C) 2011 - 2013 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
- * 
- *     VisiCut is free software: you can redistribute it and/or modify
+ *
+ *     LibLaserCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
- *    VisiCut is distributed in the hope that it will be useful,
+ *
+ *     LibLaserCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU Lesser General Public License
- *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with LibLaserCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  *
@@ -26,8 +28,24 @@ import com.t_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
  */
 public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   
+  private boolean hidePurge = false;
+  private boolean hideVentilation = false;
+  private boolean hideFocus = false;
+    
   private boolean ventilation = true;
 
+  public LaosCutterProperty(boolean hidePurge, boolean hideVentilation, boolean hideFocus)
+  {
+    this.hidePurge = hidePurge;
+    this.hideVentilation = hideVentilation;
+    this.hideFocus = hideFocus;
+  }
+  
+  public LaosCutterProperty()
+  {
+    this(false, false, false);
+  }
+  
   /**
    * Get the value of ventilation
    *
@@ -72,12 +90,21 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   @Override
   public String[] getPropertyKeys()
   {
-    String[] s = super.getPropertyKeys();
-    String[] result = new String[s.length+2];
-    System.arraycopy(s, 0, result, 0, s.length);
-    result[s.length] = "ventilation";
-    result[s.length+1] = "purge";
-    return result;
+    LinkedList<String> result = new LinkedList<String>();
+    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    if (this.hideFocus)
+    {
+      result.remove("focus");
+    }
+    if (!this.hideVentilation)
+    {
+      result.add("ventilation");
+    }
+    if (!this.hidePurge)
+    {
+      result.add("purge");
+    }
+    return result.toArray(new String[0]);
   }
 
   @Override

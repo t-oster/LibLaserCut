@@ -1,20 +1,20 @@
 /**
- * This file is part of VisiCut.
- * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * This file is part of LibLaserCut.
+ * Copyright (C) 2011 - 2013 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  *
- *     VisiCut is free software: you can redistribute it and/or modify
+ *     LibLaserCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *    VisiCut is distributed in the hope that it will be useful,
+ *     LibLaserCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
  *
  *     You should have received a copy of the GNU Lesser General Public License
- *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with LibLaserCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 package com.t_oster.liblasercut.dithering;
 
@@ -86,6 +86,10 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
   @Override
   public boolean equals(Object o)
   {
+    if (this == o)
+    {
+      return true;
+    }
     if (o == null || !getClass().equals(o.getClass()))
     {
       return false;
@@ -111,8 +115,10 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
   @Override
   public int hashCode() {
     int hash = 7;
+    hash += this.getClass().hashCode();
     for (String key : this.getPropertyKeys())
     {
+      hash += key.hashCode();
       hash += this.getProperty(key).hashCode();
     }
     return hash;

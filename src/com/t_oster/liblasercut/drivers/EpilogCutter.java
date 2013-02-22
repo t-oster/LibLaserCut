@@ -1,20 +1,20 @@
 /**
- * This file is part of VisiCut.
- * Copyright (C) 2012 Thomas Oster <thomas.oster@rwth-aachen.de>
+ * This file is part of LibLaserCut.
+ * Copyright (C) 2011 - 2013 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  *
- *     VisiCut is free software: you can redistribute it and/or modify
+ *     LibLaserCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *    VisiCut is distributed in the hope that it will be useful,
+ *     LibLaserCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
  *
  *     You should have received a copy of the GNU Lesser General Public License
- *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with LibLaserCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 /**
  * Known Limitations:
@@ -51,10 +51,9 @@ abstract class EpilogCutter extends LaserCutter
   private static final double FOCUSWIDTH = 0.0252;//How much mm/unit the focus values are
   private String hostname = "10.0.0.1";
   private int port = 515;
-  private Socket connection;
   private boolean autofocus = false;
-  private InputStream in;
-  private OutputStream out;
+  private transient InputStream in;
+  private transient OutputStream out;
 
   private int mm2focus(float mm)
   {
@@ -229,7 +228,7 @@ abstract class EpilogCutter extends LaserCutter
     }
     else
     {
-      connection = new Socket();
+      Socket connection = new Socket();
       connection.connect(new InetSocketAddress(hostname, port), NETWORK_TIMEOUT);
       in = new BufferedInputStream(connection.getInputStream());
       out = new BufferedOutputStream(connection.getOutputStream());
