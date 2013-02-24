@@ -18,7 +18,7 @@
  **/
 package com.t_oster.liblasercut.laserscript;
 
-import sun.org.mozilla.javascript.ClassShutter;
+import org.mozilla.javascript.ClassShutter;
 
 /**
  *

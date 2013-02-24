@@ -23,11 +23,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import javax.script.ScriptException;
-import sun.org.mozilla.javascript.Context;
-import sun.org.mozilla.javascript.ContextFactory;
-import sun.org.mozilla.javascript.NativeJavaObject;
-import sun.org.mozilla.javascript.Scriptable;
-import sun.org.mozilla.javascript.WrapFactory;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.NativeJavaObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.WrapFactory;
 
 /**
  * This class provides a JavaScript interpreter which is pretty sandboxed.
@@ -95,7 +95,7 @@ public class ScriptInterpreter
     {
       ContextFactory.initGlobal(new SandboxContextFactory());
     }
-    Context cx = ContextFactory.getGlobal().enterContext();
+    Context cx = ContextFactory.getGlobal().enter();
     try
     {
       cx.setClassShutter(ScriptingSecurity.getInstance());
