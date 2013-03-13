@@ -321,7 +321,7 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, SocketTimeoutException, UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
     pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
@@ -358,6 +358,10 @@ abstract class EpilogCutter extends LaserCutter
     }
     int number = 0;
     int size = jobs.size();
+    if (size > 1)
+    {
+      warnings.add("The job had to be split into "+size+" jobs.");
+    }
     for(List<JobPart> current : jobs)
     {
       number++;

@@ -23,6 +23,7 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Util;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -64,6 +65,11 @@ public abstract class LaserCutter implements Cloneable, Customizable {
         }
     }
 
+    public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
+    {
+      this.sendJob(job, pl, new LinkedList<String>());
+    }
+    
     /**
      * Performs sanity checks on the LaserJob and sends it to the Cutter
      * @param job
@@ -71,7 +77,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * @throws IllegalJobException if the Job didn't pass the SanityCheck
      * @throws Exception  if there is a Problem with the Communication or Queue
      */
-    public abstract void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception;
+    public abstract void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception;
 
     /**
      * If you lasercutter supports autofocus, override this method,
@@ -89,7 +95,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * @throws IllegalJobException
      * @throws Exception 
      */
-    public void sendJob(LaserJob job) throws IllegalJobException, Exception {
+    public void sendJob(LaserJob job, List<String> warnings) throws IllegalJobException, Exception {
         this.sendJob(job, new ProgressListener() {
 
             @Override
@@ -101,7 +107,17 @@ public abstract class LaserCutter implements Cloneable, Customizable {
             public void taskChanged(Object source, String taskName) {
                 System.out.println(taskName + "...");
             }
-        });
+        }, warnings);
+    }
+    
+    public void sendJob(LaserJob job) throws IllegalJobException, Exception
+    {
+      List<String> warnings = new LinkedList<String>();
+      this.sendJob(job, warnings);
+      for(String w : warnings)
+      {
+        System.out.println("WARNING: "+w);
+      }
     }
 
     /**

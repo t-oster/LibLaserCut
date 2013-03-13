@@ -364,7 +364,7 @@ public class Lasersaur extends LaserCutter {
   }
 
   @Override
-  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception {
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
     pl.progressChanged(this, 0);
     this.currentPower = -1;
     this.currentSpeed = -1;

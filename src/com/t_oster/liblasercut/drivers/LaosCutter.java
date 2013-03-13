@@ -670,7 +670,7 @@ public class LaosCutter extends LaserCutter
   }
 
   @Override
-  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
     currentFrequency = -1;
     currentPower = -1;

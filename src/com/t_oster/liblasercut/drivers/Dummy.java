@@ -220,7 +220,7 @@ public class Dummy extends LaserCutter {
 
 
   @Override
-  public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception {
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
     pl.progressChanged(this, 0);
     
     BufferedOutputStream out;
