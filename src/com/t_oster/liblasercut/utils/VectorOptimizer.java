@@ -38,7 +38,8 @@ public class VectorOptimizer
   {
     FILE,
     NEAREST,
-    INNER_FIRST
+    INNER_FIRST,
+    SMALLEST_FIRST
   }
 
   class Element
@@ -157,6 +158,33 @@ public class VectorOptimizer
     return Math.sqrt((a.y-b.y)*(a.y-b.y)+(a.x-b.x)*(a.x-b.x));
   }
 
+    
+    
+    
+    // helper classes:
+    private abstract class ElementValueComparator implements Comparator<Element> {
+        /**
+         * get one integer from the element
+         * order ascending by this integer
+         * inside objects should have the lowest values
+         */
+        abstract int getValue(Element e);
+        
+        /**
+         * compare by getValue()
+         */
+        @Override
+        public int compare(Element a, Element b) {
+            Integer av = new Integer(getValue(a));
+            Integer bv = new Integer(getValue(b));
+            return av.compareTo(bv);
+        }
+        
+    }
+    
+
+    
+    
   private List<Element> sort(List<Element> e)
   {
     List<Element> result = new LinkedList<Element>();
@@ -226,26 +254,6 @@ public class VectorOptimizer
          * see below for documentation of the inner workings
          */
         
-        // helper classes:
-        abstract class ElementValueComparator implements Comparator<Element> {
-          /**
-           * get one integer from the element
-           * order ascending by this integer
-           * inside objects should have the lowest values
-           */
-          abstract int getValue(Element e);
-          
-          /**
-           * compare by getValue()
-           */
-          @Override
-          public int compare(Element a, Element b) {            
-            Integer av = new Integer(getValue(a));
-            Integer bv = new Integer(getValue(b));
-            return av.compareTo(bv);
-          }
-          
-        }
         
         class XMinComparator extends ElementValueComparator {
           // compare by XMin a>b
@@ -356,6 +364,59 @@ public class VectorOptimizer
         // the result is now mostly sorted
         // TODO somehow sort by intersecting area
       }
+            
+    case SMALLEST_FIRST: {
+        /** cut smaller parts first, bigger parts later
+         Heuristic is explained below...
+         */
+        
+        
+        class SmallerComparator extends ElementValueComparator {
+            // compare by XMin a>b
+            @Override
+            int getValue(Element e) {
+                return (e.boundingBox().getXMax()-e.boundingBox().getXMin()) * (e.boundingBox().getYMax()-e.boundingBox().getYMin());
+            }
+        }
+        
+        
+        result.addAll(e);
+        /**
+         * HEURISTIC:
+         * this algorithm is based on the following observation:
+         * let S and B be rectangles, S smaller than B
+         * for explanations, assume that:
+         * - the X-axis goes from left to right
+         * - the Y-axis goes from bottom to top
+         *
+         *         ---------------- B: bigger rectangle
+         *         |              |
+         *         |    ----      |
+         * y axis  |    | S|      |
+         * ^       |    ----      |
+         * |       |              |
+         * |       ----------------
+         * |
+         *  ------> x axis
+         *
+         * we get the rectangles sorted by size
+         * 1. S
+         * 2. B
+         */
+        
+        // do the work:
+        Collections.sort(result,new SmallerComparator());
+        
+        // the result is now mostly sorted
+        
+    }
+        
+        
+        
+        
+        
+            
+            
     }
     return result;
   }
