@@ -41,7 +41,8 @@ public class LibInfo
       EpilogHelix.class,
       LaosCutter.class,
       Lasersaur.class,
-      Dummy.class
+      Dummy.class,
+      MPC6515Cutter.class
     };
   }
 }
