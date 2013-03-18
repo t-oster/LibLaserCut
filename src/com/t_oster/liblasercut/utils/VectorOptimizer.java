@@ -366,11 +366,7 @@ public class VectorOptimizer
       }
             
     case SMALLEST_FIRST: {
-        /** cut inside parts first, outside parts later
-         * this algorithm is very robust, it works even for unconnected paths that are split into individual lines (e.g. from some DXF imports)
-         * it is not completely perfect, as it only considers the bounding-box and not the individual path
-         *
-         * see below for documentation of the inner workings
+        /** cut smaller parts first, bigger parts later
          */
         
         
