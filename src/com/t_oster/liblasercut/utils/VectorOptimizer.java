@@ -367,6 +367,7 @@ public class VectorOptimizer
             
     case SMALLEST_FIRST: {
         /** cut smaller parts first, bigger parts later
+         Heuristic is explained below...
          */
         
         
