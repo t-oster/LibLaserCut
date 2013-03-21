@@ -73,7 +73,7 @@ public class IModelaMill extends LaserCutter
             out.println("M05");//stop spindle
             spindleOn = false;
           }
-          out.printf("G00 X%d Y%d\n", x, y);
+          out.printf("G00 X%f Y%f\n", x, y);
           break;
         }
         case LINETO:
@@ -85,7 +85,7 @@ public class IModelaMill extends LaserCutter
             out.println("M03");//start spindle
             spindleOn = true;
           }
-          out.printf("G01 X%d Y%d\n", x, y);
+          out.printf("G01 X%f Y%f\n", x, y);
           break;
         }
         case SETPROPERTY:
@@ -130,6 +130,7 @@ public class IModelaMill extends LaserCutter
     sendGCode(result.toByteArray());
     pl.progressChanged(this, 100);
     pl.taskChanged(this, "done");
+    warnings.add("WARNING: THE iModela driver only outputs to command line");
   }
 
   @Override
