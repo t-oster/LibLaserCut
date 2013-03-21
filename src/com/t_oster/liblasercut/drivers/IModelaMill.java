@@ -1,20 +1,20 @@
 /**
- * This file is part of VisiCut.
+ * This file is part of LibLaserCut.
  * Copyright (C) 2011 - 2013 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  *
- *     VisiCut is free software: you can redistribute it and/or modify
+ *     LibLaserCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     VisiCut is distributed in the hope that it will be useful,
+ *     LibLaserCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
  *
  *     You should have received a copy of the GNU Lesser General Public License
- *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with LibLaserCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
 package com.t_oster.liblasercut.drivers;
@@ -58,10 +58,12 @@ public class IModelaMill extends LaserCutter
     out.println("%");
     out.println("G90");//absolute positioning
     out.println("G21");//select mm as input unit
+    out.println("M03");//start spindle
   }
   
   private void writeFinalizationCode(PrintStream out)
   {
+    out.println("M05");//stop spindle
     out.println("M02");//END_OF_PROGRAM
     out.println("%");
   }
@@ -69,7 +71,12 @@ public class IModelaMill extends LaserCutter
   private void writeVectorCode(VectorPart p, PrintStream out)
   {
     double dpi = p.getDPI();
-    boolean spindleOn = false;
+    boolean headDown = false;
+    double olddepth = 0;
+    double depth = 0;
+    int spindleSpeed = -1;
+    double feedRate = -1;
+    int tool = -1;
     for (VectorCommand c : p.getCommandList())
     {
       switch (c.getType())
@@ -78,10 +85,10 @@ public class IModelaMill extends LaserCutter
         {
           double x = Util.px2mm(c.getX(), dpi);
           double y = Util.px2mm(c.getY(), dpi);
-          if (spindleOn)
+          if (headDown)
           {
-            out.println("M05");//stop spindle
-            spindleOn = false;
+            out.printf("G00 Z0\n");
+            headDown = false;
           }
           out.printf("G00 X%f Y%f\n", x, y);
           break;
@@ -90,16 +97,35 @@ public class IModelaMill extends LaserCutter
         {
           double x = Util.px2mm(c.getX(), dpi);
           double y = Util.px2mm(c.getY(), dpi);
-          if (!spindleOn)
+          if (!headDown || depth != olddepth)
           {
-            out.println("M03");//start spindle
-            spindleOn = true;
+            out.printf("G01 Zf\n", depth);
+            headDown = true;
+            olddepth = depth;
           }
           out.printf("G01 X%f Y%f\n", x, y);
           break;
         }
         case SETPROPERTY:
         {
+          IModelaProperty pr = (IModelaProperty) c.getProperty();
+          depth = pr.getDepth();
+          if (pr.getSpindleSpeed() != spindleSpeed)
+          {
+            spindleSpeed = pr.getSpindleSpeed();
+            out.printf("S%d\n", spindleSpeed);
+          }
+          if (pr.getFeedRate() != feedRate)
+          {
+            feedRate = pr.getFeedRate();
+            out.printf("F%f\n", feedRate);
+          }
+          if (pr.getTool() != tool)
+          {
+            tool = pr.getTool();
+            out.printf("M06T0\n");//return current tool
+            out.printf("M06T%d\n", tool);
+          }
           break;
         }
       }

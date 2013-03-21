@@ -1,20 +1,20 @@
 /**
- * This file is part of VisiCut.
+ * This file is part of LibLaserCut.
  * Copyright (C) 2011 - 2013 Thomas Oster <thomas.oster@rwth-aachen.de>
  * RWTH Aachen University - 52062 Aachen, Germany
  *
- *     VisiCut is free software: you can redistribute it and/or modify
+ *     LibLaserCut is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     VisiCut is distributed in the hope that it will be useful,
+ *     LibLaserCut is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU Lesser General Public License for more details.
  *
  *     You should have received a copy of the GNU Lesser General Public License
- *     along with VisiCut.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with LibLaserCut.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
 package com.t_oster.liblasercut.drivers;
@@ -28,13 +28,35 @@ import com.t_oster.liblasercut.LaserProperty;
 public class IModelaProperty implements LaserProperty
 {
 
-  private static String FEED_RATE = "feedRate";
-  private static String SPINDLE_SPEED = "spindleSpeed";
+  private static String DEPTH = "milling depth";
+  private static String FEED_RATE = "feed rate";
+  private static String SPINDLE_SPEED = "spindle speed";
   private static String TOOL = "tool";
   
-  private double feedRate = 0;
-  private double spindleSpeed = 0;
+  private double depth = 0;
+  private double feedRate = 1;
+  private int spindleSpeed = 100;
   private int tool = 1;
+
+  public double getDepth()
+  {
+    return depth;
+  }
+
+  public double getFeedRate()
+  {
+    return feedRate;
+  }
+
+  public int getSpindleSpeed()
+  {
+    return spindleSpeed;
+  }
+
+  public int getTool()
+  {
+    return tool;
+  }
   
   @Override
   public Object getMinimumValue(String name)
@@ -42,6 +64,10 @@ public class IModelaProperty implements LaserProperty
     if (TOOL.equals(name))
     {
       return (Integer) 1;
+    }
+    else if (SPINDLE_SPEED.equals(name))
+    {
+      return (Integer) 100;
     }
     else
     {
@@ -65,24 +91,29 @@ public class IModelaProperty implements LaserProperty
   public LaserProperty clone()
   {
     IModelaProperty result = new IModelaProperty();
-    result.feedRate = feedRate;
-    result.spindleSpeed = spindleSpeed;
-    result.tool = tool;
+    for (String k : getPropertyKeys())
+    {
+      result.setProperty(k, getProperty(k));
+    }
     return result;
   }
 
   @Override
   public String[] getPropertyKeys()
   {
-    return new String[]{SPINDLE_SPEED,FEED_RATE,TOOL};
+    return new String[]{DEPTH, SPINDLE_SPEED, FEED_RATE, TOOL};
   }
 
   @Override
   public void setProperty(String key, Object value)
   {
-    if (SPINDLE_SPEED.equals(key))
+    if (DEPTH.equals(key))
     {
-      spindleSpeed = (Double) value;
+      depth = (Double) value;
+    }
+    else if (SPINDLE_SPEED.equals(key))
+    {
+      spindleSpeed = (Integer) value;
     }
     else if (FEED_RATE.equals(key))
     {
@@ -97,7 +128,11 @@ public class IModelaProperty implements LaserProperty
   @Override
   public Object getProperty(String key)
   {
-    if (SPINDLE_SPEED.equals(key))
+    if (DEPTH.equals(key))
+    {
+      return depth;
+    }
+    else if (SPINDLE_SPEED.equals(key))
     {
       return spindleSpeed;
     }
