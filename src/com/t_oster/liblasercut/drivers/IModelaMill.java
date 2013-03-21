@@ -29,12 +29,16 @@ import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -43,6 +47,12 @@ import java.util.logging.Logger;
 public class IModelaMill extends LaserCutter
 {
 
+  private static String HOSTNAME = "Hostname/IP";
+  private static String PORT = "port";
+  
+  private String hostname = "localhost";
+  private int port = 5000;
+  
   private void writeInitializationCode(PrintStream out)
   {
     out.println("%");
@@ -102,8 +112,6 @@ public class IModelaMill extends LaserCutter
     return new IModelaProperty();
   }
   
-  
-  
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
@@ -127,10 +135,9 @@ public class IModelaMill extends LaserCutter
     writeFinalizationCode(out);
     pl.progressChanged(this, 50);
     pl.taskChanged(this, "sending...");
-    sendGCode(result.toByteArray());
+    sendGCode(result.toByteArray(), pl, warnings);
     pl.progressChanged(this, 100);
     pl.taskChanged(this, "done");
-    warnings.add("WARNING: THE iModela driver only outputs to command line");
   }
 
   @Override
@@ -171,29 +178,57 @@ public class IModelaMill extends LaserCutter
   @Override
   public String[] getPropertyKeys()
   {
-    return new String[0];
+    return new String[]{HOSTNAME, PORT};
   }
 
   @Override
   public void setProperty(String key, Object value)
   {
+    if (HOSTNAME.equals(key))
+    {
+      hostname = (String) value;
+    }
+    else if (PORT.equals(key))
+    {
+      port = (Integer) value;
+    }
   }
 
   @Override
   public Object getProperty(String key)
   {
+    if (HOSTNAME.equals(key))
+    {
+      return hostname;
+    }
+    else if (PORT.equals(key))
+    {
+      return (Integer) port;
+    }
     return null;
   }
 
-  private void sendGCode(byte[] toByteArray)
+  private void sendGCode(byte[] gcode, ProgressListener pl, List<String> warnings) throws IOException, URISyntaxException
   {
-    try
+    pl.taskChanged(this, "connecting...");
+    if ("stdout".equals(hostname))
     {
-      System.out.write(toByteArray);
+      pl.taskChanged(this, "sending...");
+      System.out.write(gcode);
     }
-    catch (IOException ex)
+    else if (hostname.startsWith("file://"))
     {
-      Logger.getLogger(IModelaMill.class.getName()).log(Level.SEVERE, null, ex);
+      PrintStream w = new PrintStream(new FileOutputStream(new File(new URI(hostname))));
+      pl.taskChanged(this, "sending...");
+      w.write(gcode);
+    }
+    else
+    {
+      Socket s = new Socket();
+      s.connect(new InetSocketAddress(hostname, port), 3000);
+      pl.taskChanged(this, "sending...");
+      s.getOutputStream().write(gcode);
+      s.close();
     }
   }
 
