@@ -39,6 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -87,10 +88,10 @@ public class IModelaMill extends LaserCutter
           double y = Util.px2mm(c.getY(), dpi);
           if (headDown)
           {
-            out.printf("G00 Z0\n");
+            out.println("G00 Z0");
             headDown = false;
           }
-          out.printf("G00 X%f Y%f\n", x, y);
+          out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f\n", x, y));
           break;
         }
         case LINETO:
@@ -99,11 +100,11 @@ public class IModelaMill extends LaserCutter
           double y = Util.px2mm(c.getY(), dpi);
           if (!headDown || depth != olddepth)
           {
-            out.printf("G01 Zf\n", depth);
+            out.print(String.format(Locale.ENGLISH, "G01 Z%f\n", depth));
             headDown = true;
             olddepth = depth;
           }
-          out.printf("G01 X%f Y%f\n", x, y);
+          out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f\n", x, y));
           break;
         }
         case SETPROPERTY:
@@ -113,18 +114,18 @@ public class IModelaMill extends LaserCutter
           if (pr.getSpindleSpeed() != spindleSpeed)
           {
             spindleSpeed = pr.getSpindleSpeed();
-            out.printf("S%d\n", spindleSpeed);
+            out.print(String.format(Locale.ENGLISH, "S%d\n", spindleSpeed));
           }
           if (pr.getFeedRate() != feedRate)
           {
             feedRate = pr.getFeedRate();
-            out.printf("F%f\n", feedRate);
+            out.print(String.format(Locale.ENGLISH, "F%f\n", feedRate));
           }
           if (pr.getTool() != tool)
           {
             tool = pr.getTool();
-            out.printf("M06T0\n");//return current tool
-            out.printf("M06T%d\n", tool);
+            out.print(String.format(Locale.ENGLISH, "M06T0\n"));//return current tool
+            out.print(String.format(Locale.ENGLISH, "M06T%d\n", tool));
           }
           break;
         }
