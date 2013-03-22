@@ -20,6 +20,7 @@
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.LaserProperty;
+import com.t_oster.liblasercut.platform.Util;
 
 /**
  *
@@ -146,5 +147,44 @@ public class IModelaProperty implements LaserProperty
     }
     return null;
   }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 13;
+    for (String k : this.getPropertyKeys())
+    {
+      if (this.getProperty(k) != null)
+      {
+        hash = 97 * hash + k.hashCode() + this.getProperty(k).hashCode();
+      }
+    }
+    hash += super.hashCode();
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+    IModelaProperty other = (IModelaProperty) obj;
+    for (String k : this.getPropertyKeys())
+    {
+      if (Util.differ(this.getProperty(k), other.getProperty(k)))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  
 
 }
