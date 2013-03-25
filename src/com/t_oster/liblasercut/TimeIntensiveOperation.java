@@ -30,16 +30,22 @@ import java.util.List;
 public abstract class TimeIntensiveOperation
 {
 
-  private final List<ProgressListener> listeners = new LinkedList<ProgressListener>();
+  //has to be initialized in the getter, because it will be
+  //null after deserialization
+  private List<ProgressListener> listeners = null;
 
   private List<ProgressListener> getListeners()
   {
+    if (listeners == null)
+    {
+      listeners = new LinkedList<ProgressListener>();
+    }
     return listeners;
   }
 
   public void addProgressListener(ProgressListener l)
   {
-    synchronized(listeners)
+    synchronized(getListeners())
     {
       getListeners().add(l);
     }
@@ -47,7 +53,7 @@ public abstract class TimeIntensiveOperation
 
   public void removeProgressListener(ProgressListener l)
   {
-    synchronized(listeners)
+    synchronized(getListeners())
     {
       getListeners().remove(l);
     }
@@ -55,7 +61,7 @@ public abstract class TimeIntensiveOperation
 
   public void fireProgressChanged(int progress)
   {
-    synchronized(listeners)
+    synchronized(getListeners())
     {
       for (ProgressListener l : getListeners())
       {
@@ -66,7 +72,7 @@ public abstract class TimeIntensiveOperation
 
   public void fireTaskChanged(String name)
   {
-    synchronized(listeners)
+    synchronized(getListeners())
     {
       for (ProgressListener l : getListeners())
       {
