@@ -206,7 +206,7 @@ public class IModelaMill extends LaserCutter
     // the smallest dot that we can engrave is 0.2mm with the corresponding tool.
     // 0.2mm = 0.00787401575 inches (aka 8 mil)
     // ==> 127 dots per inch, and every dot is 0.2 mm in diameter
-    return Arrays.asList(new Double[]{127});
+    return Arrays.asList(new Double[]{127d});
   }
 
   @Override
