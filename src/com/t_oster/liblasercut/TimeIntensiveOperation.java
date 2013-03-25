@@ -30,40 +30,48 @@ import java.util.List;
 public abstract class TimeIntensiveOperation
 {
 
-  private List<ProgressListener> listeners = null;
+  private final List<ProgressListener> listeners = new LinkedList<ProgressListener>();
 
   private List<ProgressListener> getListeners()
   {
-    if (listeners == null)
-    {
-      listeners = new LinkedList<ProgressListener>();
-    }
     return listeners;
   }
 
   public void addProgressListener(ProgressListener l)
   {
-    getListeners().add(l);
+    synchronized(listeners)
+    {
+      getListeners().add(l);
+    }
   }
 
   public void removeProgressListener(ProgressListener l)
   {
-    getListeners().remove(l);
+    synchronized(listeners)
+    {
+      getListeners().remove(l);
+    }
   }
 
   public void fireProgressChanged(int progress)
   {
-    for (ProgressListener l : getListeners())
+    synchronized(listeners)
     {
-      l.progressChanged(this, progress);
+      for (ProgressListener l : getListeners())
+      {
+        l.progressChanged(this, progress);
+      }
     }
   }
 
   public void fireTaskChanged(String name)
   {
-    for (ProgressListener l : getListeners())
+    synchronized(listeners)
     {
-      l.taskChanged(this, name);
+      for (ProgressListener l : getListeners())
+      {
+        l.taskChanged(this, name);
+      }
     }
   }
   private int progress = 0;
