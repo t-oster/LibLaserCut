@@ -44,6 +44,21 @@ import java.util.Locale;
 /**
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
+ * 
+ * 
+ * some technical details about the iModela IM-01:
+ * max. part dimensions (x,y,z): (86mm, 55mm, 26mm)
+ * operating speed x and y axis: 6 to 240 mm/min
+ * operating speed z axis: 6 to 180 mm/min
+ * software resolution: 0.001mm/step (in NC-code mode), 0.01mm/step (RML-1 mode)
+ * mechanical resolution: 0.000186mm/step
+ * 
+ * This driver controls the mill using NC codes.
+ * Reference: http://icreate.rolanddg.com/iModela/download/dl/manual/NC_CODE_EN.pdf
+ * 
+ * Currently, this driver just engraves/cuts material in 2D. 2.5D data is not supported by VisiCut (yet).
+ * 
+ * 
  */
 public class IModelaMill extends LaserCutter
 {
@@ -57,6 +72,7 @@ public class IModelaMill extends LaserCutter
   private void writeInitializationCode(PrintStream out)
   {
     out.println("%");
+    out.println("O00000001");//program number 00000001 - can be changed to any number, must be 8 digits
     out.println("G90");//absolute positioning
     out.println("G21");//select mm as input unit
     out.println("M03");//start spindle
@@ -78,6 +94,8 @@ public class IModelaMill extends LaserCutter
     int spindleSpeed = -1;
     double feedRate = -1;
     int tool = -1;
+    boolean feedRateWasUpdated = false;
+    
     for (VectorCommand c : p.getCommandList())
     {
       switch (c.getType())
@@ -100,11 +118,22 @@ public class IModelaMill extends LaserCutter
           double y = Util.px2mm(c.getY(), dpi);
           if (!headDown || depth != olddepth)
           {
+            
             out.print(String.format(Locale.ENGLISH, "G01 Z%f\n", depth));
             headDown = true;
             olddepth = depth;
           }
-          out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f\n", x, y));
+          
+          //update feedrate if needed
+          if(feedRateWasUpdated)
+          {
+            out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f F%f\n", x, y, feedRate));
+            feedRateWasUpdated = false;
+          }
+          else
+          {
+            out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f\n", x, y));
+          }
           break;
         }
         case SETPROPERTY:
@@ -119,7 +148,9 @@ public class IModelaMill extends LaserCutter
           if (pr.getFeedRate() != feedRate)
           {
             feedRate = pr.getFeedRate();
-            out.print(String.format(Locale.ENGLISH, "F%f\n", feedRate));
+            //F goes with the G commands and is not a command on its own.
+            //out.print(String.format(Locale.ENGLISH, "F%f\n", feedRate));
+            feedRateWasUpdated = true;
           }
           if (pr.getTool() != tool)
           {
@@ -170,19 +201,24 @@ public class IModelaMill extends LaserCutter
   @Override
   public List<Double> getResolutions()
   {
-    return Arrays.asList(new Double[]{1000d});
+    // software resolution in NC-Code mode: 0.001mm/step = 0.000036 inches/step
+    // the tool diameter might be something between 0.2mm and 1mm.
+    // the smallest dot that we can engrave is 0.2mm with the corresponding tool.
+    // 0.2mm = 0.00787401575 inches (aka 8 mil)
+    // ==> 127 dots per inch, and every dot is 0.2 mm in diameter
+    return Arrays.asList(new Double[]{127});
   }
 
   @Override
   public double getBedWidth()
   {
-    return 100;
+    return 86;
   }
 
   @Override
   public double getBedHeight()
   {
-    return 100;
+    return 55;
   }
 
   @Override
