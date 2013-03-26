@@ -103,7 +103,7 @@ public class IModelaMill extends LaserCutter
         case MOVETO:
         {
           double x = Util.px2mm(c.getX(), dpi);
-          double y = Util.px2mm(c.getY(), dpi);
+          double y = getBedHeight() - Util.px2mm(c.getY(), dpi); //mill origin is bottom left, so we have to mirror y coordinates
           if (headDown)
           {
             out.println("G00 Z0");
@@ -115,7 +115,7 @@ public class IModelaMill extends LaserCutter
         case LINETO:
         {
           double x = Util.px2mm(c.getX(), dpi);
-          double y = Util.px2mm(c.getY(), dpi);
+          double y = getBedHeight() - Util.px2mm(c.getY(), dpi); //mill origin is bottom left, so we have to mirror y coordinates
           if (!headDown || depth != olddepth)
           {
             
@@ -281,6 +281,27 @@ public class IModelaMill extends LaserCutter
       PrintStream w = new PrintStream(new FileOutputStream(new File(new URI(hostname))));
       pl.taskChanged(this, "sending...");
       w.write(gcode);
+    }
+    else if (hostname.startsWith("printer://"))
+    {
+        String printername = hostname.substring(10);
+        try
+        {
+            File tempFile = File.createTempFile(printername, ".txt");
+            PrintStream w = new PrintStream(new FileOutputStream(tempFile));
+            pl.taskChanged(this, "sending...");
+            
+            w.write(gcode);
+            System.out.println("tempFile: "+ tempFile.getAbsolutePath());
+            
+            Runtime.getRuntime().exec("/usr/bin/lp -d "+printername+" "+tempFile.getAbsolutePath());
+        }
+        catch(IOException ex)
+        {
+            System.err.println("Cannot create temp file: " + ex.getMessage());
+            
+        }
+        
     }
     else
     {
