@@ -103,7 +103,7 @@ public class IModelaMill extends LaserCutter
         case MOVETO:
         {
           double x = Util.px2mm(c.getX(), dpi);
-          double y = Util.px2mm(c.getY(), dpi);
+          double y = getBedHeight() - Util.px2mm(c.getY(), dpi); //mill origin is bottom left, so we have to mirror y coordinates
           if (headDown)
           {
             out.println("G00 Z0");
@@ -115,7 +115,7 @@ public class IModelaMill extends LaserCutter
         case LINETO:
         {
           double x = Util.px2mm(c.getX(), dpi);
-          double y = Util.px2mm(c.getY(), dpi);
+          double y = getBedHeight() - Util.px2mm(c.getY(), dpi); //mill origin is bottom left, so we have to mirror y coordinates
           if (!headDown || depth != olddepth)
           {
             
