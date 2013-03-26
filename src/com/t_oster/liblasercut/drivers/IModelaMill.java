@@ -120,7 +120,7 @@ public class IModelaMill extends LaserCutter
           if (!headDown || depth != olddepth)
           {
             
-            out.print(String.format(Locale.ENGLISH, "G01 Z%f\n", depth));
+            out.print(String.format(Locale.ENGLISH, "G01 Z%f\n", -depth));
             headDown = true;
             olddepth = depth;
           }
