@@ -282,6 +282,27 @@ public class IModelaMill extends LaserCutter
       pl.taskChanged(this, "sending...");
       w.write(gcode);
     }
+    else if (hostname.startsWith("printer://"))
+    {
+        String printername = hostname.substring(10);
+        try
+        {
+            File tempFile = File.createTempFile(printername, ".txt");
+            PrintStream w = new PrintStream(new FileOutputStream(tempFile));
+            pl.taskChanged(this, "sending...");
+            
+            w.write(gcode);
+            System.out.println("tempFile: "+ tempFile.getAbsolutePath());
+            
+            Runtime.getRuntime().exec("/usr/bin/lp -d "+printername+" "+tempFile.getAbsolutePath());
+        }
+        catch(IOException ex)
+        {
+            System.err.println("Cannot create temp file: " + ex.getMessage());
+            
+        }
+        
+    }
     else
     {
       Socket s = new Socket();
