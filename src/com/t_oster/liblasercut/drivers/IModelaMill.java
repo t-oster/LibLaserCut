@@ -81,7 +81,8 @@ public class IModelaMill extends LaserCutter
   private void writeFinalizationCode(PrintStream out)
   {
     out.println("M05");//stop spindle
-    out.println("G0 X0 Y0 Z0");//go back to home
+    out.println("G0 Z0");//head up
+    out.println("G0 X0 Y0");//go back to home
     out.println("M02");//END_OF_PROGRAM
     out.println("%");
   }
@@ -163,6 +164,8 @@ public class IModelaMill extends LaserCutter
         }
       }
     }
+    out.println("M05");
+    out.println("G0Z0.0");
   }
 
   @Override
