@@ -202,11 +202,8 @@ public class IModelaMill extends LaserCutter
   public List<Double> getResolutions()
   {
     // software resolution in NC-Code mode: 0.001mm/step = 0.000036 inches/step
-    // the tool diameter might be something between 0.2mm and 1mm.
-    // the smallest dot that we can engrave is 0.2mm with the corresponding tool.
-    // 0.2mm = 0.00787401575 inches (aka 8 mil)
-    // ==> 127 dots per inch, and every dot is 0.2 mm in diameter
-    return Arrays.asList(new Double[]{127d});
+    // means 1000 steps per mm
+   return Arrays.asList(new Double[]{Util.dpmm2dpi(1000d)});
   }
 
   @Override
