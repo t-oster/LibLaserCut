@@ -25,6 +25,7 @@ import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.LaserProperty;
 import com.t_oster.liblasercut.ProgressListener;
+import com.t_oster.liblasercut.Raster3dPart;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
@@ -191,6 +192,22 @@ public class IModelaMill extends LaserCutter
     return black/count;
   }
   
+  private double getAverageGrey(Raster3dPart p, int cx, int cy, int toolDiameter)
+  {
+    double count = toolDiameter*toolDiameter;
+    double value = 0;
+    for (int y = Math.max(cy-toolDiameter/2, 0); y < Math.min(cy+toolDiameter/2, p.getRasterHeight()); y++)
+    {
+      List<Byte> line = p.getRasterLine(y);
+      for (int x = Math.max(cx-toolDiameter/2, 0); x < Math.min(cx+toolDiameter/2, p.getRasterWidth()); x++)
+      {
+      
+        value += line.get(x);
+      }
+    }
+    return (value/count)/255;
+  }
+  
   private void writeRasterCode(RasterPart p, PrintStream out)
   {
     double dpi = p.getDPI();
@@ -226,6 +243,35 @@ public class IModelaMill extends LaserCutter
           }
           line(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
         }
+      }
+      //invert direction
+      leftToRight = !leftToRight;
+    }
+  }
+  
+  private void writeRaster3dCode(Raster3dPart p, PrintStream out)
+  {
+    double dpi = p.getDPI();
+    IModelaProperty prop = (IModelaProperty) p.getLaserProperty();
+    int toolDiameterInPx = (int) Util.mm2px(prop.getToolDiameter(), dpi);
+    applyProperty(out, prop);
+    boolean leftToRight = true;
+    Point offset = p.getRasterStart();
+    move(out, Util.mm2px(offset.x, dpi), Util.mm2px(offset.y, dpi));
+    for (int y = 0; y < p.getRasterHeight(); y+= toolDiameterInPx/2)
+    {
+      for (int x = leftToRight ? 0 : p.getRasterWidth() - 1; 
+        (leftToRight && x < p.getRasterWidth()) || (!leftToRight && x >= 0); 
+        x += leftToRight ? 1 : -1)
+      {
+        //scale the depth according to the average grey value
+        linedepth = getAverageGrey(p, x, y, toolDiameterInPx)*prop.getDepth();
+        //skip intermediate line commands
+        while((leftToRight && x+1 < p.getRasterWidth()) || (!leftToRight && x-1 >= 0) && getAverageGrey(p, leftToRight ? x+1 : x-1, y, toolDiameterInPx) == linedepth)
+        {
+          x+= leftToRight ? 1 : -1;
+        }
+        line(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
       }
       //invert direction
       leftToRight = !leftToRight;
@@ -297,9 +343,9 @@ public class IModelaMill extends LaserCutter
       {
         writeRasterCode((RasterPart) p, out);
       }
-      else
+      else if (p instanceof Raster3dPart)
       {
-        throw new IllegalJobException("Raster3d is not yet supported by iModela driver");
+        writeRaster3dCode((Raster3dPart) p, out);
       }
       pl.progressChanged(this, (int) (20+30*i++/all));
     }
