@@ -202,6 +202,7 @@ public class IModelaMill extends LaserCutter
     applyProperty(out, prop);
     boolean leftToRight = true;
     Point offset = p.getRasterStart();
+    move(out, Util.mm2px(offset.x, dpi), Util.mm2px(offset.y, dpi));
     for (int y = 0; y < p.getRasterHeight(); y+= toolDiameterInPx/2)
     {
       for (int x = leftToRight ? 0 : p.getRasterWidth() - 1; 
@@ -210,13 +211,24 @@ public class IModelaMill extends LaserCutter
       {
         if (getBlackPercent(p, x, y, toolDiameterInPx)<treshold)
         {
+          //skip intermediate move commands
+          while((leftToRight && x+1 < p.getRasterWidth()) || (!leftToRight && x-1 >= 0) && getBlackPercent(p, leftToRight ? x+1 : x-1, y, toolDiameterInPx) < treshold)
+          {
+            x+= leftToRight ? 1 : -1;
+          }
           move(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
         }
         else
         {
+          //skip intermediate line commands
+          while((leftToRight && x+1 < p.getRasterWidth()) || (!leftToRight && x-1 >= 0) && getBlackPercent(p, leftToRight ? x+1 : x-1, y, toolDiameterInPx) >= treshold)
+          {
+            x+= leftToRight ? 1 : -1;
+          }
           line(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
         }
       }
+      //invert direction
       leftToRight = !leftToRight;
     }
   }
