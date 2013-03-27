@@ -69,6 +69,7 @@ public class IModelaMill extends LaserCutter
   private static String PORT = "port";
   private static String BED_WIDTH = "bed width";
   private static String BED_HEIGHT = "bed height";
+  private static String HOME_ON_END = "move home after job";
 
   private Map<String, Object> properties = new LinkedHashMap<String, Object>();
   public IModelaMill()
@@ -77,6 +78,7 @@ public class IModelaMill extends LaserCutter
     properties.put(BED_HEIGHT, (Double) 55d);
     properties.put(HOSTNAME, "file:///dev/usb/lp0");
     properties.put(PORT, (Integer) 5000);
+    properties.put(HOME_ON_END, (Boolean) true);
   }
   
   private void writeInitializationCode(PrintStream out)
@@ -92,22 +94,77 @@ public class IModelaMill extends LaserCutter
   {
     out.println("M05");//stop spindle
     out.println("G0 Z0");//head up
-    out.println("G0 X0 Y0");//go back to home
+    if ((Boolean) properties.get(HOME_ON_END))
+    {
+      out.println("G0 X0 Y0");//go back to home
+    }
     out.println("M02");//END_OF_PROGRAM
     out.println("%");
+  }
+  
+  //all depth values are positive, 0 is top
+  private double movedepth = 0;
+  private double linedepth = 0;
+  private double headdepth = 0;
+  private double spindleSpeed = 0;
+  private double feedRate = 0;
+  private int tool = 0;
+  //is applied to next G command
+  private String parameters = "";
+  
+  private void moveHead(PrintStream out, double depth)
+  {
+    if (headdepth > depth)
+    {//move up fast
+      out.println(String.format(Locale.ENGLISH, "G00 Z%f%s\n", -depth, parameters));
+      parameters = "";
+    }
+    else if (headdepth < depth)
+    {//move down slow
+      out.println(String.format(Locale.ENGLISH, "G01 Z%f%s\n", -depth, parameters));
+      parameters = "";
+    }
+    headdepth = depth;
+  }
+  
+  private void move(PrintStream out, double x, double y)
+  {
+    moveHead(out, movedepth);
+    out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f%s\n", x, y, parameters));
+    parameters = "";
+  }
+  
+  private void line(PrintStream out, double x, double y)
+  {
+    moveHead(out, linedepth);
+    out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f%s\n", x, y, parameters));
+    parameters = "";
+  }
+  
+  private void applyProperty(PrintStream out, IModelaProperty pr)
+  {
+    linedepth = pr.getDepth();
+    if (pr.getSpindleSpeed() != spindleSpeed)
+    {
+      spindleSpeed = pr.getSpindleSpeed();
+      parameters += String.format(Locale.ENGLISH, " S%d\n", spindleSpeed);
+    }
+    if (pr.getFeedRate() != feedRate)
+    {
+      feedRate = pr.getFeedRate();
+      parameters += String.format(Locale.ENGLISH, " F%f\n", feedRate);
+    }
+    if (pr.getTool() != tool)
+    {
+      tool = pr.getTool();
+      out.print(String.format(Locale.ENGLISH, "M06T0\n"));//return current tool
+      out.print(String.format(Locale.ENGLISH, "M06T%d\n", tool));
+    }
   }
   
   private void writeVectorCode(VectorPart p, PrintStream out)
   {
     double dpi = p.getDPI();
-    boolean headDown = false;
-    double olddepth = 0;
-    double depth = 0;
-    int spindleSpeed = -1;
-    double feedRate = -1;
-    int tool = -1;
-    boolean feedRateWasUpdated = false;
-    
     for (VectorCommand c : p.getCommandList())
     {
       switch (c.getType())
@@ -116,66 +173,24 @@ public class IModelaMill extends LaserCutter
         {
           double x = Util.px2mm(c.getX(), dpi);
           double y = getBedHeight() - Util.px2mm(c.getY(), dpi); //mill origin is bottom left, so we have to mirror y coordinates
-          if (headDown)
-          {
-            out.println("G00 Z0");
-            headDown = false;
-          }
-          out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f\n", x, y));
+          move(out, x, y);
           break;
         }
         case LINETO:
         {
           double x = Util.px2mm(c.getX(), dpi);
           double y = getBedHeight() - Util.px2mm(c.getY(), dpi); //mill origin is bottom left, so we have to mirror y coordinates
-          if (!headDown || depth != olddepth)
-          {
-            
-            out.print(String.format(Locale.ENGLISH, "G01 Z%f\n", -depth));
-            headDown = true;
-            olddepth = depth;
-          }
-          
-          //update feedrate if needed
-          if(feedRateWasUpdated)
-          {
-            out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f F%f\n", x, y, feedRate));
-            feedRateWasUpdated = false;
-          }
-          else
-          {
-            out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f\n", x, y));
-          }
+          line(out, x, y);
           break;
         }
         case SETPROPERTY:
         {
           IModelaProperty pr = (IModelaProperty) c.getProperty();
-          depth = pr.getDepth();
-          if (pr.getSpindleSpeed() != spindleSpeed)
-          {
-            spindleSpeed = pr.getSpindleSpeed();
-            out.print(String.format(Locale.ENGLISH, "S%d\n", spindleSpeed));
-          }
-          if (pr.getFeedRate() != feedRate)
-          {
-            feedRate = pr.getFeedRate();
-            //F goes with the G commands and is not a command on its own.
-            //out.print(String.format(Locale.ENGLISH, "F%f\n", feedRate));
-            feedRateWasUpdated = true;
-          }
-          if (pr.getTool() != tool)
-          {
-            tool = pr.getTool();
-            out.print(String.format(Locale.ENGLISH, "M06T0\n"));//return current tool
-            out.print(String.format(Locale.ENGLISH, "M06T%d\n", tool));
-          }
+          applyProperty(out, pr);
           break;
         }
       }
     }
-    out.println("M05");
-    out.println("G0Z0.0");
   }
 
   @Override
