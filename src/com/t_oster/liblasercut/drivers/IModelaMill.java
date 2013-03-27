@@ -25,8 +25,10 @@ import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.LaserProperty;
 import com.t_oster.liblasercut.ProgressListener;
+import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
+import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -130,6 +132,8 @@ public class IModelaMill extends LaserCutter
   private void move(PrintStream out, double x, double y)
   {
     moveHead(out, movedepth);
+    //TODO: check if last command was also move and lies on the 
+    //same line. If so, replace the last move command
     out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f%s\n", x, y, parameters));
     parameters = "";
   }
@@ -137,6 +141,8 @@ public class IModelaMill extends LaserCutter
   private void line(PrintStream out, double x, double y)
   {
     moveHead(out, linedepth);
+    //TODO: check if last command was also line and lies on the 
+    //same line. If so, replace the last move command
     out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f%s\n", x, y, parameters));
     parameters = "";
   }
@@ -157,8 +163,61 @@ public class IModelaMill extends LaserCutter
     if (pr.getTool() != tool)
     {
       tool = pr.getTool();
+      //TODO: Maybe stop spindle and move to some location?
       out.print(String.format(Locale.ENGLISH, "M06T0\n"));//return current tool
       out.print(String.format(Locale.ENGLISH, "M06T%d\n", tool));
+    }
+  }
+  
+  /*
+   * Returns the percentage of black pixels in a square rectangle with
+   * side length toolDiameter
+   * arount x/y in the given raster
+   */
+  private double getBlackPercent(RasterPart p, int cx, int cy, int toolDiameter)
+  {
+    double count = 0;
+    double black = 0;
+    for (int x = Math.max(cx-toolDiameter/2, 0); x < Math.min(cx+toolDiameter/2, p.getRasterWidth()); x++)
+    {
+      for (int y = Math.max(cy-toolDiameter/2, 0); y < Math.min(cy+toolDiameter/2, p.getRasterHeight()); y++)
+      {
+        count++;
+        if (p.isBlack(x, y))
+        {
+          black++;
+        }
+      }
+    }
+    return black/count;
+  }
+  
+  private void writeRasterCode(RasterPart p, PrintStream out)
+  {
+    double dpi = p.getDPI();
+    //how many pixels(%) have to be black until we move the head down
+    double treshold = 0.7;
+    IModelaProperty prop = (IModelaProperty) p.getLaserProperty();
+    int toolDiameterInPx = (int) Util.mm2px(prop.getToolDiameter(), dpi);
+    applyProperty(out, prop);
+    boolean leftToRight = true;
+    Point offset = p.getRasterStart();
+    for (int y = 0; y < p.getRasterHeight(); y+= toolDiameterInPx/2)
+    {
+      for (int x = leftToRight ? 0 : p.getRasterWidth() - 1; 
+        (leftToRight && x < p.getRasterWidth()) || (!leftToRight && x >= 0); 
+        x += leftToRight ? 1 : -1)
+      {
+        if (getBlackPercent(p, x, y, toolDiameterInPx)<treshold)
+        {
+          move(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
+        }
+        else
+        {
+          line(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
+        }
+      }
+      leftToRight = !leftToRight;
     }
   }
   
@@ -198,6 +257,12 @@ public class IModelaMill extends LaserCutter
   {
     return new IModelaProperty();
   }
+
+  @Override
+  public LaserProperty getLaserPropertyForRasterPart()
+  {
+    return new IModelaProperty();
+  }
   
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
@@ -215,9 +280,17 @@ public class IModelaMill extends LaserCutter
     {
       if (p instanceof VectorPart)
       {
-        pl.progressChanged(this, (int) (20+30*i++/all));
         writeVectorCode((VectorPart) p, out);
       }
+      else if (p instanceof RasterPart)
+      {
+        writeRasterCode((RasterPart) p, out);
+      }
+      else
+      {
+        throw new IllegalJobException("Raster3d is not yet supported by iModela driver");
+      }
+      pl.progressChanged(this, (int) (20+30*i++/all));
     }
     writeFinalizationCode(out);
     pl.progressChanged(this, 50);

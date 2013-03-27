@@ -29,16 +29,23 @@ import com.t_oster.liblasercut.platform.Util;
 public class IModelaProperty implements LaserProperty
 {
 
-  private static String DEPTH = "milling depth";
-  private static String FEED_RATE = "feed rate";
-  private static String SPINDLE_SPEED = "spindle speed";
+  private static String DEPTH = "milling depth (mm)";
+  private static String FEED_RATE = "feed rate (mm/min)";
+  private static String SPINDLE_SPEED = "spindle speed (rpm)";
   private static String TOOL = "tool";
+  private static String TOOL_DIAMETER = "tool diameter (mm)";
   
   private double depth = 0;
   private double feedRate = 1;
   private int spindleSpeed = 100;
   private int tool = 1;
+  private double toolDiameter = 4;
 
+  public double getToolDiameter()
+  {
+    return toolDiameter;
+  }
+  
   public double getDepth()
   {
     return depth;
@@ -102,7 +109,7 @@ public class IModelaProperty implements LaserProperty
   @Override
   public String[] getPropertyKeys()
   {
-    return new String[]{DEPTH, SPINDLE_SPEED, FEED_RATE, TOOL};
+    return new String[]{DEPTH, SPINDLE_SPEED, FEED_RATE, TOOL, TOOL_DIAMETER};
   }
 
   @Override
@@ -124,6 +131,10 @@ public class IModelaProperty implements LaserProperty
     {
       tool = (Integer) value;
     }
+    else if (TOOL_DIAMETER.equals(key))
+    {
+      toolDiameter = (Double) value;
+    }
   }
 
   @Override
@@ -144,6 +155,10 @@ public class IModelaProperty implements LaserProperty
     else if (TOOL.equals(key))
     {
       return tool;
+    }
+    else if (TOOL_DIAMETER.equals(key))
+    {
+      return toolDiameter;
     }
     return null;
   }
