@@ -176,13 +176,12 @@ public class IModelaMill extends LaserCutter
    */
   private double getBlackPercent(RasterPart p, int cx, int cy, int toolDiameter)
   {
-    double count = 0;
+    double count = toolDiameter*toolDiameter;
     double black = 0;
     for (int x = Math.max(cx-toolDiameter/2, 0); x < Math.min(cx+toolDiameter/2, p.getRasterWidth()); x++)
     {
       for (int y = Math.max(cy-toolDiameter/2, 0); y < Math.min(cy+toolDiameter/2, p.getRasterHeight()); y++)
       {
-        count++;
         if (p.isBlack(x, y))
         {
           black++;
