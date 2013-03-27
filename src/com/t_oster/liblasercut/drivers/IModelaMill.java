@@ -38,8 +38,10 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  *
@@ -65,9 +67,17 @@ public class IModelaMill extends LaserCutter
 
   private static String HOSTNAME = "Hostname/IP";
   private static String PORT = "port";
-  
-  private String hostname = "localhost";
-  private int port = 5000;
+  private static String BED_WIDTH = "bed width";
+  private static String BED_HEIGHT = "bed height";
+
+  private Map<String, Object> properties = new LinkedHashMap<String, Object>();
+  public IModelaMill()
+  {
+    properties.put(BED_WIDTH, (Double) 85d);
+    properties.put(BED_HEIGHT, (Double) 55d);
+    properties.put(HOSTNAME, "file:///dev/usb/lp0");
+    properties.put(PORT, (Integer) 5000);
+  }
   
   private void writeInitializationCode(PrintStream out)
   {
@@ -207,19 +217,27 @@ public class IModelaMill extends LaserCutter
   {
     // software resolution in NC-Code mode: 0.001mm/step = 0.000036 inches/step
     // means 1000 steps per mm
-   return Arrays.asList(new Double[]{Util.dpmm2dpi(1000d)});
+   return Arrays.asList(new Double[]{100d, 200d, 300d, 400d, 500d, 1000d, 1200d, Util.dpmm2dpi(1000d)});
   }
 
   @Override
   public double getBedWidth()
   {
-    return 86;
+    if (properties.get(BED_WIDTH) == null)
+    {
+      properties.put(BED_WIDTH, (Double) 85d);
+    }
+    return (Double) properties.get(BED_WIDTH);
   }
 
   @Override
   public double getBedHeight()
   {
-    return 55;
+    if (properties.get(BED_HEIGHT) == null)
+    {
+      properties.put(BED_HEIGHT, (Double) 55d);
+    }
+    return (Double) properties.get(BED_HEIGHT);
   }
 
   @Override
@@ -242,38 +260,24 @@ public class IModelaMill extends LaserCutter
   @Override
   public String[] getPropertyKeys()
   {
-    return new String[]{HOSTNAME, PORT};
+    return properties.keySet().toArray(new String[0]);
   }
 
   @Override
   public void setProperty(String key, Object value)
   {
-    if (HOSTNAME.equals(key))
-    {
-      hostname = (String) value;
-    }
-    else if (PORT.equals(key))
-    {
-      port = (Integer) value;
-    }
+    properties.put(key, value);
   }
 
   @Override
   public Object getProperty(String key)
   {
-    if (HOSTNAME.equals(key))
-    {
-      return hostname;
-    }
-    else if (PORT.equals(key))
-    {
-      return (Integer) port;
-    }
-    return null;
+    return properties.get(key);
   }
 
   private void sendGCode(byte[] gcode, ProgressListener pl, List<String> warnings) throws IOException, URISyntaxException
   {
+    String hostname = (String) properties.get(HOSTNAME);
     pl.taskChanged(this, "connecting...");
     if ("stdout".equals(hostname))
     {
@@ -311,7 +315,7 @@ public class IModelaMill extends LaserCutter
     else
     {
       Socket s = new Socket();
-      s.connect(new InetSocketAddress(hostname, port), 3000);
+      s.connect(new InetSocketAddress(hostname, (Integer) properties.get(PORT)), 3000);
       pl.taskChanged(this, "sending...");
       s.getOutputStream().write(gcode);
       s.close();
