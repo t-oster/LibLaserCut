@@ -134,7 +134,7 @@ public class IModelaMill extends LaserCutter
     moveHead(out, movedepth);
     //TODO: check if last command was also move and lies on the 
     //same line. If so, replace the last move command
-    out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f%s\n", x, y, parameters));
+    out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f%s\n", x, getBedHeight()-y, parameters));
     parameters = "";
   }
   
@@ -143,7 +143,7 @@ public class IModelaMill extends LaserCutter
     moveHead(out, linedepth);
     //TODO: check if last command was also line and lies on the 
     //same line. If so, replace the last move command
-    out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f%s\n", x, y, parameters));
+    out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f%s\n", x, getBedHeight()-y, parameters));
     parameters = "";
   }
   
