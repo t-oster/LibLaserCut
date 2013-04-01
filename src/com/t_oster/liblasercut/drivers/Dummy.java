@@ -232,7 +232,7 @@ public class Dummy extends LaserCutter {
     SVGWriter svg = new SVGWriter(this); // SVG debug output
     System.out.println("dummy-driver got LaserJob: ");
     // TODO don't just print the parts and settins, but also the commands
-    // TODO if you have too much time, also implement some preview output (svg animation???) - would be nice for testing optimisations
+    // TODO improve SVG-debug output: support bitmaps, add animation
      for (JobPart p : job.getParts())
         {
           svg.startPart(p.getClass().getSimpleName(), p.getDPI());
@@ -261,6 +261,7 @@ public class Dummy extends LaserCutter {
           }
           if (p instanceof RasterPart)
           {
+            System.out.println("RasterPart");
             // TODO add raster output for SVG debug output
             RasterPart rp = ((RasterPart) p);
             if (rp.getLaserProperty() != null && !(rp.getLaserProperty() instanceof PowerSpeedFocusProperty))
@@ -272,6 +273,7 @@ public class Dummy extends LaserCutter {
           }
           if (p instanceof Raster3dPart)
           {
+            System.out.println("Raster3dPart");
             Raster3dPart rp = (Raster3dPart) p;
             if (rp.getLaserProperty() != null && !(rp.getLaserProperty() instanceof PowerSpeedFocusProperty))
             {
