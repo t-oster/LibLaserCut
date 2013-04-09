@@ -31,19 +31,21 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   private boolean hidePurge = false;
   private boolean hideVentilation = false;
   private boolean hideFocus = false;
+  private boolean hideFrequency = false;
     
   private boolean ventilation = true;
 
-  public LaosCutterProperty(boolean hidePurge, boolean hideVentilation, boolean hideFocus)
+  public LaosCutterProperty(boolean hidePurge, boolean hideVentilation, boolean hideFocus, boolean hideFrequency)
   {
     this.hidePurge = hidePurge;
     this.hideVentilation = hideVentilation;
     this.hideFocus = hideFocus;
+    this.hideFrequency = hideFrequency;
   }
   
   public LaosCutterProperty()
   {
-    this(false, false, false);
+    this(false, false, false, false);
   }
   
   /**
@@ -96,6 +98,10 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
     {
       result.remove("focus");
     }
+    if (this.hideFrequency)
+    {
+      result.remove("frequency");
+    }
     if (!this.hideVentilation)
     {
       result.add("ventilation");
@@ -104,6 +110,7 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
     {
       result.add("purge");
     }
+    
     return result.toArray(new String[0]);
   }
 
