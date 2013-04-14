@@ -58,8 +58,14 @@ public class MPC6515Cutter extends LaserCutter
   private double bedHeight = 210;
   
   private double firstX = 0.0, firstY = 0.0, prevX = 0.0, prevY = 0.0;
-  private double bboxMinX = 0.0, bboxMinY = 0.0, bboxMaxX = 0.0, bboxMaxY = 0.0;
+  private double bboxMinX = 0.0, bboxMinY = 0.0, bboxMaxX = 0.0, bboxMaxY = 0.0, bboxWidth, bboxHeight;
   boolean firstVector;
+  
+  private int motionBlockStart;
+  private int motionBlockSize;
+  private int nMotionBlocks;
+  private int nMoveRelative;
+  
   
   @Override
   public double getBedWidth()
@@ -83,50 +89,103 @@ public class MPC6515Cutter extends LaserCutter
     this.bedHeight = bedHeight;
   }
 
-  private void molWriteHeader(RandomAccessFile out) throws IOException
+  private void molCmdBeginMotionBlock(RandomAccessFile out) throws IOException
   {
-    out.seek(0);
-    // 0: Size of entire file in bytes (must be patched later)
-    out.writeInt(Integer.reverseBytes(0x00000000));
-    // 4: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x00000022));
-    // 8: Unknown, fixed value
-    out.write(0x02);
-    // 9: Unknown, fixed value
-    out.write(0x02);
-    // a: Unknown, fixed value
-    out.write(0x01);
-    // b: Unknown, fixed value
-    out.write(0x04);
-    // c: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x00000001));
-    // 10: This word changes when the size of the file changes, i.e. when lines are added
-    // This line corresponds to the number of "move relative" commands in the entire file counting
-    // "unknown 07" and "unknown 09" as well. Is that coincidence? What would this value be good for?
-    out.writeInt(Integer.reverseBytes(0x00000000));
-    // 14: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x00000001));
-    // 18: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x00000000));
-    // 1c: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x00000000));
-    // 20: Describing the stepper resolution in x and y
-    out.writeInt(Integer.reverseBytes(-20833));
-    out.writeInt(Integer.reverseBytes(-20833));
-    // 28: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x00481095));
-    // 2c: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(0x471a0000));
-    // Unknown bunch of zeros, likely reserved for later use
-    out.seek(0x00000070);
-    // 70: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(1));
-    // 74: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(2));
-    // 78: Unknown, fixed value, maybe the number of blocks in this file?
-    out.writeInt(Integer.reverseBytes(3));
-    // 7c: Unknown, fixed value
-    out.writeInt(Integer.reverseBytes(5));
+    molWriteBytes(out, 0x46, 0x09, 0x00, 0x80);
+    molWriteInt(out, -1);  // number of words in motion block
+    motionBlockStart = (int)out.getChannel().position();
+    motionBlockSize = 0;
+    nMotionBlocks++;
+  }
+
+  private void molCmdEndMotionBlock(RandomAccessFile out) throws IOException
+  {
+    int n = (int) out.getChannel().position();
+    out.seek(motionBlockStart-8);
+    molCmd(out, 0x46, 0x09, 0x00, 0x80,  (n-motionBlockStart)/4);
+    out.seek(n);    
+  }
+
+  private void molCmdTestMotionBlock(RandomAccessFile out, int nWords) throws IOException
+  {
+    if (motionBlockSize + nWords >= 512) {
+      molCmdEndMotionBlock(out);
+      molCmdBeginMotionBlock(out);
+    }
+    motionBlockSize += nWords;
+  }
+  
+  private void molCmdLaserOn(RandomAccessFile out) throws IOException
+  {
+    molCmdTestMotionBlock(out, 2);
+    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
+    molWriteInt(out, 1);
+  }
+
+  private void molCmdLaserOff(RandomAccessFile out) throws IOException
+  {
+    molCmdTestMotionBlock(out, 2);
+    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
+    molWriteInt(out, 0);
+  }
+  
+  private void molCmdBlowerOn(RandomAccessFile out) throws IOException
+  {
+    molCmdTestMotionBlock(out, 2);
+    molWriteBytes(out, 0x06, 0x0b, 0x00, 0x01);
+    molWriteBytes(out, 0x01, 0x02, 0x00, 0x00);
+  }
+
+  private void molCmdBlowerOff(RandomAccessFile out) throws IOException
+  {
+    molCmdTestMotionBlock(out, 2);
+    molWriteBytes(out, 0x06, 0x0b, 0x00, 0x01);
+    molWriteBytes(out, 0x00, 0x02, 0x00, 0x00);
+  }
+  
+  private void molCmdAccelerate(RandomAccessFile out) throws IOException
+  {
+    molCmdTestMotionBlock(out, 2);
+    molWriteBytes(out, 0x01, 0x46, 0x00, 0x01);
+    molWriteInt(out, 1);
+  }
+
+  private void molCmdDecelerate(RandomAccessFile out) throws IOException
+  {
+    molCmdTestMotionBlock(out, 2);
+    molWriteBytes(out, 0x01, 0x46, 0x00, 0x01);
+    molWriteInt(out, 2);
+  }
+
+  private void molCmdBeginSubroutine(RandomAccessFile out, int n) throws IOException
+  {
+    molWriteBytes(out, 0x48, 0x00, 0x30, 0x01);
+    molWriteInt(out, n);
+  }
+
+  private void molCmdEndSubroutine(RandomAccessFile out, int n) throws IOException
+  {
+    molWriteBytes(out, 0x48, 0x00, 0x40, 0x01);
+    molWriteInt(out, n);
+  }
+
+  private void molCmdSetSpeeds(RandomAccessFile out, double aMin, double aMax, double aAccel) throws IOException
+  {
+    molCmdTestMotionBlock(out, 4);
+    molWriteBytes(out, 0x01, 0x03, 0x00, 0x03);
+    molWriteFloat(out, (float)aMin);
+    molWriteFloat(out, (float)aMax);
+    molWriteFloat(out, (float)aAccel);
+  }
+  
+  private void molCmdMoveRelative(RandomAccessFile out, int dx, int dy) throws IOException
+  {
+    molCmdTestMotionBlock(out, 4);
+    molWriteBytes(out, 0x00, 0x60, 0x02, 0x03);
+    molWriteBytes(out, 0x04, 0x03, 0x00, 0x00); // x and y axis
+    molWriteInt(out, dx);
+    molWriteInt(out, dy);
+    nMoveRelative++;
   }
   
   private void molWriteFloat(RandomAccessFile out, float v) throws IOException
@@ -166,20 +225,6 @@ public class MPC6515Cutter extends LaserCutter
   private void molWriteBytes(RandomAccessFile out, int arg0, int arg1, int arg2, int arg3) throws IOException
   {
     out.write(arg0); out.write(arg1); out.write(arg2); out.write(arg3);
-  }
-
-  // begin subroutine n
-  private void molCmdBeginSub(RandomAccessFile out, int a) throws IOException
-  {
-    out.write(0x48); out.write(0x00); out.write(0x30); out.write(1);
-    out.writeInt(Integer.reverseBytes(a));
-  }
-
-  // end subroutine n
-  private void molCmdEndSub(RandomAccessFile out, int a) throws IOException
-  {
-    out.write(0x48); out.write(0x00); out.write(0x40); out.write(1);
-    out.writeInt(Integer.reverseBytes(a));
   }
 
   // unkonwn command
@@ -252,16 +297,6 @@ public class MPC6515Cutter extends LaserCutter
     out.writeInt(Integer.reverseBytes(arg6));
   }
 
-  private void molCmdAccelerate(RandomAccessFile out) throws IOException
-  {
-    molCmd(out, 0x01, 0x46, 0x00, 0x01,  1);
-  }
-  
-  private void molCmdDecelerate(RandomAccessFile out) throws IOException
-  {
-    molCmd(out, 0x01, 0x46, 0x00, 0x01,  2);
-  }
-  
   private void molSetSpeed(RandomAccessFile out, float a, float b, float c) throws IOException
   {
     molCmd(out, 0x01, 0x03, 0x00, 0x03,  a, b, c);
@@ -385,128 +420,7 @@ public class MPC6515Cutter extends LaserCutter
     molWriteFloat(out, b);
     molWriteFloat(out, c);
   }
-  
-  private void molCmdMoveRelative(RandomAccessFile out, double dx, double dy, boolean cut) throws IOException
-  {
-    double len = Math.sqrt(dx*dx+dy*dy);
-    molCmdAccelerate(out); // 01 46 00 01 01 00 00 00
-    molSetSpeed(out, 5.0f, 200.0f, 700.0f); // 01 03 00 03 b3 23 38 0a 00 c2 22 0f 40 6a 0e 11
-    molMoveRelative(out, 772, (float)(0.25*dx), (float)(0.25*dy));     // 00 60 02 03 04 03 00 00 00 00 00 00 c8 e8 ff ff
-    molSetSpeed(out, 200.0f, 200.0f, 700.0f);
-    molMoveRelative(out, 772, (float)(0.5*dx), (float)(0.5*dy));     // 00 60 02 03 04 03 00 00 00 00 00 00 c8 e8 ff ff
-    molCmdDecelerate(out); // 01 46 00 01 02 00 00 00
-    molSetSpeed(out, 5.0f, 200.0f, 700.0f);
-    molMoveRelative(out, 772, (float)(0.25*dx), (float)(0.25*dy));     // 00 60 02 03 04 03 00 00 00 00 00 00 c8 e8 ff ff
-  }
-  
-  private void molWriteConfig(RandomAccessFile out) throws IOException
-  {
-    //The configuration chunk still has a bunch of unknown commands, few of them seem to change
-    //for a single machine configuration.  
-    out.seek(0x200);
-  
-    // 200: Unknown, fixed value
-    molCmd05(out);
-    // 204: Unknown, fixed value, the default driver for the X-axis is #4 (maybe related?)
-    molCmd01(out, 4, 4.0f);
-    // 214: Unknown, fixed value, the default driver for the Y-axis is #3 (maybe related?)
-    molCmd01(out, 3, 3.0f);
-    // 224: Unknown, fixed value
-    molCmd08(out);
-    // 228: Unknown, fixed value
-    molCmd07(out);
-    // 22c: Unknown
-    // arg1 is unknown, but repeats in 'unknown 11'
-    // arg2 is the start speed for all head movements as describen in the settings
-    // arg3 is the maximum speed for moving around "quickly"
-    // arg4 is the acceleration value to get to the above speed (space acc)
-    // arg5 is the value for acceleration from the settings
-    // arg6 is unknown and nowhere to be found, probably the slow acceleration default
-    molCmd01(out, 603, 5.0f, 200.0f, 700.0f, 500.0f, 350.0f);
-    // 24c: Set the Stepper sizes
-    // arg1 is the number of steps required in X direction
-    // arg2 is the same for Y
-    // arg3 is likely the same in Z direction
-    molCmd0e(out, 208.333f, 208.333f, 800.0f);
-    // 25c: Unknown, fixed value, maybe explicitly switching the laser off?
-    molCmd09(out, 0);
-    // 264: Object origin. Cutting a 100x100 object on a 900x600 table would move the laser head
-    // to the top right corner of a centered work piece. (772 see "move rel")
-    molCmd60(out, 772, 500.005f, 350.002f); // FIXME: patch me later!
-    // 274: Motion parameters:
-    // arg1 is the initial speed
-    // arg2 is the maximum speed 
-    // arg3 is the acceleration
-    molCmd03(out, 5.0f, 200.0f, 700.0f);
-    // 284: Object size. Our test object is 100x100, so this command moves to the bottom left corner.
-    molCmd60_2(out, 772, -100.0f, -100.0f); // FIXME: patch me later
-    // 294: Unknown, fixed value
-    molCmd00(out, 3, 2.0f, 2.0f);
-    // 2a8: Unknown, fixed value, 603 also appears at 0x0000022c
-    molCmd00(out, 11);
-    // Unknown, fixed value
-    molCmd06(out);
-  }
-  
-  private void molFixHeader(RandomAccessFile out) throws IOException
-  {
-    // align file to the next 512 byte boundary for easy USB transfer
-    int len = (int)out.length();
-    len = (len+511)&0xfffffe00;
-    if (len>(int)out.length()) {
-      out.seek(len-1);
-      out.write(0);
-    }
-    // Size of entire file in bytes
-    out.seek(0x00000000);
-    out.writeInt(Integer.reverseBytes(len));
-    // 10: This word changes when the size of the file changes, i.e. when lines are added
-    // This line corresponds to the number of "move relative" commands in the entire file counting
-    // "unknown 07" and "unknown 09" as well. Is that coincidence? What would this value be good for?
-    out.seek(0x00000010);
-    out.writeInt(Integer.reverseBytes(0x00000000/*FIXME*/));
-  }
     
-  private void molFixConfig(RandomAccessFile out) throws IOException
-  {
-    // FIXME: fill this!
-    out.seek(0x00000200);
-    
-    // 284: Object size. Our test object is 100x100, so this command moves to the bottom left corner.
-    out.seek(0x00000284);
-    molCmd60_2(out, 772, (float)-firstX, (float)-firstY); // FIXME: sign?
-  }
-  
-  private void molWriteBounds(RandomAccessFile out) throws IOException
-  {
-    out.seek(0x00000400);
-  }
-  
-  private void molFixBounds(RandomAccessFile out) throws IOException
-  {
-    out.seek(0x00000400);
-    molCmdBeginSub(out, 1);
-    // 00000408: : unknown 05:  603, 1041(5.00%), 41666(200.00%), 145833(700.00%), 
-    //                     104166(500.00%), 72916(350.00%)
-    molCmd(out,  0x48, 0x01, 0x60, 0x80,  6, 603, 5.0f, 200.0f, 700.0f, 500.0f, 350.0f);
-
-    // 00000428: : command block follows, 112 words (form 00000430 to 000005f0)
-    molCmd(out, 0x46, 0x09, 0x00, 0x80,  0x00000070);
-
-    molCmdMoveRelative(out, bboxMinX-bboxMaxX, 0.0f, false);
-    molCmdMoveRelative(out, 0.0f, bboxMinY-bboxMaxY, false);
-    molCmdMoveRelative(out, bboxMaxX-bboxMinX, 0.0f, false);
-    molCmdMoveRelative(out, 0.0f, bboxMaxY-bboxMinY, false);
-    
-    //This is where the block ends
-    int n = (int) out.getChannel().position();
-    out.seek(0x00000428);
-    molCmd(out, 0x46, 0x09, 0x00, 0x80,  (n-0x00000428-8)/4);
-    out.seek(n);
-
-    molCmdEndSub(out, 1);
-  }
-  
   // molMoveRel(out, 5.0f, 200.0f, 5.0f, 700.0f, -100.0f, 0.0f);
   private void molMoveRel(RandomAccessFile out, double startSpeed, double maxSpeed, double endSpeed, double accel, double dx, double dy)
      throws IOException
@@ -519,86 +433,33 @@ public class MPC6515Cutter extends LaserCutter
     if (len<1.0)
       return;
     
-    if (lenConst>=5.0) { // huh?
+    if (lenConst>=1.0) {
       lenRampUp = lenRampUp / len;
       lenConst = lenConst / len;
       lenRampDown = lenRampDown /len;
-      // 0x00000430: accelerate
-      molWriteBytes(out, 0x01, 0x46, 0x00, 0x01);
-      molWriteInt(out, 0x00000001);
-      // 0x00000438: set speeds
-      molWriteBytes(out, 0x01, 0x03, 0x00, 0x03);
-      molWriteFloat(out, (float)startSpeed);
-      molWriteFloat(out, (float)maxSpeed);
-      molWriteFloat(out, (float)accel);
-      // 0x00000448: move rel
-      molWriteBytes(out, 0x00, 0x60, 0x02, 0x03);
-      molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);
-      molWriteInt(out, (int)(dx*lenRampUp));
-      molWriteInt(out, (int)(dy*lenRampUp));
-      // 0x00000458: set speed
-      molWriteBytes(out, 0x01, 0x03, 0x00, 0x03);
-      molWriteFloat(out, (float)maxSpeed);
-      molWriteFloat(out, (float)maxSpeed);
-      molWriteFloat(out, (float)accel);
-      // 0x00000468: move rel
-      molWriteBytes(out, 0x00, 0x60, 0x02, 0x03);
-      molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);
-      molWriteInt(out, (int)(dx - dx*lenRampUp - dx*lenRampDown));
-      molWriteInt(out, (int)(dy - dy*lenRampUp - dy*lenRampDown));
-      // 0x00000478: decelerate
-      molWriteBytes(out, 0x01, 0x46, 0x00, 0x01);
-      molWriteInt(out, 2);
-      // 0x00000480: set speeds
-      molWriteBytes(out, 0x01, 0x03, 0x00, 0x03);
-      molWriteFloat(out, (float)endSpeed);
-      molWriteFloat(out, (float)maxSpeed);
-      molWriteFloat(out, (float)accel);
-      // 0x00000490: move rel
-      molWriteBytes(out, 0x00, 0x60, 0x02, 0x03);
-      molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);
-      molWriteInt(out, (int)(dx*lenRampDown));
-      molWriteInt(out, (int)(dy*lenRampDown));
+      molCmdAccelerate(out);
+      molCmdSetSpeeds(out, startSpeed, maxSpeed, accel);
+      molCmdMoveRelative(out, (int)(dx*lenRampUp), (int)(dy*lenRampUp));
+      molCmdSetSpeeds(out, maxSpeed, maxSpeed, accel);
+      molCmdMoveRelative(out, (int)(dx - dx*lenRampUp - dx*lenRampDown), (int)(dy - dy*lenRampUp - dy*lenRampDown));
+      molCmdDecelerate(out);
+      molCmdSetSpeeds(out, endSpeed, maxSpeed, accel);
+      molCmdMoveRelative(out, (int)(dx*lenRampDown), (int)(dy*lenRampDown));
     } else {
       double scale = (lenRampUp+lenConst/2.0) / lenRampUp;
-      Debug.println("LenConst is " + Double.toString(lenConst) + "  Scale: " + Double.toString(scale));
-      //lenRampUp = (lenRampUp+lenConst/2.0) / len;
-      //lenRampDown = (lenRampDown+lenConst/2.0) /len;      
-      //maxSpeed = startSpeed + lenRampUp*accel;
-      //maxSpeed = Math.sqrt(lenRampUp*accel*2.0 + startSpeed*startSpeed);
       lenRampUp   =   (lenRampUp+lenConst/2.0) / len;
       lenRampDown = (lenRampDown+lenConst/2.0) / len;
       maxSpeed = (maxSpeed-startSpeed)*scale + startSpeed;
 
       if (Math.abs(dx*lenRampUp)>=1.0||Math.abs(dy*lenRampUp)>1.0) {
-        // 0x00000430: accelerate
-        molWriteBytes(out, 0x01, 0x46, 0x00, 0x01);
-        molWriteInt(out, 0x00000001);
-        // 0x00000438: set speeds
-        molWriteBytes(out, 0x01, 0x03, 0x00, 0x03);
-        molWriteFloat(out, (float)startSpeed);
-        molWriteFloat(out, (float)maxSpeed);
-        molWriteFloat(out, (float)accel);
-        // 0x00000448: move rel
-        molWriteBytes(out, 0x00, 0x60, 0x02, 0x03);
-        molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);
-        molWriteInt(out, (int)(dx*lenRampUp));
-        molWriteInt(out, (int)(dy*lenRampUp));
+        molCmdAccelerate(out);
+        molCmdSetSpeeds(out, startSpeed, maxSpeed, accel);
+        molCmdMoveRelative(out, (int)(dx*lenRampUp), (int)(dy*lenRampUp));
       }
       if (Math.abs(dx*lenRampDown)>=1.0||Math.abs(dy*lenRampDown)>=1.0) {
-        // 0x00000478: decelerate
-        molWriteBytes(out, 0x01, 0x46, 0x00, 0x01);
-        molWriteInt(out, 2);
-        // 0x00000480: set speeds
-        molWriteBytes(out, 0x01, 0x03, 0x00, 0x03);
-        molWriteFloat(out, (float)endSpeed);
-        molWriteFloat(out, (float)maxSpeed);
-        molWriteFloat(out, (float)accel);
-        // 0x00000490: move rel
-        molWriteBytes(out, 0x00, 0x60, 0x02, 0x03);
-        molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);
-        molWriteInt(out, (int)(dx*lenRampDown));
-        molWriteInt(out, (int)(dy*lenRampDown));
+        molCmdDecelerate(out);
+        molCmdSetSpeeds(out, endSpeed, maxSpeed, accel);
+        molCmdMoveRelative(out, (int)(dx*lenRampDown), (int)(dy*lenRampDown));
       }
     }    
   }
@@ -608,6 +469,9 @@ public class MPC6515Cutter extends LaserCutter
   // 
   private void molWriteBlock0000(RandomAccessFile out) throws IOException
   {
+    nMotionBlocks = 0;
+    nMoveRelative = 0;
+    
     out.seek(0x00000000);
     molWriteInt(out, 0x00001000);  // 0000: file size in bytes
     molWriteInt(out, 34);  // 0004: ?
@@ -618,8 +482,8 @@ public class MPC6515Cutter extends LaserCutter
     molWriteInt(out, 1);  // 0014: ?
     molWriteInt(out, 0);  // 0018: ?
     molWriteInt(out, 0);  // 001c: ?
-    molWriteInt(out, -20833);  // 0020: steps per 100mm in x direction
-    molWriteInt(out, -20833);  // 0024: steps per 100mm in y direction
+    molWriteInt(out, (int)(bboxWidth*-208.33));   // 0020: artwork width in steps
+    molWriteInt(out, (int)(bboxHeight*-208.33));  // 0024: artwork height in steps
     molWriteInt(out, 0x00481095);  // 0028: ?
     molWriteInt(out, 0x471a0000);  // 002c: ?
     molWriteInt(out, 0);  // 0030: 0
@@ -658,6 +522,10 @@ public class MPC6515Cutter extends LaserCutter
     }
     out.seek(0);
     molWriteInt(out, blockLen);
+    out.seek(4);
+    molWriteInt(out, nMotionBlocks + 30); // 0004: ???? seems to loosely correspond
+    out.seek(0x0010);
+    molWriteInt(out, nMoveRelative); // 0010: ???? seems to loosely correspond
     // FIXME: we must also fixup the movement counter in 0x00000010!
   }
 
@@ -703,8 +571,9 @@ public class MPC6515Cutter extends LaserCutter
   // 0264: Artwork Origin
     molWriteBytes(out, 0x40, 0x60, 0x04, 0x03);
     molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);  // Select motion axes
-    molWriteInt(out, 104166); // (500.005mm) table width + artwork width / 2
-    molWriteInt(out, 72916); // (350.002mm) table height + artwork height / 2
+    molWriteMm(out, (float)(0.5*(bedWidth+bboxWidth))); // (500.005mm) (table width + artwork width) / 2
+    molWriteMm(out, (float)(0.5*(bedHeight+bboxHeight))); // (350.002mm) (table height + artwork height) / 2
+    nMoveRelative++;
   // 0274: Set Speed
     molWriteBytes(out, 0x41, 0x03, 0x00, 0x03);
     molWriteFloat(out, 1041f); // (5%) start
@@ -713,8 +582,8 @@ public class MPC6515Cutter extends LaserCutter
   // 0284: Start Corner
     molWriteBytes(out, 0x40, 0x60, 0x02, 0x03);
     molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);  // Select motion axes
-    molWriteInt(out, -20833); // (-100mm) left
-    molWriteInt(out, -20833); // (-100mm) bottom
+    molWriteMm(out, (float)(bboxWidth)); // (-100mm) left
+    molWriteMm(out, (float)(bboxHeight)); // (-100mm) bottom
   // 0294: Unknown Command 10
     molWriteBytes(out, 0x48, 0x00, 0x50, 0x80);
     molWriteInt(out, 3);  // Length = 3 words
@@ -731,18 +600,6 @@ public class MPC6515Cutter extends LaserCutter
 
   private void molFixBlock0200(RandomAccessFile out) throws IOException
   {
-  // 0264: Artwork Origin
-    out.seek(0x00000264);
-    molWriteBytes(out, 0x40, 0x60, 0x04, 0x03);
-    molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);  // Select motion axes
-    molWriteMm(out, (float)(0.5*(bedWidth+(bboxMaxX-bboxMinX)))); // (500.005mm) (table width + artwork width) / 2
-    molWriteMm(out, (float)(0.5*(bedHeight+(bboxMaxY-bboxMinY)))); // (350.002mm) (table height + artwork height) / 2
-  // 0284: Start Corner
-    out.seek(0x00000284);
-    molWriteBytes(out, 0x40, 0x60, 0x02, 0x03);
-    molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);  // Select motion axes
-    molWriteMm(out, (float)(bboxMinX-bboxMaxX)); // (-100mm) left
-    molWriteMm(out, (float)(bboxMinY-bboxMaxY)); // (-100mm) bottom
   }
 
   // 
@@ -750,19 +607,8 @@ public class MPC6515Cutter extends LaserCutter
   // 
   private void molWriteBlock0400(RandomAccessFile out) throws IOException
   {
-    // data is written in FixBlock
-  }
-  
-  // 
-  // .MOL file data block at 0x00000400
-  // 
-  private void molFixBlock0400(RandomAccessFile out) throws IOException
-  {
-    double wdt = bboxMaxX - bboxMinX, hgt = bboxMaxY - bboxMinY;
     out.seek(0x00000400);
-  // 0400: Begin Subroutine
-    molWriteBytes(out, 0x48, 0x00, 0x30, 0x01);
-    molWriteInt(out, 1);
+    molCmdBeginSubroutine(out, 1);
   // 0408: Unknown Command 2
     molWriteBytes(out, 0x48, 0x01, 0x60, 0x80);
     molWriteInt(out, 6);  // Length = 6 words
@@ -773,21 +619,22 @@ public class MPC6515Cutter extends LaserCutter
     molWriteFloat(out, 104166f); // (500%) value for acceleration from the settings
     molWriteFloat(out, 72916f); // (350%) 
   // 0428: Begin Motion Block
-  // 0428: Begin Motion Block
-    molWriteBytes(out, 0x46, 0x09, 0x00, 0x80);
-    molWriteInt(out, 112);  // FIXME: number of words in motion block
+    molCmdBeginMotionBlock(out);
   // motion  
-    molMoveRel(out, 1041f, 41666f, 1473.12f, 145833f, -wdt*208.33, 0f); // (5%, 200%, 7%, 700%, -100mm, 0mm [rcr])
-    molMoveRel(out, 1473.12f, 41666f, 1473.12f, 145833f, 0f, -hgt*208.33); // (7%, 200%, 7%, 700%, 0mm, -100mm [rcr])
-    molMoveRel(out, 1473.12f, 41666f, 1473.12f, 145833f, wdt*208.33, 0f); // (7%, 200%, 7%, 700%, 100mm, 0mm [rcr])
-    molMoveRel(out, 1473.12f, 41666f, 1041f, 145833f, 0f, hgt*208.33); // (7%, 200%, 5%, 700%, 0mm, 100mm [rcr])
+    molMoveRel(out, 1041f, 41666f, 1473.12f, 145833f, -bboxWidth*208.33, 0f); // (5%, 200%, 7%, 700%, -100mm, 0mm [rcr])
+    molMoveRel(out, 1473.12f, 41666f, 1473.12f, 145833f, 0f, -bboxHeight*208.33); // (7%, 200%, 7%, 700%, 0mm, -100mm [rcr])
+    molMoveRel(out, 1473.12f, 41666f, 1473.12f, 145833f, bboxWidth*208.33, 0f); // (7%, 200%, 7%, 700%, 100mm, 0mm [rcr])
+    molMoveRel(out, 1473.12f, 41666f, 1041f, 145833f, 0f, bboxHeight*208.33); // (7%, 200%, 5%, 700%, 0mm, 100mm [rcr])
   // 05f0: End Of Motion Block (started at 0430, 112 words)
-    out.seek(0x0000042c);  // fix the motion block word count
-    molWriteInt(out, 112);  // calculated size
-    out.seek(0x000005f0);  // continue here
-  // 05f0: End Subroutine
-    molWriteBytes(out, 0x48, 0x00, 0x40, 0x01);
-    molWriteInt(out, 1);
+    molCmdEndMotionBlock(out);
+    molCmdEndSubroutine(out, 1);
+  }
+  
+  // 
+  // .MOL file data block at 0x00000400
+  // 
+  private void molFixBlock0400(RandomAccessFile out) throws IOException
+  {
   }
 
   // 
@@ -795,19 +642,8 @@ public class MPC6515Cutter extends LaserCutter
   // 
   private void molWriteBlock0600(RandomAccessFile out) throws IOException
   {
-    // data is written in FixBlock
-  }
-    
-  // 
-  // .MOL file data block at 0x00000600
-  // 
-  private void molFixBlock0600(RandomAccessFile out) throws IOException
-  {
-    double wdt = bboxMaxX - bboxMinX, hgt = bboxMaxY - bboxMinY;
     out.seek(0x00000600);
-  // 0600: Begin Subroutine
-    molWriteBytes(out, 0x48, 0x00, 0x30, 0x01);
-    molWriteInt(out, 2);
+    molCmdBeginSubroutine(out, 2);
   // 0608: Unknown Command 2
     molWriteBytes(out, 0x48, 0x01, 0x60, 0x80);
     molWriteInt(out, 6);  // Length = 6 words
@@ -834,26 +670,24 @@ public class MPC6515Cutter extends LaserCutter
     molWriteFloat(out, 5208f); // (25%) maximum cutting speed
     molWriteInt(out, 0);  // unknown
   // 0660: Begin Motion Block
-    molWriteBytes(out, 0x46, 0x09, 0x00, 0x80);
-    molWriteInt(out, 144);  // number of words in motion block
+    molCmdBeginMotionBlock(out);
     molMoveRel(out, 1041f, 5208f, 1014.73f, 104166f, 417f, 417f); // (5%, 25%, 5%, 500%, 2.00163mm, 2.00163mm [rcr])
-  // 06d8: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 1014.73f, 5208f, 1473.12f, 104166f, (-wdt-4.0)*208.33, 0f); // (5%, 25%, 7%, 500%, -104.003mm, 0mm [rcr])
-    molMoveRel(out, 1473.12f, 5208f, 1473.12f, 104166f, 0f, (-hgt-4.0)*208.33); // (7%, 25%, 7%, 500%, 0mm, -104.003mm [rcr])
-    molMoveRel(out, 1473.12f, 5208f, 1473.12f, 104166f, (wdt+4.0)*208.33, 0f); // (7%, 25%, 7%, 500%, 104.003mm, 0mm [rcr])
-    molMoveRel(out, 1473.12f, 5208f, 1041f, 104166f, 0f, (hgt+4.0)*208.33); // (7%, 25%, 5%, 500%, 0mm, 104.003mm [rcr])
-  // 08a0: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
+    molCmdLaserOn(out); // 06d8
+    molMoveRel(out, 1014.73f, 5208f, 1473.12f, 104166f, (-bboxWidth-4.0)*208.33, 0f); // (5%, 25%, 7%, 500%, -104.003mm, 0mm [rcr])
+    molMoveRel(out, 1473.12f, 5208f, 1473.12f, 104166f, 0f, (-bboxHeight-4.0)*208.33); // (7%, 25%, 7%, 500%, 0mm, -104.003mm [rcr])
+    molMoveRel(out, 1473.12f, 5208f, 1473.12f, 104166f, (bboxWidth+4.0)*208.33, 0f); // (7%, 25%, 7%, 500%, 104.003mm, 0mm [rcr])
+    molMoveRel(out, 1473.12f, 5208f, 1041f, 104166f, 0f, (bboxHeight+4.0)*208.33); // (7%, 25%, 5%, 500%, 0mm, 104.003mm [rcr])
+    molCmdLaserOff(out); // 08a0
   // 08a8: End Of Motion Block (started at 0668, 144 words)
-    out.seek(0x00000664);  // fix the motion block word count
-    molWriteInt(out, 144);  // calculated size
-    out.seek(0x000008a8);  // continue here
-  // 08a8: End Subroutine
-    molWriteBytes(out, 0x48, 0x00, 0x40, 0x01);
-    molWriteInt(out, 2);
+    molCmdEndMotionBlock(out);
+    molCmdEndSubroutine(out, 2);
+  }
+    
+  // 
+  // .MOL file data block at 0x00000600
+  // 
+  private void molFixBlock0600(RandomAccessFile out) throws IOException
+  {
   }
 
   @Override
@@ -863,6 +697,41 @@ public class MPC6515Cutter extends LaserCutter
     
     pl.taskChanged(this, "checking...");
     checkJob(job);
+    
+    // find the size of the entire artwork
+    firstVector = true;
+    for (JobPart p : job.getParts())
+    {
+      if (p instanceof VectorPart)
+      {
+        double resolution = p.getDPI();
+        for (VectorCommand c : ((VectorPart) p).getCommandList())
+        {
+          switch (c.getType())
+          {
+            case LINETO:
+            case MOVETO:
+            {
+              double dx, x = Util.px2mm(c.getX(), resolution);
+              double dy, y = Util.px2mm(c.getY(), resolution);
+              if (firstVector) {
+                firstVector = false;
+                bboxMinX = bboxMaxX = firstX = prevX = x;
+                bboxMinY = bboxMaxY = firstY = prevY = y;
+              } else {
+                if (x<bboxMinX) bboxMinX = x;
+                if (x>bboxMaxX) bboxMaxX = x;
+                if (y<bboxMinY) bboxMinY = y;
+                if (y>bboxMaxY) bboxMaxY = y;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+    bboxWidth  = bboxMaxX - bboxMinX;
+    bboxHeight = bboxMaxY - bboxMinY;
     
     pl.progressChanged(this, 20);
     pl.taskChanged(this, "buffering...");
@@ -895,9 +764,7 @@ public class MPC6515Cutter extends LaserCutter
   // .MOL file data block at 0x00000a00
   // 
     out.seek(0x00000a00);
-  // 0a00: Begin Subroutine
-    molWriteBytes(out, 0x48, 0x00, 0x30, 0x01);
-    molWriteInt(out, 3);
+    molCmdBeginSubroutine(out, 3);
   // 0a08: Unknown Command 13
     molWriteBytes(out, 0x46, 0x0d, 0x00, 0x01);
     molWriteInt(out, 3000);
@@ -932,98 +799,12 @@ public class MPC6515Cutter extends LaserCutter
     molWriteFloat(out, 20833f); // (100%) maximum cutting speed
     molWriteInt(out, 0);  // unknown
   // 0a70: Begin Motion Block
-    molWriteBytes(out, 0x46, 0x09, 0x00, 0x80);
-    molWriteInt(out, 290);  // number of words in motion block
-  // 0a78: Blower On/Off
-    molWriteBytes(out, 0x06, 0x0b, 0x00, 0x01);
-    molWriteBytes(out, 0x01, 0x02, 0x00, 0x00);
-/*    
-  // 0a80: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 1041f, 20833f, 936.9f, 104166f, 20833f, 0f); // (5%, 100%, 4%, 500%, 100mm, 0mm [rcr])
-  // 0af8: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-  // 0b00: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 936.9f, 20833f, 936.9f, 104166f, 0f, 20833f); // (4%, 100%, 4%, 500%, 0mm, 100mm [rcr])
-  // 0b78: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-  // 0b80: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 936.9f, 20833f, 936.9f, 104166f, -20833f, 0f); // (4%, 100%, 4%, 500%, -100mm, 0mm [rcr])
-  // 0bf8: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-  // 0c00: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 936.9f, 20833f, 936.9f, 104166f, 0f, -20833f); // (4%, 100%, 4%, 500%, 0mm, -100mm [rcr])
-  // 0c78: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-    molMoveRel(out, 936.9f, 20763.3f, 1469.88f, 145833f, 2083f, 2083f); // (4%, 100%, 7%, 700%, 9.99856mm, 9.99856mm [rr])
-  // 0cd0: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 1469.88f, 20833f, 936.9f, 104166f, 8334f, 0f); // (7%, 100%, 4%, 500%, 40.0038mm, 0mm [rcr])
-  // 0d48: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-    molMoveRel(out, 936.9f, 35407.2f, 936.9f, 145833f, -8334f, 2084f); // (4%, 170%, 4%, 700%, -40.0038mm, 10.0034mm [rr])
-  // 0da0: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 936.9f, 20833f, 936.9f, 104166f, 8334f, 0f); // (4%, 100%, 4%, 500%, 40.0038mm, 0mm [rcr])
-  // 0e18: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-    molMoveRel(out, 936.9f, 35406.7f, 936.9f, 145833f, -8334f, 2083f); // (4%, 170%, 4%, 700%, -40.0038mm, 9.99856mm [rr])
-  // 0e70: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 1);
-    molMoveRel(out, 936.9f, 20833f, 1041f, 104166f, 8334f, 0f); // (4%, 100%, 5%, 500%, 40.0038mm, 0mm [rcr])
-*/
+    molCmdBeginMotionBlock(out);
+    molCmdBlowerOn(out);
 
-    // find the size of the entire artwork
-    firstVector = true;
-    for (JobPart p : job.getParts())
-    {
-      if (p instanceof VectorPart)
-      {
-        double resolution = p.getDPI();
-        for (VectorCommand c : ((VectorPart) p).getCommandList())
-        {
-          switch (c.getType())
-          {
-            case LINETO:
-            case MOVETO:
-            {
-              double dx, x = Util.px2mm(c.getX(), resolution);
-              double dy, y = Util.px2mm(c.getY(), resolution);
-              if (firstVector) {
-                firstVector = false;
-                bboxMinX = bboxMaxX = firstX = prevX = x;
-                bboxMinY = bboxMaxY = firstY = prevY = y;
-              } else {
-                if (x<bboxMinX) bboxMinX = x;
-                if (x>bboxMaxX) bboxMaxX = x;
-                if (y<bboxMinY) bboxMinY = y;
-                if (y>bboxMaxY) bboxMaxY = y;
-              }
-              break;
-            }
-          }
-        }
-      }
-    }
     // generate the commands to draw the artwork
     firstVector = true;
-    int bailCnt = 9999999; // 10, 100, 1000(F), 500(F), 300(F), 200, 250, 275, 290, 295(F), 293(F), 292(F), 291(OK)
+    int bailCnt = 9999999; // FIXME: no longer used?! 10, 100, 1000(F), 500(F), 300(F), 200, 250, 275, 290, 295(F), 293(F), 292(F), 291(OK)
     for (JobPart p : job.getParts())
     {
       if (bailCnt<=0) break;
@@ -1062,14 +843,9 @@ public class MPC6515Cutter extends LaserCutter
                 dy = y - prevY; prevY = y;
                 if (dx!=0.0 || dy!=0.0) {
                   if (c.getType()==VectorCommand.CmdType.LINETO) {
-                    // Laser On
-                    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-                    molWriteInt(out, 1);
-                    /// move slowly
+                    molCmdLaserOn(out);
                     molMoveRel(out, 936.9f, 25.0*208.33, 936.9f, 104166f, dx*208.33, dy*208.33);
-                    // Laser Off
-                    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-                    molWriteInt(out, 0);
+                    molCmdLaserOff(out);
                   } else {
                     molMoveRel(out, 936.9f, 35406.7f, 936.9f, 145833f, dx*208.33, dy*208.33);
                   }
@@ -1092,24 +868,10 @@ public class MPC6515Cutter extends LaserCutter
         }
       }
     }
-  // 0ee8: Laser On/Off
-    molWriteBytes(out, 0x06, 0x06, 0x00, 0x01);
-    molWriteInt(out, 0);
-  // 0ef0: Blower On/Off
-    molWriteBytes(out, 0x06, 0x0b, 0x00, 0x01);
-    molWriteBytes(out, 0x00, 0x02, 0x00, 0x00);
-  // 0ef8: Blower On/Off
-    molWriteBytes(out, 0x06, 0x0b, 0x00, 0x01);
-    molWriteBytes(out, 0x00, 0x02, 0x00, 0x00);
-  // 0f00: End Of Motion Block (started at 0a78, 290 words)
-  // a70: Command block used for repetition. Interestingly, the blower commands are inside the block.
-    int n = (int) out.getChannel().position();
-    out.seek(0x00000a70);
-    molCmd(out, 0x46, 0x09, 0x00, 0x80,  (n-0x00000a70-8)/4);
-    out.seek(n);    
-  // 0f00: End Subroutine
-    molWriteBytes(out, 0x48, 0x00, 0x40, 0x01);
-    molWriteInt(out, 3);    
+    molCmdLaserOff(out);
+    molCmdBlowerOff(out);
+    molCmdEndMotionBlock(out);
+    molCmdEndSubroutine(out, 3);
 
     molFixBlock0600(out);
     
