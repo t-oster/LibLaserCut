@@ -582,8 +582,8 @@ public class MPC6515Cutter extends LaserCutter
   // 0284: Start Corner
     molWriteBytes(out, 0x40, 0x60, 0x02, 0x03);
     molWriteBytes(out, 0x04, 0x03, 0x00, 0x00);  // Select motion axes
-    molWriteMm(out, (float)(bboxWidth)); // (-100mm) left
-    molWriteMm(out, (float)(bboxHeight)); // (-100mm) bottom
+    molWriteMm(out, (float)(-bboxWidth)); // (-100mm) left
+    molWriteMm(out, (float)(-bboxHeight)); // (-100mm) bottom
   // 0294: Unknown Command 10
     molWriteBytes(out, 0x48, 0x00, 0x50, 0x80);
     molWriteInt(out, 3);  // Length = 3 words
