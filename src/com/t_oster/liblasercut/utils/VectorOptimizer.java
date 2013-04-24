@@ -363,6 +363,7 @@ public class VectorOptimizer
         
         // the result is now mostly sorted
         // TODO somehow sort by intersecting area
+        break;
       }
             
     case SMALLEST_FIRST: {
@@ -408,15 +409,8 @@ public class VectorOptimizer
         Collections.sort(result,new SmallerComparator());
         
         // the result is now mostly sorted
-        
-    }
-        
-        
-        
-        
-        
-            
-            
+        break;
+      }
     }
     return result;
   }
