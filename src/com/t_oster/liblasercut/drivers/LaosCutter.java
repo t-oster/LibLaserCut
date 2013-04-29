@@ -36,7 +36,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.net.tftp.TFTP;
@@ -61,7 +60,6 @@ public class LaosCutter extends LaserCutter
   private static final String SETTING_MMPERSTEP = "mm per Step (for SimpleMode)";
   private static final String SETTING_TFTP = "Use TFTP instead of TCP";
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line";
-  private static final String SETTING_UNIDIR = "Engrave unidirectional";
   private static final String SETTING_DEBUGFILE = "Debug output file";
   private static final String SETTING_SUPPORTS_PURGE = "Supports purge";
   private static final String SETTING_SUPPORTS_VENTILATION = "Supports ventilation";
@@ -116,7 +114,8 @@ public class LaosCutter extends LaserCutter
     this.supportsVentilation = supportsVentilation;
   }
   
-  private boolean unidir = false;
+  //only kept for backwards compatibility. unused
+  private transient boolean unidir = false;
   private String debugFilename = "";
 
   @Override
@@ -126,25 +125,15 @@ public class LaosCutter extends LaserCutter
   }
 
   @Override
-  public LaosCutterProperty getLaserPropertyForRasterPart()
+  public LaosEngraveProperty getLaserPropertyForRasterPart()
   {
-    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus, !this.supportsFrequency);
+    return new LaosEngraveProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus, !this.supportsFrequency);
   }
 
   @Override
-  public LaosCutterProperty getLaserPropertyForRaster3dPart()
+  public LaosEngraveProperty getLaserPropertyForRaster3dPart()
   {
-    return new LaosCutterProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus, !this.supportsFrequency);
-  }
-
-  public void setEngraveUnidirectional(boolean uni)
-  {
-    this.unidir = uni;
-  }
-
-  public boolean isEngraveUnidirectional()
-  {
-    return this.unidir;
+    return new LaosEngraveProperty(!this.supportsPurge, !this.supportsVentilation, !this.supportsFocus, !this.supportsFrequency);
   }
 
   private double addSpacePerRasterLine = 5;
@@ -451,9 +440,11 @@ public class LaosCutter extends LaserCutter
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
-    this.setCurrentProperty(out, rp.getLaserProperty());
+    LaosEngraveProperty prop = rp.getLaserProperty() instanceof LaosEngraveProperty ? (LaosEngraveProperty) rp.getLaserProperty() : new LaosEngraveProperty(rp.getLaserProperty());
+    this.setCurrentProperty(out, prop);
     float maxPower = this.currentPower;
-    for (int line = 0; line < rp.getRasterHeight(); line++)
+    boolean bu = prop.isEngraveBottomUp();
+    for (int line = bu ? rp.getRasterHeight()-1 : 0; bu ? line >= 0 : line < rp.getRasterHeight(); line += bu ? -1 : 1 )
     {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
@@ -524,7 +515,7 @@ public class LaosCutter extends LaserCutter
           line(out, lineStart.x, lineStart.y, resolution);
         }
       }
-      if (!this.isEngraveUnidirectional())
+      if (!prop.isEngraveUnidirectional())
       {
         dirRight = !dirRight;
       }
@@ -581,8 +572,10 @@ public class LaosCutter extends LaserCutter
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
-    this.setCurrentProperty(out, rp.getLaserProperty());
-    for (int line = 0; line < rp.getRasterHeight(); line++)
+    LaosEngraveProperty prop = rp.getLaserProperty() instanceof LaosEngraveProperty ? (LaosEngraveProperty) rp.getLaserProperty() : new LaosEngraveProperty(rp.getLaserProperty());
+    this.setCurrentProperty(out, prop);
+    boolean bu = prop.isEngraveBottomUp();
+    for (int line = bu ? rp.getRasterHeight()-1 : 0; bu ? line >= 0 : line < rp.getRasterHeight(); line += bu ? -1 : 1)
     {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
@@ -633,7 +626,7 @@ public class LaosCutter extends LaserCutter
           line(out, lineStart.x, lineStart.y, resolution);
         }
       }
-      if (!this.isEngraveUnidirectional())
+      if (!prop.isEngraveUnidirectional())
       {
         dirRight = !dirRight;
       }
@@ -807,7 +800,6 @@ public class LaosCutter extends LaserCutter
   private static String[] settingAttributes = new String[]{
     SETTING_HOSTNAME,
     SETTING_PORT,
-    SETTING_UNIDIR,
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
     //SETTING_FLIPX,
@@ -854,10 +846,6 @@ public class LaosCutter extends LaserCutter
     else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
     {
       return (Boolean) this.supportsFocus;
-    }
-    else if (SETTING_UNIDIR.equals(attribute))
-    {
-      return (Boolean) this.isEngraveUnidirectional();
     }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
@@ -921,10 +909,6 @@ public class LaosCutter extends LaserCutter
     {
       this.setSupportsFocus((Boolean) value);
     }
-    else if (SETTING_UNIDIR.endsWith(attribute))
-    {
-      this.setEngraveUnidirectional((Boolean) value);
-    }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
       this.setHostname((String) value);
@@ -973,7 +957,6 @@ public class LaosCutter extends LaserCutter
     clone.mmPerStep = mmPerStep;
     clone.useTftp = useTftp;
     clone.addSpacePerRasterLine = addSpacePerRasterLine;
-    clone.unidir = unidir;
     clone.supportsFrequency = supportsFrequency;
     clone.supportsPurge = supportsPurge;
     clone.supportsVentilation = supportsVentilation;
