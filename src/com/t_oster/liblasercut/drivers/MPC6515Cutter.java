@@ -549,9 +549,13 @@ public class MPC6515Cutter extends LaserCutter
     molWriteInt(out, 1);  // 000c: ?
     //molWriteInt(out, 41);  // 0010: somehow related to the file size or the number of commands
     molWriteInt(out, 2000);  // 0010: somehow related to the file size or the number of commands
-    molWriteInt(out, 1);  // 0014: ? also 257 (bitfield?)
-    molWriteInt(out, 0);  // 0018: ?
-    molWriteInt(out, 0);  // 001c: ?
+    molWriteInt(out, 0x00000101);  // 0014: ? also 257 (bitfield?) -> user origin is top right!
+    //molWriteInt(out, 0x00000001);  // 0014: ? also 257 (bitfield?) -> fixed origin
+    // 201, 401, 801, 100, 102: top right relative: no change
+    // 001, (somewhat) center relative
+    
+    molWriteInt(out, (int)(100*-208.33));  // 0018: ? (no change)
+    molWriteInt(out, (int)(100*-208.33));  // 001c: ?
     molWriteInt(out, (int)(bboxWidth*-208.33));   // 0020: artwork width in steps
     molWriteInt(out, (int)(bboxHeight*-208.33));  // 0024: artwork height in steps
     molWriteInt(out, 0x00481095);  // 0028: ?
@@ -644,8 +648,9 @@ public class MPC6515Cutter extends LaserCutter
     // Verify setting for origin andsize, coordinate flipping, etc.
     //molWriteMm(out, (float)(0.5*(bedWidth+bboxWidth))); // FIXME: (500.005mm) (table width + artwork width) / 2
     //molWriteMm(out, (float)(0.5*(bedHeight+bboxHeight))); // FIXME: (350.002mm) (table height + artwork height) / 2
-    molWriteMm(out, (float)200); // FIXME: (500.005mm) (table width + artwork width) / 2
-    molWriteMm(out, (float)200); // FIXME: (350.002mm) (table height + artwork height) / 2
+    molWriteMm(out, (float)100); // FIXME: (500.005mm) (table width + artwork width) / 2
+    // if user origin or fixed origin is set, this seems to do nothing (is there some offset origin?)
+    molWriteMm(out, (float)100); // FIXME: (350.002mm) (table height + artwork height) / 2
     nMoveRelative++;
   // 0274: Set Speed
     molWriteBytes(out, 0x41, 0x03, 0x00, 0x03);
