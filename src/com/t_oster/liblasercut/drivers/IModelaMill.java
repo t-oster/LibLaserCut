@@ -72,6 +72,7 @@ public class IModelaMill extends LaserCutter
   private static String PORT = "port";
   private static String BED_WIDTH = "bed width";
   private static String BED_HEIGHT = "bed height";
+  private static String FLIP_YAXIS = "flip y axis";
   private static String HOME_ON_END = "move home after job";
 
   private Map<String, Object> properties = new LinkedHashMap<String, Object>();
@@ -82,6 +83,17 @@ public class IModelaMill extends LaserCutter
     properties.put(HOSTNAME, "file:///dev/usb/lp0");
     properties.put(PORT, (Integer) 5000);
     properties.put(HOME_ON_END, (Boolean) true);
+    properties.put(FLIP_YAXIS, (Boolean) false);
+  }
+  
+  private boolean spindleOn = false;
+  private void setSpindleOn(PrintStream out, boolean spindleOn)
+  {
+    if (spindleOn != this.spindleOn)
+    {
+      this.spindleOn = spindleOn;
+      out.println(spindleOn ? "M03" : "M05");//start/stop spindle
+    }
   }
   
   private void writeInitializationCode(PrintStream out)
@@ -90,12 +102,11 @@ public class IModelaMill extends LaserCutter
     out.println("O00000001");//program number 00000001 - can be changed to any number, must be 8 digits
     out.println("G90");//absolute positioning
     out.println("G21");//select mm as input unit
-    out.println("M03");//start spindle
   }
   
   private void writeFinalizationCode(PrintStream out)
   {
-    out.println("M05");//stop spindle
+    this.setSpindleOn(out, false);
     out.println("G0 Z0");//head up
     if ((Boolean) properties.get(HOME_ON_END))
     {
@@ -135,16 +146,17 @@ public class IModelaMill extends LaserCutter
     moveHead(out, movedepth);
     //TODO: check if last command was also move and lies on the 
     //same line. If so, replace the last move command
-    out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f%s\n", x, getBedHeight()-y, parameters));
+    out.print(String.format(Locale.ENGLISH, "G00 X%f Y%f%s\n", x, properties.get(FLIP_YAXIS) == Boolean.TRUE ? getBedHeight()-y : y, parameters));
     parameters = "";
   }
   
   private void line(PrintStream out, double x, double y)
   {
+    setSpindleOn(out, true);
     moveHead(out, linedepth);
     //TODO: check if last command was also line and lies on the 
     //same line. If so, replace the last move command
-    out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f%s\n", x, getBedHeight()-y, parameters));
+    out.print(String.format(Locale.ENGLISH, "G01 X%f Y%f%s\n", x, properties.get(FLIP_YAXIS) == Boolean.TRUE ? getBedHeight()-y : y, parameters));
     parameters = "";
   }
   
@@ -154,7 +166,7 @@ public class IModelaMill extends LaserCutter
     if (pr.getSpindleSpeed() != spindleSpeed)
     {
       spindleSpeed = pr.getSpindleSpeed();
-      parameters += String.format(Locale.ENGLISH, " S%d\n", spindleSpeed);
+      parameters += String.format(Locale.ENGLISH, " S%f\n", spindleSpeed);
     }
     if (pr.getFeedRate() != feedRate)
     {
@@ -309,6 +321,12 @@ public class IModelaMill extends LaserCutter
     }
   }
 
+  @Override
+  public LaserProperty getLaserPropertyForRaster3dPart()
+  {
+    return new IModelaProperty();
+  }
+  
   @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
