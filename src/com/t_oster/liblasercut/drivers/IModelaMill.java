@@ -269,7 +269,7 @@ public class IModelaMill extends LaserCutter
     applyProperty(out, prop);
     boolean leftToRight = true;
     Point offset = p.getRasterStart();
-    move(out, Util.mm2px(offset.x, dpi), Util.mm2px(offset.y, dpi));
+    move(out, Util.px2mm(offset.x, dpi), Util.px2mm(offset.y, dpi));
     for (int y = 0; y < p.getRasterHeight(); y+= toolDiameterInPx/2)
     {
       for (int x = leftToRight ? 0 : p.getRasterWidth() - 1; 
@@ -283,7 +283,7 @@ public class IModelaMill extends LaserCutter
         {
           x+= leftToRight ? 1 : -1;
         }
-        line(out, Util.mm2px(offset.x+x, dpi), Util.mm2px(offset.y+y, dpi));
+        line(out, Util.px2mm(offset.x+x, dpi), Util.px2mm(offset.y+y, dpi));
       }
       //invert direction
       leftToRight = !leftToRight;
