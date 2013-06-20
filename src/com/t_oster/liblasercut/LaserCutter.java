@@ -60,7 +60,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
             double maxX = Util.px2mm(p.getMaxX(), p.getDPI());
             double maxY = Util.px2mm(p.getMaxY(), p.getDPI());
             if (maxX > this.getBedWidth() || maxY > this.getBedHeight()) {
-                throw new IllegalJobException("The Job is too big (" + maxX + "x" + maxY + ") for the Laser bed (" + this.getBedHeight() + "x" + this.getBedHeight() + ")");
+                throw new IllegalJobException("The Job is too big (" + maxX + "x" + maxY + ") for the Laser bed (" + this.getBedWidth() + "x" + this.getBedHeight() + ")");
             }
         }
     }
