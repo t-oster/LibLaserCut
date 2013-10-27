@@ -633,7 +633,7 @@ public class LaosCutter extends LaserCutter
     }
     return result.toByteArray();
   }
-
+  
   private byte[] generateInitializationCode() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -655,6 +655,7 @@ public class LaosCutter extends LaserCutter
   {
     out.write(this.generateInitializationCode());
     pl.progressChanged(this, 20);
+    out.write(this.generateBoundingBoxCode(job));
     int i = 0;
     int max = job.getParts().size();
     for (JobPart p : job.getParts())
@@ -962,6 +963,41 @@ public class LaosCutter extends LaserCutter
     clone.supportsVentilation = supportsVentilation;
     clone.supportsFocus = supportsFocus;
     return clone;
+  }
+
+  /**
+   * Calculates the smallest bounding box of all job-parts
+   * and generates the laos bounding-box commands
+   * @param job
+   * @return
+   * @throws UnsupportedEncodingException 
+   */
+  private byte[] generateBoundingBoxCode(LaserJob job) throws UnsupportedEncodingException
+  {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    if (job.getParts().size() > 0)
+    {
+      JobPart p = job.getParts().get(0);
+      double xMin = Util.px2mm(p.getMinX(),p.getDPI());
+      double xMax = Util.px2mm(p.getMaxX(),p.getDPI());
+      double yMin = Util.px2mm(p.getMinY(),p.getDPI());
+      double yMax = Util.px2mm(p.getMaxY(),p.getDPI());
+      double maxDPI = p.getDPI();
+      for (JobPart jp : job.getParts())
+      {
+        xMin = Math.min(xMin, Util.px2mm(jp.getMinX(),jp.getDPI()));
+        xMax = Math.max(xMax, Util.px2mm(jp.getMaxX(),jp.getDPI()));
+        yMin = Math.min(yMin, Util.px2mm(jp.getMinY(),jp.getDPI()));
+        yMax = Math.max(yMax, Util.px2mm(jp.getMaxY(),jp.getDPI()));
+        maxDPI = Math.max(maxDPI, jp.getDPI());
+      }
+      out.printf("201 %d %d\n", px2steps(Util.mm2px(isFlipXaxis() ? bedWidth - xMax : xMin,maxDPI), maxDPI));
+      out.printf("202 %d %d\n", px2steps(Util.mm2px(isFlipXaxis() ? bedWidth - xMin : xMax,maxDPI), maxDPI));
+      out.printf("203 %d %d\n", px2steps(Util.mm2px(isFlipYaxis() ? bedWidth - yMax : yMin,maxDPI), maxDPI));
+      out.printf("204 %d %d\n", px2steps(Util.mm2px(isFlipYaxis() ? bedWidth - xMin : yMax,maxDPI), maxDPI));
+    }
+    return result.toByteArray();
   }
 
 }
