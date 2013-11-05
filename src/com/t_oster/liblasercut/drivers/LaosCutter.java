@@ -992,10 +992,10 @@ public class LaosCutter extends LaserCutter
         yMax = Math.max(yMax, Util.px2mm(jp.getMaxY(),jp.getDPI()));
         maxDPI = Math.max(maxDPI, jp.getDPI());
       }
-      out.printf("201 %d %d\n", px2steps(Util.mm2px(isFlipXaxis() ? bedWidth - xMax : xMin,maxDPI), maxDPI));
-      out.printf("202 %d %d\n", px2steps(Util.mm2px(isFlipXaxis() ? bedWidth - xMin : xMax,maxDPI), maxDPI));
-      out.printf("203 %d %d\n", px2steps(Util.mm2px(isFlipYaxis() ? bedWidth - yMax : yMin,maxDPI), maxDPI));
-      out.printf("204 %d %d\n", px2steps(Util.mm2px(isFlipYaxis() ? bedWidth - xMin : yMax,maxDPI), maxDPI));
+      out.printf("201 %d\n", px2steps(Util.mm2px(isFlipXaxis() ? bedWidth - xMax : xMin,maxDPI), maxDPI));
+      out.printf("202 %d\n", px2steps(Util.mm2px(isFlipXaxis() ? bedWidth - xMin : xMax,maxDPI), maxDPI));
+      out.printf("203 %d\n", px2steps(Util.mm2px(isFlipYaxis() ? bedWidth - yMax : yMin,maxDPI), maxDPI));
+      out.printf("204 %d\n", px2steps(Util.mm2px(isFlipYaxis() ? bedWidth - xMin : yMax,maxDPI), maxDPI));
     }
     return result.toByteArray();
   }
