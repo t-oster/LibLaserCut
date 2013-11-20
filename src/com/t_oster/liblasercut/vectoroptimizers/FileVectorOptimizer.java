@@ -19,25 +19,29 @@
  */
 package com.t_oster.liblasercut.vectoroptimizers;
 
+import com.t_oster.liblasercut.VectorPart;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Just returns the elements in the order they already appear: like
- * defined in the source file
+ * defined in the source file. It also preserves MOVETO commands and the
+ * directions
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public class FileVectorOptimizer extends VectorOptimizer
 {
 
   @Override
+  public VectorPart optimize(VectorPart vp)
+  {
+    return vp;
+  }
+
+  @Override
   protected List<Element> sort(List<Element> e)
   {
-    List<Element> result = new LinkedList<Element>();
-    if (!e.isEmpty())
-    {
-      result.addAll(e);
-    }
-    return result;
+    return e;
   }
+  
 }
