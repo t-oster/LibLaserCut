@@ -1,3 +1,6 @@
 /build/
 /nbproject/private/
 /dist/
+
+# Maven build directory
+target/
