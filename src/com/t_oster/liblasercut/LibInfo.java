@@ -42,7 +42,8 @@ public class LibInfo
       LaosCutter.class,
       Lasersaur.class,
       Dummy.class,
-      IModelaMill.class
+      IModelaMill.class,
+      SampleDriver.class
     };
   }
 }
