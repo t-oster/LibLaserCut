@@ -38,7 +38,8 @@ public abstract class VectorOptimizer
     FILE,
     NEAREST,
     INNER_FIRST,
-    SMALLEST_FIRST
+    SMALLEST_FIRST,
+    DELETE_DUPLICATE_PATHS
   }
 
   protected class Element
@@ -47,6 +48,30 @@ public abstract class VectorOptimizer
     LaserProperty prop;
     Point start;
     List<Point> moves = new LinkedList<Point>();
+
+  public boolean equals(Element e)
+    {
+      if(this.moves.size()==e.moves.size())
+      {
+        if (!this.start.equals(e.start) )
+        {
+          return false;//start point differs
+        }
+        
+        for (int j = 0; j < this.moves.size(); j++)
+        {
+          if (!this.moves.get(j).equals(e.moves.get(j)))
+          {
+            return false;//one move point differs
+          }
+        }
+      }
+      else
+      {
+        return false;
+      }
+      return true;
+    }
 
     void invert()
     {
@@ -114,6 +139,8 @@ public abstract class VectorOptimizer
         return new InnerFirstVectorOptimizer();
       case SMALLEST_FIRST:
         return new SmallestFirstVectorOptimizer();
+      case DELETE_DUPLICATE_PATHS:
+        return new DeleteDuplicatePathsOptimizer();
     }
     throw new IllegalArgumentException("Unknown Order Strategy: " + s);
   }
