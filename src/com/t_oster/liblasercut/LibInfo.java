@@ -43,7 +43,8 @@ public class LibInfo
       Lasersaur.class,
       Dummy.class,
       IModelaMill.class,
-      SampleDriver.class
+      SampleDriver.class,
+      ExportSVG.class
     };
   }
 }
