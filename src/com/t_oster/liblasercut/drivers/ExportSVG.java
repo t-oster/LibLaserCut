@@ -1,23 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.t_oster.liblasercut.drivers;
-
-
-import com.t_oster.liblasercut.*;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.util.*;
-import javax.swing.JFileChooser;
-/**
- *
- * @author Icetea
- */
-public class ExportSVG extends LaserCutter
-{
-  /**
+ /**
  * This file is part of LibLaserCut.
  * Copyright (C) 2011 - 2014 Thomas Oster <mail@thomas-oster.de>
  *
@@ -43,6 +24,22 @@ public class ExportSVG extends LaserCutter
  *
  * @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
  */
+package com.t_oster.liblasercut.drivers;
+
+
+import com.t_oster.liblasercut.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.*;
+import javax.swing.JFileChooser;
+/**
+ *
+ * @author Icetea
+ */
+public class ExportSVG extends LaserCutter
+{
+ 
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
   private static final String SETTING_RUNTIME = "Fake estimated run-time in seconds (-1 to disable)";
