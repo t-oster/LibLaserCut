@@ -175,7 +175,7 @@ public class Lasersaur extends LaserCutter {
 
   private void setSpeed(PrintStream out, int speedInPercent) {
     if (speedInPercent != currentSpeed) {
-      out.printf(Locale.US, "G1 F%i\n", (int) ((double) speedInPercent * this.getLaserRate() / 100));
+      out.printf(Locale.US, "G1 F%d\n", (int) ((double) speedInPercent * this.getLaserRate() / 100));
       currentSpeed = speedInPercent;
     }
 
@@ -183,7 +183,7 @@ public class Lasersaur extends LaserCutter {
 
   private void setPower(PrintStream out, int powerInPercent) {
     if (powerInPercent != currentPower) {
-      out.printf(Locale.US, "S%i\n", (int) (255d * powerInPercent / 100));
+      out.printf(Locale.US, "S%d\n", (int) (255d * powerInPercent / 100));
       currentPower = powerInPercent;
     }
   }
