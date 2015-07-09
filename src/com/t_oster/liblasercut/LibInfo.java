@@ -44,7 +44,8 @@ public class LibInfo
       Dummy.class,
       IModelaMill.class,
       SampleDriver.class,
-      ExportSVG.class
+      ExportSVG.class,
+      SmoothieBoard.class
     };
   }
 }
