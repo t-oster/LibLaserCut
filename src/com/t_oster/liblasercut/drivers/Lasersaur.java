@@ -379,6 +379,10 @@ public class Lasersaur extends LaserCutter {
     {
       throw new Exception("Error: Could not Open COM-Port '"+this.getComPort()+"'");
     }
+    if (!(tmp instanceof SerialPort))
+    {
+      throw new Exception("Port '"+this.getComPort()+"' is not a serial port.");
+    }
     SerialPort port = (SerialPort) tmp;
     port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
     port.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
