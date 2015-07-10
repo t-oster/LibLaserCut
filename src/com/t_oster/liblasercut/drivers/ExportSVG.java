@@ -1,4 +1,4 @@
- /**
+/**
  * This file is part of LibLaserCut.
  * Copyright (C) 2011 - 2014 Thomas Oster <mail@thomas-oster.de>
  *
