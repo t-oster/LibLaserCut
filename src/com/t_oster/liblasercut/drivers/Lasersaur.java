@@ -126,7 +126,7 @@ public class Lasersaur extends LaserCutter {
   public void setFlipXaxis(boolean flipXaxis) {
     this.flipXaxis = flipXaxis;
   }
-  protected String comPort = "/dev/ttyUSB0";
+  protected String comPort = "ttyUSB0";
 
   /**
    * Get the value of port
@@ -373,31 +373,11 @@ public class Lasersaur extends LaserCutter {
     checkJob(job);
     job.applyStartPoint();
     pl.taskChanged(this, "connecting");
-    CommPortIdentifier cpi = null;
-    //since the CommPortIdentifier.getPortIdentifier(String name) method
-    //is not working as expected, we have to manually find our port.
-    Enumeration en = CommPortIdentifier.getPortIdentifiers();
-    while (en.hasMoreElements())
-    {
-      Object o = en.nextElement();
-      if (o instanceof CommPortIdentifier && ((CommPortIdentifier) o).getName().equals(this.getComPort()))
-      {
-        cpi = (CommPortIdentifier) o;
-        break;
-      }
-    }
-    if (cpi == null)
-    {
-      throw new Exception("Error: No such COM-Port '"+this.getComPort()+"'");
-    }
+    CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(this.getComPort());
     CommPort tmp = cpi.open("VisiCut", 10000);
     if (tmp == null)
     {
       throw new Exception("Error: Could not Open COM-Port '"+this.getComPort()+"'");
-    }
-    if (!(tmp instanceof SerialPort))
-    {
-      throw new Exception("Port '"+this.getComPort()+"' is not a serial port.");
     }
     SerialPort port = (SerialPort) tmp;
     port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
