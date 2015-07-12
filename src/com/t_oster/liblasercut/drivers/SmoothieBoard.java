@@ -45,8 +45,9 @@ public class SmoothieBoard extends LaserCutter {
   private static final String SETTING_COMPORT = "COM Port";
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
+  private static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
   private static final String LINEEND = "\r\n";
-
+  
   @Override
   public String getModelName() {
     return "SmoothieBoard";
@@ -64,7 +65,7 @@ public class SmoothieBoard extends LaserCutter {
     this.host = host;
   }
   
-  protected String comport = "ttyACM0";
+  protected String comport = "auto";
 
   public String getComport()
   {
@@ -76,6 +77,18 @@ public class SmoothieBoard extends LaserCutter {
     this.comport = comport;
   }
   
+  protected double max_speed = 20*60;
+
+  public double getMax_speed()
+  {
+    return max_speed;
+  }
+
+  public void setMax_speed(double max_speed)
+  {
+    this.max_speed = max_speed;
+  }
+  
   @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
@@ -84,9 +97,7 @@ public class SmoothieBoard extends LaserCutter {
     return new PowerSpeedFocusProperty();
   }
 
-  private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+  private void writeVectorGCode(PrintStream out, VectorPart vp, double resolution) throws UnsupportedEncodingException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
@@ -101,25 +112,24 @@ public class SmoothieBoard extends LaserCutter {
           break;
         case SETPROPERTY:
           PowerSpeedFocusProperty p = (PowerSpeedFocusProperty) cmd.getProperty();
-          setPower(out, p.getPower());
-          setSpeed(out, p.getSpeed());
+          setPower(p.getPower());
+          setSpeed(p.getSpeed());
           setFocus(out, p.getFocus(), resolution);
           break;
       }
     }
-    return result.toByteArray();
   }
   private double currentPower = -1;
-  private int currentSpeed = -1;
+  private double currentSpeed = -1;
   private double nextPower = -1;
-  private int nextSpeed = -1;
+  private double nextSpeed = -1;
   private double currentFocus = 0;
 
-  private void setSpeed(PrintStream out, int speedInPercent) {
+  private void setSpeed(double speedInPercent) {
     nextSpeed = speedInPercent;
   }
 
-  private void setPower(PrintStream out, double powerInPercent) {
+  private void setPower(double powerInPercent) {
     nextPower = powerInPercent;
   }
   
@@ -144,44 +154,36 @@ public class SmoothieBoard extends LaserCutter {
     }
     if (nextSpeed != currentSpeed)
     {
-      out.printf(Locale.US, " S%d", nextSpeed);
+      out.printf(Locale.US, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
     out.printf(Locale.US, LINEEND);
   }
 
-  private byte[] generateInitializationCode() throws UnsupportedEncodingException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
-    //out.print("G54"+LINEEND);//use table offset
-    //out.print("G21"+LINEEND);//units to mm
-    //out.print("G90"+LINEEND);//following coordinates are absolute
+  private void writeInitializationCode(PrintStream out) {
+    out.print("G21"+LINEEND);//units to mm
+    out.print("G90"+LINEEND);//following coordinates are absolute
     //out.print("G0 X0 Y0"+LINEEND);//move to 0 0
-    return result.toByteArray();
   }
 
-  private byte[] generateShutdownCode() throws UnsupportedEncodingException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+  private void writeShutdownCode(PrintStream out) {
     //back to origin and shutdown
     //out.print("G0 X0 Y0\n");//move to 0 0
-    return result.toByteArray();
   }
 
   private BufferedInputStream in;
   private BufferedOutputStream out;
   private Socket socket;
   private CommPort port;
+  private CommPortIdentifier portIdentifier;
   
-  protected void connect() throws IOException, PortInUseException, NoSuchPortException
+  protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException
   {
-    if (comport != null && !comport.equals(""))
+    pl.taskChanged(this, "opening '"+i.getName()+"'");
+    if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
     {
-      CommPortIdentifier i = CommPortIdentifier.getPortIdentifier(comport);
-      if (i.getPortType()==CommPortIdentifier.PORT_SERIAL)
+      try
       {
-        System.out.println(i.getName());
-
         port = i.open("VisiCut", 1000);
         in = new BufferedInputStream(port.getInputStream());
         out = new BufferedOutputStream(port.getOutputStream());
@@ -189,8 +191,66 @@ public class SmoothieBoard extends LaserCutter {
         String line = rd.readLine();
         if (!"Smoothie".equals(line))
         {
-          throw new IOException("Does not seem to be a smoothieboard on "+comport);
+          in.close();
+          out.close();
+          port.close();
+          return ("Does not seem to be a smoothieboard on "+i.getName());
         }
+        portIdentifier = i;
+        return null;
+      }
+      catch (PortInUseException e)
+      {
+        return "Port in use "+i.getName();
+      }
+      catch (IOException e)
+      {
+        return "IO Error "+i.getName();
+      }
+      catch (PureJavaIllegalStateException e)
+      {
+        return "Could not open "+i.getName();
+      }
+    }
+    else
+    {
+      return "Not a serial Port "+comport;
+    }
+  }
+  
+  protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException
+  {
+    if (comport != null && !comport.equals(""))
+    {
+      String error = "No serial port found";
+      if (portIdentifier == null && !comport.equals("auto"))
+      {
+        portIdentifier = CommPortIdentifier.getPortIdentifier(comport);
+      }
+      
+      if (portIdentifier != null)
+      {//use port identifier we had last time
+        error = connect_serial(portIdentifier, pl);
+      }
+      else
+      {
+        Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers();
+        while (e.hasMoreElements())
+        {
+          CommPortIdentifier i = e.nextElement();
+          if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
+          {
+            error = connect_serial(i, pl);
+            if (error == null)
+            {
+              break;
+            }
+          }
+        }
+      }
+      if (error != null)
+      {
+        throw new IOException(error);
       }
     }
     else
@@ -227,11 +287,11 @@ public class SmoothieBoard extends LaserCutter {
     pl.taskChanged(this, "checking job");
     checkJob(job);
     job.applyStartPoint();
-    pl.taskChanged(this, "connecting");
     pl.taskChanged(this, "connecting...");
-    connect();
+    connect(pl);
     pl.taskChanged(this, "sending");
-    out.write(this.generateInitializationCode());
+    PrintStream printstream = new PrintStream(out, true, "US-ASCII");
+    writeInitializationCode(printstream);
     pl.progressChanged(this, 20);
     int i = 0;
     int max = job.getParts().size();
@@ -243,12 +303,13 @@ public class SmoothieBoard extends LaserCutter {
       }
       if (p instanceof VectorPart)
       {
-        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
+        writeVectorGCode(printstream, (VectorPart) p, p.getDPI());
       }
       i++;
       pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
-    out.write(this.generateShutdownCode());
+    writeShutdownCode(printstream);
+    printstream.flush();
     disconnect();
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
@@ -308,7 +369,8 @@ public class SmoothieBoard extends LaserCutter {
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
     SETTING_HOST,
-    SETTING_COMPORT
+    SETTING_COMPORT,
+    SETTING_MAX_SPEED
   };
 
   @Override
@@ -326,6 +388,8 @@ public class SmoothieBoard extends LaserCutter {
       return this.getBedHeight();
     } else if (SETTING_COMPORT.equals(attribute)) {
       return this.getComport();
+    } else if (SETTING_MAX_SPEED.equals(attribute)) {
+      return this.getMax_speed();
     }
     return null;
   }
@@ -340,6 +404,8 @@ public class SmoothieBoard extends LaserCutter {
       this.setBedHeight((Double) value);
     } else if (SETTING_COMPORT.equals(attribute)) {
       this.setComport((String) value);
+    } else if (SETTING_MAX_SPEED.equals(attribute)) {
+      this.setMax_speed((Double) max_speed);
     }
   }
 
@@ -350,6 +416,7 @@ public class SmoothieBoard extends LaserCutter {
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
     clone.comport = comport;
+    clone.max_speed = max_speed;
     return clone;
   }
 }
