@@ -20,10 +20,7 @@ package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.*;
 import com.t_oster.liblasercut.platform.Util;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -97,7 +94,7 @@ public class SmoothieBoard extends LaserCutter {
     return new PowerSpeedFocusProperty();
   }
 
-  private void writeVectorGCode(PrintStream out, VectorPart vp, double resolution) throws UnsupportedEncodingException {
+  protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
@@ -125,57 +122,70 @@ public class SmoothieBoard extends LaserCutter {
   private double nextSpeed = -1;
   private double currentFocus = 0;
 
-  private void setSpeed(double speedInPercent) {
+  protected void setSpeed(double speedInPercent) {
     nextSpeed = speedInPercent;
   }
 
-  private void setPower(double powerInPercent) {
+  protected void setPower(double powerInPercent) {
     nextPower = powerInPercent;
   }
   
-  private void setFocus(PrintStream out, double focus, double resolution) {
+  protected void setFocus(PrintStream out, double focus, double resolution) throws IOException {
     if (currentFocus != focus)
     {
-      out.printf(Locale.US, "G0 Z%f"+LINEEND, Util.px2mm(focus, resolution));
+      sendLine("G0 Z%f", Util.px2mm(focus, resolution));
       currentFocus = focus;
     }
   }
 
-  private void move(PrintStream out, int x, int y, double resolution) {
-    out.printf(Locale.US, "G0 X%f Y%f"+LINEEND, Util.px2mm(x, resolution), Util.px2mm(y, resolution));
+  protected void move(PrintStream out, int x, int y, double resolution) throws IOException {
+    sendLine("G0 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution));
   }
 
-  private void line(PrintStream out, int x, int y, double resolution) {
-    out.printf(Locale.US, "G1 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution));
+  protected void line(PrintStream out, int x, int y, double resolution) throws IOException {
+    String append = "";
     if (nextPower != currentPower)
     {
-      out.printf(Locale.US, " S%f", nextPower);
+      append += String.format(Locale.US, " S%f", nextPower);
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
     {
-      out.printf(Locale.US, " F%d", (int) (max_speed*nextSpeed/100.0));
+      append += String.format(Locale.US, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    out.printf(Locale.US, LINEEND);
+    sendLine("G1 X%f Y%f"+append, Util.px2mm(x, resolution), Util.px2mm(y, resolution));
   }
 
-  private void writeInitializationCode(PrintStream out) {
-    out.print("G21"+LINEEND);//units to mm
-    out.print("G90"+LINEEND);//following coordinates are absolute
-    //out.print("G0 X0 Y0"+LINEEND);//move to 0 0
+  private void writeInitializationCode() throws IOException {
+    sendLine("G21");
+    sendLine("G21");//units to mm
+    sendLine("G90");//following coordinates are absolute
   }
 
-  private void writeShutdownCode(PrintStream out) {
+  private void writeShutdownCode() throws IOException {
     //back to origin and shutdown
-    //out.print("G0 X0 Y0\n");//move to 0 0
+    sendLine("G0 X0 Y0");
   }
 
-  private BufferedInputStream in;
-  private BufferedOutputStream out;
+  private BufferedReader in;
+  private PrintStream out;
   private Socket socket;
   private CommPort port;
   private CommPortIdentifier portIdentifier;
+  private boolean waitForOKafterEachLine = true;
+  
+  protected void sendLine(String text, Object... parameters) throws IOException
+  {
+    out.format(text+LINEEND, parameters);
+    if (waitForOKafterEachLine)
+    {
+      if (!"ok".equals(in.readLine()))
+      {
+        throw new IOException("Smoothieboard did not respond 'ok'");
+      }
+    }
+  }
   
   protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException
   {
@@ -185,10 +195,9 @@ public class SmoothieBoard extends LaserCutter {
       try
       {
         port = i.open("VisiCut", 1000);
-        in = new BufferedInputStream(port.getInputStream());
-        out = new BufferedOutputStream(port.getOutputStream());
-        BufferedReader rd = new BufferedReader(new InputStreamReader(in));
-        String line = rd.readLine();
+        out = new PrintStream(port.getOutputStream(), true, "US-ASCII");
+        in = new BufferedReader(new InputStreamReader(port.getInputStream()));
+        String line = in.readLine();
         if (!"Smoothie".equals(line))
         {
           in.close();
@@ -257,8 +266,8 @@ public class SmoothieBoard extends LaserCutter {
     {
       socket = new Socket();
       socket.connect(new InetSocketAddress(this.host, 23), 1000);
-      in = new BufferedInputStream(socket.getInputStream());
-      out = new BufferedOutputStream(socket.getOutputStream());
+      in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+      out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
     }
   }
   
@@ -290,8 +299,7 @@ public class SmoothieBoard extends LaserCutter {
     pl.taskChanged(this, "connecting...");
     connect(pl);
     pl.taskChanged(this, "sending");
-    PrintStream printstream = new PrintStream(out, true, "US-ASCII");
-    writeInitializationCode(printstream);
+    writeInitializationCode();
     pl.progressChanged(this, 20);
     int i = 0;
     int max = job.getParts().size();
@@ -303,13 +311,14 @@ public class SmoothieBoard extends LaserCutter {
       }
       if (p instanceof VectorPart)
       {
-        writeVectorGCode(printstream, (VectorPart) p, p.getDPI());
+        //TODO: in direct mode use progress listener to indicate progress 
+        //of individual job
+        writeVectorGCode((VectorPart) p, p.getDPI());
       }
       i++;
       pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
-    writeShutdownCode(printstream);
-    printstream.flush();
+    writeShutdownCode();
     disconnect();
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
