@@ -43,7 +43,39 @@ public class SmoothieBoard extends LaserCutter {
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
   private static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
+  private static final String SETTING_PRE_JOB_GCODE = "Pre-Job GCode (comma separated)";
+  private static final String SETTING_POST_JOB_GCODE = "Post-Job GCode (comma separated)";
   private static final String LINEEND = "\r\n";
+  
+  protected String preJobGcode = "G21,G90";
+
+  public String getPreJobGcode()
+  {
+    return preJobGcode;
+  }
+
+  public void setPreJobGcode(String preJobGcode)
+  {
+    this.preJobGcode = preJobGcode;
+  }
+  
+  protected String postJobGcode = "G0 X0 Y0";
+
+  public String getPostJobGcode()
+  {
+    return postJobGcode;
+  }
+
+  public void setPostJobGcode(String postJobGcode)
+  {
+    this.postJobGcode = postJobGcode;
+  }
+  
+  /**
+   * What is expected to be received after serial/telnet connection
+   * Used e.g. for auto-detecting the serial port.
+   */
+  protected String identificationLine = "Smoothie";
   
   @Override
   public String getModelName() {
@@ -158,14 +190,23 @@ public class SmoothieBoard extends LaserCutter {
   }
 
   private void writeInitializationCode() throws IOException {
-    sendLine("G21");
-    sendLine("G21");//units to mm
-    sendLine("G90");//following coordinates are absolute
+    if (preJobGcode != null)
+    {
+      for (String line : preJobGcode.split(","))
+      {
+        sendLine(line);
+      }
+    }
   }
 
   private void writeShutdownCode() throws IOException {
-    //back to origin and shutdown
-    sendLine("G0 X0 Y0");
+    if (postJobGcode != null)
+    {
+      for (String line : postJobGcode.split(","))
+      {
+        sendLine(line);
+      }
+    }
   }
 
   private BufferedReader in;
@@ -197,13 +238,16 @@ public class SmoothieBoard extends LaserCutter {
         port = i.open("VisiCut", 1000);
         out = new PrintStream(port.getOutputStream(), true, "US-ASCII");
         in = new BufferedReader(new InputStreamReader(port.getInputStream()));
-        String line = in.readLine();
-        if (!"Smoothie".equals(line))
+        if (identificationLine != null && identificationLine.length() > 0)
         {
-          in.close();
-          out.close();
-          port.close();
-          return ("Does not seem to be a smoothieboard on "+i.getName());
+          String line = in.readLine();
+          if (!identificationLine.equals(line))
+          {
+            in.close();
+            out.close();
+            port.close();
+            return ("Does not seem to be a smoothieboard on "+i.getName());
+          }
         }
         portIdentifier = i;
         return null;
@@ -383,7 +427,9 @@ public class SmoothieBoard extends LaserCutter {
     SETTING_BEDHEIGHT,
     SETTING_HOST,
     SETTING_COMPORT,
-    SETTING_MAX_SPEED
+    SETTING_MAX_SPEED,
+    SETTING_PRE_JOB_GCODE,
+    SETTING_POST_JOB_GCODE
   };
 
   @Override
@@ -403,7 +449,12 @@ public class SmoothieBoard extends LaserCutter {
       return this.getComport();
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
       return this.getMax_speed();
+    } else if (SETTING_PRE_JOB_GCODE.equals(attribute)) {
+      return this.getPreJobGcode();
+    } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
+      return this.getPostJobGcode();
     }
+    
     return null;
   }
 
@@ -419,6 +470,10 @@ public class SmoothieBoard extends LaserCutter {
       this.setComport((String) value);
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
       this.setMax_speed((Double) max_speed);
+    } else if (SETTING_PRE_JOB_GCODE.equals(attribute)) {
+      this.setPreJobGcode((String) value);
+    } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
+      this.setPostJobGcode((String) value);
     }
   }
 
@@ -430,6 +485,8 @@ public class SmoothieBoard extends LaserCutter {
     clone.bedWidth = bedWidth;
     clone.comport = comport;
     clone.max_speed = max_speed;
+    clone.preJobGcode = preJobGcode;
+    clone.postJobGcode = postJobGcode;
     return clone;
   }
 }
