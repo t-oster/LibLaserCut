@@ -307,7 +307,11 @@ public class SmoothieBoard extends LaserCutter {
     {
       if (p instanceof RasterPart)
       {
-        p = convertRasterToVectorPart((RasterPart) p, p.getDPI(), false);
+        RasterPart rp = (RasterPart) p;
+        LaserProperty black = rp.getLaserProperty();
+        LaserProperty white = black.clone();
+        white.setProperty("power", 0);
+        p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
       }
       if (p instanceof VectorPart)
       {

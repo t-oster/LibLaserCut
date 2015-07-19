@@ -174,13 +174,11 @@ public abstract class LaserCutter implements Cloneable, Customizable {
 
     public abstract String getModelName();
 
-    protected VectorPart convertRasterToVectorPart(RasterPart rp, double resolution, boolean unidirectional)
+    protected VectorPart convertRasterToVectorPart(RasterPart rp, LaserProperty blackPixelProperty, LaserProperty whitePixelProperty, double resolution, boolean unidirectional)
     {
       boolean dirRight = true;
-      //TODO: Replace "moveto" in single lines with "lineto" and zero power, so we get smooth movement
       Point rasterStart = rp.getRasterStart();
-      LaserProperty prop = rp.getLaserProperty();
-      VectorPart result = new VectorPart(prop, resolution);
+      VectorPart result = new VectorPart(blackPixelProperty, resolution);
       for (int line = 0; line < rp.getRasterHeight(); line++)
       {
         Point lineStart = rasterStart.clone();
@@ -225,18 +223,19 @@ public abstract class LaserCutter implements Cloneable, Customizable {
               if (bytes.get(pix) != old)
               {
                 if (old == 0)
-                {
-                  result.moveto(lineStart.x + pix, lineStart.y);
+                {//beginning of "black" segment -> move with 0 power
+                  result.setProperty(whitePixelProperty);
+                  result.lineto(lineStart.x + pix, lineStart.y);
                 }
                 else
-                {
+                {//end of "black" segment -> move with power to pixel before
+                  result.setProperty(blackPixelProperty);
                   result.lineto(lineStart.x + pix - 1, lineStart.y);
-                  result.moveto(lineStart.x + pix, lineStart.y);
                 }
                 old = bytes.get(pix);
               }
             }
-            //last point is also not "white"
+            result.setProperty(blackPixelProperty);
             result.lineto(lineStart.x + bytes.size() - 1, lineStart.y);
           }
           else
@@ -250,17 +249,19 @@ public abstract class LaserCutter implements Cloneable, Customizable {
               {
                 if (old == 0)
                 {
-                  result.moveto(lineStart.x + pix, lineStart.y);
+                  result.setProperty(whitePixelProperty);
+                  result.lineto(lineStart.x + pix, lineStart.y);
                 }
                 else
                 {
+                  result.setProperty(blackPixelProperty);
                   result.lineto(lineStart.x + pix + 1, lineStart.y);
-                  result.moveto(lineStart.x + pix, lineStart.y);
                 }
                 old = bytes.get(pix);
               }
             }
-            //last point is also not "white"
+            //last pixel is always black (white pixels are stripped before)
+            result.setProperty(blackPixelProperty);
             result.lineto(lineStart.x, lineStart.y);
           }
         }
