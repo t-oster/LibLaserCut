@@ -297,7 +297,14 @@ public class GenericGcodeDriver extends LaserCutter {
   
   protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException
   {
-    if (getComport() != null && !getComport().equals(""))
+    if (getHost() != null && getHost().length() > 0)
+    {
+      socket = new Socket();
+      socket.connect(new InetSocketAddress(getHost(), 23), 1000);
+      in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+      out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
+    }
+    else if (getComport() != null && !getComport().equals(""))
     {
       String error = "No serial port found";
       if (portIdentifier == null && !getComport().equals("auto"))
@@ -332,10 +339,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     else
     {
-      socket = new Socket();
-      socket.connect(new InetSocketAddress(getHost(), 23), 1000);
-      in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-      out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
+      throw new IOException("Either COM Port or IP/Host has to be set");
     }
   }
   
