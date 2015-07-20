@@ -39,7 +39,8 @@ public abstract class VectorOptimizer
     NEAREST,
     INNER_FIRST,
     SMALLEST_FIRST,
-    DELETE_DUPLICATE_PATHS
+    DELETE_DUPLICATE_PATHS,
+    TSP_OPTIMIZER
   }
 
   protected class Element
@@ -141,6 +142,8 @@ public abstract class VectorOptimizer
         return new SmallestFirstVectorOptimizer();
       case DELETE_DUPLICATE_PATHS:
         return new DeleteDuplicatePathsOptimizer();
+      case TSP_OPTIMIZER:
+        return new TSPOptimizer();
     }
     throw new IllegalArgumentException("Unknown Order Strategy: " + s);
   }
