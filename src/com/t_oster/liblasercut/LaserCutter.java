@@ -273,6 +273,19 @@ public abstract class LaserCutter implements Cloneable, Customizable {
       return result;
     }
     
+    /**
+     * Intented for use in the clone mehtod. Copies all properties
+     * of that to this
+     * @param that 
+     */
+    protected void copyProperties(LaserCutter that)
+    {
+      for (String prop : that.getPropertyKeys())
+      {
+        setProperty(prop, that.getProperty(prop));
+      }
+    }
+    
     @Override
     public abstract LaserCutter clone();
 }
