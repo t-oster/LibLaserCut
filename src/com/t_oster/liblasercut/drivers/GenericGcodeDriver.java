@@ -21,14 +21,20 @@ package com.t_oster.liblasercut.drivers;
 import com.t_oster.liblasercut.*;
 import com.t_oster.liblasercut.platform.Util;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import purejavacomm.*;
 import java.util.*;
+import net.sf.corn.httpclient.HttpClient;
+import net.sf.corn.httpclient.HttpResponse;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -43,12 +49,39 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_COMPORT = "COM Port";
   protected static final String SETTING_BEDWIDTH = "Laserbed width";
   protected static final String SETTING_BEDHEIGHT = "Laserbed height";
+  protected static final String SETTING_HTTP_UPLOAD_URL = "HTTP Upload URL";
   protected static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
   protected static final String SETTING_PRE_JOB_GCODE = "Pre-Job GCode (comma separated)";
   protected static final String SETTING_POST_JOB_GCODE = "Post-Job GCode (comma separated)";
+  protected static final String SETTING_RESOLUTIONS = "Supported DPI (comma separated)";
   protected static final String SETTING_IDENTIFICATION_STRING = "Board Identification String";
   protected static final String SETTING_WAIT_FOR_OK = "Wait for OK after each line (interactive mode)";
   protected static final String LINEEND = "\r\n";
+  
+  protected String httpUploadUrl = "http://10.10.10.100/upload";
+
+  public String getHttpUploadUrl()
+  {
+    return httpUploadUrl;
+  }
+
+  public void setHttpUploadUrl(String httpUploadUrl)
+  {
+    this.httpUploadUrl = httpUploadUrl;
+  }
+  
+  protected String supportedResolutions = "100,500,1000";
+
+  public String getSupportedResolutions()
+  {
+    return supportedResolutions;
+  }
+
+  public void setSupportedResolutions(String supportedResolutions)
+  {
+    this.resolutions = null;
+    this.supportedResolutions = supportedResolutions;
+  }
   
   protected boolean waitForOKafterEachLine = true;
 
@@ -252,6 +285,17 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
   
+  protected void http_upload(URI url, String data, String filename) throws IOException
+  {
+    HttpClient client = new HttpClient(url);
+    client.putAdditionalRequestProperty("X-Filename", filename);
+    HttpResponse response = client.sendData(HttpClient.HTTP_METHOD.POST, data);
+    if (response == null || response.hasError())
+    {
+      throw new IOException("Error during POST Request");
+    }
+  }
+  
   protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException
   {
     pl.taskChanged(this, "opening '"+i.getName()+"'");
@@ -294,9 +338,13 @@ public class GenericGcodeDriver extends LaserCutter {
       return "Not a serial Port "+comport;
     }
   }
-  
+  /**
+   * Used to buffer the file before uploading via http
+   */
+  private ByteArrayOutputStream outputBuffer;
   protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException
   {
+    outputBuffer = null;
     if (getHost() != null && getHost().length() > 0)
     {
       socket = new Socket();
@@ -337,26 +385,42 @@ public class GenericGcodeDriver extends LaserCutter {
         throw new IOException(error);
       }
     }
+    else if (getHttpUploadUrl() != null && getHttpUploadUrl().length() > 0)
+    {
+      outputBuffer = new ByteArrayOutputStream();
+      out = new PrintStream(outputBuffer);
+      setWaitForOKafterEachLine(false);
+      in = null;
+    }
     else
     {
       throw new IOException("Either COM Port or IP/Host has to be set");
     }
   }
   
-  protected void disconnect() throws IOException
+  protected void disconnect() throws IOException, URISyntaxException
   {
-    in.close();
-    out.close();
-    if (this.socket != null)
+    if (outputBuffer != null)
     {
-      socket.close();
-      socket = null;
+      out.close();
+      http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString("UTF-8"), "VisiCut.gcode");
     }
-    else if (this.port != null)
+    else
     {
-      this.port.close();
-      this.port = null;
+      in.close();
+      out.close();
+      if (this.socket != null)
+      {
+        socket.close();
+        socket = null;
+      }
+      else if (this.port != null)
+      {
+        this.port.close();
+        this.port = null;
+      }   
     }
+
   }
   
   @Override
@@ -404,9 +468,11 @@ public class GenericGcodeDriver extends LaserCutter {
   @Override
   public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Double[]{
-                500d
-              });
+      resolutions = new LinkedList<Double>();
+      for (String s : getSupportedResolutions().split(","))
+      {
+        resolutions.add(Double.parseDouble(s));
+      }
     }
     return resolutions;
   }
@@ -456,10 +522,12 @@ public class GenericGcodeDriver extends LaserCutter {
     SETTING_BEDHEIGHT,
     SETTING_COMPORT,
     SETTING_HOST,
+    SETTING_HTTP_UPLOAD_URL,
     SETTING_IDENTIFICATION_STRING,
     SETTING_MAX_SPEED,
     SETTING_PRE_JOB_GCODE,
     SETTING_POST_JOB_GCODE,
+    SETTING_RESOLUTIONS,
     SETTING_WAIT_FOR_OK
   };
 
@@ -480,6 +548,8 @@ public class GenericGcodeDriver extends LaserCutter {
       return this.getComport();
     } else if (SETTING_HOST.equals(attribute)) {
       return this.getHost();
+    } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
+      return this.getHttpUploadUrl();
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       return this.getIdentificationLine();
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
@@ -488,6 +558,8 @@ public class GenericGcodeDriver extends LaserCutter {
       return this.getPreJobGcode();
     } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
       return this.getPostJobGcode();
+    } else if (SETTING_RESOLUTIONS.equals(attribute)) {
+      return this.getResolutions();
     } else if (SETTING_WAIT_FOR_OK.equals(attribute)) {
       return this.isWaitForOKafterEachLine();
     }
@@ -507,6 +579,8 @@ public class GenericGcodeDriver extends LaserCutter {
       this.setComport((String) value);
     } else if (SETTING_HOST.equals(attribute)) {
       this.setHost((String) value);
+    } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
+      this.setHttpUploadUrl((String) value);
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       this.setIdentificationLine((String) value);
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
@@ -515,6 +589,8 @@ public class GenericGcodeDriver extends LaserCutter {
       this.setPreJobGcode((String) value);
     } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
       this.setPostJobGcode((String) value);
+    } else if (SETTING_RESOLUTIONS.equals(attribute)) {
+      this.setSupportedResolutions((String) value);
     } else if (SETTING_WAIT_FOR_OK.equals(attribute)) {
       this.setWaitForOKafterEachLine((Boolean) value);
     }
