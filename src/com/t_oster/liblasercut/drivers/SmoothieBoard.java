@@ -34,6 +34,8 @@ public class SmoothieBoard extends GenericGcodeDriver {
     //set some smoothie-specific defaults
     setIdentificationLine("Smoothie");
     setWaitForOKafterEachLine(true);
+    setBaudRate(115200);
+    setLineend("CRLF");
   }
 
   @Override
@@ -43,6 +45,8 @@ public class SmoothieBoard extends GenericGcodeDriver {
     result.addAll(Arrays.asList(super.getPropertyKeys()));
     result.remove(GenericGcodeDriver.SETTING_IDENTIFICATION_STRING);
     result.remove(GenericGcodeDriver.SETTING_WAIT_FOR_OK);
+    result.remove(GenericGcodeDriver.SETTING_BAUDRATE);
+    result.remove(GenericGcodeDriver.SETTING_LINEEND);
     return result.toArray(new String[0]);
   }
 
