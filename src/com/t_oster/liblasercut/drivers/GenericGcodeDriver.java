@@ -315,12 +315,10 @@ public class GenericGcodeDriver extends LaserCutter {
     out.flush();
     if (isWaitForOKafterEachLine())
     {
-      String line = in.readLine();
-      //TODO: Remove
-      System.out.println("< "+line);
+      String line = waitForLine();
       if (!"ok".equals(line))
       {
-        throw new IOException("Lasercutter did not respond 'ok'");
+        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
       }
     }
   }
@@ -334,6 +332,37 @@ public class GenericGcodeDriver extends LaserCutter {
     {
       throw new IOException("Error during POST Request");
     }
+    System.out.println("Response: "+response.toString());//TODO: Remove
+  }
+  
+  protected String waitForLine() throws IOException
+  {
+    String line = "";
+    while ("".equals(line))
+    {//skip empty lines
+      line = in.readLine();
+    }
+    System.out.println("< "+line);//TODO: remove
+    return line;
+  }
+  
+  /**
+   * Waits for the Identification line and returns null if it's allright
+   * Otherwise it returns the wrong line
+   * @return
+   * @throws IOException 
+   */
+  protected String waitForIdentificationLine() throws IOException
+  {
+    if (getIdentificationLine() != null && getIdentificationLine().length() > 0)
+    {
+      String line = waitForLine();
+      if (!getIdentificationLine().equals(line))
+      {
+        return line;
+      }
+    }
+    return null;
   }
   
   protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
@@ -351,17 +380,12 @@ public class GenericGcodeDriver extends LaserCutter {
         }
         out = new PrintStream(port.getOutputStream(), true, "US-ASCII");
         in = new BufferedReader(new InputStreamReader(port.getInputStream()));
-        if (getIdentificationLine() != null && getIdentificationLine().length() > 0)
+        if (waitForIdentificationLine() != null)
         {
-          
-          String line = in.readLine();
-          if (!getIdentificationLine().equals(line))
-          {
-            in.close();
-            out.close();
-            port.close();
-            return ("Does not seem to be a smoothieboard on "+i.getName());
-          }
+          in.close();
+          out.close();
+          port.close();
+          return "Does not seem to be a "+getModelName()+" on "+i.getName();
         }
         portIdentifier = i;
         return null;
@@ -397,6 +421,13 @@ public class GenericGcodeDriver extends LaserCutter {
       socket.connect(new InetSocketAddress(getHost(), 23), 1000);
       in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
+      String line = waitForIdentificationLine();
+      if (line != null)
+      {
+        in.close();
+        out.close();
+        throw new IOException("Wrong identification Line: "+line+"\n instead of "+getIdentificationLine());
+      }
     }
     else if (getComport() != null && !getComport().equals(""))
     {
@@ -444,12 +475,12 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
   
-  protected void disconnect() throws IOException, URISyntaxException
+  protected void disconnect(String jobname) throws IOException, URISyntaxException
   {
     if (outputBuffer != null)
     {
       out.close();
-      http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString("UTF-8"), "VisiCut.gcode");
+      http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString("UTF-8"), jobname);
     }
     else
     {
@@ -505,7 +536,7 @@ public class GenericGcodeDriver extends LaserCutter {
       pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
     writeShutdownCode();
-    disconnect();
+    disconnect(job.getName()+".gcode");
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }

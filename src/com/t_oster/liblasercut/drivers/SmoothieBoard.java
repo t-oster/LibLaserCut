@@ -18,6 +18,7 @@
  **/
 package com.t_oster.liblasercut.drivers;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,32 @@ public class SmoothieBoard extends GenericGcodeDriver {
     setBaudRate(115200);
     setLineend("CRLF");
   }
+  
+  @Override
+  public String getIdentificationLine()
+  {
+    if (getHost() == null || "".equals(getHost()))
+    {
+      return "Smoothie";
+    }
+    else
+    {
+      return "Smoothie command shell";
+    }
+  }
 
+  @Override
+  protected String waitForLine() throws IOException
+  {
+    String line = super.waitForLine();
+    //The telnet interface for smoothie prepends lines with '> '
+    if (getHost() != null && !"".equals(getHost()) && line.startsWith("> "))
+    {
+      return line.substring(2);
+    }
+    return line;
+  }
+  
   @Override
   public String[] getPropertyKeys()
   {
