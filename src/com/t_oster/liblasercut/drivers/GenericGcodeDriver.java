@@ -357,6 +357,7 @@ public class GenericGcodeDriver extends LaserCutter {
     String line = "";
     while ("".equals(line))
     {//skip empty lines
+      //TODO: Add Timeout
       line = in.readLine();
     }
     System.out.println("< "+line);//TODO: remove
@@ -373,11 +374,16 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     if (getIdentificationLine() != null && getIdentificationLine().length() > 0)
     {
-      String line = waitForLine();
-      if (!getIdentificationLine().equals(line))
+      String line = "";
+      for (int trials = 3; trials > 0; trials--)
       {
-        return line;
+        line = waitForLine();
+        if (line.startsWith(getIdentificationLine()))
+        {
+          return null;
+        }
       }
+      return line;
     }
     return null;
   }
