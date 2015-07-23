@@ -37,6 +37,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
     setWaitForOKafterEachLine(true);
     setBaudRate(115200);
     setLineend("CRLF");
+    setInitDelay(0);
   }
   
   @Override
@@ -73,6 +74,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
     result.remove(GenericGcodeDriver.SETTING_WAIT_FOR_OK);
     result.remove(GenericGcodeDriver.SETTING_BAUDRATE);
     result.remove(GenericGcodeDriver.SETTING_LINEEND);
+    result.remove(GenericGcodeDriver.SETTING_INIT_DELAY);
     return result.toArray(new String[0]);
   }
 

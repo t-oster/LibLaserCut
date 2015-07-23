@@ -56,10 +56,11 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_PRE_JOB_GCODE = "Pre-Job GCode (comma separated)";
   protected static final String SETTING_POST_JOB_GCODE = "Post-Job GCode (comma separated)";
   protected static final String SETTING_RESOLUTIONS = "Supported DPI (comma separated)";
-  protected static final String SETTING_IDENTIFICATION_STRING = "Board Identification String";
+  protected static final String SETTING_IDENTIFICATION_STRING = "Board Identification String (startsWith)";
   protected static final String SETTING_WAIT_FOR_OK = "Wait for OK after each line (interactive mode)";
+  protected static final String SETTING_INIT_DELAY = "Seconds to wait for board reset (Serial)";
   
-  private String lineend = "\r\n";
+  private String lineend = "LF";
 
   public String getLineend()
   {
@@ -172,6 +173,22 @@ public class GenericGcodeDriver extends LaserCutter {
   @Override
   public String getModelName() {
     return "Generic GRBL GCode Driver";
+  }
+  
+  /**
+   * Time to wait before firsts reads of serial port.
+   * See autoreset feature on arduinos.
+   */
+  protected int initDelay = 5; 
+
+  public int getInitDelay()
+  {
+    return initDelay;
+  }
+
+  public void setInitDelay(int initDelay)
+  {
+    this.initDelay = initDelay;
   }
   
   protected String host = "10.10.10.222";
@@ -380,6 +397,18 @@ public class GenericGcodeDriver extends LaserCutter {
         }
         out = new PrintStream(port.getOutputStream(), true, "US-ASCII");
         in = new BufferedReader(new InputStreamReader(port.getInputStream()));
+        // Wait 5 seconds since GRBL is long to wake up..
+        for (int rest = getInitDelay(); rest > 0; rest--) {
+          pl.taskChanged(this, String.format("Waiting %ds", rest));
+          try
+          {
+            Thread.sleep(1000);
+          }
+          catch(InterruptedException ex)
+          {
+            Thread.currentThread().interrupt();
+          }
+        }
         if (waitForIdentificationLine() != null)
         {
           in.close();
@@ -602,6 +631,7 @@ public class GenericGcodeDriver extends LaserCutter {
     SETTING_HOST,
     SETTING_HTTP_UPLOAD_URL,
     SETTING_IDENTIFICATION_STRING,
+    SETTING_INIT_DELAY,
     SETTING_LINEEND,
     SETTING_MAX_SPEED,
     SETTING_PRE_JOB_GCODE,
@@ -633,6 +663,8 @@ public class GenericGcodeDriver extends LaserCutter {
       return this.getHttpUploadUrl();
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       return this.getIdentificationLine();
+    } else if (SETTING_INIT_DELAY.equals(attribute)) {
+      return this.getInitDelay();
     } else if (SETTING_LINEEND.equals(attribute)) {
       return this.getLineend();
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
@@ -668,10 +700,12 @@ public class GenericGcodeDriver extends LaserCutter {
       this.setHttpUploadUrl((String) value);
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       this.setIdentificationLine((String) value);
+    } else if (SETTING_INIT_DELAY.equals(attribute)) {
+      this.setInitDelay((Integer) value);
     } else if (SETTING_LINEEND.equals(attribute)) {
       this.setLineend((String) value);
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
-      this.setMax_speed((Double) max_speed);
+      this.setMax_speed((Double) value);
     } else if (SETTING_PRE_JOB_GCODE.equals(attribute)) {
       this.setPreJobGcode((String) value);
     } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
