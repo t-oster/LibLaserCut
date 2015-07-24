@@ -357,7 +357,6 @@ public class GenericGcodeDriver extends LaserCutter {
     String line = "";
     while ("".equals(line))
     {//skip empty lines
-      //TODO: Add Timeout
       line = in.readLine();
     }
     System.out.println("< "+line);//TODO: remove
@@ -396,6 +395,14 @@ public class GenericGcodeDriver extends LaserCutter {
       try
       {
         port = i.open("VisiCut", 1000);
+        try
+        {
+          port.enableReceiveTimeout(1000);
+        }
+        catch (UnsupportedCommOperationException e)
+        {
+          System.err.println("Serial timeout not supported. Driver may hang if device does not respond properly.");
+        }
         if (this.getBaudRate() > 0 && port instanceof SerialPort)
         {
           SerialPort sp = (SerialPort) port;
