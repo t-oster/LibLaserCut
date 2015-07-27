@@ -232,7 +232,7 @@ public class GenericGcodeDriver extends LaserCutter {
    * We do not support Frequency atm, so we return power,speed and focus
    */
   public LaserProperty getLaserPropertyForVectorPart() {
-    return new PowerSpeedFocusProperty();
+    return new FloatPowerSpeedFocusProperty();
   }
 
   protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
