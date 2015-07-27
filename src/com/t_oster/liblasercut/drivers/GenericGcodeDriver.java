@@ -287,7 +287,7 @@ public class GenericGcodeDriver extends LaserCutter {
     String append = "";
     if (nextPower != currentPower)
     {
-      append += String.format(Locale.US, " S%f", nextPower);
+      append += String.format(Locale.US, " S%f", nextPower/100.0);
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
