@@ -249,7 +249,7 @@ public class GenericGcodeDriver extends LaserCutter {
           line(out, x, y, resolution);
           break;
         case SETPROPERTY:
-          PowerSpeedFocusProperty p = (PowerSpeedFocusProperty) cmd.getProperty();
+          FloatPowerSpeedFocusProperty p = (FloatPowerSpeedFocusProperty) cmd.getProperty();
           setPower(p.getPower());
           setSpeed(p.getSpeed());
           setFocus(out, p.getFocus(), resolution);
