@@ -235,6 +235,18 @@ public class GenericGcodeDriver extends LaserCutter {
     return new FloatPowerSpeedFocusProperty();
   }
 
+  @Override
+  public LaserProperty getLaserPropertyForRaster3dPart()
+  {
+    return new FloatPowerSpeedFocusProperty();
+  }
+
+  @Override
+  public LaserProperty getLaserPropertyForRasterPart()
+  {
+    return new FloatPowerSpeedFocusProperty();
+  }
+
   protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
