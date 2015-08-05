@@ -46,7 +46,8 @@ public class LibInfo
       SampleDriver.class,
       ExportSVG.class,
       GenericGcodeDriver.class,
-      SmoothieBoard.class
+      SmoothieBoard.class,
+      Marlin.class
     };
   }
 }
