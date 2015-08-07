@@ -44,6 +44,7 @@ public class Marlin extends GenericGcodeDriver {
     
     //Marlin has no way to upload over the network so remove the upload url text
     setHttpUploadUrl("");
+    setHost("");
   }
   
   @Override
@@ -62,6 +63,8 @@ public class Marlin extends GenericGcodeDriver {
     result.remove(GenericGcodeDriver.SETTING_BAUDRATE);
     result.remove(GenericGcodeDriver.SETTING_LINEEND);
     result.remove(GenericGcodeDriver.SETTING_INIT_DELAY);
+    result.remove(GenericGcodeDriver.SETTING_HTTP_UPLOAD_URL);
+    result.remove(GenericGcodeDriver.SETTING_HOST);
     return result.toArray(new String[0]);
   }
   
@@ -78,7 +81,7 @@ public class Marlin extends GenericGcodeDriver {
     {
       String line = waitForLine();
         if (line.startsWith(getIdentificationLine()))
-        {//we received the first "start", now we have to skip the rest
+        {//we received the identification line ("start"), now we have to skip the rest of Marlin's dump
           while(!(waitForLine().startsWith("echo:SD init fail")))
           {
            //do nothing and wait until Marlin has dumped all of the settings
