@@ -577,7 +577,7 @@ public class GenericGcodeDriver extends LaserCutter {
         RasterPart rp = (RasterPart) p;
         LaserProperty black = rp.getLaserProperty();
         LaserProperty white = black.clone();
-        white.setProperty("power", 0);
+        white.setProperty("power", 0.0f);
         p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
       }
       if (p instanceof VectorPart)
