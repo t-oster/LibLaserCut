@@ -59,6 +59,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_IDENTIFICATION_STRING = "Board Identification String (startsWith)";
   protected static final String SETTING_WAIT_FOR_OK = "Wait for OK after each line (interactive mode)";
   protected static final String SETTING_INIT_DELAY = "Seconds to wait for board reset (Serial)";
+  protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
   
   private String lineend = "LF";
 
@@ -162,6 +163,18 @@ public class GenericGcodeDriver extends LaserCutter {
   public void setPostJobGcode(String postJobGcode)
   {
     this.postJobGcode = postJobGcode;
+  }
+  
+  protected int serialTimeout= 15000;
+
+  public int getSerialTimeout()
+  {
+    return serialTimeout;
+  }
+
+  public void setSerialTimeout(int serialTimeout)
+  {
+    this.serialTimeout = serialTimeout;
   }
   
   /**
@@ -409,7 +422,7 @@ public class GenericGcodeDriver extends LaserCutter {
         port = i.open("VisiCut", 1000);
         try
         {
-          port.enableReceiveTimeout(15000);
+          port.enableReceiveTimeout(getSerialTimeout());
         }
         catch (UnsupportedCommOperationException e)
         {
@@ -662,7 +675,8 @@ public class GenericGcodeDriver extends LaserCutter {
     SETTING_PRE_JOB_GCODE,
     SETTING_POST_JOB_GCODE,
     SETTING_RESOLUTIONS,
-    SETTING_WAIT_FOR_OK
+    SETTING_WAIT_FOR_OK,
+    SETTING_SERIAL_TIMEOUT
   };
 
   @Override
@@ -702,6 +716,8 @@ public class GenericGcodeDriver extends LaserCutter {
       return this.getSupportedResolutions();
     } else if (SETTING_WAIT_FOR_OK.equals(attribute)) {
       return this.isWaitForOKafterEachLine();
+    } else if (SETTING_SERIAL_TIMEOUT.equals(attribute)) {
+      return this.getSerialTimeout();
     }
     
     return null;
@@ -739,6 +755,8 @@ public class GenericGcodeDriver extends LaserCutter {
       this.setSupportedResolutions((String) value);
     } else if (SETTING_WAIT_FOR_OK.equals(attribute)) {
       this.setWaitForOKafterEachLine((Boolean) value);
+    } else if (SETTING_SERIAL_TIMEOUT.equals(attribute)) {
+      this.setSerialTimeout((Integer) value);
     }
   }
 
