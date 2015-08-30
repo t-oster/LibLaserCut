@@ -38,9 +38,9 @@ public class Marlin extends GenericGcodeDriver {
     setWaitForOKafterEachLine(true);
     setBaudRate(115200);
     setLineend("CRLF");
-    setInitDelay(0);
-    setPreJobGcode(getPreJobGcode()+",G28 XY,M5");
-    setPostJobGcode(getPostJobGcode()+",G28 XY,M5");
+    setInitDelay(10);
+    setPreJobGcode(getPreJobGcode()+",G28 XY,M3");
+    setPostJobGcode(getPostJobGcode()+",G0 X0Y0,M5");
     
     //Marlin has no way to upload over the network so remove the upload url text
     setHttpUploadUrl("");
@@ -82,7 +82,7 @@ public class Marlin extends GenericGcodeDriver {
       String line = waitForLine();
         if (line.startsWith(getIdentificationLine()))
         {//we received the identification line ("start"), now we have to skip the rest of Marlin's dump
-          while(!(waitForLine().startsWith("echo:SD init fail")))
+          while(!(waitForLine().startsWith("echo:SD")))
           {
            //do nothing and wait until Marlin has dumped all of the settings
           }
