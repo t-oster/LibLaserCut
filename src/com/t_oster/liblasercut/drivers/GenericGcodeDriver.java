@@ -409,7 +409,7 @@ public class GenericGcodeDriver extends LaserCutter {
         port = i.open("VisiCut", 1000);
         try
         {
-          port.enableReceiveTimeout(1000);
+          port.enableReceiveTimeout(15000);
         }
         catch (UnsupportedCommOperationException e)
         {
