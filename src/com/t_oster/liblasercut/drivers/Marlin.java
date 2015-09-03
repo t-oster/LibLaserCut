@@ -40,7 +40,7 @@ public class Marlin extends GenericGcodeDriver {
     setLineend("CRLF");
     setInitDelay(0);
     setPreJobGcode(getPreJobGcode()+",G28 XY,M5");
-    setPostJobGcode(getPostJobGcode()+",G0 X0Y0,M5");
+    setPostJobGcode(getPostJobGcode()+",G28 XY,M5");
     
     //Marlin has no way to upload over the network so remove the upload url text
     setHttpUploadUrl("");
@@ -60,7 +60,6 @@ public class Marlin extends GenericGcodeDriver {
     result.addAll(Arrays.asList(super.getPropertyKeys()));
     result.remove(GenericGcodeDriver.SETTING_IDENTIFICATION_STRING);
     result.remove(GenericGcodeDriver.SETTING_WAIT_FOR_OK);
-    result.remove(GenericGcodeDriver.SETTING_BAUDRATE);
     result.remove(GenericGcodeDriver.SETTING_LINEEND);
     result.remove(GenericGcodeDriver.SETTING_INIT_DELAY);
     result.remove(GenericGcodeDriver.SETTING_HTTP_UPLOAD_URL);
