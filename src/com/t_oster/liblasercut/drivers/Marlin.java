@@ -40,7 +40,8 @@ public class Marlin extends GenericGcodeDriver {
     setLineend("CRLF");
     setInitDelay(0);
     setPreJobGcode(getPreJobGcode()+",G28 XY,M5");
-    setPostJobGcode(getPostJobGcode()+",G28 XY,M5");
+    setPostJobGcode(getPostJobGcode()+",M5,G28 XY");
+    setSerialTimeout(35000);
     
     //Marlin has no way to upload over the network so remove the upload url text
     setHttpUploadUrl("");
