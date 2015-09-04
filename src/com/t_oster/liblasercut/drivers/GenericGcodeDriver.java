@@ -241,7 +241,7 @@ public class GenericGcodeDriver extends LaserCutter {
     this.max_speed = max_speed;
   }
   
-  protected double travel_speed = 20*60;
+  protected double travel_speed = 60*60;
 
   public double getTravel_speed()
   {
