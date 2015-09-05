@@ -53,6 +53,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_HTTP_UPLOAD_URL = "HTTP Upload URL";
   protected static final String SETTING_LINEEND = "Lineend (CR,LF,CRLF)";
   protected static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
+  protected static final String SETTING_TRAVEL_SPEED = "Travel (non laser moves) speed (in mm/min)";
   protected static final String SETTING_PRE_JOB_GCODE = "Pre-Job GCode (comma separated)";
   protected static final String SETTING_POST_JOB_GCODE = "Post-Job GCode (comma separated)";
   protected static final String SETTING_RESOLUTIONS = "Supported DPI (comma separated)";
@@ -240,6 +241,18 @@ public class GenericGcodeDriver extends LaserCutter {
     this.max_speed = max_speed;
   }
   
+  protected double travel_speed = 60*60;
+
+  public double getTravel_speed()
+  {
+    return travel_speed;
+  }
+
+  public void setTravel_speed(double travel_speed)
+  {
+    this.travel_speed = travel_speed;
+  }
+  
   @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
@@ -305,7 +318,8 @@ public class GenericGcodeDriver extends LaserCutter {
   }
 
   protected void move(PrintStream out, int x, int y, double resolution) throws IOException {
-    sendLine("G0 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution));
+    currentSpeed = getTravel_speed();
+    sendLine("G0 X%f Y%f F%d", Util.px2mm(x, resolution), Util.px2mm(y, resolution), (int) (travel_speed));
   }
 
   protected void line(PrintStream out, int x, int y, double resolution) throws IOException {
@@ -672,6 +686,7 @@ public class GenericGcodeDriver extends LaserCutter {
     SETTING_INIT_DELAY,
     SETTING_LINEEND,
     SETTING_MAX_SPEED,
+    SETTING_TRAVEL_SPEED,
     SETTING_PRE_JOB_GCODE,
     SETTING_POST_JOB_GCODE,
     SETTING_RESOLUTIONS,
@@ -708,6 +723,8 @@ public class GenericGcodeDriver extends LaserCutter {
       return this.getLineend();
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
       return this.getMax_speed();
+    } else if (SETTING_TRAVEL_SPEED.equals(attribute)) {
+      return this.getTravel_speed();
     } else if (SETTING_PRE_JOB_GCODE.equals(attribute)) {
       return this.getPreJobGcode();
     } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
@@ -747,6 +764,8 @@ public class GenericGcodeDriver extends LaserCutter {
       this.setLineend((String) value);
     } else if (SETTING_MAX_SPEED.equals(attribute)) {
       this.setMax_speed((Double) value);
+    } else if (SETTING_TRAVEL_SPEED.equals(attribute)) {
+      this.setTravel_speed((Double) value);
     } else if (SETTING_PRE_JOB_GCODE.equals(attribute)) {
       this.setPreJobGcode((String) value);
     } else if (SETTING_POST_JOB_GCODE.equals(attribute)) {
