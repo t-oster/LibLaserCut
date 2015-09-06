@@ -40,6 +40,7 @@ public class LibInfo
       EpilogZing.class,
       EpilogHelix.class,
       LaosCutter.class,
+      GoldCutHPGL.class,
       Lasersaur.class,
       Dummy.class,
       IModelaMill.class,
