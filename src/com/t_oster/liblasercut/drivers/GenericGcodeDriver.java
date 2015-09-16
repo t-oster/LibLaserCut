@@ -50,6 +50,8 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_BAUDRATE = "Baud Rate (Serial)";
   protected static final String SETTING_BEDWIDTH = "Laserbed width";
   protected static final String SETTING_BEDHEIGHT = "Laserbed height";
+  protected static final String SETTING_FLIP_X = "Flip X Axis";
+  protected static final String SETTING_FLIP_Y = "Flip Y Axis";
   protected static final String SETTING_HTTP_UPLOAD_URL = "HTTP Upload URL";
   protected static final String SETTING_LINEEND = "Lineend (CR,LF,CRLF)";
   protected static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
@@ -95,6 +97,30 @@ public class GenericGcodeDriver extends LaserCutter {
     this.baudRate = baudRate;
   }
 
+  protected boolean flipXaxis = false;
+
+  public boolean isFlipXaxis()
+  {
+    return flipXaxis;
+  }
+
+  public void setFlipXaxis(boolean flipXaxis)
+  {
+    this.flipXaxis = flipXaxis;
+  }
+  
+  protected boolean flipYaxis = false;
+
+  public boolean isFlipYaxis()
+  {
+    return flipYaxis;
+  }
+
+  public void setFlipYaxis(boolean flipYaxis)
+  {
+    this.flipYaxis = flipYaxis;
+  }
+  
   protected String httpUploadUrl = "http://10.10.10.100/upload";
 
   public String getHttpUploadUrl()
@@ -317,12 +343,16 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
-  protected void move(PrintStream out, int x, int y, double resolution) throws IOException {
+  protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
+    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
-    sendLine("G0 X%f Y%f F%d", Util.px2mm(x, resolution), Util.px2mm(y, resolution), (int) (travel_speed));
+    sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
   }
 
-  protected void line(PrintStream out, int x, int y, double resolution) throws IOException {
+  protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
+    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
     if (nextPower != currentPower)
     {
@@ -334,7 +364,7 @@ public class GenericGcodeDriver extends LaserCutter {
       append += String.format(Locale.US, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    sendLine("G1 X%f Y%f"+append, Util.px2mm(x, resolution), Util.px2mm(y, resolution));
+    sendLine("G1 X%f Y%f"+append, x, y);
   }
 
   private void writeInitializationCode() throws IOException {
@@ -680,6 +710,8 @@ public class GenericGcodeDriver extends LaserCutter {
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
     SETTING_COMPORT,
+    SETTING_FLIP_X,
+    SETTING_FLIP_Y,
     SETTING_HOST,
     SETTING_HTTP_UPLOAD_URL,
     SETTING_IDENTIFICATION_STRING,
@@ -711,6 +743,10 @@ public class GenericGcodeDriver extends LaserCutter {
       return this.getBedHeight();
     } else if (SETTING_COMPORT.equals(attribute)) {
       return this.getComport();
+    } else if (SETTING_FLIP_X.equals(attribute)) {
+      return this.isFlipXaxis();
+    } else if (SETTING_FLIP_Y.equals(attribute)) {
+      return this.isFlipYaxis();
     } else if (SETTING_HOST.equals(attribute)) {
       return this.getHost();
     } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
@@ -752,6 +788,10 @@ public class GenericGcodeDriver extends LaserCutter {
       this.setBedHeight((Double) value);
     } else if (SETTING_COMPORT.equals(attribute)) {
       this.setComport((String) value);
+    } else if (SETTING_FLIP_X.equals(attribute)) {
+      this.setFlipXaxis((Boolean) value);
+    } else if (SETTING_FLIP_Y.equals(attribute)) {
+      this.setFlipYaxis((Boolean) value);
     } else if (SETTING_HOST.equals(attribute)) {
       this.setHost((String) value);
     } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
