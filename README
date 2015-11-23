@@ -1,8 +1,11 @@
 This is a library intended to provide suppport
 for Lasercutters on any platform.
 
-Currently it supports moste Epilog Lasers
-and the current LAOS board. (www.laoslaser.org).
+Currently it supports most Epilog Lasers,
+the current LAOS board. (www.laoslaser.org),
+the SmoothieBoard (www.smoothieware.org),
+generic GRBL based boards,
+and some untested work-in-progress drivers like the Roland iModela and the Lasersaur.
 
 It was created for VisiCut (http://visicut.org)
 but you are invited to use it for your own programs.

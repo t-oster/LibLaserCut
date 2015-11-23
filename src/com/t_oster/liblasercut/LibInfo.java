@@ -45,7 +45,10 @@ public class LibInfo
       Dummy.class,
       IModelaMill.class,
       SampleDriver.class,
-      ExportSVG.class
+      ExportSVG.class,
+      GenericGcodeDriver.class,
+      SmoothieBoard.class,
+      Marlin.class
     };
   }
 }
