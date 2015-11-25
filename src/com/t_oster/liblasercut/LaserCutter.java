@@ -80,6 +80,8 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      */
     public abstract void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception;
 
+	public abstract void saveJob(LaserJob job) throws IllegalJobException, Exception;
+
     /**
      * If you lasercutter supports autofocus, override this method,
      * to let programs like VisiCut know, that they don't need to focus.
