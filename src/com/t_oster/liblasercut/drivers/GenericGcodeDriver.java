@@ -23,6 +23,7 @@ import com.t_oster.liblasercut.platform.Util;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -31,10 +32,16 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import purejavacomm.*;
 import java.util.*;
 import net.sf.corn.httpclient.HttpClient;
 import net.sf.corn.httpclient.HttpResponse;
+
+
+
+
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -377,6 +384,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
+
   private void writeShutdownCode() throws IOException {
     if (postJobGcode != null)
     {
@@ -651,6 +659,42 @@ public class GenericGcodeDriver extends LaserCutter {
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
+
+@Override
+public void saveJob(LaserJob job) throws IllegalJobException, Exception {
+	checkJob(job);
+
+	String timestamp = new SimpleDateFormat( "yyyyMMddhhmmssSSS" ).format( new Date( ) );
+	String filename = "output_" + timestamp + ".gcode";
+	System.out.println("Creating file " + filename);
+	//BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+	this.out = new PrintStream(new File(filename));
+
+	writeInitializationCode();
+	int i = 0;
+	int max = job.getParts().size();
+	for (JobPart p : job.getParts())
+	{
+		if (p instanceof RasterPart)
+		{
+			RasterPart rp = (RasterPart) p;
+			LaserProperty black = rp.getLaserProperty();
+			LaserProperty white = black.clone();
+			white.setProperty("power", 0.0f);
+			p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+		}
+		if (p instanceof VectorPart)
+		{
+			//TODO: in direct mode use progress listener to indicate progress
+			//of individual job
+			writeVectorGCode((VectorPart) p, p.getDPI());
+		}
+		i++;
+	}
+	writeShutdownCode();
+	//writer.close();
+}
+
   private List<Double> resolutions;
 
   @Override
