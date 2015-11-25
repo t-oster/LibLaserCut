@@ -667,7 +667,6 @@ public void saveJob(LaserJob job) throws IllegalJobException, Exception {
 	String timestamp = new SimpleDateFormat( "yyyyMMddhhmmssSSS" ).format( new Date( ) );
 	String filename = "output_" + timestamp + ".gcode";
 	System.out.println("Creating file " + filename);
-	//BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
 	this.out = new PrintStream(new File(filename));
 
 	writeInitializationCode();
