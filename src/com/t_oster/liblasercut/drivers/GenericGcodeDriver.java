@@ -416,7 +416,7 @@ public class GenericGcodeDriver extends LaserCutter {
       }
     }
   }
-  
+
   protected void http_upload(URI url, String data, String filename) throws IOException
   {
     HttpClient client = new HttpClient(url);
@@ -669,6 +669,8 @@ public void saveJob(LaserJob job) throws IllegalJobException, Exception {
 	System.out.println("Creating file " + filename);
 	this.out = new PrintStream(new File(filename));
 
+	setWaitForOKafterEachLine( false );
+
 	writeInitializationCode();
 	int i = 0;
 	int max = job.getParts().size();
@@ -691,7 +693,9 @@ public void saveJob(LaserJob job) throws IllegalJobException, Exception {
 		i++;
 	}
 	writeShutdownCode();
-	//writer.close();
+	this.out.flush();
+
+	setWaitForOKafterEachLine(true);
 }
 
   private List<Double> resolutions;
