@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.Exception;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
@@ -661,14 +662,12 @@ public class GenericGcodeDriver extends LaserCutter {
   }
 
 @Override
-public void saveJob(LaserJob job) throws IllegalJobException, Exception {
+public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
 	checkJob(job);
 
-	String timestamp = new SimpleDateFormat( "yyyyMMddhhmmssSSS" ).format( new Date( ) );
-	String filename = "output_" + timestamp + ".gcode";
-	System.out.println("Creating file " + filename);
-	this.out = new PrintStream(new File(filename));
+	this.out = fileOutputStream;
 
+	boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
 	setWaitForOKafterEachLine( false );
 
 	writeInitializationCode();
@@ -695,7 +694,7 @@ public void saveJob(LaserJob job) throws IllegalJobException, Exception {
 	writeShutdownCode();
 	this.out.flush();
 
-	setWaitForOKafterEachLine(true);
+	setWaitForOKafterEachLine(wasSetWaitingForOk);
 }
 
   private List<Double> resolutions;
