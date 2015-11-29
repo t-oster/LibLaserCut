@@ -23,18 +23,26 @@ import com.t_oster.liblasercut.platform.Util;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.Exception;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import purejavacomm.*;
 import java.util.*;
 import net.sf.corn.httpclient.HttpClient;
 import net.sf.corn.httpclient.HttpResponse;
+
+
+
+
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -377,6 +385,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
+
   private void writeShutdownCode() throws IOException {
     if (postJobGcode != null)
     {
@@ -408,7 +417,7 @@ public class GenericGcodeDriver extends LaserCutter {
       }
     }
   }
-  
+
   protected void http_upload(URI url, String data, String filename) throws IOException
   {
     HttpClient client = new HttpClient(url);
@@ -651,6 +660,43 @@ public class GenericGcodeDriver extends LaserCutter {
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
+
+@Override
+public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
+	checkJob(job);
+
+	this.out = fileOutputStream;
+
+	boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
+	setWaitForOKafterEachLine( false );
+
+	writeInitializationCode();
+	int i = 0;
+	int max = job.getParts().size();
+	for (JobPart p : job.getParts())
+	{
+		if (p instanceof RasterPart)
+		{
+			RasterPart rp = (RasterPart) p;
+			LaserProperty black = rp.getLaserProperty();
+			LaserProperty white = black.clone();
+			white.setProperty("power", 0.0f);
+			p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+		}
+		if (p instanceof VectorPart)
+		{
+			//TODO: in direct mode use progress listener to indicate progress
+			//of individual job
+			writeVectorGCode((VectorPart) p, p.getDPI());
+		}
+		i++;
+	}
+	writeShutdownCode();
+	this.out.flush();
+
+	setWaitForOKafterEachLine(wasSetWaitingForOk);
+}
+
   private List<Double> resolutions;
 
   @Override

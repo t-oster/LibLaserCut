@@ -24,6 +24,8 @@ package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -79,6 +81,11 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * @throws Exception  if there is a Problem with the Communication or Queue
      */
     public abstract void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception;
+
+	public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws NotImplementedException, IllegalJobException, Exception {
+		System.err.println("Your driver does not implement saveJob(LaserJob job)");
+		throw new NotImplementedException();
+	}
 
     /**
      * If you lasercutter supports autofocus, override this method,
