@@ -671,8 +671,6 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 	setWaitForOKafterEachLine( false );
 
 	writeInitializationCode();
-	int i = 0;
-	int max = job.getParts().size();
 	for (JobPart p : job.getParts())
 	{
 		if (p instanceof RasterPart)
@@ -683,13 +681,10 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 			white.setProperty("power", 0.0f);
 			p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
 		}
-		if (p instanceof VectorPart)
+    else if (p instanceof VectorPart)
 		{
-			//TODO: in direct mode use progress listener to indicate progress
-			//of individual job
 			writeVectorGCode((VectorPart) p, p.getDPI());
 		}
-		i++;
 	}
 	writeShutdownCode();
 	this.out.flush();
