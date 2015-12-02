@@ -23,7 +23,6 @@ import com.t_oster.liblasercut.platform.Util;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -32,17 +31,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import purejavacomm.*;
 import java.util.*;
 import net.sf.corn.httpclient.HttpClient;
 import net.sf.corn.httpclient.HttpResponse;
-
-
-
-
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -61,6 +53,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_FLIP_X = "Flip X Axis";
   protected static final String SETTING_FLIP_Y = "Flip Y Axis";
   protected static final String SETTING_HTTP_UPLOAD_URL = "HTTP Upload URL";
+  protected static final String SETTING_AUTOPLAY = "Start Job after HTTP Upload";
   protected static final String SETTING_LINEEND = "Lineend (CR,LF,CRLF)";
   protected static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
   protected static final String SETTING_TRAVEL_SPEED = "Travel (non laser moves) speed (in mm/min)";
@@ -141,6 +134,18 @@ public class GenericGcodeDriver extends LaserCutter {
     this.httpUploadUrl = httpUploadUrl;
   }
   
+  private boolean autoPlay = true;
+
+  public boolean isAutoPlay()
+  {
+    return autoPlay;
+  }
+
+  public void setAutoPlay(boolean autoPlay)
+  {
+    this.autoPlay = autoPlay;
+  }
+
   protected String supportedResolutions = "100,500,1000";
 
   public String getSupportedResolutions()
@@ -430,6 +435,19 @@ public class GenericGcodeDriver extends LaserCutter {
     System.out.println("Response: "+response.toString());//TODO: Remove
   }
   
+  protected void http_play(String filename) throws IOException, URISyntaxException
+  {
+    URI url = new URI(getHttpUploadUrl().replace("upload", "command"));
+    String command = "play /sd/"+filename+"\n";
+    HttpClient client = new HttpClient(url);
+    HttpResponse response = client.sendData(HttpClient.HTTP_METHOD.POST, command);
+    if (response == null || response.hasError())
+    {
+      throw new IOException("Error during POST Request");
+    }
+    System.out.println("Response: "+response.toString());//TODO: Remove
+  }
+  
   protected String waitForLine() throws IOException
   {
     String line = "";
@@ -601,6 +619,10 @@ public class GenericGcodeDriver extends LaserCutter {
     {
       out.close();
       http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString("UTF-8"), jobname);
+      if (this.isAutoPlay())
+      {
+        http_play(jobname);
+      }
     }
     else
     {
@@ -755,6 +777,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_FLIP_Y,
     SETTING_HOST,
     SETTING_HTTP_UPLOAD_URL,
+    SETTING_AUTOPLAY,
     SETTING_IDENTIFICATION_STRING,
     SETTING_INIT_DELAY,
     SETTING_LINEEND,
@@ -792,6 +815,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getHost();
     } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
       return this.getHttpUploadUrl();
+    } else if (SETTING_AUTOPLAY.equals(attribute)) {
+      return this.isAutoPlay();
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       return this.getIdentificationLine();
     } else if (SETTING_INIT_DELAY.equals(attribute)) {
@@ -837,6 +862,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setHost((String) value);
     } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
       this.setHttpUploadUrl((String) value);
+    } else if (SETTING_AUTOPLAY.equals(attribute)) {
+      this.setAutoPlay((Boolean) value);
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       this.setIdentificationLine((String) value);
     } else if (SETTING_INIT_DELAY.equals(attribute)) {
