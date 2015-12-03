@@ -45,18 +45,18 @@ public class MakeBlockXYPlotter extends LaserCutter
   private final boolean debug = false; // print to command line
   private static final String MODELNAME = "MakeBlockXYPlotter";
   private double addSpacePerRasterLine = 0.5;
-  private String hostname = "file:///Users/Sven/Desktop/out.gcode";
+  private String hostname = ""; 
   private double bedWidth = 300;
   private double bedHeight = 210;
-  private int speedRate = 255;
+  private int delayRate = 5000;
   private int powerRate = 255;
   private String usedTool = "PEN"; // PEN, Laser
   private List<Double> resolutions = Arrays.asList(new Double[]{
                 64d // fine liner
               });
   
-  private int currentSpeed;
-  private int currentPower;
+  private int chosenDelay;
+  private int chosenPower;
   private ToolState toolState;
   
   private PrintWriter w = null;
@@ -71,15 +71,15 @@ public class MakeBlockXYPlotter extends LaserCutter
   private static final String SETTING_RASTER_WHITESPACE = "Additional space per Raster line (mm)";
   private static final String SETTING_BEDWIDTH = "Laserbed width (mm)";
   private static final String SETTING_BEDHEIGHT = "Laserbed height (mm)";
-  private static final String SETTING_SPEED_RATE = "Max. Speed Rate (abs. value)";
-  private static final String SETTING_POWER_RATE = "Max. Power Rate (abs. value)";
+  private static final String SETTING_DELAY_RATE = "Max. Delay Rate (abs. us)";
+  private static final String SETTING_POWER_RATE = "Max. Power Rate (abs. pwm)";
   private static final String SETTING_TOOL = "Tool (PEN, LASER)";
   private static String[] settingAttributes = new String[]{
     SETTING_HOSTNAME,
     SETTING_RASTER_WHITESPACE,
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
-    SETTING_SPEED_RATE,
+    SETTING_DELAY_RATE,
     SETTING_POWER_RATE,
     SETTING_TOOL
   };
@@ -135,38 +135,39 @@ public class MakeBlockXYPlotter extends LaserCutter
 
   
   private void generateInitializationGCode() throws Exception {
-    this.send("G54");//use table offset
-    this.send("G21");//units to mm
-    this.send("G90");//following coordinates are absolute
     toolOff();
-    this.send("G28 X Y");//move to 0 0
+    this.sendCommand("G28 X Y");//move to 0 0
   }
 
   private void generateShutdownGCode() throws Exception {
     //back to origin and shutdown
     toolOff();
-    this.send("G28 X Y");//move to 0 0
+    this.sendCommand("G28 X Y");//move to 0 0
   }
   
   private void toolOff() throws Exception {
     if(toolState != ToolState.OFF) {
       if(usedTool.equals("PEN")) {
-        this.send("M1 90");
+        this.sendCommand("M1 90");
+        this.sendCommand(String.format("M3 %d", 0)); // to ensure fastest speed
       } else if(usedTool.equals("LASER")) {
-        this.send("M1 ???");
+        this.sendCommand(String.format("M4 %d", 0));
+        this.sendCommand(String.format("M3 %d", 0)); // to move faster with tool off
       } else {
         throw new Exception("Tool " + this.usedTool + " not supported!");
       }
-        toolState = ToolState.OFF;
+      toolState = ToolState.OFF;
     }
   }
   
   private void toolOn() throws Exception {
     if(toolState != ToolState.ON) {
       if(usedTool.equals("PEN")) {
-        this.send("M1 130");
+        this.sendCommand(String.format("M3 %d", 0)); // to ensure fastest speed
+        this.sendCommand("M1 130");
       } else if(usedTool.equals("LASER")) {
-        this.send("M1 ???");
+        this.sendCommand(String.format("M3 %d", (int) ((double) delayRate * this.chosenDelay / 100)));
+        this.sendCommand(String.format("M4 %d", (int) ((double) powerRate * this.chosenPower / 100)));
       } else {
         throw new Exception("Tool " + this.usedTool + " not supported!");
       }
@@ -174,32 +175,34 @@ public class MakeBlockXYPlotter extends LaserCutter
     }
   }
   
-  private void setSpeed(int value) throws Exception{
-    if(usedTool.equals("LASER")) {
-      if (value != currentSpeed) {
-        this.send(String.format(Locale.US, "G1 F%d", (int) ((double) speedRate * value / 100)));
-        currentSpeed = value;
+  private void setDelay(int value) throws Exception{
+    // saves just the chosen delay value
+    // delay of the plotter really set on toolOn(), to move faster with tool off
+    if(usedTool.equals("LASER")) { // property option only supported if laser
+      if (value != chosenDelay) {
+        chosenDelay = value;
       }
     }
   }
   
   private void setPower(int value) throws Exception{
-    if(usedTool.equals("LASER")) {
-      if (value != currentPower) {
-        this.send(String.format(Locale.US, "S%d", (int) ((double) powerRate * value / 100)));
-        currentPower = value;
+    // saves just the chosen power value
+    // power of the laser really set on toolOn()
+    if(usedTool.equals("LASER")) { // property option only supported if laser
+      if (value != chosenPower) {
+        chosenPower = value;
       }
     }
   }
   
   private void move(int x, int y, double resolution) throws Exception{
     toolOff();
-    this.send(String.format(Locale.US, "G0 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution)));
+    this.sendCommand(String.format(Locale.US, "G0 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution)));
   }
 
   private void line(int x, int y, double resolution) throws Exception{
     toolOn();
-    this.send(String.format(Locale.US, "G1 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution)));
+    this.sendCommand(String.format(Locale.US, "G1 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution)));
   }
   
   private void generateVectorGCode(VectorPart vp, double resolution, ProgressListener pl, int startProgress, int maxProgress) throws UnsupportedEncodingException, Exception {
@@ -218,10 +221,19 @@ public class MakeBlockXYPlotter extends LaserCutter
           y = cmd.getY();
           this.line(x, y, resolution);
           break;
-        case SETPROPERTY:
-          PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
-          this.setPower(p.getPower());
-          this.setSpeed(p.getSpeed());
+        case SETPROPERTY: // called once per part to set chosen properties
+          MakeBlockXYPlotterProperty p = (MakeBlockXYPlotterProperty) cmd.getProperty(); // only set with LASER tool
+          // ensure percent power
+          int pPercent = p.getPower();
+          pPercent = pPercent<0?0:pPercent;
+          pPercent = pPercent>100?100:pPercent;
+          this.setPower(pPercent);
+          // ensure percent speed
+          int sPercent = p.getSpeed();
+          sPercent = sPercent<0?0:sPercent;
+          sPercent = sPercent>100?100:sPercent;
+          int dPercent = 100-sPercent; // convert speed to delay
+          this.setDelay(dPercent);
           break;
       }
       i++;
@@ -237,9 +249,12 @@ public class MakeBlockXYPlotter extends LaserCutter
     
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
+    
+    // called once per part to set chosen properties
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    this.setSpeed(prop.getSpeed());
+    this.setDelay(prop.getSpeed());
     this.setPower(prop.getPower());
+    
     for (int line = 0; line < rp.getRasterHeight(); line++) {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
@@ -322,8 +337,15 @@ public class MakeBlockXYPlotter extends LaserCutter
     if(!this.debug){
       if (this.hostname.startsWith("port://")) {
         String portString = this.hostname.replace("port://", "");
-        CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(portString);
-        port = (SerialPort) cpi.open("VisiCut", 2000);
+        
+        try{
+          CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(portString);
+          port = (SerialPort) cpi.open("VisiCut", 2000);
+        }
+        catch(Exception e) {
+          throw new Exception("Port '"+portString+"' is not available.");
+        }
+        
         if (port == null)
         {
           throw new Exception("Error: Could not Open COM-Port '"+portString+"'");
@@ -336,10 +358,16 @@ public class MakeBlockXYPlotter extends LaserCutter
         out = new BufferedOutputStream(port.getOutputStream());
         portReader = new BufferedReader(new InputStreamReader(port.getInputStream()));
         
+        // wake up firmware
         String command = "\r\n\r\n";
         out.write(command.getBytes("US-ASCII"));
         out.flush();
         Thread.sleep(2000);
+        String str;
+        portReader.readLine(); // "ok"
+        portReader.readLine(); // "ok"
+        
+        this.checkVersion();
       }
       else if (hostname.startsWith("file://")) {
         String filename = this.hostname.replace("file://", "");
@@ -373,13 +401,43 @@ public class MakeBlockXYPlotter extends LaserCutter
     }
   }
   
+  private void checkResponse(String command, String response, String expectedAnswer) throws Exception {
+    if(!response.toLowerCase().contains(expectedAnswer.toLowerCase())) {
+        throw new Exception(String.format("Got wrong response to command \"%s\":\n\"%s\" instead of \"%s\"", command, response, expectedAnswer));
+      }
+  }
+  private void sendCommand(String command) throws Exception {
+    this.send(command);
+    
+    if(!debug) {
+      if (this.hostname.startsWith("port://")) {
+        String resp = this.receive();
+        this.checkResponse(command, resp, "ok");
+      }    
+    }
+  }
+  
+  private void checkVersion() throws Exception {
+    // check if firmware matches implemented protocol
+    this.send("M115");
+    
+    if(!debug) {
+      if (this.hostname.startsWith("port://")) {
+        String resp = this.receive();
+        this.checkResponse("Version", resp, "SvenJung");
+        String resp2 = this.receive();
+        this.checkResponse("Version", resp2, "ok");
+      }    
+    }
+  }
+  
   private void send(String command) throws Exception {
     if(!debug) {
       if (this.hostname.startsWith("port://")) {
+        // send
         String sendString = command + "\n";
         out.write(sendString.getBytes("US-ASCII"));
         out.flush();
-        this.waitForResponse(command);
       }
       else if (hostname.startsWith("file://")) {
         w.println(command);
@@ -393,33 +451,29 @@ public class MakeBlockXYPlotter extends LaserCutter
     }
   }
   
-  private void waitForResponse(String command) throws IOException, Exception
-  {
-    String line;
-    String expected = "ok";
-    try {
-      line = portReader.readLine();
-      line = line.replace("\n", "").replace("\r", "");
-      if(!line.toLowerCase().equals(expected.toLowerCase())) {
-        throw new Exception(String.format("Got wrong response to command: %s:%s", command, line));
+  private String receive() throws Exception{
+    if(!debug) {
+      if (this.hostname.startsWith("port://")) {
+            String line;
+        try {
+          line = portReader.readLine();
+          line = line.replace("\n", "").replace("\r", "");
+          return line;
+        } catch(IOException e) { 
+          throw new IOException("IO Exception, e.g. timeout");
+        }
       }
-      else {
-        return; // everything ok
-      }
-    } catch(IOException e) { 
-      throw new Exception("IO Exception, e.g. timeout");
     }
+    return "";
   }
-  
-  
-  
+
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
-    this.currentPower = -1;
-    this.currentSpeed = -1;
-    this.toolState = ToolState.OFF;
-    pl.progressChanged(this, 0);
+    this.chosenPower = 0;
+    this.chosenDelay = 0;
+    this.toolState = ToolState.ON; // assume worst case, set to OFF in initialization code
+    pl.progressChanged(this, 0); 
     pl.taskChanged(this, "checking job");
     checkJob(job);
     job.applyStartPoint();
@@ -465,7 +519,7 @@ public class MakeBlockXYPlotter extends LaserCutter
     clone.hostname = hostname;
     clone.bedWidth = bedWidth;
     clone.bedHeight = bedHeight;
-    clone.speedRate = speedRate;
+    clone.delayRate = delayRate;
     clone.powerRate = powerRate;
     clone.usedTool = usedTool;
     return clone;
@@ -486,8 +540,8 @@ public class MakeBlockXYPlotter extends LaserCutter
       return this.bedWidth;
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
       return this.bedHeight;
-    } else if (SETTING_SPEED_RATE.equals(attribute)) {
-      return this.speedRate;
+    } else if (SETTING_DELAY_RATE.equals(attribute)) {
+      return this.delayRate;
     } else if (SETTING_POWER_RATE.equals(attribute)) {
       return this.powerRate;
     } else if (SETTING_TOOL.equals(attribute)) {
@@ -506,8 +560,8 @@ public class MakeBlockXYPlotter extends LaserCutter
       this.bedWidth = (Double) value;
     } else if (SETTING_BEDHEIGHT.equals(attribute)) {
       this.bedHeight = (Double) value;
-    } else if (SETTING_SPEED_RATE.equals(attribute)) {
-      this.speedRate = (Integer) value;
+    } else if (SETTING_DELAY_RATE.equals(attribute)) {
+      this.delayRate = (Integer) value;
     } else if (SETTING_POWER_RATE.equals(attribute)) {
       this.powerRate = (Integer) value;
     } else if (SETTING_TOOL.equals(attribute)) {
