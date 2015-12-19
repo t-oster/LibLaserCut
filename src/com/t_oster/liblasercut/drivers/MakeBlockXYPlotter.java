@@ -28,13 +28,10 @@ import purejavacomm.SerialPort;
 
 /**
  *
- * @author Sven
+ * @author Sven Jung
  */
 public class MakeBlockXYPlotter extends LaserCutter
 {
-  // TODO: 
-  // send serial
-  
   private enum ToolState {
     ON, OFF
   }
@@ -363,7 +360,6 @@ public class MakeBlockXYPlotter extends LaserCutter
         out.write(command.getBytes("US-ASCII"));
         out.flush();
         Thread.sleep(2000);
-        String str;
         portReader.readLine(); // "ok"
         portReader.readLine(); // "ok"
         
@@ -424,7 +420,7 @@ public class MakeBlockXYPlotter extends LaserCutter
     if(!debug) {
       if (this.hostname.startsWith("port://")) {
         String resp = this.receive();
-        this.checkResponse("Version", resp, "SvenJung");
+        this.checkResponse("Version", resp, "Version");
         String resp2 = this.receive();
         this.checkResponse("Version", resp2, "ok");
       }    
