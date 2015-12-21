@@ -654,7 +654,10 @@ public class LaosCutter extends LaserCutter
   protected void writeJobCode(LaserJob job, OutputStream out, ProgressListener pl) throws UnsupportedEncodingException, IOException
   {
     out.write(this.generateInitializationCode());
-    pl.progressChanged(this, 20);
+    if (pl != null)
+    {
+      pl.progressChanged(this, 20);
+    }
     out.write(this.generateBoundingBoxCode(job));
     int i = 0;
     int max = job.getParts().size();
@@ -673,10 +676,27 @@ public class LaosCutter extends LaserCutter
         out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       }
       i++;
-      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
+      if (pl != null)
+      {
+        pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
+      }
     }
     out.write(this.generateShutdownCode());
     out.close();
+  }
+
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
+  {
+    currentFrequency = -1;
+    currentPower = -1;
+    currentSpeed = -1;
+    currentFocus = 0;
+    currentPurge = false;
+    currentVentilation = false;
+    checkJob(job);
+    job.applyStartPoint();
+    this.writeJobCode(job, fileOutputStream, null);
   }
 
   @Override
