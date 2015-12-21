@@ -46,6 +46,7 @@ public class LibInfo
       IModelaMill.class,
       SampleDriver.class,
       ExportSVG.class,
+      MakeBlockXYPlotter.class,
       GenericGcodeDriver.class,
       SmoothieBoard.class,
       Marlin.class
