@@ -503,6 +503,7 @@ public class GenericGcodeDriver extends LaserCutter {
         {
           SerialPort sp = (SerialPort) port;
           sp.setSerialPortParams(getBaudRate(), 8, 1, 0);
+          sp.setDTR(true);
         }
         out = new PrintStream(port.getOutputStream(), true, "US-ASCII");
         in = new BufferedReader(new InputStreamReader(port.getInputStream()));
