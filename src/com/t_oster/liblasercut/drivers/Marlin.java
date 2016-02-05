@@ -92,6 +92,12 @@ public class Marlin extends GenericGcodeDriver {
     return null;
   }
 
+  @Override
+  protected void setPower(double powerInPercent)
+  {
+    //marlin interprets power from 0-100 instead of 0-1
+    super.setPower(powerInPercent*100);
+  }
 
   @Override
   public String getModelName()
