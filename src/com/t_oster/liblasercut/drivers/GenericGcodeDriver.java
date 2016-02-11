@@ -65,6 +65,8 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_INIT_DELAY = "Seconds to wait for board reset (Serial)";
   protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
   
+  protected static Locale FORMAT_LOCALE = Locale.US;
+  
   private String lineend = "LF";
 
   public String getLineend()
@@ -369,12 +371,12 @@ public class GenericGcodeDriver extends LaserCutter {
     String append = "";
     if (nextPower != currentPower)
     {
-      append += String.format(Locale.US, " S%f", nextPower/100.0);
+      append += String.format(FORMAT_LOCALE, " S%f", nextPower/100.0);
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
     {
-      append += String.format(Locale.US, " F%d", (int) (max_speed*nextSpeed/100.0));
+      append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
     sendLine("G1 X%f Y%f"+append, x, y);
@@ -409,9 +411,9 @@ public class GenericGcodeDriver extends LaserCutter {
   
   protected void sendLine(String text, Object... parameters) throws IOException
   {
-    out.format(text+LINEEND(), parameters);
+    out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
     //TODO: Remove
-    System.out.format("> "+text+LINEEND(), parameters);
+    System.out.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters);
     out.flush();
     if (isWaitForOKafterEachLine())
     {
@@ -509,7 +511,7 @@ public class GenericGcodeDriver extends LaserCutter {
         in = new BufferedReader(new InputStreamReader(port.getInputStream()));
         // Wait 5 seconds since GRBL is long to wake up..
         for (int rest = getInitDelay(); rest > 0; rest--) {
-          pl.taskChanged(this, String.format("Waiting %ds", rest));
+          pl.taskChanged(this, String.format(FORMAT_LOCALE, "Waiting %ds", rest));
           try
           {
             Thread.sleep(1000);
