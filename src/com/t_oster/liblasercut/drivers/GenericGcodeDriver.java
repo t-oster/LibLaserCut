@@ -688,6 +688,9 @@ public class GenericGcodeDriver extends LaserCutter {
 
 @Override
 public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
+  this.currentPower = -1;
+  this.currentSpeed = -1;
+  
 	checkJob(job);
 
 	this.out = fileOutputStream;
