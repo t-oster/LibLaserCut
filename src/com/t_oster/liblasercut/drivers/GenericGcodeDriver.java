@@ -709,7 +709,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 			white.setProperty("power", 0.0f);
 			p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
 		}
-    else if (p instanceof VectorPart)
+    		if (p instanceof VectorPart)
 		{
 			writeVectorGCode((VectorPart) p, p.getDPI());
 		}
