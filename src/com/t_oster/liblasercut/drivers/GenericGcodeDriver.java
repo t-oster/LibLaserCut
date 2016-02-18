@@ -362,7 +362,8 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
-    sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
+    currentPower = 0.0;
+    sendLine("G0 X%f Y%f S0 F%d", x, y, (int) (travel_speed));
   }
 
   protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
