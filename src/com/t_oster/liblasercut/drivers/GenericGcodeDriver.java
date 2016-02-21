@@ -64,7 +64,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_WAIT_FOR_OK = "Wait for OK after each line (interactive mode)";
   protected static final String SETTING_INIT_DELAY = "Seconds to wait for board reset (Serial)";
   protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
-  protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Blank laser during non-laser moves";
+  protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Force laser off during G0 moves";
   
   protected static Locale FORMAT_LOCALE = Locale.US;
   
