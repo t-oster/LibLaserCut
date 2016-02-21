@@ -24,7 +24,7 @@ import com.t_oster.liblasercut.dithering.*;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class BlackWhiteRaster extends TimeIntensiveOperation
+public class BlackWhiteRaster extends TimeIntensiveOperation implements GreyscaleRaster
 {
 
   public static enum DitherAlgorithm
@@ -128,6 +128,22 @@ public class BlackWhiteRaster extends TimeIntensiveOperation
   public byte getByte(int x, int y)
   {
     return raster[x][y];
+  }
+  
+  /**
+   * Convenience function to pretend this B&W image is greyscale
+   * @param x
+   * @param y
+   * @return 0 for black, 255 for white
+   */
+  public int getGreyScale(int x, int y)
+  {
+    return isBlack(x, y) ? 0 : 255;
+  }
+  
+  public void setGreyScale(int x, int y, int color)
+  {
+    this.setBlack(x, y, color < 128);
   }
 
   public int getWidth()

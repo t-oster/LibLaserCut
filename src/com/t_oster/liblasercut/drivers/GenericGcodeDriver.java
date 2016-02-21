@@ -721,13 +721,9 @@ public class GenericGcodeDriver extends LaserCutter {
       int max = job.getParts().size();
       for (JobPart p : job.getParts())
       {
-        if (p instanceof RasterPart)
+        if (p instanceof Raster3dPart || p instanceof RasterPart)
         {
-          RasterPart rp = (RasterPart) p;
-          LaserProperty black = rp.getLaserProperty();
-          LaserProperty white = black.clone();
-          white.setProperty("power", 0.0f);
-          p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+          p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI());
         }
         if (p instanceof VectorPart)
         {
@@ -765,13 +761,9 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 	writeInitializationCode();
 	for (JobPart p : job.getParts())
 	{
-		if (p instanceof RasterPart)
+		if (p instanceof Raster3dPart || p instanceof RasterPart)
 		{
-			RasterPart rp = (RasterPart) p;
-			LaserProperty black = rp.getLaserProperty();
-			LaserProperty white = black.clone();
-			white.setProperty("power", 0.0f);
-			p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+			p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI());
 		}
     		if (p instanceof VectorPart)
 		{

@@ -26,20 +26,21 @@ import java.util.List;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class RasterPart extends JobPart
+public class RasterPart extends RasterizableJobPart
 {
 
-  BlackWhiteRaster image = null;
-  LaserProperty property = null;
-  Point start = null;
+  LaserProperty blackPixelProperty = null;
+  LaserProperty whitePixelProperty = null;
   double resolution = 500;
 
   public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {
     this.image = image;
-    this.property = laserProperty;
     this.start = offset;
     this.resolution = resolution;
+    this.blackPixelProperty = laserProperty;
+    this.whitePixelProperty = blackPixelProperty.clone();
+    whitePixelProperty.setProperty("power", 0.0f);
   }
 
   @Override
@@ -86,7 +87,6 @@ public class RasterPart extends JobPart
    * Returns one line of the given rasterpart
    * every byte represents 8 pixel and the value corresponds to
    * 1 when black or 0 when white
-   * @param raster
    * @param line
    * @return
    */
@@ -95,29 +95,28 @@ public class RasterPart extends JobPart
     List<Byte> result = new LinkedList<Byte>();
     for (int x = 0; x < (image.getWidth() + 7) / 8; x++)
     {
-      result.add(image.getByte(x, line));
+      result.add(((BlackWhiteRaster) image).getByte(x, line));
     }
     return result;
   }
 
   public boolean isBlack(int x, int y)
   {
-    return this.image.isBlack(x, y);
+    return ((BlackWhiteRaster) image).isBlack(x, y);
   }
 
-  public int getRasterWidth()
-  {
-    return this.image.getWidth();
-  }
-
-  public int getRasterHeight()
-  {
-    return this.image.getHeight();
-  }
-
+  @Override
   public LaserProperty getLaserProperty()
   {
-      return this.property;
+    return this.blackPixelProperty;
+  }
+  
+  @Override
+  public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color)
+  {
+    return color < 128
+      ? (FloatPowerSpeedFocusProperty) blackPixelProperty
+      : (FloatPowerSpeedFocusProperty) whitePixelProperty;
   }
 
 }

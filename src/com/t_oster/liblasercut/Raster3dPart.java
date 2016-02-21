@@ -26,12 +26,10 @@ import java.util.List;
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
-public class Raster3dPart extends JobPart
+public class Raster3dPart extends RasterizableJobPart
 {
 
-  private GreyscaleRaster image = null;
   private LaserProperty property = null;
-  protected Point start = null;
   private double resolution = 500;
 
   public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
@@ -126,5 +124,16 @@ public class Raster3dPart extends JobPart
       result.add((byte) (255 - image.getGreyScale(x, line)));
     }
     return result;
+  }
+
+  @Override
+  public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color)
+  {
+    FloatPowerSpeedFocusProperty power = (FloatPowerSpeedFocusProperty) getLaserProperty().clone();
+    // convert 0-255 into <max power>-0. i.e....
+    //   - 0 (black) -> 100%
+    //   - 255 (white) -> 0%
+    power.setPower(100 - ((int) (power.getPower() * color / 255)));
+    return power;
   }
 }
