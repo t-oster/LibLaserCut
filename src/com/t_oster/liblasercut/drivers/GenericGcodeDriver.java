@@ -64,6 +64,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_WAIT_FOR_OK = "Wait for OK after each line (interactive mode)";
   protected static final String SETTING_INIT_DELAY = "Seconds to wait for board reset (Serial)";
   protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
+  protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Blank laser during non-laser moves";
   
   protected static Locale FORMAT_LOCALE = Locale.US;
   
@@ -294,6 +295,18 @@ public class GenericGcodeDriver extends LaserCutter {
     this.travel_speed = travel_speed;
   }
   
+  protected boolean blankLaserDuringRapids = false;
+  
+  public boolean getBlankLaserDuringRapids()
+  {
+    return blankLaserDuringRapids;
+  }
+  
+  public void setBlankLaserDuringRapids(boolean blankLaserDuringRapids)
+  {
+    this.blankLaserDuringRapids = blankLaserDuringRapids;
+  }
+  
   @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
@@ -362,8 +375,15 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
-    currentPower = 0.0;
-    sendLine("G0 X%f Y%f S0 F%d", x, y, (int) (travel_speed));
+    if (blankLaserDuringRapids)
+    {
+      currentPower = 0.0;
+      sendLine("G0 X%f Y%f F%d S0", x, y, (int) (travel_speed));
+    }
+    else
+    {
+      sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
+    }
   }
 
   protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
@@ -790,6 +810,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_LINEEND,
     SETTING_MAX_SPEED,
     SETTING_TRAVEL_SPEED,
+    SETTING_BLANK_LASER_DURING_RAPIDS,
     SETTING_PRE_JOB_GCODE,
     SETTING_POST_JOB_GCODE,
     SETTING_RESOLUTIONS,
@@ -844,6 +865,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.isWaitForOKafterEachLine();
     } else if (SETTING_SERIAL_TIMEOUT.equals(attribute)) {
       return this.getSerialTimeout();
+    } else if (SETTING_BLANK_LASER_DURING_RAPIDS.equals(attribute)) {
+      return this.getBlankLaserDuringRapids();
     }
     
     return null;
@@ -891,6 +914,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setWaitForOKafterEachLine((Boolean) value);
     } else if (SETTING_SERIAL_TIMEOUT.equals(attribute)) {
       this.setSerialTimeout((Integer) value);
+    } else if (SETTING_BLANK_LASER_DURING_RAPIDS.equals(attribute)) {
+      this.setBlankLaserDuringRapids((Boolean) value);
     }
   }
 

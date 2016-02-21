@@ -40,6 +40,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
     setInitDelay(0);
     setPreJobGcode(getPreJobGcode()+",M3");
     setPostJobGcode(getPostJobGcode()+",M5");
+    setBlankLaserDuringRapids(false);
   }
   
   @Override
@@ -77,6 +78,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
     result.remove(GenericGcodeDriver.SETTING_BAUDRATE);
     result.remove(GenericGcodeDriver.SETTING_LINEEND);
     result.remove(GenericGcodeDriver.SETTING_INIT_DELAY);
+    result.remove(GenericGcodeDriver.SETTING_BLANK_LASER_DURING_RAPIDS);
     return result.toArray(new String[0]);
   }
 
