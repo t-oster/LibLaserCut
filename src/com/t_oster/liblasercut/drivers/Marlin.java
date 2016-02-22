@@ -42,6 +42,7 @@ public class Marlin extends GenericGcodeDriver {
     setPreJobGcode(getPreJobGcode()+",G28 XY,M5");
     setPostJobGcode(getPostJobGcode()+",M5,G28 XY");
     setSerialTimeout(35000);
+    setBlankLaserDuringRapids(false);
     
     //Marlin has no way to upload over the network so remove the upload url text
     setHttpUploadUrl("");
@@ -65,6 +66,7 @@ public class Marlin extends GenericGcodeDriver {
     result.remove(GenericGcodeDriver.SETTING_INIT_DELAY);
     result.remove(GenericGcodeDriver.SETTING_HTTP_UPLOAD_URL);
     result.remove(GenericGcodeDriver.SETTING_HOST);
+    result.remove(GenericGcodeDriver.SETTING_BLANK_LASER_DURING_RAPIDS);
     return result.toArray(new String[0]);
   }
   
