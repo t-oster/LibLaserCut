@@ -69,6 +69,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Force laser off during G0 moves";
   protected static final String SETTING_FILE_EXPORT_PATH = "Path to save exported gcode";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
+  protected static final String SETTING_SPINDLE_MAX = "100% value for spindle";
   
   protected static Locale FORMAT_LOCALE = Locale.US;
   
@@ -339,6 +340,22 @@ public class GenericGcodeDriver extends LaserCutter {
     this.useBidirectionalRastering = useBidirectionalRastering;
   }
   
+   /*
+   * Value to use for feedrate when laser is 100% on.
+   * Varies between firmwares... 1, 100, 255, 10000, etc.
+   */
+  protected double spindleMax = 1.0;
+  
+  public double getSpindleMax()
+  {
+    return spindleMax;
+  }
+  
+  public void setSpindleMax(double spindleMax)
+  {
+    this.spindleMax = spindleMax;
+  }
+  
   @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
@@ -392,7 +409,7 @@ public class GenericGcodeDriver extends LaserCutter {
   }
 
   protected void setPower(double powerInPercent) {
-    nextPower = powerInPercent;
+    nextPower = powerInPercent/100.0*spindleMax;
   }
   
   protected void setFocus(PrintStream out, double focus, double resolution) throws IOException {
@@ -424,7 +441,7 @@ public class GenericGcodeDriver extends LaserCutter {
     String append = "";
     if (nextPower != currentPower)
     {
-      append += String.format(FORMAT_LOCALE, " S%f", nextPower/100.0);
+      append += String.format(FORMAT_LOCALE, " S%f", nextPower);
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
@@ -862,6 +879,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_LINEEND,
     SETTING_MAX_SPEED,
     SETTING_TRAVEL_SPEED,
+    SETTING_SPINDLE_MAX,
     SETTING_BLANK_LASER_DURING_RAPIDS,
     SETTING_PRE_JOB_GCODE,
     SETTING_POST_JOB_GCODE,
@@ -925,6 +943,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getExportPath();
     } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
       return this.getUseBidirectionalRastering();
+    } else if (SETTING_SPINDLE_MAX.equals(attribute)) {
+      return this.getSpindleMax();
     }
     
     return null;
@@ -978,9 +998,22 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setExportPath((String) value);
     } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
       this.setUseBidirectionalRastering((Boolean) value);
+    } else if (SETTING_SPINDLE_MAX.equals(attribute)) {
+      this.setSpindleMax((Double) value);
     }
   }
-
+  
+  /**
+   * Adjust defaults after deserializing driver from an old version of XML file
+   */
+  @Override
+  protected void setKeysMissingFromDeserialization()
+  {
+    // added field spindleMax, needs to be set to 1.0 by default
+    // but xstream initializes it to 0.0 when it is missing from XML
+    if (this.spindleMax <= 0.0) this.spindleMax = 1.0;
+  }
+  
   @Override
   public GenericGcodeDriver clone() {
     GenericGcodeDriver clone = new GenericGcodeDriver();

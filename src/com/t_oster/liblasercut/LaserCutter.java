@@ -228,6 +228,29 @@ public abstract class LaserCutter implements Cloneable, Customizable {
       }
     }
     
+    /**
+     * Adjust defaults after deserializing driver from XML
+     * Use this if you add new fields to a driver and need them to be properly
+     * initialized to *non-falsy* values before use.
+     * 
+     * i.e. you add a new key that by default isn't 0/0.0/false/"". Without
+     * adding a default in here, then no matter what your constructor/initializer
+     * does, it will always be set to a falsey value after deserializing an old
+     * XML file.
+     */
+    protected void setKeysMissingFromDeserialization()
+    {
+    }
+    
     @Override
     public abstract LaserCutter clone();
+  
+    /**
+     * Called by XStream when deserializing XML settings files. Hook here to
+     * call setKeysMissingFromDeserialization.
+     */
+    private Object readResolve() {
+      setKeysMissingFromDeserialization();
+      return this;
+    }
 }
