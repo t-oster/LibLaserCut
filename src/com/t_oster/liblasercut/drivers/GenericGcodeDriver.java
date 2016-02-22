@@ -550,19 +550,23 @@ public class GenericGcodeDriver extends LaserCutter {
           return "Does not seem to be a "+getModelName()+" on "+i.getName();
         }
         portIdentifier = i;
+        pl.taskChanged(this, "Connected");
         return null;
       }
       catch (PortInUseException e)
       {
-        return "Port in use "+i.getName();
+        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        return "Port in use: "+i.getName();
       }
       catch (IOException e)
       {
-        return "IO Error "+i.getName();
+        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        return "IO Error from "+i.getName()+": "+e.getMessage();
       }
       catch (PureJavaIllegalStateException e)
       {
-        return "Could not open "+i.getName();
+        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        return "Could not open "+i.getName()+": "+e.getMessage();
       }
     }
     else
@@ -596,7 +600,12 @@ public class GenericGcodeDriver extends LaserCutter {
       String error = "No serial port found";
       if (portIdentifier == null && !getComport().equals("auto"))
       {
-        portIdentifier = CommPortIdentifier.getPortIdentifier(getComport());
+        try {
+          portIdentifier = CommPortIdentifier.getPortIdentifier(getComport());
+        }
+        catch (NoSuchPortException e) {
+          throw new IOException("No such port: "+getComport());
+        }
       }
       
       if (portIdentifier != null)
@@ -678,31 +687,38 @@ public class GenericGcodeDriver extends LaserCutter {
     pl.taskChanged(this, "connecting...");
     connect(pl);
     pl.taskChanged(this, "sending");
-    writeInitializationCode();
-    pl.progressChanged(this, 20);
-    int i = 0;
-    int max = job.getParts().size();
-    for (JobPart p : job.getParts())
-    {
-      if (p instanceof RasterPart)
+    try {
+      writeInitializationCode();
+      pl.progressChanged(this, 20);
+      int i = 0;
+      int max = job.getParts().size();
+      for (JobPart p : job.getParts())
       {
-        RasterPart rp = (RasterPart) p;
-        LaserProperty black = rp.getLaserProperty();
-        LaserProperty white = black.clone();
-        white.setProperty("power", 0.0f);
-        p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+        if (p instanceof RasterPart)
+        {
+          RasterPart rp = (RasterPart) p;
+          LaserProperty black = rp.getLaserProperty();
+          LaserProperty white = black.clone();
+          white.setProperty("power", 0.0f);
+          p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+        }
+        if (p instanceof VectorPart)
+        {
+          //TODO: in direct mode use progress listener to indicate progress 
+          //of individual job
+          writeVectorGCode((VectorPart) p, p.getDPI());
+        }
+        i++;
+        pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
       }
-      if (p instanceof VectorPart)
-      {
-        //TODO: in direct mode use progress listener to indicate progress 
-        //of individual job
-        writeVectorGCode((VectorPart) p, p.getDPI());
-      }
-      i++;
-      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
+      writeShutdownCode();
+      disconnect(job.getName()+".gcode");
     }
-    writeShutdownCode();
-    disconnect(job.getName()+".gcode");
+    catch (IOException e) {
+      pl.taskChanged(this, "disconnecting");
+      disconnect(job.getName()+".gcode");
+      throw e;
+    }
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
