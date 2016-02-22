@@ -187,26 +187,37 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * emulate this functionality using gcode.
      * @param rp the raster job to convert
      * @param resolution resolution to output job at
+     * @param bidirectional cut in both directions
      * @return a VectorPart job of VectorCommands
      */
-    protected VectorPart convertRasterizableToVectorPart(RasterizableJobPart rp, double resolution)
+    protected VectorPart convertRasterizableToVectorPart(RasterizableJobPart rp, double resolution, boolean bidirectional)
     {
+      boolean cutDirectionleftToRight = true;
       VectorPart result = new VectorPart(rp.getLaserProperty(), resolution);
       for (int y = 0; y < rp.getRasterHeight(); y++)
       {
         if (rp.lineIsBlank(y) == false)
         {
+          rp.setRasteringCutDirection(cutDirectionleftToRight);
           Point lineStart = rp.getStartPosition(y);
           
+          // fix off-by-one errors when cutting in reverse direction, since
+          // functions always refer to the bottom left corner of a pixels
+          // and when cutting in reverse direction, we need to take pixel width
+          // into account.
+          int lineCompensation = cutDirectionleftToRight ? 0 : 1;
+          
           //move to the first point of the line
-          result.moveto(lineStart.x + rp.firstNonWhitePixel(y), lineStart.y);
+          result.moveto(lineStart.x + rp.firstNonWhitePixel(y)+lineCompensation, lineStart.y);
 
-          for (int x = rp.firstNonWhitePixel(y); x < rp.lastNonWhitePixel(y);)
+          for (int x = rp.firstNonWhitePixel(y); cutDirectionleftToRight ? (x < rp.lastNonWhitePixel(y)) : (x > rp.lastNonWhitePixel(y));)
           {
             result.setProperty(rp.getPowerSpeedFocusPropertyForPixel(x, y));
             x = rp.nextColorChange(x, y);
-            result.lineto(lineStart.x + x, lineStart.y);
+            result.lineto(lineStart.x + x + lineCompensation, lineStart.y);
           }
+          
+          if (bidirectional) cutDirectionleftToRight = !cutDirectionleftToRight;
         }
       }
       return result;
