@@ -22,6 +22,8 @@ import com.t_oster.liblasercut.*;
 import com.t_oster.liblasercut.platform.Util;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -65,6 +67,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_INIT_DELAY = "Seconds to wait for board reset (Serial)";
   protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
   protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Force laser off during G0 moves";
+  protected static final String SETTING_FILE_EXPORT_PATH = "Path to save exported gcode";
   
   protected static Locale FORMAT_LOCALE = Locale.US;
   
@@ -220,6 +223,18 @@ public class GenericGcodeDriver extends LaserCutter {
     this.serialTimeout = serialTimeout;
   }
   
+  private String exportPath = "";
+
+  public void setExportPath(String path)
+  {
+    this.exportPath = path;
+  }
+
+  public String getExportPath()
+  {
+    return exportPath;
+  }
+
   /**
    * What is expected to be received after serial/telnet connection
    * Used e.g. for auto-detecting the serial port.
@@ -578,6 +593,7 @@ public class GenericGcodeDriver extends LaserCutter {
    * Used to buffer the file before uploading via http
    */
   private ByteArrayOutputStream outputBuffer;
+  private String jobName;
   protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
   {
     outputBuffer = null;
@@ -640,9 +656,16 @@ public class GenericGcodeDriver extends LaserCutter {
       setWaitForOKafterEachLine(false);
       in = null;
     }
+    else if (getExportPath() != null && getExportPath().length() > 0)
+    {
+      File file = new File(getExportPath(), this.jobName);
+      out = new PrintStream(new FileOutputStream(file));
+      setWaitForOKafterEachLine(false);
+      in = null;
+    }
     else
     {
-      throw new IOException("Either COM Port or IP/Host has to be set");
+      throw new IOException("Either COM Port or IP/Host or Export Path has to be set");
     }
   }
   
@@ -659,7 +682,10 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     else
     {
-      in.close();
+      if (in != null)
+      {
+        in.close();
+      }
       out.close();
       if (this.socket != null)
       {
@@ -683,6 +709,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
     pl.taskChanged(this, "checking job");
     checkJob(job);
+    this.jobName = job.getName()+".gcode";
     job.applyStartPoint();
     pl.taskChanged(this, "connecting...");
     connect(pl);
@@ -716,7 +743,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     catch (IOException e) {
       pl.taskChanged(this, "disconnecting");
-      disconnect(job.getName()+".gcode");
+      disconnect(this.jobName);
       throw e;
     }
     pl.taskChanged(this, "sent.");
@@ -831,7 +858,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_POST_JOB_GCODE,
     SETTING_RESOLUTIONS,
     SETTING_WAIT_FOR_OK,
-    SETTING_SERIAL_TIMEOUT
+    SETTING_SERIAL_TIMEOUT,
+    SETTING_FILE_EXPORT_PATH
   };
 
   @Override
@@ -883,6 +911,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getSerialTimeout();
     } else if (SETTING_BLANK_LASER_DURING_RAPIDS.equals(attribute)) {
       return this.getBlankLaserDuringRapids();
+    } else if (SETTING_FILE_EXPORT_PATH.equals(attribute)) {
+      return this.getExportPath();
     }
     
     return null;
@@ -932,6 +962,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setSerialTimeout((Integer) value);
     } else if (SETTING_BLANK_LASER_DURING_RAPIDS.equals(attribute)) {
       this.setBlankLaserDuringRapids((Boolean) value);
+    } else if (SETTING_FILE_EXPORT_PATH.equals(attribute)) {
+      this.setExportPath((String) value);
     }
   }
 
@@ -941,4 +973,5 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     clone.copyProperties(this);
     return clone;
   }
+
 }
