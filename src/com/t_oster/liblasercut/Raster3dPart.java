@@ -139,15 +139,15 @@ public class Raster3dPart extends RasterizableJobPart
     // x = color
     // y = power
     // 
-    // x = 0 -> y = 100
+    // x = 0 -> y = <max power>
     // x = 255 -> y = 0
     // 
-    // x = 0  ->  y = 100  ->  y = m*0 + c  ->  c = 100
-    float c = 100f;
+    // x = 0  ->  y = <max>  ->  y = m*0 + c  ->  c = <max>
+    float c = (float) power.getPower();
     
-    // x = 255  ->  y = 0  ->  y = m*255 + 100  ->  0 = m*255 + 100
-    // ->  -100 = m*255  -> -100/255 = m
-    float m = -((float) power.getPower()) / 255f;
+    // x = 255  ->  y = 0  ->  y = m*255 + <max>  ->  0 = m*255 + <max>
+    // ->  -<max> = m*255  -> -<max>/255 = m
+    float m = -c / 255f;
     
     float x = (float) color;
     float y = m*x + c;
