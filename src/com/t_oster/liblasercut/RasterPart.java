@@ -114,7 +114,7 @@ public class RasterPart extends RasterizableJobPart
   @Override
   public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color)
   {
-    return color < 128
+    return color <= 127
       ? (FloatPowerSpeedFocusProperty) blackPixelProperty
       : (FloatPowerSpeedFocusProperty) whitePixelProperty;
   }

@@ -132,8 +132,27 @@ public class Raster3dPart extends RasterizableJobPart
     FloatPowerSpeedFocusProperty power = (FloatPowerSpeedFocusProperty) getLaserProperty().clone();
     // convert 0-255 into <max power>-0. i.e....
     //   - 0 (black) -> 100%
+    //   - 127 (mid) -> 50%
     //   - 255 (white) -> 0%
-    power.setPower(100 - ((int) (power.getPower() * color / 255)));
+    
+    // y = mx + c
+    // x = color
+    // y = power
+    // 
+    // x = 0 -> y = 100
+    // x = 255 -> y = 0
+    // 
+    // x = 0  ->  y = 100  ->  y = m*0 + c  ->  c = 100
+    float c = 100f;
+    
+    // x = 255  ->  y = 0  ->  y = m*255 + 100  ->  0 = m*255 + 100
+    // ->  -100 = m*255  -> -100/255 = m
+    float m = -((float) power.getPower()) / 255f;
+    
+    float x = (float) color;
+    float y = m*x + c;
+    
+    power.setPower((int) y);
     return power;
   }
 }

@@ -28,7 +28,7 @@ abstract public class RasterizableJobPart extends JobPart
 {
   protected GreyscaleRaster image;
   protected Point start = null;
-  protected boolean cutDirectionleftToRight;
+  protected boolean cutDirectionleftToRight = true;
   
   /**
    * The initial laser settings to start a rasterization job with.
@@ -66,16 +66,41 @@ abstract public class RasterizableJobPart extends JobPart
   }
   
   /**
-   * Set the direction cutting is done in. Left to right by default; when changed
+   * Toggle the direction cutting is done in. Left to right by default; when changed
    * then "start" of the line is the right-most side, and "end" is the left-most
    * side.
-   * @param cutDirectionleftToRight
-   *   true to cut in a left to right direction,
-   *   false for other directions.
    */
-  public void setRasteringCutDirection(boolean cutDirectionleftToRight)
+  public void toggleRasteringCutDirection()
   {
-    this.cutDirectionleftToRight = cutDirectionleftToRight;
+    cutDirectionleftToRight = !cutDirectionleftToRight;
+  }
+
+  
+  /**
+   * Adds any required compensation when cutting.
+   * Fixes off-by-one errors when cutting in reverse direction, since
+   * the pixel finding methods here always refer to the bottom left corner of 
+   * a pixel, but when cutting in reverse direction, we need to take pixel width
+   * into account.
+   * @return amount to adjust coordinates by
+   */
+  public int cutCompensation()
+  {
+    return cutDirectionleftToRight ? 0 : 1;
+  }
+  
+  /**
+   * Given an coordinate, and knowing the direction we are cutting in, decide
+   * if we have finished cutting a row of the image.
+   * @param x x coordinate of last pixel cut
+   * @param y y coordinate of last pixel cut
+   * @return true if we have finished cutting a line
+   */
+  public boolean hasFinishedCuttingLine(int x, int y)
+  {
+    return cutDirectionleftToRight 
+      ? (x > rightMostNonWhitePixel(y)) 
+      : (x < leftMostNonWhitePixel(y));
   }
   
   /**
@@ -156,8 +181,8 @@ abstract public class RasterizableJobPart extends JobPart
     for (int i=x; i<getRasterWidth(); i++)
       if (image.getGreyScale(i, y) != color)
         return i;
-    // whole line is the same color, so go to end of line
-    return rightMostNonWhitePixel(y);
+    // rest of line is the same color, so next colour change is past end of line
+    return getRasterWidth();
   }
   
   /**
@@ -172,8 +197,8 @@ abstract public class RasterizableJobPart extends JobPart
     for (int i=x; i>=0; i--)
       if (image.getGreyScale(i, y) != color)
         return i;
-    // whole line is the same color, so go to end of line
-    return leftMostNonWhitePixel(y);
+    // rest of line is the same color, so next colour change is past the beginning of line
+    return -1;
   }
   
   /**
