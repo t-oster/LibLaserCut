@@ -68,6 +68,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
   protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Force laser off during G0 moves";
   protected static final String SETTING_FILE_EXPORT_PATH = "Path to save exported gcode";
+  protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
   
   protected static Locale FORMAT_LOCALE = Locale.US;
   
@@ -320,6 +321,22 @@ public class GenericGcodeDriver extends LaserCutter {
   public void setBlankLaserDuringRapids(boolean blankLaserDuringRapids)
   {
     this.blankLaserDuringRapids = blankLaserDuringRapids;
+  }
+  
+  /**
+   * When rastering, whether to always cut from left to right, or to cut in both
+   * directions? (i.e. use the return stroke to raster as well)
+   */
+  protected boolean useBidirectionalRastering = false;
+  
+  public boolean getUseBidirectionalRastering()
+  {
+    return useBidirectionalRastering;
+  }
+  
+  public void setUseBidirectionalRastering(boolean useBidirectionalRastering)
+  {
+    this.useBidirectionalRastering = useBidirectionalRastering;
   }
   
   @Override
@@ -721,13 +738,9 @@ public class GenericGcodeDriver extends LaserCutter {
       int max = job.getParts().size();
       for (JobPart p : job.getParts())
       {
-        if (p instanceof RasterPart)
+        if (p instanceof Raster3dPart || p instanceof RasterPart)
         {
-          RasterPart rp = (RasterPart) p;
-          LaserProperty black = rp.getLaserProperty();
-          LaserProperty white = black.clone();
-          white.setProperty("power", 0.0f);
-          p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+          p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI(), getUseBidirectionalRastering());
         }
         if (p instanceof VectorPart)
         {
@@ -765,13 +778,9 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 	writeInitializationCode();
 	for (JobPart p : job.getParts())
 	{
-		if (p instanceof RasterPart)
+		if (p instanceof Raster3dPart || p instanceof RasterPart)
 		{
-			RasterPart rp = (RasterPart) p;
-			LaserProperty black = rp.getLaserProperty();
-			LaserProperty white = black.clone();
-			white.setProperty("power", 0.0f);
-			p = convertRasterToVectorPart((RasterPart) p, black, white,  p.getDPI(), false);
+			p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI(), getUseBidirectionalRastering());
 		}
     		if (p instanceof VectorPart)
 		{
@@ -859,7 +868,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_RESOLUTIONS,
     SETTING_WAIT_FOR_OK,
     SETTING_SERIAL_TIMEOUT,
-    SETTING_FILE_EXPORT_PATH
+    SETTING_FILE_EXPORT_PATH,
+    SETTING_USE_BIDIRECTIONAL_RASTERING
   };
 
   @Override
@@ -913,6 +923,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getBlankLaserDuringRapids();
     } else if (SETTING_FILE_EXPORT_PATH.equals(attribute)) {
       return this.getExportPath();
+    } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
+      return this.getUseBidirectionalRastering();
     }
     
     return null;
@@ -964,6 +976,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setBlankLaserDuringRapids((Boolean) value);
     } else if (SETTING_FILE_EXPORT_PATH.equals(attribute)) {
       this.setExportPath((String) value);
+    } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
+      this.setUseBidirectionalRastering((Boolean) value);
     }
   }
 

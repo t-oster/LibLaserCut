@@ -181,100 +181,35 @@ public abstract class LaserCutter implements Cloneable, Customizable {
 
     public abstract String getModelName();
 
-    protected VectorPart convertRasterToVectorPart(RasterPart rp, LaserProperty blackPixelProperty, LaserProperty whitePixelProperty, double resolution, boolean unidirectional)
+    /**
+     * Converts a raster image (B&W or greyscale) into a series of vector
+     * instructions suitable for printing. Lets non-raster-native cutters
+     * emulate this functionality using gcode.
+     * @param rp the raster job to convert
+     * @param resolution resolution to output job at
+     * @param bidirectional cut in both directions
+     * @return a VectorPart job of VectorCommands
+     */
+    protected VectorPart convertRasterizableToVectorPart(RasterizableJobPart rp, double resolution, boolean bidirectional)
     {
-      boolean dirRight = true;
-      Point rasterStart = rp.getRasterStart();
-      VectorPart result = new VectorPart(blackPixelProperty, resolution);
-      for (int line = 0; line < rp.getRasterHeight(); line++)
+      VectorPart result = new VectorPart(rp.getLaserProperty(), resolution);
+      for (int y = 0; y < rp.getRasterHeight(); y++)
       {
-        Point lineStart = rasterStart.clone();
-        lineStart.y += line;
-        //Convert BlackWhite line into line of 0 and 255 bytes
-        BlackWhiteRaster bwr = rp.image;
-        List<Byte> bytes = new LinkedList<Byte>();
-        boolean lookForStart = true;
-        for (int x = 0; x < bwr.getWidth(); x++)
+        if (rp.lineIsBlank(y) == false)
         {
-          if (lookForStart)
+          Point lineStart = rp.getStartPosition(y);
+          
+          //move to the first point of the line
+          result.moveto(lineStart.x + rp.firstNonWhitePixel(y)+rp.cutCompensation(), lineStart.y);
+          
+          for (int x = rp.firstNonWhitePixel(y); !rp.hasFinishedCuttingLine(x, y);)
           {
-            if (bwr.isBlack(x, line))
-            {
-              lookForStart = false;
-              bytes.add((byte) 255);
-            }
-            else
-            {
-              lineStart.x += 1;
-            }
+            result.setProperty(rp.getPowerSpeedFocusPropertyForPixel(x, y));
+            x = rp.nextColorChange(x, y);
+            result.lineto(lineStart.x + x + rp.cutCompensation(), lineStart.y);
           }
-          else
-          {
-            bytes.add(bwr.isBlack(x, line) ? (byte) 255 : (byte) 0);
-          }
-        }
-        //remove trailing zeroes
-        while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0)
-        {
-          bytes.remove(bytes.size() - 1);
-        }
-        if (bytes.size() > 0)
-        {
-          if (dirRight)
-          {
-            //move to the first nonempyt point of the line
-            result.moveto(lineStart.x, lineStart.y);
-            byte old = bytes.get(0);
-            for (int pix = 0; pix < bytes.size(); pix++)
-            {
-              if (bytes.get(pix) != old)
-              {
-                if (old == 0)
-                {//beginning of "black" segment -> move with 0 power
-                  result.setProperty(whitePixelProperty);
-                  result.lineto(lineStart.x + pix, lineStart.y);
-                }
-                else
-                {//end of "black" segment -> move with power to pixel before
-                  result.setProperty(blackPixelProperty);
-                  result.lineto(lineStart.x + pix - 1, lineStart.y);
-                }
-                old = bytes.get(pix);
-              }
-            }
-            result.setProperty(blackPixelProperty);
-            result.lineto(lineStart.x + bytes.size() - 1, lineStart.y);
-          }
-          else
-          {
-            //move to the last nonempty point of the line
-            result.moveto(lineStart.x + bytes.size() - 1, lineStart.y);
-            byte old = bytes.get(bytes.size() - 1);
-            for (int pix = bytes.size() - 1; pix >= 0; pix--)
-            {
-              if (bytes.get(pix) != old || pix == 0)
-              {
-                if (old == 0)
-                {
-                  result.setProperty(whitePixelProperty);
-                  result.lineto(lineStart.x + pix, lineStart.y);
-                }
-                else
-                {
-                  result.setProperty(blackPixelProperty);
-                  result.lineto(lineStart.x + pix + 1, lineStart.y);
-                }
-                old = bytes.get(pix);
-              }
-            }
-            //last pixel is always black (white pixels are stripped before)
-            result.setProperty(blackPixelProperty);
-            result.lineto(lineStart.x, lineStart.y);
-          }
-        }
-        if (!unidirectional)
-        {
-          dirRight = !dirRight;
+          
+          if (bidirectional) rp.toggleRasteringCutDirection();
         }
       }
       return result;
