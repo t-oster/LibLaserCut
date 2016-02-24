@@ -69,7 +69,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_BLANK_LASER_DURING_RAPIDS = "Force laser off during G0 moves";
   protected static final String SETTING_FILE_EXPORT_PATH = "Path to save exported gcode";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
-  protected static final String SETTING_SPINDLE_MAX = "100% value for spindle";
+  protected static final String SETTING_SPINDLE_MAX = "S value for 100% laser power";
   
   protected static Locale FORMAT_LOCALE = Locale.US;
   
