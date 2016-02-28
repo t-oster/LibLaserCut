@@ -48,6 +48,7 @@ public class LibInfo
       ExportSVG.class,
       MakeBlockXYPlotter.class,
       GenericGcodeDriver.class,
+      Grbl.class,
       SmoothieBoard.class,
       Marlin.class
     };
