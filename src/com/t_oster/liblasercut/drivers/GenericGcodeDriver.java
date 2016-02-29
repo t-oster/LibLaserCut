@@ -245,7 +245,7 @@ public class GenericGcodeDriver extends LaserCutter {
   
   @Override
   public String getModelName() {
-    return "Generic GRBL GCode Driver";
+    return "Generic GCode Driver";
   }
   
   /**
@@ -473,8 +473,8 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
-  private BufferedReader in;
-  private PrintStream out;
+  protected BufferedReader in;
+  protected PrintStream out;
   private Socket socket;
   private CommPort port;
   private CommPortIdentifier portIdentifier;
@@ -534,10 +534,11 @@ public class GenericGcodeDriver extends LaserCutter {
   /**
    * Waits for the Identification line and returns null if it's allright
    * Otherwise it returns the wrong line
+   * @param pl Progress listener to update during connect process
    * @return
    * @throws IOException 
    */
-  protected String waitForIdentificationLine() throws IOException
+  protected String waitForIdentificationLine(ProgressListener pl) throws IOException
   {
     if (getIdentificationLine() != null && getIdentificationLine().length() > 0)
     {
@@ -591,7 +592,7 @@ public class GenericGcodeDriver extends LaserCutter {
             Thread.currentThread().interrupt();
           }
         }
-        if (waitForIdentificationLine() != null)
+        if (waitForIdentificationLine(pl) != null)
         {
           in.close();
           out.close();
@@ -637,7 +638,7 @@ public class GenericGcodeDriver extends LaserCutter {
       socket.connect(new InetSocketAddress(getHost(), 23), 1000);
       in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
-      String line = waitForIdentificationLine();
+      String line = waitForIdentificationLine(pl);
       if (line != null)
       {
         in.close();
