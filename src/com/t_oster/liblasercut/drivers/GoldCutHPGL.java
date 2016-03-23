@@ -446,8 +446,12 @@ public class GoldCutHPGL extends LaserCutter {
 	out = new BufferedOutputStream(port.getOutputStream());
 	pl.taskChanged(this, "sending");
     }
+    writeJob(out, job, pl, port);
+  }
+
+  private void writeJob(BufferedOutputStream out, LaserJob job, ProgressListener pl, SerialPort port) throws IllegalJobException, Exception {
     out.write(this.generateInitializationCode());
-    pl.progressChanged(this, 20);
+    if (pl != null) pl.progressChanged(this, 20);
     int i = 0;
     int max = job.getParts().size();
     for (JobPart p : job.getParts())
@@ -465,7 +469,7 @@ public class GoldCutHPGL extends LaserCutter {
         out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       }
       i++;
-      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
+      if (pl != null) pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
     out.write(this.generateShutdownCode());
     out.close();
@@ -473,8 +477,11 @@ public class GoldCutHPGL extends LaserCutter {
     {
       port.close();
     }
-    pl.taskChanged(this, "sent.");
-    pl.progressChanged(this, 100);
+    if (pl != null)
+    {
+      pl.taskChanged(this, "sent.");
+      pl.progressChanged(this, 100);
+    }
   }
   private List<Double> resolutions;
 
@@ -605,5 +612,10 @@ public class GoldCutHPGL extends LaserCutter {
     clone.flipYaxis = flipYaxis;
     clone.addSpacePerRasterLine = addSpacePerRasterLine;
     return clone;
+  }
+
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
+      writeJob(new BufferedOutputStream(fileOutputStream), job, null, null);
   }
 }

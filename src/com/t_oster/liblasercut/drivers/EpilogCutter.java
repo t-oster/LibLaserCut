@@ -999,4 +999,10 @@ abstract class EpilogCutter extends LaserCutter
     return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
   }
 
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
+    job.applyStartPoint();
+    byte[] pjlData = generatePjlData(job);
+    fileOutputStream.write(pjlData);
+  }
 }
