@@ -31,6 +31,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -382,11 +383,11 @@ abstract class EpilogCutter extends LaserCutter
   /**
    * Encodes the given line of the given image in TIFF Packbyte encoding
    */
-  public List<Byte> encode(List<Byte> line)
+  public void encode(List<Byte> line, List<Byte> result)
   {
     int idx = 0;
     int r = line.size();
-    List<Byte> result = new LinkedList<Byte>();
+    result.clear();
     while (idx < r)
     {
       int p;
@@ -418,7 +419,6 @@ abstract class EpilogCutter extends LaserCutter
         }
       }
     }
-    return result;
   }
 
   private byte[] generateRaster3dPCL(Raster3dPart rp) throws UnsupportedEncodingException, IOException
@@ -456,9 +456,11 @@ abstract class EpilogCutter extends LaserCutter
       out.printf("\033*r1A");
       Point sp = rp.getRasterStart();
       boolean leftToRight = true;
+      ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
+      ByteArrayList encoded = new ByteArrayList(rp.getRasterWidth());
       for (int y = 0; y < rp.getRasterHeight(); y++)
       {
-        List<Byte> line = rp.getInvertedRasterLine(y);
+	rp.getInvertedRasterLine(y, line);
         for (int n = 0; n < line.size(); n++)
         {//Apperantly the other power settings are ignored, so we have to scale
           int x = line.get(n);
@@ -488,15 +490,15 @@ abstract class EpilogCutter extends LaserCutter
             out.printf("\033*b%dA", -line.size());
             Collections.reverse(line);
           }
-          line = encode(line);
-          int len = line.size();
+          encode(line, encoded);
+          int len = encoded.size();
           int pcks = len / 8;
           if (len % 8 > 0)
           {
             pcks++;
           }
           out.printf("\033*b%dW", pcks * 8);
-          for (byte s : line)
+          for (byte s : encoded)
           {
             out.write(s);
           }
@@ -583,9 +585,11 @@ abstract class EpilogCutter extends LaserCutter
     {
       Point sp = rp.getRasterStart();
       boolean leftToRight = true;
+      ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
+      ByteArrayList encoded = new ByteArrayList(rp.getRasterWidth());
       for (int y = 0; y < rp.getRasterHeight(); y++)
       {
-        List<Byte> line = rp.getRasterLine(y);
+	rp.getRasterLine(y, line);
         //Remove leading zeroes, but keep track of the offset
         int jump = 0;
         while (line.size() > 0 && line.get(0) == 0)
@@ -611,8 +615,8 @@ abstract class EpilogCutter extends LaserCutter
             out.printf("\033*b%dA", -line.size());
             Collections.reverse(line);
           }
-          line = encode(line);
-          int len = line.size();
+          encode(line, encoded);
+          int len = encoded.size();
           int pcks = len / 8;
           if (len % 8 > 0)
           {
@@ -625,7 +629,7 @@ abstract class EpilogCutter extends LaserCutter
            * in ctrl-cut its number of packed bytes
            */
           out.printf("\033*b%dW", pcks * 8);
-          for (byte s : line)
+          for (byte s : encoded)
           {
             out.write(s);
           }
@@ -913,10 +917,12 @@ abstract class EpilogCutter extends LaserCutter
         result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
           (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
         double linespeed = ((double) RASTER_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
+        ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
         for (int y = 0; y < rp.getRasterHeight(); y++)
         {//Find any black point
           boolean lineEmpty = true;
-          for (byte b : rp.getRasterLine(y))
+	  rp.getRasterLine(y, line);
+          for (byte b : line)
           {
             if (b != 0)
             {
@@ -944,10 +950,12 @@ abstract class EpilogCutter extends LaserCutter
         result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
           (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
         double linespeed = ((double) RASTER3D_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
+	ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
         for (int y = 0; y < rp.getRasterHeight(); y++)
         {//Check if
           boolean lineEmpty = true;
-          for (byte b : rp.getRasterLine(y))
+	  rp.getRasterLine(y, line);
+          for (byte b : line)
           {
             if (b != 0)
             {
@@ -998,5 +1006,10 @@ abstract class EpilogCutter extends LaserCutter
   {
     return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
   }
-
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
+    job.applyStartPoint();
+    byte[] pjlData = generatePjlData(job);
+    fileOutputStream.write(pjlData);
+  }
 }

@@ -233,10 +233,11 @@ public class GoldCutHPGL extends LaserCutter {
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
     setSpeed(out, prop.getSpeed());
+    ByteArrayList bytes = new ByteArrayList(rp.getRasterWidth());
     for (int line = 0; line < rp.getRasterHeight(); line++) {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
-      List<Byte> bytes = rp.getRasterLine(line);
+      rp.getRasterLine(line, bytes);
       //remove heading zeroes
       while (bytes.size() > 0 && bytes.get(0) == 0) {
         bytes.remove(0);
