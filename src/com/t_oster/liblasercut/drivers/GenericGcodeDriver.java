@@ -70,9 +70,17 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_FILE_EXPORT_PATH = "Path to save exported gcode";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
   protected static final String SETTING_SPINDLE_MAX = "S value for 100% laser power";
-  
+  protected static final String SETTING_UPLOAD_METHOD = "Upload method";
+
   protected static Locale FORMAT_LOCALE = Locale.US;
-  
+
+  protected static final String UPLOAD_METHOD_FILE = "File";
+  protected static final String UPLOAD_METHOD_HTTP = "HTTP";
+  protected static final String UPLOAD_METHOD_IP = "IP";
+  protected static final String UPLOAD_METHOD_SERIAL = "Serial";
+
+  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
+
   private String lineend = "LF";
 
   public String getLineend()
@@ -84,7 +92,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.lineend = lineend;
   }
-  
+
   protected String LINEEND()
   {
     return getLineend()
@@ -117,7 +125,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.flipXaxis = flipXaxis;
   }
-  
+
   protected boolean flipYaxis = false;
 
   public boolean isFlipYaxis()
@@ -129,7 +137,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.flipYaxis = flipYaxis;
   }
-  
+
   protected String httpUploadUrl = "http://10.10.10.100/upload";
 
   public String getHttpUploadUrl()
@@ -141,7 +149,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.httpUploadUrl = httpUploadUrl;
   }
-  
+
   private boolean autoPlay = true;
 
   public boolean isAutoPlay()
@@ -166,7 +174,7 @@ public class GenericGcodeDriver extends LaserCutter {
     this.resolutions = null;
     this.supportedResolutions = supportedResolutions;
   }
-  
+
   protected boolean waitForOKafterEachLine = true;
 
   public boolean isWaitForOKafterEachLine()
@@ -188,7 +196,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.identificationLine = identificationLine;
   }
-  
+
   protected String preJobGcode = "G21,G90";
 
   public String getPreJobGcode()
@@ -200,7 +208,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.preJobGcode = preJobGcode;
   }
-  
+
   protected String postJobGcode = "G0 X0 Y0";
 
   public String getPostJobGcode()
@@ -212,7 +220,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.postJobGcode = postJobGcode;
   }
-  
+
   protected int serialTimeout= 15000;
 
   public int getSerialTimeout()
@@ -224,7 +232,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.serialTimeout = serialTimeout;
   }
-  
+
   private String exportPath = "";
 
   public void setExportPath(String path)
@@ -237,22 +245,56 @@ public class GenericGcodeDriver extends LaserCutter {
     return exportPath;
   }
 
+  private String uploadMethod = "";
+
+  public void setUploadMethod(Object method)
+  {
+    this.uploadMethod = String.valueOf(method);
+  }
+
+  public OptionSelector getUploadMethod()
+  {
+    if (uploadMethod == null || uploadMethod.length() == 0)
+    {
+      // Determine using original connect() logic
+      if (getHost() != null && getHost().length() > 0)
+      {
+        uploadMethod = UPLOAD_METHOD_IP;
+      }
+      else if (getComport() != null && !getComport().equals(""))
+      {
+        uploadMethod = UPLOAD_METHOD_SERIAL;
+      }
+      else if (getHttpUploadUrl() != null && getHttpUploadUrl().length() > 0)
+      {
+        uploadMethod = UPLOAD_METHOD_HTTP;
+      }
+      else if (getExportPath() != null && getExportPath().length() > 0)
+      {
+        uploadMethod = UPLOAD_METHOD_FILE;
+      }
+    }
+
+    OptionSelector o = new OptionSelector(uploadMethodList, uploadMethod);
+    return o;
+  }
+
   /**
    * What is expected to be received after serial/telnet connection
    * Used e.g. for auto-detecting the serial port.
    */
   protected String identificationLine = "Grbl";
-  
+
   @Override
   public String getModelName() {
-    return "Generic GRBL GCode Driver";
+    return "Generic GCode Driver";
   }
-  
+
   /**
    * Time to wait before firsts reads of serial port.
    * See autoreset feature on arduinos.
    */
-  protected int initDelay = 5; 
+  protected int initDelay = 5;
 
   public int getInitDelay()
   {
@@ -263,7 +305,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.initDelay = initDelay;
   }
-  
+
   protected String host = "10.10.10.222";
 
   public String getHost()
@@ -275,7 +317,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.host = host;
   }
-  
+
   protected String comport = "auto";
 
   public String getComport()
@@ -287,7 +329,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.comport = comport;
   }
-  
+
   protected double max_speed = 20*60;
 
   public double getMax_speed()
@@ -299,7 +341,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.max_speed = max_speed;
   }
-  
+
   protected double travel_speed = 60*60;
 
   public double getTravel_speed()
@@ -311,51 +353,51 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.travel_speed = travel_speed;
   }
-  
+
   protected boolean blankLaserDuringRapids = false;
-  
+
   public boolean getBlankLaserDuringRapids()
   {
     return blankLaserDuringRapids;
   }
-  
+
   public void setBlankLaserDuringRapids(boolean blankLaserDuringRapids)
   {
     this.blankLaserDuringRapids = blankLaserDuringRapids;
   }
-  
+
   /**
    * When rastering, whether to always cut from left to right, or to cut in both
    * directions? (i.e. use the return stroke to raster as well)
    */
   protected boolean useBidirectionalRastering = false;
-  
+
   public boolean getUseBidirectionalRastering()
   {
     return useBidirectionalRastering;
   }
-  
+
   public void setUseBidirectionalRastering(boolean useBidirectionalRastering)
   {
     this.useBidirectionalRastering = useBidirectionalRastering;
   }
-  
+
    /*
    * Value to use for feedrate when laser is 100% on.
    * Varies between firmwares... 1, 100, 255, 10000, etc.
    */
   protected double spindleMax = 1.0;
-  
+
   public double getSpindleMax()
   {
     return spindleMax;
   }
-  
+
   public void setSpindleMax(double spindleMax)
   {
     this.spindleMax = spindleMax;
   }
-  
+
   @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
@@ -411,7 +453,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void setPower(double powerInPercent) {
     nextPower = powerInPercent/100.0*spindleMax;
   }
-  
+
   protected void setFocus(PrintStream out, double focus, double resolution) throws IOException {
     if (currentFocus != focus)
     {
@@ -473,12 +515,12 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
-  private BufferedReader in;
-  private PrintStream out;
+  protected BufferedReader in;
+  protected PrintStream out;
   private Socket socket;
   private CommPort port;
   private CommPortIdentifier portIdentifier;
-  
+
   protected void sendLine(String text, Object... parameters) throws IOException
   {
     out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
@@ -506,7 +548,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     System.out.println("Response: "+response.toString());//TODO: Remove
   }
-  
+
   protected void http_play(String filename) throws IOException, URISyntaxException
   {
     URI url = new URI(getHttpUploadUrl().replace("upload", "command"));
@@ -519,7 +561,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     System.out.println("Response: "+response.toString());//TODO: Remove
   }
-  
+
   protected String waitForLine() throws IOException
   {
     String line = "";
@@ -530,14 +572,15 @@ public class GenericGcodeDriver extends LaserCutter {
     System.out.println("< "+line);//TODO: remove
     return line;
   }
-  
+
   /**
    * Waits for the Identification line and returns null if it's allright
    * Otherwise it returns the wrong line
+   * @param pl Progress listener to update during connect process
    * @return
-   * @throws IOException 
+   * @throws IOException
    */
-  protected String waitForIdentificationLine() throws IOException
+  protected String waitForIdentificationLine(ProgressListener pl) throws IOException
   {
     if (getIdentificationLine() != null && getIdentificationLine().length() > 0)
     {
@@ -554,7 +597,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     return null;
   }
-  
+
   protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
   {
     pl.taskChanged(this, "opening '"+i.getName()+"'");
@@ -591,7 +634,7 @@ public class GenericGcodeDriver extends LaserCutter {
             Thread.currentThread().interrupt();
           }
         }
-        if (waitForIdentificationLine() != null)
+        if (waitForIdentificationLine(pl) != null)
         {
           in.close();
           out.close();
@@ -631,13 +674,17 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
   {
     outputBuffer = null;
-    if (getHost() != null && getHost().length() > 0)
+    if (UPLOAD_METHOD_IP.equals(uploadMethod))
     {
+      if (getHost() == null || getHost().equals(""))
+      {
+        throw new IOException("IP/Hostname must be set to upload via IP method");
+      }
       socket = new Socket();
       socket.connect(new InetSocketAddress(getHost(), 23), 1000);
       in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
       out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
-      String line = waitForIdentificationLine();
+      String line = waitForIdentificationLine(pl);
       if (line != null)
       {
         in.close();
@@ -645,10 +692,10 @@ public class GenericGcodeDriver extends LaserCutter {
         throw new IOException("Wrong identification Line: "+line+"\n instead of "+getIdentificationLine());
       }
     }
-    else if (getComport() != null && !getComport().equals(""))
+    else if (UPLOAD_METHOD_SERIAL.equals(uploadMethod))
     {
       String error = "No serial port found";
-      if (portIdentifier == null && !getComport().equals("auto"))
+      if (portIdentifier == null && !getComport().equals("auto") && !getComport().equals(""))
       {
         try {
           portIdentifier = CommPortIdentifier.getPortIdentifier(getComport());
@@ -657,17 +704,17 @@ public class GenericGcodeDriver extends LaserCutter {
           throw new IOException("No such port: "+getComport());
         }
       }
-      
+
       if (portIdentifier != null)
       {//use port identifier we had last time
         error = connect_serial(portIdentifier, pl);
       }
       else
       {
-        Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers();
+        Enumeration e = CommPortIdentifier.getPortIdentifiers();
         while (e.hasMoreElements())
         {
-          CommPortIdentifier i = e.nextElement();
+          CommPortIdentifier i = (CommPortIdentifier) e.nextElement();
           if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
           {
             error = connect_serial(i, pl);
@@ -683,15 +730,23 @@ public class GenericGcodeDriver extends LaserCutter {
         throw new IOException(error);
       }
     }
-    else if (getHttpUploadUrl() != null && getHttpUploadUrl().length() > 0)
+    else if (UPLOAD_METHOD_HTTP.equals(uploadMethod))
     {
+      if (getHttpUploadUrl() == null || getHttpUploadUrl().equals(""))
+      {
+        throw new IOException("HTTP Upload URL must be set to upload via HTTP method");
+      }
       outputBuffer = new ByteArrayOutputStream();
       out = new PrintStream(outputBuffer);
       setWaitForOKafterEachLine(false);
       in = null;
     }
-    else if (getExportPath() != null && getExportPath().length() > 0)
+    else if (UPLOAD_METHOD_FILE.equals(uploadMethod))
     {
+      if (getExportPath() != null && getExportPath().length() > 0)
+      {
+        throw new IOException("Export Path must be set to upload via File method.");
+      }
       File file = new File(getExportPath(), this.jobName);
       out = new PrintStream(new FileOutputStream(file));
       setWaitForOKafterEachLine(false);
@@ -699,10 +754,10 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     else
     {
-      throw new IOException("Either COM Port or IP/Host or Export Path has to be set");
+      throw new IOException("Upload Method must be set");
     }
   }
-  
+
   protected void disconnect(String jobname) throws IOException, URISyntaxException
   {
     if (outputBuffer != null)
@@ -730,11 +785,11 @@ public class GenericGcodeDriver extends LaserCutter {
       {
         this.port.close();
         this.port = null;
-      }   
+      }
     }
 
   }
-  
+
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
     pl.progressChanged(this, 0);
@@ -761,7 +816,7 @@ public class GenericGcodeDriver extends LaserCutter {
         }
         if (p instanceof VectorPart)
         {
-          //TODO: in direct mode use progress listener to indicate progress 
+          //TODO: in direct mode use progress listener to indicate progress
           //of individual job
           writeVectorGCode((VectorPart) p, p.getDPI());
         }
@@ -784,7 +839,7 @@ public class GenericGcodeDriver extends LaserCutter {
 public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
   this.currentPower = -1;
   this.currentSpeed = -1;
-  
+
 	checkJob(job);
 
 	this.out = fileOutputStream;
@@ -863,8 +918,9 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
   public void setBedHeight(double bedHeight) {
     this.bedHeight = bedHeight;
   }
-  
+
   private static String[] settingAttributes = new String[]{
+    SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
@@ -945,8 +1001,10 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getUseBidirectionalRastering();
     } else if (SETTING_SPINDLE_MAX.equals(attribute)) {
       return this.getSpindleMax();
+    } else if (SETTING_UPLOAD_METHOD.equals(attribute)) {
+      return this.getUploadMethod();
     }
-    
+
     return null;
   }
 
@@ -1000,9 +1058,11 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setUseBidirectionalRastering((Boolean) value);
     } else if (SETTING_SPINDLE_MAX.equals(attribute)) {
       this.setSpindleMax((Double) value);
+    } else if (SETTING_UPLOAD_METHOD.equals(attribute)) {
+      this.setUploadMethod(value);
     }
   }
-  
+
   /**
    * Adjust defaults after deserializing driver from an old version of XML file
    */
@@ -1013,7 +1073,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     // but xstream initializes it to 0.0 when it is missing from XML
     if (this.spindleMax <= 0.0) this.spindleMax = 1.0;
   }
-  
+
   @Override
   public GenericGcodeDriver clone() {
     GenericGcodeDriver clone = new GenericGcodeDriver();

@@ -18,6 +18,7 @@
  **/
 package com.t_oster.liblasercut.drivers;
 
+import com.t_oster.liblasercut.ProgressListener;
 import com.t_oster.liblasercut.drivers.GenericGcodeDriver;
 import java.io.IOException;
 import java.util.Arrays;
@@ -90,7 +91,7 @@ public class Marlin extends GenericGcodeDriver {
    * @throws IOException 
    */
  @Override
-  protected String waitForIdentificationLine() throws IOException
+  protected String waitForIdentificationLine(ProgressListener pl) throws IOException
   {
     if (getIdentificationLine() != null && getIdentificationLine().length() > 0)
     {

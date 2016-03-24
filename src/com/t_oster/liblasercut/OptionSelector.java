@@ -18,39 +18,51 @@
  **/
 package com.t_oster.liblasercut;
 
-import com.t_oster.liblasercut.drivers.*;
-
-/**
- * This class contains Version information
- * etc from the Library
- * @author Thomas Oster <thomas.oster@rwth-aachen.de>
- */
-public class LibInfo
+public class OptionSelector
 {
-  private static String VERSION = "visicut1.7";
-  
-  public static String getVersion()
+  protected String[] items;
+  protected String selectedItem;
+
+  public OptionSelector(String[] items, String selectedItem)
   {
-    return VERSION;
+    this.items = items;
+    this.selectedItem = selectedItem;
   }
-  
-  public static Class[] getSupportedDrivers()
+
+  public OptionSelector(String[] items)
   {
-    return new Class[]{
-      EpilogZing.class,
-      EpilogHelix.class,
-      LaosCutter.class,
-      GoldCutHPGL.class,
-      Lasersaur.class,
-      Dummy.class,
-      IModelaMill.class,
-      SampleDriver.class,
-      ExportSVG.class,
-      MakeBlockXYPlotter.class,
-      GenericGcodeDriver.class,
-      Grbl.class,
-      SmoothieBoard.class,
-      Marlin.class
-    };
+    this.items = items;
+    this.selectedItem = null;
+  }
+
+  public void setItems(String[] items)
+  {
+    this.items = items;
+  }
+
+  public String[] getItems()
+  {
+    return this.items;
+  }
+
+  public void setSelectedItem(String item)
+  {
+    this.selectedItem = item;
+  }
+
+  public void setSelectedItemIndex(int index)
+  {
+    this.selectedItem = this.items[index];
+  }
+
+  public String getSelectedItem()
+  {
+    return this.selectedItem;
+  }
+
+  @Override
+  public String toString()
+  {
+    return this.selectedItem;
   }
 }

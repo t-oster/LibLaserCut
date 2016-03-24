@@ -39,7 +39,12 @@ public class RasterPart extends RasterizableJobPart
     this.resolution = resolution;
     this.blackPixelProperty = laserProperty;
     this.whitePixelProperty = blackPixelProperty.clone();
-    whitePixelProperty.setProperty("power", 0.0f);
+    if (whitePixelProperty instanceof FloatPowerSpeedFocusFrequencyProperty || whitePixelProperty instanceof FloatPowerSpeedFocusProperty) {
+      whitePixelProperty.setProperty("power", 0.0f);
+    }
+    else {
+      whitePixelProperty.setProperty("power", 0);
+    }
   }
 
   @Override
