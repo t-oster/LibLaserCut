@@ -19,7 +19,6 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -85,13 +84,33 @@ public class Raster3dPart extends RasterizableJobPart
    * Returns one line of the given rasterpart every byte represents one pixel
    * and the value corresponds to the raster power
    *
-   * @param raster
    * @param line
    * @return
    */
   public List<Byte> getRasterLine(int line)
   {
-    List<Byte> result = new LinkedList<Byte>();
+    ByteArrayList b = new ByteArrayList(image.getWidth());
+    getRasterLine(line, b);
+    return b;
+  }
+
+  /**
+   * Sets one line of the given rasterpart in the given result list.
+   * Every byte represents one pixel and the value corresponds to the
+   * raster power.
+   * This method is preferred to the above method because it allows reuse of
+   * an allocated List<Byte> instead of reallocating for every line.
+   *
+   * @param line
+   * @param result
+   */
+  public List<Byte> getRasterLine(int line, List<Byte> result)
+  {
+    if (result instanceof ByteArrayList) {
+	((ByteArrayList)result).clear(image.getWidth());
+    } else {
+	result.clear();
+    }
     for (int x = 0; x < image.getWidth(); x++)
     {
       //TOTEST: Black white (byte converssion)
@@ -117,13 +136,23 @@ public class Raster3dPart extends RasterizableJobPart
 
   public List<Byte> getInvertedRasterLine(int line)
   {
-    List<Byte> result = new LinkedList<Byte>();
+    ByteArrayList b = new ByteArrayList(image.getWidth());
+    getInvertedRasterLine(line, b);
+    return b;
+  }
+
+  public void getInvertedRasterLine(int line, List<Byte> result)
+  {
+    if (result instanceof ByteArrayList) {
+	((ByteArrayList)result).clear(image.getWidth());
+    } else {
+	result.clear();
+    }
     for (int x = 0; x < image.getWidth(); x++)
     {
       //TOTEST: Black white (byte converssion)
       result.add((byte) (255 - image.getGreyScale(x, line)));
     }
-    return result;
   }
 
   @Override

@@ -18,6 +18,7 @@
  **/
 package com.t_oster.liblasercut.drivers;
 
+import com.t_oster.liblasercut.ByteArrayList;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.JobPart;
 import com.t_oster.liblasercut.LaserCutter;
@@ -444,11 +445,12 @@ public class LaosCutter extends LaserCutter
     this.setCurrentProperty(out, prop);
     float maxPower = this.currentPower;
     boolean bu = prop.isEngraveBottomUp();
+    ByteArrayList bytes = new ByteArrayList(rp.getRasterWidth());
     for (int line = bu ? rp.getRasterHeight()-1 : 0; bu ? line >= 0 : line < rp.getRasterHeight(); line += bu ? -1 : 1 )
     {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
-      List<Byte> bytes = rp.getRasterLine(line);
+      rp.getRasterLine(line, bytes);
       //remove heading zeroes
       while (bytes.size() > 0 && bytes.get(0) == 0)
       {
@@ -575,11 +577,12 @@ public class LaosCutter extends LaserCutter
     LaosEngraveProperty prop = rp.getLaserProperty() instanceof LaosEngraveProperty ? (LaosEngraveProperty) rp.getLaserProperty() : new LaosEngraveProperty(rp.getLaserProperty());
     this.setCurrentProperty(out, prop);
     boolean bu = prop.isEngraveBottomUp();
+    ByteArrayList bytes = new ByteArrayList(rp.getRasterWidth());
     for (int line = bu ? rp.getRasterHeight()-1 : 0; bu ? line >= 0 : line < rp.getRasterHeight(); line += bu ? -1 : 1)
     {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
-      List<Byte> bytes = rp.getRasterLine(line);
+      rp.getRasterLine(line, bytes);
       //remove heading zeroes
       while (bytes.size() > 0 && bytes.get(0) == 0)
       {
