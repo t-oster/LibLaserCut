@@ -43,7 +43,7 @@ public class ByteArrayList extends AbstractList<Byte> {
 
     /**
      * Most uses of ByteArrayList know their size up front, but some may add
-     * a few elements onto the beginning or end.  A small additive growith is 
+     * a few elements onto the beginning or end.  A small additive growth is 
      * sufficient to support them.  It is preferred for callers to hold onto
      * and reuse the ByteArrayList to avoid reallocation.
      */
@@ -129,7 +129,8 @@ public class ByteArrayList extends AbstractList<Byte> {
     /**
      * Clear the list for a new expected size.  This will reallocate the array
      * if needed, and also set internal state so that any extra space for growth
-     * is split evenly between the beginning and end of the underlying array.
+     * beyond the expected size is split evenly between the beginning and end
+     * of the underlying array.
      */
     public void clear(int newExpectedSize) {
 	if (data.length < newExpectedSize) {
