@@ -149,33 +149,4 @@ public class ByteArrayList extends AbstractList<Byte> {
 		 (data.length - start - size) + " free at tail)]");
 	return b.toString();
     }
-
-    public static void main(String[] args) {
-	ByteArrayList b = new ByteArrayList(4);
-	System.out.println(b);
-	b.add((byte)0);
-	System.out.println(b);
-	b.add((byte)1);
-	System.out.println(b);
-	b.add((byte)2);
-	System.out.println(b);
-	b.add((byte)3);
-	System.out.println(b);
-	b.add((byte)4);
-	System.out.println(b);
-	b.remove(0);
-	System.out.println(b);
-	b.remove(4);
-	System.out.println(b);
-	b.set(2,(byte)8);
-	System.out.println(b);
-	b.add(0, (byte)-1);
-	System.out.println(b);
-	b.add(0, (byte)-2);
-	System.out.println(b);
-	b.add(2, (byte)9);
-	System.out.println(b);
-	b.clear(10);
-	System.out.println(b);
-    }
 }
