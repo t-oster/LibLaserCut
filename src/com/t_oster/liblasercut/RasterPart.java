@@ -19,7 +19,6 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -97,12 +96,31 @@ public class RasterPart extends RasterizableJobPart
    */
   public List<Byte> getRasterLine(int line)
   {
-    List<Byte> result = new LinkedList<Byte>();
+    ByteArrayList b = new ByteArrayList((image.getWidth() + 7) / 8);
+    getRasterLine(line, b);
+    return b;
+  }
+
+  /**
+   * Sets one line of the given rasterpart into the given result list.
+   * every byte represents 8 pixel and the value corresponds to
+   * 1 when black or 0 when white
+   * This method is preferred to the above method because it allows reuse of
+   * an allocated List<Byte> instead of reallocating for every line.
+   * @param line
+   * @param result
+   */ 
+  public void getRasterLine(int line, List<Byte> result)
+  {
+    if (result instanceof ByteArrayList) {
+	((ByteArrayList)result).clear((image.getWidth() + 7) / 8);
+    } else {
+	result.clear();
+    }
     for (int x = 0; x < (image.getWidth() + 7) / 8; x++)
     {
       result.add(((BlackWhiteRaster) image).getByte(x, line));
     }
-    return result;
   }
 
   public boolean isBlack(int x, int y)
