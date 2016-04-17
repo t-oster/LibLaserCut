@@ -743,7 +743,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     else if (UPLOAD_METHOD_FILE.equals(uploadMethod))
     {
-      if (getExportPath() != null && getExportPath().length() > 0)
+      if (getExportPath() == null || getExportPath().equals(""))
       {
         throw new IOException("Export Path must be set to upload via File method.");
       }
