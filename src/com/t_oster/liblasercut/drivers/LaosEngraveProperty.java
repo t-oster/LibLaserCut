@@ -109,4 +109,15 @@ public class LaosEngraveProperty extends LaosCutterProperty
     }
   }
   
+  @Override
+  public LaosEngraveProperty clone()
+  {
+    LaosEngraveProperty result = new LaosEngraveProperty();
+    for (String s:this.getPropertyKeys())
+    {
+      result.setProperty(s, this.getProperty(s));
+    }
+    return result;
+  }
+
 }
