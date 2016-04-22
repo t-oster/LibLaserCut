@@ -245,7 +245,7 @@ public class GenericGcodeDriver extends LaserCutter {
     return exportPath;
   }
 
-  private String uploadMethod = "";
+  protected String uploadMethod = "";
 
   public void setUploadMethod(Object method)
   {
