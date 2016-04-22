@@ -47,13 +47,13 @@ public class SmoothieBoard extends GenericGcodeDriver {
   @Override
   public String getIdentificationLine()
   {
-    if (getHost() == null || "".equals(getHost()))
+    if (UPLOAD_METHOD_IP.equals(this.uploadMethod))
     {
-      return "Smoothie";
+      return "Smoothie command shell";
     }
     else
     {
-      return "Smoothie command shell";
+      return "Smoothie";
     }
   }
 
@@ -62,7 +62,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
   {
     String line = super.waitForLine();
     //The telnet interface for smoothie prepends lines with '> '
-    if (getHost() != null && !"".equals(getHost()) && line.startsWith("> "))
+    if (UPLOAD_METHOD_IP.equals(this.uploadMethod) && line.startsWith("> "))
     {
       return line.substring(2);
     }
