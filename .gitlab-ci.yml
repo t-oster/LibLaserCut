@@ -1,0 +1,16 @@
+image: java:8
+
+before_script:
+  - apt-get update -y
+  - apt-get install -y ant
+
+
+
+build:
+  script:
+    - ./test.sh
+    - ant jar
+
+test:
+  script:
+    - ant test
