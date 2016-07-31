@@ -60,21 +60,9 @@ public class MakeBlockXYPlotterProperty extends PowerSpeedFocusFrequencyProperty
   }
 
   @Override
-  public Object getProperty(String name)
-  {
-    return super.getProperty(name);
-  }
-
-  @Override
-  public void setProperty(String name, Object value)
-  {
-    super.setProperty(name, value);
-  }
-
-  @Override
   public MakeBlockXYPlotterProperty clone()
   {
-    MakeBlockXYPlotterProperty result = new MakeBlockXYPlotterProperty();
+    MakeBlockXYPlotterProperty result = new MakeBlockXYPlotterProperty(showPowerAndSpeed);
     for (String s:this.getPropertyKeys())
     {
       result.setProperty(s, this.getProperty(s));
@@ -100,7 +88,7 @@ public class MakeBlockXYPlotterProperty extends PowerSpeedFocusFrequencyProperty
   @Override
   public int hashCode()
   {
-    int hash = 7;
+    int hash = super.hashCode();
     hash = 59 * hash + (this.showPowerAndSpeed ? 1 : 0);
     return hash;
   }
