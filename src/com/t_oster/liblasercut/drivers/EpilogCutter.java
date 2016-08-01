@@ -186,7 +186,7 @@ abstract class EpilogCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  private void sendPjlJob(LaserJob job, byte[] pjlData) throws UnknownHostException, UnsupportedEncodingException, IOException, Exception
+  protected void sendPjlJob(LaserJob job, byte[] pjlData) throws UnknownHostException, UnsupportedEncodingException, IOException, Exception
   {
     String localhost;
     try
@@ -221,7 +221,7 @@ abstract class EpilogCutter extends LaserCutter
     waitForResponse(0);
   }
 
-  private void connect() throws IOException, SocketTimeoutException
+  protected void connect() throws IOException, SocketTimeoutException
   {
     if (SIMULATE_COMMUNICATION)
     {
@@ -236,7 +236,7 @@ abstract class EpilogCutter extends LaserCutter
     }
   }
 
-  private void disconnect() throws IOException
+  protected void disconnect() throws IOException
   {
     if (!SIMULATE_COMMUNICATION)
     {
