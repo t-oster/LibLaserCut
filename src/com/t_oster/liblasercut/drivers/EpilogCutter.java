@@ -53,8 +53,8 @@ abstract class EpilogCutter extends LaserCutter
   private String hostname = "10.0.0.1";
   private int port = 515;
   private boolean autofocus = false;
-  private transient InputStream in;
-  private transient OutputStream out;
+  transient InputStream in;
+  transient OutputStream out;
 
   private int mm2focus(float mm)
   {
