@@ -4,4 +4,7 @@ jdk:
   - openjdk7
   - openjdk6
 
-script: "./test.sh && ant jar"
+script:
+  - "./test.sh"
+  - "ant test"
+  - "ant jar"

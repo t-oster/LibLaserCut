@@ -49,6 +49,10 @@ public class LaosCutterTest extends LaosCutter{
   @Test
   public void testVectorCode() throws UnsupportedEncodingException, IOException
   {
+    setSupportsFrequency(true);
+    setSupportsFocus(true);
+    setSupportsVentilation(true);
+    setSupportsPurge(true);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     LaserJob job = new LaserJob("test", "test", "test");
     LaosCutterProperty prop = new LaosCutterProperty();
