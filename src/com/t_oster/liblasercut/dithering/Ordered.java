@@ -28,12 +28,8 @@ import com.t_oster.liblasercut.GreyscaleRaster;
 public class Ordered extends DitheringAlgorithm
 {
 
-  @Override
-  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  protected int[][] getThresholdMatrix()
   {
-    int width = src.getWidth();
-    int height = src.getHeight();
-    int nPatWid = 4;
     int[][] filter =
     {
       {
@@ -49,6 +45,16 @@ public class Ordered extends DitheringAlgorithm
         256, 128, 224, 96
       },
     };
+    return filter;
+  }
+  @Override
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  {
+    int width = src.getWidth();
+    int height = src.getHeight();
+    int[][] filter = getThresholdMatrix();
+    int nPatWid = filter.length;
+
 
     int x = 0;
     int y = 0;
