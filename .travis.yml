@@ -4,11 +4,14 @@ jdk:
   - openjdk7
   - openjdk6
 
-before_install:
-  - sudo hostname "$(hostname | cut -c1-63)" # Fix for travis issue https://github.com/travis-ci/travis-ci/issues/5227
-  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/host
 
 script:
   - "./test.sh"
   - "ant test"
   - "ant jar"
+
+addons:
+  # Fix OpenJDK 7 buffer overflows when the host name is too long.
+  # https://docs.travis-ci.com/user/hostname
+  # https://github.com/travis-ci/travis-ci/issues/5227
+  hostname: dummy
