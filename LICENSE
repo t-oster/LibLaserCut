@@ -2,10 +2,6 @@ LibLaserCut itself is licensed under the GNU Lesser Public License (see COPYING.
 
 However, it contains some 3rd Party files, which are listed below.
 
-GPL v2 (These are incompatible with the LGPL and will be replaced shortly):
-- GLPK (http://www.gnu.org/software/glpk/)
-- SCPSolver (http://scpsolver.org/), GPLed due to use of GPLK
-
 Eclipse Public License 1.0:
 - JUnit (http://junit.org/), see http://junit.org/junit4/license.html
 
