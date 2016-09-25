@@ -27,9 +27,9 @@ package com.t_oster.liblasercut;
 public class FloatPowerSpeedFocusProperty implements LaserProperty
 {
 
-  private float power = 20;
-  private float speed = 100;
-  private float focus = 0;
+  protected float power = 20;
+  protected float speed = 100;
+  protected float focus = 0;
 
   public FloatPowerSpeedFocusProperty()
   {
@@ -100,7 +100,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
     return p;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed", "focus"};
+  private static String[] propertyNames = new String[]{"power (%)", "speed (%)", "focus (mm)"};
   
   @Override
   public String[] getPropertyKeys()
@@ -111,15 +111,15 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
   @Override
   public Object getProperty(String name)
   {
-    if ("power".equals(name))
+    if (name.startsWith("power"))
     {
       return (Float) this.getPower();
     }
-    else if ("speed".equals(name))
+    else if (name.startsWith("speed"))
     {
       return (Float) this.getSpeed();
     }
-    else if ("focus".equals(name))
+    else if (name.startsWith("focus"))
     {
       return (Float) this.getFocus();
     }
@@ -129,15 +129,15 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
   @Override
   public void setProperty(String name, Object value)
   {
-    if ("power".equals(name))
+    if (name.startsWith("power"))
     {
       this.setPower((Float) value);
     }
-    else if ("speed".equals(name))
+    else if (name.startsWith("speed"))
     {
       this.setSpeed((Float) value);
     }
-    else if ("focus".equals(name))
+    else if (name.startsWith("focus"))
     {
       this.setFocus((Float) value);
     }
@@ -150,19 +150,15 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
   @Override
   public Object getMinimumValue(String name)
   {
-  if ("power".equals(name))
+    if (name.startsWith("power"))
     {
       return (Float) 0f;
     }
-    else if ("speed".equals(name))
+    else if (name.startsWith("speed"))
     {
       return (Float) 0f;
     }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
+    else if (name.startsWith("focus"))
     {
       return null;
     }
@@ -175,19 +171,15 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
   @Override
   public Object getMaximumValue(String name)
   {
-    if ("power".equals(name))
+    if (name.startsWith("power"))
     {
       return (Float) 100f;
     }
-    else if ("speed".equals(name))
+    else if (name.startsWith("speed"))
     {
       return (Float) 100f;
     }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
+    else if (name.startsWith("focus"))
     {
       return null;
     }
@@ -233,5 +225,4 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
         return hash;
     }
   
-
 }

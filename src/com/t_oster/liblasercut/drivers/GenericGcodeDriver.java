@@ -443,11 +443,11 @@ public class GenericGcodeDriver extends LaserCutter {
   private double currentPower = -1;
   private double currentSpeed = -1;
   private double nextPower = -1;
-  private double nextSpeed = -1;
+  protected double nextSpeed = -1;
   private double currentFocus = 0;
 
   protected void setSpeed(double speedInPercent) {
-    nextSpeed = speedInPercent;
+    nextSpeed = max_speed*speedInPercent/100.0;
   }
 
   protected void setPower(double powerInPercent) {
@@ -469,11 +469,11 @@ public class GenericGcodeDriver extends LaserCutter {
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      sendLine("G0 X%f Y%f F%d S0", x, y, (int) (travel_speed));
+      sendLine("G0 X%f Y%f F%f S0", x, y, currentSpeed);
     }
     else
     {
-      sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
+      sendLine("G0 X%f Y%f F%f", x, y, currentSpeed);
     }
   }
 
@@ -488,7 +488,7 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     if (nextSpeed != currentSpeed)
     {
-      append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
+      append += String.format(FORMAT_LOCALE, " F%f", nextSpeed);
       currentSpeed = nextSpeed;
     }
     sendLine("G1 X%f Y%f"+append, x, y);
