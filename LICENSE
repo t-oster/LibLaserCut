@@ -1,0 +1,17 @@
+LibLaserCut itself is licensed under the GNU Lesser Public License (see COPYING.LESSER for details).
+
+However, it contains some 3rd Party files, which are listed below.
+
+Eclipse Public License 1.0:
+- JUnit (http://junit.org/), see http://junit.org/junit4/license.html
+
+Apache Software License 2.0:
+- Apache Commons Net (https://commons.apache.org/proper/commons-net/)
+- Apache HttpComponents (https://hc.apache.org/)
+- JNA (https://github.com/java-native-access/jna)
+
+Mozilla Public License 2.0:
+- Rhino JS interpreter (https://github.com/mozilla/rhino)
+
+BSD Licensed:
+- Purejavacomm by Kustaa "Kusti" Nyholm (https://github.com/nyholku/purejavacomm)
