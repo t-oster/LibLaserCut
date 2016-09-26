@@ -435,7 +435,7 @@ public class GenericGcodeDriver extends LaserCutter {
           FloatPowerSpeedFocusProperty p = (FloatPowerSpeedFocusProperty) cmd.getProperty();
           setPower(p.getPower());
           setSpeed(p.getSpeed());
-          setFocus(out, p.getFocus(), resolution);
+          setFocus(out, p.getFocus());
           break;
       }
     }
@@ -454,10 +454,10 @@ public class GenericGcodeDriver extends LaserCutter {
     nextPower = powerInPercent/100.0*spindleMax;
   }
 
-  protected void setFocus(PrintStream out, double focus, double resolution) throws IOException {
+  protected void setFocus(PrintStream out, double focus) throws IOException {
     if (currentFocus != focus)
     {
-      sendLine("G0 Z%f", Util.px2mm(focus, resolution));
+      sendLine("G0 Z%f", focus);
       currentFocus = focus;
     }
   }
