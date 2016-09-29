@@ -456,6 +456,7 @@ public class GenericGcodeDriver extends LaserCutter {
     return null;
   }
   
+  @SuppressWarnings("empty-statement")
   protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
   {
     pl.taskChanged(this, "opening '"+i.getName()+"'");
@@ -463,6 +464,16 @@ public class GenericGcodeDriver extends LaserCutter {
     {
       try
       {
+        try
+        {
+          in.close();
+          out.close();
+          port.close();
+        }
+        catch (Exception e)
+        { } //do nothing
+       
+       
         port = i.open("VisiCut", 1000);
         try
         {
