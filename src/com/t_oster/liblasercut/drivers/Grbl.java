@@ -28,15 +28,13 @@ import java.util.List;
 
 /**
  * This class implements a driver for Grbl based firmwares.
- * 
+ *
  * @author Michael Adams <zap@michaeladams.org>
  */
 public class Grbl extends GenericGcodeDriver
 {
   public Grbl()
   {
-    System.out.println("Running grbl constructor");
-    
     //set some grbl-specific defaults
     setLineend("CR");
     setIdentificationLine("Grbl");
@@ -127,11 +125,14 @@ public class Grbl extends GenericGcodeDriver
    * (if desired & required).
    * @param pl Progress listener to update during connect/homing process
    * @return
-   * @throws IOException 
+   * @throws IOException
    */
   @Override
   protected String waitForIdentificationLine(ProgressListener pl) throws IOException
   {
+    // flush serial buffer
+    while (in.ready()) { in.readLine(); }
+    
     // send reset character to Grbl to get it to print out its welcome message
     pl.taskChanged(this, "Sending soft reset");
     out.write(0x18);
