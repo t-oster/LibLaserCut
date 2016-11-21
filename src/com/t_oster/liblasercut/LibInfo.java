@@ -50,7 +50,8 @@ public class LibInfo
       GenericGcodeDriver.class,
       Grbl.class,
       SmoothieBoard.class,
-      Marlin.class
+      Marlin.class,
+      FullSpectrumCutter.class
     };
   }
 }
