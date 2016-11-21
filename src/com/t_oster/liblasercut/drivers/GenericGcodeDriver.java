@@ -525,7 +525,7 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
     //TODO: Remove
-    System.out.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters);
+    System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
     out.flush();
     if (isWaitForOKafterEachLine())
     {
