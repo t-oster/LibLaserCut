@@ -440,8 +440,8 @@ public class GenericGcodeDriver extends LaserCutter {
       }
     }
   }
-  private double currentPower = -1;
-  private double currentSpeed = -1;
+  protected double currentPower = -1;
+  protected double currentSpeed = -1;
   private double nextPower = -1;
   private double nextSpeed = -1;
   private double currentFocus = 0;
@@ -523,7 +523,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
   protected void sendLine(String text, Object... parameters) throws IOException
   {
-    out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
+    out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
     //TODO: Remove
     System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
     out.flush();

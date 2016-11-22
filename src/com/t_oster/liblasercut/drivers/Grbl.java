@@ -160,6 +160,32 @@ public class Grbl extends GenericGcodeDriver
     
     return null;
   }
+  
+  /**
+   * Send a G0 rapid move to Grbl.
+   * Doesn't include travel speed since grbl ignores that anyway.
+   * 
+   * @param out
+   * @param x
+   * @param y
+   * @param resolution
+   * @throws IOException 
+   */
+  @Override
+  protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
+    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    currentSpeed = getTravel_speed();
+    if (blankLaserDuringRapids)
+    {
+      currentPower = 0.0;
+      sendLine("G0 X%f Y%f S0", x, y);
+    }
+    else
+    {
+      sendLine("G0 X%f Y%f", x, y);
+    }
+  }
 
   @Override
   public Grbl clone()
