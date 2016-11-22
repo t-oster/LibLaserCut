@@ -160,6 +160,55 @@ public class Grbl extends GenericGcodeDriver
     
     return null;
   }
+  
+  /**
+   * Send a G0 rapid move to Grbl.
+   * Doesn't include travel speed since grbl ignores that anyway.
+   * 
+   * @param out
+   * @param x
+   * @param y
+   * @param resolution
+   * @throws IOException 
+   */
+  @Override
+  protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
+    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    currentSpeed = getTravel_speed();
+    if (blankLaserDuringRapids)
+    {
+      currentPower = 0.0;
+      sendLine("G0 X%f Y%f S0", x, y);
+    }
+    else
+    {
+      sendLine("G0 X%f Y%f", x, y);
+    }
+  }
+  
+  /**
+   * Send a line of gcode to the cutter, stripping out any whitespace in the process
+   * @param text
+   * @param parameters
+   * @throws IOException 
+   */
+  @Override
+  protected void sendLine(String text, Object... parameters) throws IOException
+  {
+    out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
+    //TODO: Remove
+    System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
+    out.flush();
+    if (isWaitForOKafterEachLine())
+    {
+      String line = waitForLine();
+      if (!"ok".equals(line))
+      {
+        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
+      }
+    }
+  }
 
   @Override
   public Grbl clone()

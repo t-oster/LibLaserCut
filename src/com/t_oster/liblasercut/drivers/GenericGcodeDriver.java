@@ -440,8 +440,8 @@ public class GenericGcodeDriver extends LaserCutter {
       }
     }
   }
-  private double currentPower = -1;
-  private double currentSpeed = -1;
+  protected double currentPower = -1;
+  protected double currentSpeed = -1;
   private double nextPower = -1;
   private double nextSpeed = -1;
   private double currentFocus = 0;
