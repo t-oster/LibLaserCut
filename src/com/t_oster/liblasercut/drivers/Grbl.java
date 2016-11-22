@@ -186,6 +186,29 @@ public class Grbl extends GenericGcodeDriver
       sendLine("G0 X%f Y%f", x, y);
     }
   }
+  
+  /**
+   * Send a line of gcode to the cutter, stripping out any whitespace in the process
+   * @param text
+   * @param parameters
+   * @throws IOException 
+   */
+  @Override
+  protected void sendLine(String text, Object... parameters) throws IOException
+  {
+    out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
+    //TODO: Remove
+    System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
+    out.flush();
+    if (isWaitForOKafterEachLine())
+    {
+      String line = waitForLine();
+      if (!"ok".equals(line))
+      {
+        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
+      }
+    }
+  }
 
   @Override
   public Grbl clone()

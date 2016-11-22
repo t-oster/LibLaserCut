@@ -523,7 +523,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
   protected void sendLine(String text, Object... parameters) throws IOException
   {
-    out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
+    out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
     //TODO: Remove
     System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
     out.flush();
