@@ -162,7 +162,7 @@ public class FloatPowerSpeedProperty implements LaserProperty
       if (getClass() != obj.getClass()) {
           return false;
       }
-      final FullSpectrumCutterProperty other = (FullSpectrumCutterProperty) obj;
+      final FloatPowerSpeedProperty other = (FloatPowerSpeedProperty) obj;
       if (Float.floatToIntBits(this.power) != Float.floatToIntBits(other.power)) {
           return false;
       }
