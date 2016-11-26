@@ -21,18 +21,16 @@ package com.t_oster.liblasercut.drivers;
 import com.t_oster.liblasercut.LaserProperty;
 
 /**
- * Handles parameters for full spectrum jobs.
- * 
  * Based upon PowerSpeedFocusProperty by Thomas Oster <thomas.oster@rwth-aachen.de>
  * 
  * @author Volkan Vonk <vol.vonk@yandex.com> 
  */
-public class FullSpectrumCutterProperty implements LaserProperty
+public class FloatPowerSpeedProperty implements LaserProperty
 {
   private float power = 20;
   private float speed = 100;
 
-  public FullSpectrumCutterProperty()
+  public FloatPowerSpeedProperty()
   {
   }
 
@@ -69,9 +67,9 @@ public class FullSpectrumCutterProperty implements LaserProperty
   }
 
   @Override
-  public FullSpectrumCutterProperty clone()
+  public FloatPowerSpeedProperty clone()
   {
-    FullSpectrumCutterProperty p = new FullSpectrumCutterProperty();
+    FloatPowerSpeedProperty p = new FloatPowerSpeedProperty();
     p.power = power;
     p.speed = speed;
     return p;
@@ -127,14 +125,6 @@ public class FullSpectrumCutterProperty implements LaserProperty
     {
       return (Float) 0f;
     }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
-    {
-      return null;
-    }
     else
     {
       throw new IllegalArgumentException("Unknown setting '"+name+"'");
@@ -151,14 +141,6 @@ public class FullSpectrumCutterProperty implements LaserProperty
     else if ("speed".equals(name))
     {
       return (Float) 100f;
-    }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
-    {
-      return null;
     }
     else
     {
