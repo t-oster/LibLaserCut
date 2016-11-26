@@ -651,8 +651,8 @@ public class FullSpectrumCutter extends LaserCutter
   }
   
   @Override
-  public FullSpectrumCutterProperty getLaserPropertyForVectorPart() {
-      return new FullSpectrumCutterProperty();
+  public FloatPowerSpeedProperty getLaserPropertyForVectorPart() {
+      return new FloatPowerSpeedProperty();
   }
   
   /**
