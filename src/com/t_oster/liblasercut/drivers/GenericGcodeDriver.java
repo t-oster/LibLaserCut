@@ -71,6 +71,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
   protected static final String SETTING_SPINDLE_MAX = "S value for 100% laser power";
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
+  protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
 
   protected static Locale FORMAT_LOCALE = Locale.US;
 
@@ -919,6 +920,27 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     this.bedHeight = bedHeight;
   }
 
+  protected double rasterPadding = 5;
+
+  /**
+   * Get the amount of padding at each end of a raster scanline
+   *
+   * @return the value of rasterPadding
+   */
+  @Override
+  public double getRasterPadding() {
+    return rasterPadding;
+  }
+
+  /**
+   * Set the amount of padding at each end of a raster scanline
+   *
+   * @param rasterPadding new value of rasterPadding
+   */
+  public void setRasterPadding(double rasterPadding) {
+    this.rasterPadding = rasterPadding;
+  }
+
   private static String[] settingAttributes = new String[]{
     SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
@@ -943,7 +965,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_WAIT_FOR_OK,
     SETTING_SERIAL_TIMEOUT,
     SETTING_FILE_EXPORT_PATH,
-    SETTING_USE_BIDIRECTIONAL_RASTERING
+    SETTING_USE_BIDIRECTIONAL_RASTERING,
+    SETTING_RASTER_PADDING,
   };
 
   @Override
@@ -1003,6 +1026,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getSpindleMax();
     } else if (SETTING_UPLOAD_METHOD.equals(attribute)) {
       return this.getUploadMethod();
+    } else if (SETTING_RASTER_PADDING.equals(attribute)) {
+      return this.getRasterPadding();
     }
 
     return null;
@@ -1060,6 +1085,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setSpindleMax((Double) value);
     } else if (SETTING_UPLOAD_METHOD.equals(attribute)) {
       this.setUploadMethod(value);
+    } else if (SETTING_RASTER_PADDING.equals(attribute)) {
+      this.setRasterPadding(Math.abs((Double)value));
     }
   }
 
