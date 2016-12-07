@@ -179,6 +179,10 @@ public abstract class LaserCutter implements Cloneable, Customizable {
         return new PowerSpeedFocusProperty();
     }
 
+    public double getRasterPadding() {
+      return 5;
+    }
+
     public abstract String getModelName();
 
     /**
@@ -198,17 +202,28 @@ public abstract class LaserCutter implements Cloneable, Customizable {
         if (rp.lineIsBlank(y) == false)
         {
           Point lineStart = rp.getStartPosition(y);
-          
-          //move to the first point of the line
-          result.moveto(lineStart.x + rp.firstNonWhitePixel(y)+rp.cutCompensation(), lineStart.y);
-          
-          for (int x = rp.firstNonWhitePixel(y); !rp.hasFinishedCuttingLine(x, y);)
+
+          //move to prestart
+          int x = rp.firstNonWhitePixel(y);
+          int overscan = Math.round((float)Util.mm2px(this.getRasterPadding() * (rp.cutDirectionleftToRight ? 1 : -1), resolution));
+
+          result.moveto(lineStart.x + x + rp.cutCompensation() - overscan, lineStart.y);
+
+          //move to the first point of the scanline
+          result.setProperty(rp.getPowerSpeedFocusPropertyForColor(255));
+          result.lineto(lineStart.x + x + rp.cutCompensation(), lineStart.y);
+
+          while(!rp.hasFinishedCuttingLine(x, y))
           {
             result.setProperty(rp.getPowerSpeedFocusPropertyForPixel(x, y));
             x = rp.nextColorChange(x, y);
             result.lineto(lineStart.x + x + rp.cutCompensation(), lineStart.y);
           }
-          
+
+          // move to post-end
+          result.setProperty(rp.getPowerSpeedFocusPropertyForColor(255));
+          result.lineto(lineStart.x + x + rp.cutCompensation() + overscan, lineStart.y);
+
           if (bidirectional) rp.toggleRasteringCutDirection();
         }
       }
