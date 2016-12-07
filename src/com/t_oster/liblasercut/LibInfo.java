@@ -50,6 +50,7 @@ public class LibInfo
       GenericGcodeDriver.class,
       Grbl.class,
       SmoothieBoard.class,
+      SmoothieBoardAbsolute.class,
       Marlin.class
     };
   }

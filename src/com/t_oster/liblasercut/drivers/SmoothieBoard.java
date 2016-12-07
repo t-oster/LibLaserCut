@@ -87,7 +87,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
   @Override
   public String getModelName()
   {
-    return "Smoothie Board";
+    return "Smoothieboard";
   }
 
   @Override
@@ -97,5 +97,4 @@ public class SmoothieBoard extends GenericGcodeDriver {
     clone.copyProperties(this);
     return clone;
   }
-
 }
