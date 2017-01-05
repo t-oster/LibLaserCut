@@ -141,7 +141,7 @@ public class Grbl extends GenericGcodeDriver
     if (error != null) return error;
     
     // check if board is locked and if so home/unlock
-    if (in.ready() && waitForLine().equals("['$H'|'$X' to unlock]")) {
+    if (in.ready() && waitForLine().contains("'$H'|'$X' to unlock]")) {
       if (getAutoHome() == true) {
         pl.taskChanged(this, "Homing");
         sendLineWithoutWait("$H");
