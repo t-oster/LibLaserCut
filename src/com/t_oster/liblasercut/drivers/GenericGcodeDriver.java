@@ -791,6 +791,17 @@ public class GenericGcodeDriver extends LaserCutter {
 
   }
 
+
+  /* sendJobPrepare() and sendJobFinish() can be overrided in children to
+   * perform device-specific setup before and after sending job over serial
+   * line
+   */
+  protected void sendJobPrepare() throws IOException {
+  }
+
+  protected void sendJobFinish() throws IOException {
+  }
+
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
     pl.progressChanged(this, 0);
@@ -805,6 +816,7 @@ public class GenericGcodeDriver extends LaserCutter {
     connect(pl);
     pl.taskChanged(this, "sending");
     try {
+      sendJobPrepare();
       writeInitializationCode();
       pl.progressChanged(this, 20);
       int i = 0;
@@ -825,6 +837,7 @@ public class GenericGcodeDriver extends LaserCutter {
         pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
       }
       writeShutdownCode();
+      sendJobFinish();
       disconnect(job.getName()+".gcode");
     }
     catch (IOException e) {

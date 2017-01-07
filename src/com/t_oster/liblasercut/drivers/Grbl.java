@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayDeque;
 
 /**
  * This class implements a driver for Grbl based firmwares.
@@ -33,8 +34,11 @@ import java.util.List;
  */
 public class Grbl extends GenericGcodeDriver
 {
+  protected ArrayDeque<Integer> commandLenQueue;
+
   public Grbl()
   {
+    commandLenQueue = new ArrayDeque<Integer>();
     //set some grbl-specific defaults
     setLineend("CR");
     setIdentificationLine("Grbl");
@@ -105,13 +109,31 @@ public class Grbl extends GenericGcodeDriver
     this.autoHome = auto_home;
   }
 
+  protected boolean simpleStreamMode = true;
+
+  public boolean isSimpleStreamMode()
+  {
+    return simpleStreamMode;
+  }
+
+  public void setSimpleStreamMode(boolean mode) throws IOException
+  {
+    if (mode != simpleStreamMode) {
+      if (!simpleStreamMode)
+        waitForCommandsCompletion();
+      else
+        commandLenQueue.clear();
+
+      simpleStreamMode = mode;
+    }
+  }
 
   @Override
   public String getModelName()
   {
     return "Grbl Gcode Driver";
   }
-  
+
   protected void sendLineWithoutWait(String text, Object... parameters) throws IOException
   {
     boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
@@ -119,6 +141,77 @@ public class Grbl extends GenericGcodeDriver
     sendLine(text, parameters);
     setWaitForOKafterEachLine(wasSetWaitingForOk);
   }
+
+  @Override
+  protected String waitForLine() throws IOException
+  {
+    String line = "";
+    while ("".equals(line))
+    {//skip empty lines
+      line = in.readLine();
+    }
+
+    //TODO: remove
+    if (isSimpleStreamMode() || !"ok".equals(line))
+      System.out.println("< "+line);
+    else {
+      int len = commandLenQueue.peek();
+      // Debug: print counted chars still remains in the buffer AFTER receiving this 'ok' response
+      System.out.println(String.format(FORMAT_LOCALE, "%d< %s", getBufferedCommandsLen() - len, line));
+    }
+
+    return line;
+  }
+
+  protected static final int GRBL_BUF_LEN = 128;
+
+  protected Integer getBufferedCommandsLen()
+  {
+    Integer len = 0;
+    for (Integer c : commandLenQueue)
+      len += c;
+    return len;
+  }
+
+  protected void sendLineSimple(String text, Object... parameters) throws IOException
+  {
+    super.sendLine(text, parameters);
+  }
+
+  protected void sendLineCC(String text, Object... parameters) throws IOException
+  {
+    String outStr = String.format(FORMAT_LOCALE, text+LINEEND(), parameters);
+    int len = outStr.length();
+
+    // Read all received responses from grbl or wait for needed free space in the serial buffer
+    while (in.ready() || (getBufferedCommandsLen() + len > GRBL_BUF_LEN)) {
+      String line = waitForLine();
+      if (!"ok".equals(line))
+      {
+        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
+      }
+      commandLenQueue.remove();
+    }
+
+    commandLenQueue.add(len);
+    out.print(outStr);
+    //TODO: Remove
+    System.out.println(String.format(FORMAT_LOCALE, "%d> %s", getBufferedCommandsLen(), outStr));
+    out.flush();
+  }
+
+  protected void waitForCommandsCompletion() throws IOException
+  {
+    while (!commandLenQueue.isEmpty()) {
+      String line = waitForLine();
+      if (!"ok".equals(line))
+      {
+        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
+      }
+      commandLenQueue.remove();
+    }
+  }
+
   
   /**
    * Initializes Grbl, handling issuing of soft-reset and initial homing
@@ -186,7 +279,7 @@ public class Grbl extends GenericGcodeDriver
       sendLine("G0 X%f Y%f", x, y);
     }
   }
-  
+
   /**
    * Send a line of gcode to the cutter, stripping out any whitespace in the process
    * @param text
@@ -194,20 +287,31 @@ public class Grbl extends GenericGcodeDriver
    * @throws IOException 
    */
   @Override
+
   protected void sendLine(String text, Object... parameters) throws IOException
   {
-    out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
-    //TODO: Remove
-    System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
-    out.flush();
-    if (isWaitForOKafterEachLine())
-    {
-      String line = waitForLine();
-      if (!"ok".equals(line))
-      {
-        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
-      }
-    }
+    if (isSimpleStreamMode())
+      sendLineSimple(text, parameters);
+    else
+      sendLineCC(text, parameters);
+  }
+
+  @Override
+  protected void sendJobPrepare() throws IOException {
+    setSimpleStreamMode(false);
+  }
+
+  @Override
+  protected void sendJobFinish() throws IOException {
+    setSimpleStreamMode(true);
+  }
+
+  @Override
+  protected void setKeysMissingFromDeserialization()
+  {
+    super.setKeysMissingFromDeserialization();
+    commandLenQueue = new ArrayDeque<Integer>();
+    simpleStreamMode = true;
   }
 
   @Override
