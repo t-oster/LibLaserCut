@@ -225,7 +225,9 @@ public class Grbl extends GenericGcodeDriver
   {
     // flush serial buffer
     while (in.ready()) { in.readLine(); }
-    
+    commandLenQueue.clear();
+    simpleStreamMode = true;
+
     // send reset character to Grbl to get it to print out its welcome message
     pl.taskChanged(this, "Sending soft reset");
     out.write(0x18);
