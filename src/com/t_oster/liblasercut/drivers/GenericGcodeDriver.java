@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.Exception;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
@@ -525,8 +524,6 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void sendLine(String text, Object... parameters) throws IOException
   {
     out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
-    //TODO: Remove
-    System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
     out.flush();
     if (isWaitForOKafterEachLine())
     {
@@ -547,7 +544,6 @@ public class GenericGcodeDriver extends LaserCutter {
     {
       throw new IOException("Error during POST Request");
     }
-    System.out.println("Response: "+response.toString());//TODO: Remove
   }
 
   protected void http_play(String filename) throws IOException, URISyntaxException
@@ -560,7 +556,6 @@ public class GenericGcodeDriver extends LaserCutter {
     {
       throw new IOException("Error during POST Request");
     }
-    System.out.println("Response: "+response.toString());//TODO: Remove
   }
 
   protected String waitForLine() throws IOException
@@ -570,7 +565,6 @@ public class GenericGcodeDriver extends LaserCutter {
     {//skip empty lines
       line = in.readLine();
     }
-    System.out.println("< "+line);//TODO: remove
     return line;
   }
 

@@ -119,25 +119,24 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
      * - the X-axis goes from left to right
      * - the Y-axis goes from bottom to top
      *
-     * ---------------- O: outside rectangle
-     * | |
-     * | ---- |
-     * y axis | |in| I |
-     * ^ | ---- |
-     * | | |
-     * | ----------------
+     *         ---------------- O: outside rectangle
+     *         |              |
+     *         |    ----      |
+     * y axis  |    |in| I    |
+     * ^       |    ----      |
+     * |       |              |
+     * |       ----------------
      * |
      * ------> x axis
      *
      * look at each border:
-     * right border: I.getXMax() < O.getXMax()
-     * left border: I.getXMin() > O.getXMin()
-     * top border: I.getYMax() < O.getYMax()
+     *  right border: I.getXMax() < O.getXMax()
+     *   left border: I.getXMin() > O.getXMin()
+     *    top border: I.getYMax() < O.getYMax()
      * bottom border: I.getYMin() > O.getYMin()
      *
-     * If we now SORT BY ymax ASCENDING, ymin DESCENDING, xmax ASCENDING, xmin
-     * DESCENDING
-     * (higher sorting priority listed first)
+     * If we now SORT BY ymax ASCENDING, ymin DESCENDING, xmax ASCENDING, xmin DESCENDING
+     *           (higher sorting priority listed first)
      * we get the rectangles sorted inside-out:
      * 1. I
      * 2. O
