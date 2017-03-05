@@ -469,11 +469,11 @@ public class GenericGcodeDriver extends LaserCutter {
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      sendLine("G0 X%f Y%f F%d S0", x, y, (int) (travel_speed));
+      sendLine("G0 X%.3f Y%.3f F%d S0", x, y, (int) (travel_speed));
     }
     else
     {
-      sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
+      sendLine("G0 X%.3f Y%.3f F%d", x, y, (int) (travel_speed));
     }
   }
 
@@ -483,7 +483,7 @@ public class GenericGcodeDriver extends LaserCutter {
     String append = "";
     if (nextPower != currentPower)
     {
-      append += String.format(FORMAT_LOCALE, " S%f", nextPower);
+      append += String.format(FORMAT_LOCALE, " S%d", (int) nextPower);
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
@@ -491,7 +491,7 @@ public class GenericGcodeDriver extends LaserCutter {
       append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    sendLine("G1 X%f Y%f"+append, x, y);
+    sendLine("G1 X%.3f Y%.3f"+append, x, y);
   }
 
   private void writeInitializationCode() throws IOException {
