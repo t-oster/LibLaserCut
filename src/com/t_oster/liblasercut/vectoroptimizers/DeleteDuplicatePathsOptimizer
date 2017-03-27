@@ -1,0 +1,57 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.t_oster.liblasercut.vectoroptimizers;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * This VectorOptimizer removes all duplicate (identical) Elements
+ * and sorts the remaining (unique) elements with a NearestVectorOptimizer
+ * @author René Bohne
+ */
+public class DeleteDuplicatePathsOptimizer extends VectorOptimizer
+{
+
+  @Override
+  protected List<Element> sort(List<Element> e)
+  {
+    List<Element> result = new LinkedList<Element>();
+    if (e.isEmpty())
+    {
+      return result;
+    }
+    
+    List<Element> doubleEntries = new LinkedList<Element>();
+    
+    for(int i=0;i<e.size();i++)
+    {
+      for(int j=0;j<e.size();j++)
+      {
+        if(i!=j)
+        {
+         if(e.get(i).equals(e.get(j)))
+         {
+           if(!doubleEntries.contains(e.get(j)))
+           {
+            doubleEntries.add(e.get(i));
+           }
+         }
+        }
+      }
+    }
+    
+    for(Element doubleEntry : doubleEntries)
+    {
+      e.remove(doubleEntry);
+    }
+    
+    NearestVectorOptimizer vo = new NearestVectorOptimizer();
+    result = vo.sort(e);
+    
+    return result;
+  }
+}
