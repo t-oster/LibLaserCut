@@ -271,15 +271,26 @@ public class Grbl extends GenericGcodeDriver
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
+
+    String line = "G0";
+
+    if (resolution >= 254) {
+      line += String.format(FORMAT_LOCALE, "X%.3fY%.3f",x,y);
+    } else {
+      line += String.format(FORMAT_LOCALE, "X%.2fY%.2f",x,y);
+    }
+
+    currentX = x;
+    currentY = y;
+
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      sendLine("G0 X%f Y%f S0", x, y);
+      line += "S0";
     }
-    else
-    {
-      sendLine("G0 X%f Y%f", x, y);
-    }
+
+    sendLine(line);
+
   }
 
   /**
