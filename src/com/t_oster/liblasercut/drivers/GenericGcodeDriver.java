@@ -445,6 +445,8 @@ public class GenericGcodeDriver extends LaserCutter {
   private double nextPower = -1;
   private double nextSpeed = -1;
   private double currentFocus = 0;
+  protected double currentX = 0;
+  protected double currentY = 0;
 
   protected void setSpeed(double speedInPercent) {
     nextSpeed = speedInPercent;
@@ -466,32 +468,66 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
+
+    String line = "G0";
+
+    if (resolution >= 254) {
+        line += String.format(FORMAT_LOCALE, "X%.3fY%.3f",x,y);
+    } else {
+        line += String.format(FORMAT_LOCALE, "X%.2fY%.2f",x,y);
+    }
+
+    currentX = x;
+    currentY = y;
+
+    line += String.format(FORMAT_LOCALE, "F%d",(int) (travel_speed));
+
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      sendLine("G0 X%.3f Y%.3f F%d S0", x, y, (int) (travel_speed));
+      line += "S0";
     }
-    else
-    {
-      sendLine("G0 X%.3f Y%.3f F%d", x, y, (int) (travel_speed));
-    }
+
+    sendLine(line);
+
   }
 
   protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
-    String append = "";
+
+    String line = "G1";
+
+    if (x != currentX) {
+      if (resolution >= 254) {
+        line += String.format(FORMAT_LOCALE, "X%.3f", x);
+      } else {
+        line += String.format(FORMAT_LOCALE, "X%.2f", x);
+      }
+      currentX = x;
+    }
+
+    if (y != currentY) {
+      if (resolution >= 254) {
+        line += String.format(FORMAT_LOCALE, "Y%.3f", y);
+      } else {
+        line += String.format(FORMAT_LOCALE, "Y%.2f", y);
+      }
+      currentY = y;
+    }
+
+
     if (nextPower != currentPower)
     {
-      append += String.format(FORMAT_LOCALE, " S%d", (int) nextPower);
+      line += String.format(FORMAT_LOCALE, "S%.2f", nextPower);
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
     {
-      append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
+      line += String.format(FORMAT_LOCALE, "F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    sendLine("G1 X%.3f Y%.3f"+append, x, y);
+    sendLine(line);
   }
 
   private void writeInitializationCode() throws IOException {
