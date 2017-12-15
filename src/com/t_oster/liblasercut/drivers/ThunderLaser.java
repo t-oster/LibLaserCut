@@ -28,6 +28,10 @@ import com.t_oster.liblasercut.ProgressListener;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
+import java.io.BufferedReader;
+import java.io.PrintStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,7 +57,7 @@ import java.util.zip.Deflater;
 public class ThunderLaser extends LaserCutter
 {
   
-  protected static final String SETTING_HOST = "IP/Hostname";
+  protected static final String SETTING_FILE = "Output filename";
   protected static final String SETTING_MAX_VECTOR_CUT_SPEED = "Max vector cutting speed";
   protected static final String SETTING_MAX_VECTOR_MOVE_SPEED = "Max vector move speed";
   protected static final String SETTING_MAX_POWER = "Max laser power";
@@ -82,7 +86,7 @@ public class ThunderLaser extends LaserCutter
   
   public ThunderLaser()
   {
-    
+    System.out.println("ThunderLaser()");
   }
   /**
    * It is called, whenever VisiCut wants the driver to send a job to the lasercutter.
@@ -104,6 +108,8 @@ public class ThunderLaser extends LaserCutter
     ByteArrayOutputStream bosRawCmds = new ByteArrayOutputStream();
     ByteArrayOutputStream bosFullPacket = new ByteArrayOutputStream();
 
+    System.out.println("ThunderLaser.sendJob()");
+
     pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
     checkJob(job);
@@ -123,6 +129,7 @@ public class ThunderLaser extends LaserCutter
         //iterate over command list
         for (VectorCommand cmd : vp.getCommandList())
         {
+          System.out.println("CMD " + cmd.getType());
           //There are three types of commands: MOVETO, LINETO and SETPROPERTY
           switch (cmd.getType())
           {
@@ -134,6 +141,7 @@ public class ThunderLaser extends LaserCutter
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
               double y = Util.px2mm(cmd.getY(), p.getDPI())*0.0393701;
+              System.out.println("LINETO " + x + ", " + y);
               bosRawCmds.write(line(xsim,x,ysim,y,power,speed));
               
               // estimate the new real position
@@ -149,6 +157,7 @@ public class ThunderLaser extends LaserCutter
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
               double y = Util.px2mm(cmd.getY(), p.getDPI())*0.0393701;
+              System.out.println("MOVETO " + x + ", " + y);
               bosRawCmds.write(line(xsim,x,ysim,y,0,moving_speed));
               
               // estimate the new real position
@@ -182,107 +191,30 @@ public class ThunderLaser extends LaserCutter
       }
     }
     
-    // feeds the commands into packet generator
-    bosFullPacket.write(generatePacket(bosRawCmds.toByteArray()));
-    
-    BufferedOutputStream italkout;
-    BufferedOutputStream jobout;
-    BufferedInputStream italkin;
+    BufferedReader in;
+    PrintStream out;
     
     // connect to italk
     pl.taskChanged(this, "connecting");
-    System.out.println("begin connection");
+    System.out.println("XXX begin connection");
     
-    Socket connection=new Socket();
-    connection.connect(new InetSocketAddress(hostname, 12345), 3000);
-    italkout = new BufferedOutputStream(connection.getOutputStream());
-    italkin = new BufferedInputStream(connection.getInputStream()); 
-    receiveResponse(italkin);
+    if (getFilename() == null || getFilename().equals(""))
+    {
+      throw new IOException("Output filename must be set to upload via File method.");
+    }
+    System.out.println("jobName >" + job.getName() + "<");
+    File file = new File(getFilename());
+    System.out.println("have file");
+    out = new PrintStream(new FileOutputStream(file));
+    System.out.println("have out");
+    in = null;
     pl.taskChanged(this, "sending");
-    
-    // sending protocol
-    sendTextCmd("xjob\n",italkout);
-    receiveResponse(italkin);
-    
-    // send: "immediate <size packet>\n"
-    StringBuilder sb = new StringBuilder();
-    sb.append("immediate ");
-    sb.append(bosFullPacket.toByteArray().length);
-    sb.append("\n");
-    String msgSize = sb.toString();
-    sendTextCmd(msgSize,italkout);
-    receiveResponse(italkin);
-    
-    sendTextCmd("data\n",italkout);
-    receiveResponse(italkin);
-    
-    // connect and send packet to port 12346
-    Socket jobconn = new Socket();
-    jobconn.connect(new InetSocketAddress(hostname, 12346), 3000);
-    
-    sendTextCmd("sending\n",italkout);
-    receiveResponse(italkin);
-    
-    jobout = new BufferedOutputStream(jobconn.getOutputStream());
-    jobout.write(bosFullPacket.toByteArray());
-    jobout.flush();
-    jobout.close();
-    jobconn.close();
-    
-    receiveResponse(italkin);
-    
-    // begin job execution
-    sendTextCmd("run\n",italkout);
-    receiveResponse(italkin);
-    
-    waitjobend();
     
     System.out.println("End job");
     
-    sendTextCmd("bye\n",italkout);
-    receiveResponse(italkin);
-    
-    italkout.close();
-    italkin.close();
-    connection.close();
+    out.close();
     
     pl.progressChanged(this, 100);
-  }
-  
-  /**
-   * Loops until the machine finish cutting
-   * @throws IOException 
-   */
-  private void waitjobend() throws IOException
-  {
-    BufferedInputStream status_in;
-
-    // conect to status port
-    Socket status=new Socket();
-    status.connect(new InetSocketAddress(hostname, 12347), 3000);
-    status_in = new BufferedInputStream(status.getInputStream()); 
-    
-    byte countAction=0;
-    byte[] statusPacket=new byte[68];
-    
-    // there must be 4 consecutive status packets with the same info to make sure the machine finish cutting
-    while(countAction<4)
-    {
-      status_in.read(statusPacket, 0, 68);
-      if (statusPacket[4]!=1) // 1 means cutting
-      {
-        countAction++;
-      }
-      else
-      {
-        countAction=0;
-      }
-      //clear queue
-      while(status_in.available()!=0)
-      {
-        status_in.read();
-      }
-    }    
   }
   
   
@@ -779,26 +711,26 @@ public class ThunderLaser extends LaserCutter
     this.MaxVectorMoveSpeed = MaxVectorMoveSpeed;
   }
   
-  protected String hostname = "192.168.123.111";
+  protected String filename = "thunder.rd";
 
   /**
-   * Get the value of hostname
+   * Get the value of output filename
    *
-   * @return the value of hostname
+   * @return the value of filename
    */
-  public String getHostname()
+  public String getFilename()
   {
-    return hostname;
+    return filename;
   }
 
   /**
-   * Set the value of hostname
+   * Set the value of output filename
    *
-   * @param hostname new value of hostname
+   * @param filename new value of filename
    */
-  public void setHostname(String hostname)
+  public void setFilename(String filename)
   {
-    this.hostname = hostname;
+    this.filename = filename;
   }
 
   /**
@@ -815,7 +747,7 @@ public class ThunderLaser extends LaserCutter
 
   private static String[] settingAttributes = new String[]
   {
-    SETTING_HOST,
+    SETTING_FILE,
     SETTING_MAX_VECTOR_CUT_SPEED,
     SETTING_MAX_VECTOR_MOVE_SPEED,
     SETTING_MAX_POWER,
@@ -825,8 +757,8 @@ public class ThunderLaser extends LaserCutter
   
   @Override
   public Object getProperty(String attribute) {
-    if (SETTING_HOST.equals(attribute)) {
-      return this.getHostname();
+    if (SETTING_FILE.equals(attribute)) {
+      return this.getFilename();
     }else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)){
       return this.getMaxVectorCutSpeed();}
     else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)){
@@ -843,8 +775,8 @@ public class ThunderLaser extends LaserCutter
   
   @Override
   public void setProperty(String attribute, Object value) {
-    if (SETTING_HOST.equals(attribute)) {
-      this.setHostname((String) value);
+    if (SETTING_FILE.equals(attribute)) {
+      this.setFilename((String) value);
     }else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)){
       this.setMaxVectorCutSpeed((Integer) value);
       }else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)){
