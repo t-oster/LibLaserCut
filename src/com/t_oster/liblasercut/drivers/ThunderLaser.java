@@ -83,7 +83,17 @@ public class ThunderLaser extends LaserCutter
   private static final int width = 0;
   private static final int height = 0;
   
-  
+  // https://stackoverflow.com/questions/11208479/how-do-i-initialize-a-byte-array-in-java
+  public static byte[] hexStringToByteArray(String s) {
+    int len = s.length();
+    byte[] data = new byte[len / 2];
+    for (int i = 0; i < len; i += 2) {
+      data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                            + Character.digit(s.charAt(i+1), 16));
+    }
+    return data;
+  }
+
   public ThunderLaser()
   {
     System.out.println("ThunderLaser()");
@@ -209,11 +219,14 @@ public class ThunderLaser extends LaserCutter
     System.out.println("have out");
     in = null;
     pl.taskChanged(this, "sending");
-    
+
+    byte[] header = hexStringToByteArray("D29BFA");
+    out.write(header);
+
     System.out.println("End job");
     
     out.close();
-    
+
     pl.progressChanged(this, 100);
   }
   
