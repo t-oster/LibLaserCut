@@ -28,6 +28,7 @@ import com.t_oster.liblasercut.ProgressListener;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
+import org.apache.commons.lang3.ArrayUtils;
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.io.File;
@@ -94,6 +95,24 @@ public class ThunderLaser extends LaserCutter
     return data;
   }
 
+  // absolute coordinate in mm (double)
+  public static byte[] absCoordToByteArray(double f) {
+    byte[] data = new byte[5];
+    int fak = 0x80;
+    int val = (int)(f * 1000.0);
+    for (int i = 0; i < 5; i++) {
+      data[i] = (byte)(val & 0x7f);
+      val = val >> 7;
+    }
+    ArrayUtils.reverse(data);
+    return data;
+  }
+
+  public static byte[] cutAbs(double x, double y) {
+    byte[] res = (byte[])ArrayUtils.addAll(hexStringToByteArray("A8"), absCoordToByteArray(x));
+    return (byte[])ArrayUtils.addAll(res, absCoordToByteArray(y));
+  }
+
   public ThunderLaser()
   {
     System.out.println("ThunderLaser()");
@@ -151,7 +170,7 @@ public class ThunderLaser extends LaserCutter
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
               double y = Util.px2mm(cmd.getY(), p.getDPI())*0.0393701;
-              System.out.println("LINETO " + x + ", " + y);
+//              System.out.println("LINETO " + x + ", " + y);
               bosRawCmds.write(line(xsim,x,ysim,y,power,speed));
               
               // estimate the new real position
@@ -167,7 +186,7 @@ public class ThunderLaser extends LaserCutter
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
               double y = Util.px2mm(cmd.getY(), p.getDPI())*0.0393701;
-              System.out.println("MOVETO " + x + ", " + y);
+//              System.out.println("MOVETO " + x + ", " + y);
               bosRawCmds.write(line(xsim,x,ysim,y,0,moving_speed));
               
               // estimate the new real position
@@ -223,13 +242,31 @@ public class ThunderLaser extends LaserCutter
     byte[] header = hexStringToByteArray("D29BFA");
     out.write(header);
 
+    out.write(scramble(cutAbs(1, 8.192)));
+    
     System.out.println("End job");
     
     out.close();
 
     pl.progressChanged(this, 100);
   }
-  
+
+  private byte[] scramble(byte[] data)
+  {
+    for (int i = 0; i < data.length; i++) {
+      int val = data[i] & 0xff;
+      System.out.format("Scramble %d: %02x", i, val);
+      int hbit = (val >> 7) & 0x01;
+      int lbit = val & 0x01;
+      System.out.format(" hbit %d, lbit %d", hbit, lbit);
+      val = (val & 0x7e) + hbit + (lbit<<7);
+      System.out.format(" swapped bits %02x", val);
+      val = val ^ 0x88;
+      System.out.format(" xor %02x\n", val);
+      data[i] = (byte)((val + 1) & 0xff);
+    }
+    return data;
+  }
   
   /**
    * Generates the full packet to send, given a set of raw machine commands.
