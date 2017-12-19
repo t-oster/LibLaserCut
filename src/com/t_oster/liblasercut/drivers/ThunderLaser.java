@@ -61,9 +61,11 @@ public class ThunderLaser extends LaserCutter
   protected static final String SETTING_FILE = "Output filename";
   protected static final String SETTING_MAX_VECTOR_CUT_SPEED = "Max vector cutting speed";
   protected static final String SETTING_MAX_VECTOR_MOVE_SPEED = "Max vector move speed";
+  protected static final String SETTING_MIN_POWER = "Min laser power";
   protected static final String SETTING_MAX_POWER = "Max laser power";
   protected static final String SETTING_BED_WIDTH = "Bed width (mm)";
   protected static final String SETTING_BED_HEIGHT = "Bed height (mm)";
+  
   // config values
   private static final long[] JogAcceleration = {200000,50000,600000};
   private static final long[] JogMaxVelocity = {16,16,2048};
@@ -346,6 +348,7 @@ public class ThunderLaser extends LaserCutter
     bb.put((byte)0);
     bb.put(FlipLaserOutput);
     bb.put(FlipLaserPWMPower);
+    bb.put(LaserPowerMin.byteValue());
     bb.put(LaserPowerMax.byteValue());
     bb.put(HomeDirection);
     
@@ -695,6 +698,28 @@ public class ThunderLaser extends LaserCutter
     return "ThunderLaser";
   }
   
+  protected Integer LaserPowerMin = 10;
+  
+  /**
+   * Get the value of LaserPowerMin
+   * 
+   * @return the value of LaserPowerMin
+   */
+  public Integer getLaserPowerMin()
+  {
+    return LaserPowerMin;
+  }
+  
+  /**
+   * Set the value of LaserPowerMin
+   * 
+   * @param LaserPowerMin new value of LaserPowerMin
+   */
+  public void setLaserPowerMin(Integer LaserPowerMin)
+  {
+    this.LaserPowerMin = LaserPowerMin;
+  }
+  
   protected Integer LaserPowerMax = 180;
   
   /**
@@ -800,6 +825,7 @@ public class ThunderLaser extends LaserCutter
     SETTING_FILE,
     SETTING_MAX_VECTOR_CUT_SPEED,
     SETTING_MAX_VECTOR_MOVE_SPEED,
+    SETTING_MIN_POWER,
     SETTING_MAX_POWER,
     SETTING_BED_WIDTH,
     SETTING_BED_HEIGHT
@@ -813,6 +839,8 @@ public class ThunderLaser extends LaserCutter
       return this.getMaxVectorCutSpeed();}
     else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)){
       return this.getMaxVectorMoveSpeed();
+    }else if (SETTING_MIN_POWER.equals(attribute)){
+      return this.getLaserPowerMin();
     }else if (SETTING_MAX_POWER.equals(attribute)){
       return this.getLaserPowerMax();
     }else if (SETTING_BED_WIDTH.equals(attribute)){
@@ -829,8 +857,10 @@ public class ThunderLaser extends LaserCutter
       this.setFilename((String) value);
     }else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)){
       this.setMaxVectorCutSpeed((Integer) value);
-      }else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)){
+    }else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)){
       this.setMaxVectorMoveSpeed((Integer) value);
+    }else if (SETTING_MIN_POWER.equals(attribute)){
+      this.setLaserPowerMin((Integer) value);
     }else if (SETTING_MAX_POWER.equals(attribute)){
       this.setLaserPowerMax((Integer) value);
     }else if (SETTING_BED_HEIGHT.equals(attribute)){
