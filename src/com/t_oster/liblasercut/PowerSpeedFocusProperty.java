@@ -30,7 +30,7 @@ import java.util.Collection;
 public class PowerSpeedFocusProperty implements LaserProperty
 {
 
-  private int power = 20;
+  private int power = 0;
   private int speed = 100;
   private float focus = 0;
 
