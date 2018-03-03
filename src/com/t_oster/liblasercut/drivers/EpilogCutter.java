@@ -655,7 +655,7 @@ abstract class EpilogCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     out.printf("\033%%1B");// Start HLGL
-    out.printf("IN;PU0,0;");
+    out.printf("IN;");
     //Reset Focus to 0
     out.printf("WF%d;", 0);
     return result.toByteArray();
@@ -668,7 +668,7 @@ abstract class EpilogCutter extends LaserCutter
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     /* Resolution of the print. Number of Units/Inch*/
     out.printf("\033%%1B");// Start HLGL
-    out.printf("IN;PU0,0;");
+    out.printf("IN;");
 
     if (vp != null)
     {
