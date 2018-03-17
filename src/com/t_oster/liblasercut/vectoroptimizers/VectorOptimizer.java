@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
- **/
+ *
+ */
 package com.t_oster.liblasercut.vectoroptimizers;
 
 import com.t_oster.liblasercut.LaserProperty;
@@ -43,12 +44,26 @@ public abstract class VectorOptimizer
     DELETE_DUPLICATE_PATHS
   }
 
-  protected class Element
+  protected static class Element
   {
 
     LaserProperty prop;
     Point start;
     List<Point> moves = new ArrayList<Point>();
+
+    @Override
+    public boolean equals(Object o)
+    {
+      if (o == this)
+      {
+        return true;
+      }
+      if (!(o instanceof Element))
+      {
+        return false;
+      }
+      return equals((Element) o);
+    }
 
     public boolean equals(Element e)
     {
@@ -76,6 +91,13 @@ public abstract class VectorOptimizer
     Point getEnd()
     {
       return moves.isEmpty() ? start : moves.get(moves.size() - 1);
+    }
+
+    void append(Element other)
+    {
+      assert (prop == null || prop.equals(other.prop));
+      assert (getEnd().equals(other.start));
+      moves.addAll(other.moves);
     }
 
     /**
@@ -109,6 +131,20 @@ public abstract class VectorOptimizer
         return false;
       }
       return getEnd().equals(start);
+    }
+
+    @Override
+    public String toString()
+    {
+      String partial = "Element {"
+        + ((start == null) ? "null" : "(" + start.x + ", " + start.y + ")");
+
+      for (Point p : moves)
+      {
+        partial += " -> (" + p.x + ", " + p.y + ")";
+      }
+
+      return partial + "}";
     }
   }
 
