@@ -96,9 +96,9 @@ public class InnerFirstVectorOptimizerTest
     elements.add(newElem(50, 0, 0, 0, 5));
 
     elements.add(newElem(50, 2, 1, 1, 1));
-    elements.add(newElem(100, 1, 2, 2, 2));
-    elements.add(newElem(100, 2, 1, 2, 2));
     elements.add(newElem(50, 1, 2, 1, 1));
+    elements.add(newElem(100, 2, 1, 2, 2));
+    elements.add(newElem(50, 2, 2, 1, 2));
 
     elements.add(newElem(50, 1, 3, 2, 3));
     elements.add(newElem(50, 2, 4, 2, 3));
@@ -108,8 +108,8 @@ public class InnerFirstVectorOptimizerTest
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
 
     assertEquals(4, sorted.size());
-    assertEquals(newElem(50, 2, 1, 1, 1, 1, 2), sorted.get(0));
-    assertEquals(newElem(50, 2, 1, 2, 2, 1, 2), sorted.get(1));
+    assertEquals(newElem(100, 2, 1, 2, 2), sorted.get(0));
+    assertEquals(newElem(50, 2, 2, 1, 2, 1, 1, 2, 1), sorted.get(1));
     assertEquals(newElem(50, 2, 4, 1, 4, 1, 3, 2, 3, 2, 4), sorted.get(2));
     assertEquals(newElem(50, 3, 5, 0, 5, 0, 0, 3, 0, 3, 5), sorted.get(3));
   }
