@@ -23,7 +23,8 @@ import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Rectangle;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,33 +43,36 @@ public abstract class VectorOptimizer
     DELETE_DUPLICATE_PATHS
   }
 
-  protected class Element
+  protected static class Element
   {
 
     LaserProperty prop;
     Point start;
-    List<Point> moves = new LinkedList<Point>();
+    List<Point> moves = new ArrayList<Point>();
 
-  public boolean equals(Element e)
+    @Override
+    public boolean equals(Object o)
     {
-      if(this.moves.size()==e.moves.size())
+      if (o == this)
       {
-        if (!this.start.equals(e.start) )
-        {
-          return false;//start point differs
-        }
-        
-        for (int j = 0; j < this.moves.size(); j++)
-        {
-          if (!this.moves.get(j).equals(e.moves.get(j)))
-          {
-            return false;//one move point differs
-          }
-        }
+        return true;
       }
-      else
+      if (!(o instanceof Element))
       {
         return false;
+      }
+      return equals((Element) o);
+    }
+
+    public boolean equals(Element e)
+    {
+      if (!this.start.equals(e.start) )
+      {
+        return false;//start point differs
+      }
+      if(!this.moves.equals(e.moves))
+      {
+        return false;//move lists are different
       }
       return true;
     }
@@ -79,18 +83,20 @@ public abstract class VectorOptimizer
       {
         moves.add(0, start);
         start = moves.remove(moves.size() - 1);
-        List<Point> inv = new LinkedList<Point>();
-        while (!moves.isEmpty())
-        {
-          inv.add(moves.remove(moves.size() - 1));
-        }
-        moves = inv;
+        Collections.reverse(moves);
       }
     }
 
     Point getEnd()
     {
       return moves.isEmpty() ? start : moves.get(moves.size() - 1);
+    }
+
+    void append(Element other)
+    {
+      assert (prop == null || prop.equals(other.prop));
+      assert (getEnd().equals(other.start));
+      moves.addAll(other.moves);
     }
 
     /**
@@ -125,6 +131,20 @@ public abstract class VectorOptimizer
       }
       return getEnd().equals(start);
     }
+
+    @Override
+    public String toString()
+    {
+      String partial = "Element {"
+        + ((start == null) ? "null" : "(" + start.x + ", " + start.y + ")");
+
+      for (Point p : moves)
+      {
+        partial += " -> (" + p.x + ", " + p.y + ")";
+      }
+
+      return partial + "}";
+    }
   }
 
   public static VectorOptimizer create(OrderStrategy s)
@@ -147,7 +167,7 @@ public abstract class VectorOptimizer
 
   protected List<Element> divide(VectorPart vp)
   {
-    List<Element> result = new LinkedList<Element>();
+    List<Element> result = new ArrayList<Element>();
     Element cur = null;
     Point lastMove = null;
     LaserProperty lastProp = null;
