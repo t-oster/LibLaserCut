@@ -28,9 +28,16 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
 {
 
   private int frequency = 5000;
- 
+  private boolean useFocus = true;
+
   public PowerSpeedFocusFrequencyProperty()
   {
+  }
+
+  /** Make a new PowerSpeedFocusFrequencyProperty that optionally utilizes the focus setting */
+  public PowerSpeedFocusFrequencyProperty(boolean useFocus)
+  {
+    this.useFocus = useFocus;
   }
 
   public void setFrequency(int frequency)
@@ -46,13 +53,18 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   }
 
   private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
-  
+  private static String[] propertyNamesNoFocus = new String[]{"power", "speed", "frequency"};
+
   @Override
   public String[] getPropertyKeys()
   {
-    return propertyNames;
+    if (useFocus) {
+      return propertyNames;
+    } else {
+      return propertyNamesNoFocus;
+    }
   }
-  
+
   @Override
   public Object getProperty(String name)
   {
@@ -104,7 +116,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
        return super.getMaximumValue(name);
      }
   }
-  
+
   @Override
   public Object[] getPossibleValues(String name)
   {
@@ -117,7 +129,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
       return super.getPossibleValues(name);
     }
   }
-  
+
   @Override
   public PowerSpeedFocusFrequencyProperty clone()
   {
@@ -126,6 +138,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
     p.setPower(getPower());
     p.setSpeed(getSpeed());
     p.setFocus(getFocus());
+    p.useFocus = useFocus;
     return p;
   }
 

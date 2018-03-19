@@ -39,6 +39,7 @@ public class LaserJob
   private double startX = 0;
   private double startY = 0;
   private List<JobPart> parts = new LinkedList<JobPart>();
+  private boolean autoFocusEnabled = true;
 
   public LaserJob(String title, String name, String user)
   {
@@ -140,5 +141,18 @@ public class LaserJob
       startX = 0;
       startY = 0;
     }
+  }
+
+  /**
+   * Sets whether autofocus is enabled for this job.
+   * No-op for lasers that do not support it.
+   */
+  public void setAutoFocusEnabled(boolean b) {
+    autoFocusEnabled = b;
+  }
+
+  /** Indicates whether autofocus is enabled for this job, assuming the cutter supports it. */
+  public boolean isAutoFocusEnabled() {
+    return autoFocusEnabled;
   }
 }

@@ -33,9 +33,16 @@ public class PowerSpeedFocusProperty implements LaserProperty
   private int power = 0;
   private int speed = 100;
   private float focus = 0;
+  private boolean useFocus = true;
 
   public PowerSpeedFocusProperty()
   {
+  }
+
+  /** Make a new PowerSpeedFocusProperty that optionally utilizes the focus setting */
+  public PowerSpeedFocusProperty(boolean useFocus)
+  {
+      this.useFocus = useFocus;
   }
 
   /**
@@ -100,15 +107,21 @@ public class PowerSpeedFocusProperty implements LaserProperty
     p.power = power;
     p.speed = speed;
     p.focus = focus;
+    p.useFocus = useFocus;
     return p;
   }
 
   private static String[] propertyNames = new String[]{"power", "speed", "focus"};
+  private static String[] propertyNamesNoFocus = new String[]{"power", "speed"};
   
   @Override
   public String[] getPropertyKeys()
   {
-    return propertyNames;
+    if (useFocus) {
+      return propertyNames;
+    } else {
+      return propertyNamesNoFocus;
+    }
   }
 
   @Override

@@ -75,6 +75,7 @@ public class EpilogZing extends EpilogCutter
     result.setBedHeight(this.getBedHeight());
     result.setBedWidth(this.getBedWidth());
     result.setAutoFocus(this.isAutoFocus());
+    result.setSoftwareFocusSupported(this.isSoftwareFocusSupported());
     return result;
   }
 
@@ -137,5 +138,17 @@ public class EpilogZing extends EpilogCutter
   public void setPort(int p)
   {
     super.setPort(p);
+  }
+
+  @Override
+  public boolean isSoftwareFocusSupported()
+  {
+    return super.isSoftwareFocusSupported();
+  }
+
+  @Override
+  public void setSoftwareFocusSupported(boolean b)
+  {
+    super.setSoftwareFocusSupported(b);
   }
 }
