@@ -71,9 +71,9 @@ public class InnerFirstVectorOptimizerTest
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
 
     assertEquals(3, sorted.size());
-    assertEquals(newElem(50, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1), sorted.get(0));
-    assertEquals(newElem(50, 2, 4, 1, 4, 1, 3, 2, 3, 2, 4), sorted.get(1));
-    assertEquals(newElem(50, 3, 5, 0, 5, 0, 0, 3, 0, 3, 5), sorted.get(2));
+    assertEquals(newElem(50, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2), sorted.get(0));
+    assertEquals(newElem(50, 2, 4, 2, 3, 1, 3, 1, 4, 2, 4), sorted.get(1));
+    assertEquals(newElem(50, 3, 5, 3, 0, 0, 0, 0, 5, 3, 5), sorted.get(2));
   }
 
   @Test
@@ -113,10 +113,10 @@ public class InnerFirstVectorOptimizerTest
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
 
     assertEquals(4, sorted.size());
-    assertEquals(newElem(100, 2, 1, 2, 2), sorted.get(0));
-    assertEquals(newElem(50, 2, 2, 1, 2, 1, 1, 2, 1), sorted.get(1));
-    assertEquals(newElem(50, 2, 4, 1, 4, 1, 3, 2, 3, 2, 4), sorted.get(2));
-    assertEquals(newElem(50, 3, 5, 0, 5, 0, 0, 3, 0, 3, 5), sorted.get(3));
+    assertEquals(newElem(100, 2, 2, 2, 1), sorted.get(0));
+    assertEquals(newElem(50, 2, 1, 1, 1, 1, 2, 2, 2), sorted.get(1));
+    assertEquals(newElem(50, 2, 4, 2, 3, 1, 3, 1, 4, 2, 4), sorted.get(2));
+    assertEquals(newElem(50, 3, 5, 3, 0, 0, 0, 0, 5, 3, 5), sorted.get(3));
   }
 
   @Test
@@ -132,18 +132,21 @@ public class InnerFirstVectorOptimizerTest
     2 | *-*-*
       | | | |
     3 * *-*-*
-      | | | |
-    4 | *-*-*
+      | 
+    4 | 
       |
     5 *-----*
 
      */
-    elements.add(newElem(50, 0, 0, 3, 0));
-    elements.add(newElem(50, 3, 5, 0, 5, 0, 3, 0, 0));
 
-    for (int i = 1; i <= 3; i++)
+    // Both elements starting at 0, 0; without the invert step to check for
+    // matches at the start instead of just at the end, this would fail to join.
+    elements.add(newElem(50, 0, 0, 3, 0));
+    elements.add(newElem(50, 0, 0, 0, 3, 0, 5, 3, 5));
+
+    for (int i = 1; i <= 2; i++)
     {
-      for (int j = 1; j <= 4; j++)
+      for (int j = 1; j <= 3; j++)
       {
         elements.add(newElem(50, i, j, i + 1, j));
         elements.add(newElem(50, j, i, j, i + 1));
@@ -153,16 +156,18 @@ public class InnerFirstVectorOptimizerTest
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
 
     // Grid partially combined.
-    assertEquals(7, sorted.size());
-    assertEquals(newElem(50, 3, 2, 4, 2), sorted.get(0));
-    assertEquals(newElem(50, 1, 2, 1, 3), sorted.get(1));
-    assertEquals(newElem(50, 3, 3, 4, 3, 4, 2, 4, 1, 3, 1), sorted.get(2));
-    assertEquals(newElem(50, 3, 3, 3, 4), sorted.get(3));
-    assertEquals(newElem(50, 3, 2, 3, 3, 2, 3, 2, 4), sorted.get(4));
-    assertEquals(newElem(50, 4, 3, 4, 4, 3, 4, 2, 4, 1, 4, 1, 3, 2, 3, 2, 2, 1, 2, 1, 1, 2, 1, 2, 2, 3, 2, 3, 1, 2, 1), sorted.get(5));
+    assertEquals(9, sorted.size());
+    assertEquals(newElem(50, 2, 2, 1, 2), sorted.get(0));
+    assertEquals(newElem(50, 2, 2, 2, 1), sorted.get(1));
+    assertEquals(newElem(50, 1, 2, 1, 1, 2, 1), sorted.get(2));
+    assertEquals(newElem(50, 3, 2, 2, 2), sorted.get(3));
+    assertEquals(newElem(50, 3, 2, 3, 1, 2, 1), sorted.get(4));
+    assertEquals(newElem(50, 2, 3, 2, 2), sorted.get(5));
+    assertEquals(newElem(50, 2, 3, 1, 3, 1, 2), sorted.get(6));
+    assertEquals(newElem(50, 3, 2, 3, 3, 2, 3), sorted.get(7));
 
     // Polyline combined.
-    assertEquals(newElem(50, 3, 5, 0, 5, 0, 3, 0, 0, 3, 0), sorted.get(6));
+    assertEquals(newElem(50, 3, 5, 0, 5, 0, 3, 0, 0, 3, 0), sorted.get(8));
   }
 
   private static Element newElem(int power, int x1, int y1, int... moves)
