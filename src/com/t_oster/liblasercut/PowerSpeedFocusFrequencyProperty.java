@@ -28,16 +28,15 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
 {
 
   private int frequency = 5000;
-  private boolean useFocus = true;
 
   public PowerSpeedFocusFrequencyProperty()
   {
   }
 
   /** Make a new PowerSpeedFocusFrequencyProperty that optionally utilizes the focus setting */
-  public PowerSpeedFocusFrequencyProperty(boolean useFocus)
+  public PowerSpeedFocusFrequencyProperty(boolean hideFocus)
   {
-    this.useFocus = useFocus;
+    super(hideFocus);
   }
 
   public void setFrequency(int frequency)
@@ -58,10 +57,10 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   @Override
   public String[] getPropertyKeys()
   {
-    if (useFocus) {
-      return propertyNames;
-    } else {
+    if (isHideFocus()) {
       return propertyNamesNoFocus;
+    } else {
+      return propertyNames;
     }
   }
 
@@ -138,7 +137,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
     p.setPower(getPower());
     p.setSpeed(getSpeed());
     p.setFocus(getFocus());
-    p.useFocus = useFocus;
+    p.setHideFocus(isHideFocus());
     return p;
   }
 

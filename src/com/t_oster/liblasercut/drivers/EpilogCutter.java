@@ -53,8 +53,8 @@ abstract class EpilogCutter extends LaserCutter
   private String hostname = "10.0.0.1";
   private int port = 515;
   private boolean autofocus = false;
-  // Not all epilogs support focusing laser commands
-  private boolean softwareFocusSupported = true;
+  /** Not all epilogs support focusing laser commands.  Setting this true will hide it in the UI. */
+  private boolean hideSoftwareFocus = false;
   private transient InputStream in;
   private transient OutputStream out;
 
@@ -98,27 +98,27 @@ abstract class EpilogCutter extends LaserCutter
     this.autofocus = af;
   }
 
-  public boolean isSoftwareFocusSupported() {
-    return this.softwareFocusSupported;
+  public boolean isHideSoftwareFocus() {
+    return this.hideSoftwareFocus;
   }
 
-  public void setSoftwareFocusSupported(boolean sf) {
-    this.softwareFocusSupported = sf;
+  public void setHideSoftwareFocus(boolean sf) {
+    this.hideSoftwareFocus = sf;
   }
 
   @Override
   public LaserProperty getLaserPropertyForVectorPart() {
-    return new PowerSpeedFocusFrequencyProperty(isSoftwareFocusSupported());
+    return new PowerSpeedFocusFrequencyProperty(isHideSoftwareFocus());
   }
 
   @Override
   public LaserProperty getLaserPropertyForRasterPart() {
-    return new PowerSpeedFocusProperty(isSoftwareFocusSupported());
+    return new PowerSpeedFocusProperty(isHideSoftwareFocus());
   }
 
   @Override
   public LaserProperty getLaserPropertyForRaster3dPart() {
-    return new PowerSpeedFocusProperty(isSoftwareFocusSupported());
+    return new PowerSpeedFocusProperty(isHideSoftwareFocus());
   }
 
   private void waitForResponse(int expected) throws IOException, Exception
@@ -835,9 +835,9 @@ abstract class EpilogCutter extends LaserCutter
     {
       return (Double) this.getBedHeight();
     }
-    else if ("SoftwareFocusSupported".equals(attribute))
+    else if ("SoftwareFocusNotSupported".equals(attribute))
     {
-      return (Boolean) this.isSoftwareFocusSupported();
+      return (Boolean) this.isHideSoftwareFocus();
     }
     return null;
   }
@@ -909,14 +909,17 @@ abstract class EpilogCutter extends LaserCutter
     {
       this.setBedHeight((Double) value);
     }
-    else if ("SoftwareFocusSupported".equals(attribute))
+    else if ("SoftwareFocusNotSupported".equals(attribute))
     {
-      this.setSoftwareFocusSupported((Boolean) value);
+      this.setHideSoftwareFocus((Boolean) value);
     }
   }
   private static String[] attributes = new String[]
   {
-    "Hostname", "Port", "BedWidth", "BedHeight", "AutoFocus", "SoftwareFocusSupported"
+    // The slightly awkward wording of SoftwareFocusNotSupported is to handle importing old settings
+    // without disabling functionality.  Internally it is stored as hideSoftwareFocus, which removes
+    // it from the UI when software focus is not supported.
+    "Hostname", "Port", "BedWidth", "BedHeight", "AutoFocus", "SoftwareFocusNotSupported"
   };
 
   @Override

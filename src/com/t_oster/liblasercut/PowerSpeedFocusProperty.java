@@ -33,16 +33,16 @@ public class PowerSpeedFocusProperty implements LaserProperty
   private int power = 0;
   private int speed = 100;
   private float focus = 0;
-  private boolean useFocus = true;
+  private boolean hideFocus = false;
 
   public PowerSpeedFocusProperty()
   {
   }
 
   /** Make a new PowerSpeedFocusProperty that optionally utilizes the focus setting */
-  public PowerSpeedFocusProperty(boolean useFocus)
+  public PowerSpeedFocusProperty(boolean hideFocus)
   {
-      this.useFocus = useFocus;
+      this.hideFocus = hideFocus;
   }
 
   /**
@@ -100,6 +100,14 @@ public class PowerSpeedFocusProperty implements LaserProperty
     return this.focus;
   }
 
+  public void setHideFocus(boolean hf) {
+    hideFocus = hf;
+  }
+
+  public boolean isHideFocus() {
+    return hideFocus;
+  }
+
   @Override
   public PowerSpeedFocusProperty clone()
   {
@@ -107,7 +115,7 @@ public class PowerSpeedFocusProperty implements LaserProperty
     p.power = power;
     p.speed = speed;
     p.focus = focus;
-    p.useFocus = useFocus;
+    p.hideFocus = hideFocus;
     return p;
   }
 
@@ -117,10 +125,10 @@ public class PowerSpeedFocusProperty implements LaserProperty
   @Override
   public String[] getPropertyKeys()
   {
-    if (useFocus) {
-      return propertyNames;
-    } else {
+    if (hideFocus) {
       return propertyNamesNoFocus;
+    } else {
+      return propertyNames;
     }
   }
 
