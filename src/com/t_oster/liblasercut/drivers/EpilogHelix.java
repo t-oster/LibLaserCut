@@ -75,6 +75,7 @@ public class EpilogHelix extends EpilogCutter
     result.setBedHeight(this.getBedHeight());
     result.setBedWidth(this.getBedWidth());
     result.setAutoFocus(this.isAutoFocus());
+    result.setHideSoftwareFocus(this.isHideSoftwareFocus());
     return result;
   }
 
@@ -137,5 +138,17 @@ public class EpilogHelix extends EpilogCutter
   public void setPort(int p)
   {
     super.setPort(p);
+  }
+  
+  @Override
+  public boolean isHideSoftwareFocus()
+  {
+    return super.isHideSoftwareFocus();
+  }
+
+  @Override
+  public void setHideSoftwareFocus(boolean b)
+  {
+    super.setHideSoftwareFocus(b);
   }
 }
