@@ -70,12 +70,7 @@ public class EpilogZing extends EpilogCutter
   public EpilogZing clone()
   {
     EpilogZing result = new EpilogZing();
-    result.setHostname(this.getHostname());
-    result.setPort(this.getPort());
-    result.setBedHeight(this.getBedHeight());
-    result.setBedWidth(this.getBedWidth());
-    result.setAutoFocus(this.isAutoFocus());
-    result.setHideSoftwareFocus(this.isHideSoftwareFocus());
+    copyProperties(result);
     return result;
   }
 
