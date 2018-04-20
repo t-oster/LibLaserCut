@@ -70,7 +70,7 @@ public class EpilogHelix extends EpilogCutter
   public EpilogHelix clone()
   {
     EpilogHelix result = new EpilogHelix();
-    copyProperties(result);
+    result.copyProperties(this);
     return result;
   }
 

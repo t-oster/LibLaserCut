@@ -70,7 +70,7 @@ public class EpilogZing extends EpilogCutter
   public EpilogZing clone()
   {
     EpilogZing result = new EpilogZing();
-    copyProperties(result);
+    result.copyProperties(this);
     return result;
   }
 
