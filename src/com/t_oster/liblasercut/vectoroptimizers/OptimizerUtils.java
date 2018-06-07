@@ -27,17 +27,17 @@ import java.util.List;
 
 public class OptimizerUtils
 {
+
   /**
    * Given a list of Elements, combines Elements with matching start/end points
    * into single Elements. Elements with different props will never be joined.
    *
    * Joining will be perfect for any sequence of Elements which forms a perfect,
    * straightforward loop within which every point matches precisely two
-   * Elements' start or end points. In more general cases (e.g., more than two
-   * Elements meeting at a single point, or non-closed loops), joining of
-   * contiguous Elements will not necessarily be as complete as possible, but
-   * the output Elements will always include all of the moves in the input
-   * (possibly inverted.)
+   * Elements' start or end points. Any similar sequences that end on single
+   * points rather than completing a loop are also joined. In remaining cases,
+   * i.e., where more than two Elements meet at a single point, the Elements
+   * will not be joined.
    *
    * @param input List of Elements to join.
    * @return ArrayList of joined Elements.
@@ -59,8 +59,8 @@ public class OptimizerUtils
         list = new ArrayList();
         propToElements.put(element.prop, list);
       }
-      list.add(new DirectedElement(i, element.start, false));
-      list.add(new DirectedElement(i, element.getEnd(), true));
+      list.add(new DirectedElement(i, element.start, element.getEnd(), false));
+      list.add(new DirectedElement(i, element.getEnd(), element.start, true));
     }
 
     ArrayList<VectorOptimizer.Element> result = new ArrayList();
@@ -74,6 +74,30 @@ public class OptimizerUtils
       // particular point later.
       Collections.sort(directedElements);
 
+      // Find any start points shared by more than two directElements, and mark
+      // them as invalid. This will prevent any joining at this point.
+      for (int i = 0; i < directedElements.size(); i++)
+      {
+        Point startPoint = directedElements.get(i).start;
+        int indexWithSameStartPoint = i;
+        for (int j = i + 1; j < directedElements.size(); j++)
+        {
+          if (!startPoint.equals(directedElements.get(j).start))
+          {
+            break;
+          }
+          indexWithSameStartPoint = j;
+        }
+        if (indexWithSameStartPoint + 1 - i > 2)
+        {
+          for (int j = i; j <= indexWithSameStartPoint; j++)
+          {
+            directedElements.get(i).valid = false;
+          }
+        }
+        i = indexWithSameStartPoint;
+      }
+
       while (!directedElements.isEmpty())
       {
         // Grab an arbitrary element, setting it to null in the process to
@@ -86,47 +110,55 @@ public class OptimizerUtils
         }
         input.set(de.index, null);
 
-        // Search for any other elements that can be joined on to the end of
-        // this element.
-        boolean keepGoing = true;
-        while (keepGoing)
+        for (int pass = 0; pass < 2; pass++)
         {
-          Point endPoint = current.getEnd();
-          int i = binarySearch(directedElements, endPoint);
-          keepGoing = false;
-          while (i < directedElements.size()
-            && directedElements.get(i).point.equals(endPoint))
+          // Search for any other elements that can be joined on to the end of
+          // this element.
+          boolean keepGoing = true;
+          while (keepGoing)
           {
-            int nextIndex = directedElements.get(i).index;
-            VectorOptimizer.Element next = input.get(nextIndex);
-            if (next == null)
+            Point endPoint = current.getEnd();
+            int i = binarySearch(directedElements, endPoint);
+            keepGoing = false;
+            while (i < directedElements.size()
+              && directedElements.get(i).valid
+              && directedElements.get(i).start.equals(endPoint))
             {
-              i++;
-              continue;
-            }
+              int nextIndex = directedElements.get(i).index;
+              VectorOptimizer.Element next = input.get(nextIndex);
+              if (next == null)
+              {
+                i++;
+                continue;
+              }
 
-            // We've found an element (next) that can be joined onto the end of
-            // current! Do so, delete the element to prevent it from being seen
-            // again, and then go through the outer loop again to see if we can
-            // find yet another element to join on to the newly combined one.
-            input.set(nextIndex, null);
-            if (directedElements.get(i).inverted)
-            {
-              next.invert();
+              // We've found an element (next) that can be joined onto the end of
+              // current! Do so, delete the element to prevent it from being seen
+              // again, and then go through the outer loop again to see if we can
+              // find yet another element to join on to the newly combined one.
+              input.set(nextIndex, null);
+              if (directedElements.get(i).inverted)
+              {
+                next.invert();
+              }
+              current.append(next);
+              keepGoing = true;
+              break;
             }
-            current.append(next);
-            keepGoing = true;
+          }
+
+          if (pass == 1)
+          {
             break;
           }
+
+          // We couldn't find any more elements to join on. Either the loop is
+          // complete, or we've reached one end of an open polyline. Invert the
+          // path and take another run through in order to check for any more
+          // elements than can be joined on to the other end.
+          current.invert();
         }
 
-        // We couldn't find any more elements to join on. Either the loop is
-        // complete, or we've reached one end of an open polyline.
-        //
-        // In order to do a better joining job with open polylines, We could
-        // perhaps invert the combined element and go through the while loop
-        // again -- but this would add more complexity (both conceptual and in
-        // CPU time) and doesn't seem worthwhile.
         result.add(current);
       }
     }
@@ -134,9 +166,9 @@ public class OptimizerUtils
   }
 
   /**
-   * Returns the index of the first DirectedElement that is greater than or
-   * equal to the provided point. Relies on the list already being sorted
-   * according to the natural ordering of DirectedElement.point.
+   * Returns the index of the first DirectedElement whose start point is greater
+   * than or equal to the provided point p. Relies on the list already being
+   * sorted according to the natural ordering of DirectedElement.start.
    * Collections.binarySearch cannot be used because it has undefined behaviour
    * when several equal elements exist.
    */
@@ -148,7 +180,7 @@ public class OptimizerUtils
     while (end - start > 1)
     {
       int mid = (start + end) / 2;
-      if (list.get(mid).point.compareTo(p) >= 0)
+      if (list.get(mid).start.compareTo(p) >= 0)
       {
         end = mid;
       }
@@ -162,22 +194,26 @@ public class OptimizerUtils
 
   /**
    * Represents an index within an ArrayList of Elements, combined with a
-   * inverted/non-inverted flag. Contains the start or end point of the
-   * referenced Element (depending on whether the inverted flag is set.)
-   * Possesses a natural ordering based on this start/end point, allowing
-   * a sorted ArrayList of DirectedElements to be efficiently binary searched
-   * to find Elements starting or ending at a given point.
+   * inverted/non-inverted flag. Contains the start and end points of the
+   * referenced Element, switched if the inverted flag is set. Possesses a
+   * natural ordering based on this start point, allowing a sorted ArrayList of
+   * DirectedElements to be efficiently binary searched to find Elements
+   * starting or ending at a given point.
    */
   private static class DirectedElement implements Comparable
   {
-    int index;
-    Point point;
-    boolean inverted;
 
-    DirectedElement(int index, Point point, boolean inverted)
+    int index;
+    Point start;
+    Point end;
+    boolean inverted;
+    boolean valid = true;
+
+    DirectedElement(int index, Point start, Point end, boolean inverted)
     {
       this.index = index;
-      this.point = point;
+      this.start = start;
+      this.end = end;
       this.inverted = inverted;
     }
 
@@ -189,7 +225,12 @@ public class OptimizerUtils
 
     public int compareTo(DirectedElement o)
     {
-      return point.compareTo(o.point);
+      int cmp = start.compareTo(o.start);
+      if (cmp != 0)
+      {
+        return cmp;
+      }
+      return end.compareTo(o.end);
     }
   }
 }
