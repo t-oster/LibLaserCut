@@ -47,6 +47,8 @@ public class ShapeConverter
     PathIterator iter = shape.getPathIterator(scale, 1);
     int startx = 0;
     int starty = 0;
+    int lastx = 0;
+    int lasty = 0;
     while (!iter.isDone())
     {
       double[] test = new double[8];
@@ -56,10 +58,19 @@ public class ShapeConverter
         vectorpart.moveto((int) test[0], (int) test[1]);
         startx = (int) test[0];
         starty = (int) test[1];
+        lastx = startx;
+        lasty = starty;
       }
       else if (result == PathIterator.SEG_LINETO)
       {
-        vectorpart.lineto((int) test[0], (int) test[1]);
+        //skip lines with length 0 https://github.com/t-oster/LibLaserCut/issues/87
+        int x = (int) test[0];
+        int y = (int) test[1];
+        if (x != lastx || y != lasty) {
+          vectorpart.lineto(x, y);
+          lastx = x;
+          lasty = y;
+        }
       }
       else if (result == PathIterator.SEG_CLOSE)
       {
