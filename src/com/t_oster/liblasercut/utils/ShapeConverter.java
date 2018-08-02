@@ -66,7 +66,7 @@ public class ShapeConverter
         //skip lines with length 0 https://github.com/t-oster/LibLaserCut/issues/87
         int x = (int) test[0];
         int y = (int) test[1];
-        if (x != lastx || y != lasty) {
+        if (x != lastx && y != lasty) {
           vectorpart.lineto(x, y);
           lastx = x;
           lasty = y;
