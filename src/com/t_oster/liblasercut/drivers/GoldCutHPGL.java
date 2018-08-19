@@ -526,7 +526,7 @@ public class GoldCutHPGL extends LaserCutter {
     return 1000;	// dummy value, used for GUI!
   }
 
-  protected double hwDPI = 1000.;
+  protected double hwDPI = 1016.; // see Wikipedia: one HPGL "pixel" is 25µm, i.e. 1016 per inch
   /**
    * Get the value of hwDPI
    *
