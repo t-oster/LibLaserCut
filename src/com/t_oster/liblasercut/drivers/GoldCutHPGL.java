@@ -213,17 +213,27 @@ public class GoldCutHPGL extends LaserCutter {
   }
 
   private void move(PrintStream out, int x, int y, double resolution) {
-    double hw_scale = this.getHwDPI()/resolution;
-    hw_x = (int)(hw_scale * (isFlipXaxis() ? Util.mm2px(this.bedWidth, resolution) - y : y));
-    hw_y = (int)(hw_scale * (isFlipYaxis() ? 1000-x : x));
-    out.printf(Locale.US, "PU%d,%d;", hw_x, hw_y);
+    moveOrLine("PU", out, x, y, resolution);
   }
 
   private void line(PrintStream out, int x, int y, double resolution) {
+    moveOrLine("PD", out, x, y, resolution);
+  }
+
+  /**
+   * send a PU or PD command and move to next coordinate
+   * @param command "PU" or "PD"
+   * @param out PrintStream for the output
+   * @param x coordinate (in pixels)
+   * @param y coordinate (in pixels)
+   * @param resolution dpi (coordinate pixels per inch)
+   */
+  private void moveOrLine(String command, PrintStream out, int x, int y, double resolution) {
     double hw_scale = this.getHwDPI()/resolution;
+    // Note: standard HPGL coordinates are: (0,0)=top-left, Y=right, X=down.
     hw_x = (int)(hw_scale * (isFlipXaxis() ? Util.mm2px(this.bedWidth, resolution) - y : y));
-    hw_y = (int)(hw_scale * (isFlipYaxis() ? 1000-x : x));
-    out.printf(Locale.US, "PD%d,%d;", hw_x, hw_y);
+    hw_y = (int)(hw_scale * (isFlipYaxis() ?  Util.mm2px(getBedHeight(), resolution) - x : x));
+    out.printf(Locale.US, command + "%d,%d;", hw_x, hw_y);
   }
 
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException {
