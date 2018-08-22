@@ -32,24 +32,26 @@ public class FloydSteinberg extends DitheringAlgorithm
   protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException
   {
     int pixelcount = 0;
+    int width = src.getWidth();
+    int height = src.getHeight();
     /**
      * We have to copy the input image, because we will
      * alter the pixels during dither process and don't want
      * to destroy the input image
      */
-    int[][] input = new int[src.getWidth()][2];
-    for (int x = 0; x < src.getWidth(); x++)
+    int[][] input = new int[width][2];
+    for (int x = 0; x < width; x++)
     {
       input[x][1] = src.getGreyScale(x, 0);
     }
-    for (int y = 0; y < src.getHeight(); y++)
+    for (int y = 0; y < height; y++)
     {
       // copy lower line to upper line
       // and read in next line from picture
       for (int x = 0; x < input.length; x++)
       {
         input[x][0] = input[x][1];
-        if (y + 1 < src.getHeight())
+        if (y + 1 < height)
         {
           input[x][1] = (src.getGreyScale(x, y + 1));
         }
@@ -62,12 +64,12 @@ public class FloydSteinberg extends DitheringAlgorithm
         if (x + 1 < input.length)
         {
           input[x + 1][0] = (input[x + 1][0] + 7 * error / 16);
-          if (y + 1 < src.getHeight())
+          if (y + 1 < height)
           {
             input[x + 1][1] = (input[x + 1][1] + 1 * error / 16);
           }
         }
-        if (y + 1 < src.getHeight())
+        if (y + 1 < height)
         {
           input[x][1] = (input[x][1] + 5 * error / 16);
           if (x > 0)
