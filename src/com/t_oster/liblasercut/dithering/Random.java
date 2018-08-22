@@ -29,7 +29,7 @@ public class Random extends DitheringAlgorithm
 {
 
   @Override
-  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException
   {
     int width = src.getWidth();
     int height = src.getHeight();
@@ -41,6 +41,9 @@ public class Random extends DitheringAlgorithm
       for (int x = 0; x < width; x++)
       {
         this.setBlack(src, target, x, y, src.getGreyScale(x, y) < r.nextInt(256));
+      }
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
       }
       setProgress((100 * pixelcount++) / (height));
     }

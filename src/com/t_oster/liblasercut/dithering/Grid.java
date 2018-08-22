@@ -71,7 +71,7 @@ public class Grid extends DitheringAlgorithm
   protected int blockdistance = 5;
 
   @Override
-  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException
   {
     long lumTotal = 0;
     int pixelcount = 0;
@@ -83,6 +83,9 @@ public class Grid extends DitheringAlgorithm
       for (int x = 0; x < width; x++)
       {
         lumTotal += src.getGreyScale(x, y);
+      }
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
       }
       setProgress((100 * pixelcount++) / (2 * height));
     }
@@ -102,6 +105,9 @@ public class Grid extends DitheringAlgorithm
         {
           this.setBlack(src, target, x, y, false);
         }
+      }
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
       }
       setProgress((100 * pixelcount++) / (2 * height));
     }

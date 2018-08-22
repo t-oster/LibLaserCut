@@ -138,7 +138,15 @@ public class PhotoPrint {
                 DitherAlgorithm da = (DitherAlgorithm) cbDa.getSelectedItem();
                 BufferedImageAdapter ad = new BufferedImageAdapter(scaledImg);
                 ad.setColorShift(filter.getValue());
-                BlackWhiteRaster bw = new BlackWhiteRaster(ad, da);
+                BlackWhiteRaster bw;
+                try
+                {
+                  bw = new BlackWhiteRaster(ad, da);
+                }
+                catch (InterruptedException ex)
+                {
+                  throw new RuntimeException("this must not happen");
+                }
                 for (int y = 0; y < bw.getHeight(); y++) {
                     for (int x = 0; x < bw.getWidth(); x++) {
                         outImg.setRGB(x, y, bw.isBlack(x, y) ^ cbInvert.isSelected() ? Color.BLACK.getRGB() : Color.WHITE.getRGB());

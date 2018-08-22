@@ -29,7 +29,7 @@ public class FloydSteinberg extends DitheringAlgorithm
 {
 
   @Override
-  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException
   {
     int pixelcount = 0;
     /**
@@ -76,7 +76,10 @@ public class FloydSteinberg extends DitheringAlgorithm
           }
         }
       }
-      setProgress((100 * pixelcount++) / (src.getHeight()));
+      setProgress((100 * pixelcount++) / (height));
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
+      }
     }
   }
 

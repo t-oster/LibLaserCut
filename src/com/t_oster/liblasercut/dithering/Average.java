@@ -29,7 +29,7 @@ public class Average extends  DitheringAlgorithm
 {
 
   @Override
-  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException
   {
     long lumTotal = 0;
     int pixelcount = 0;
@@ -42,6 +42,9 @@ public class Average extends  DitheringAlgorithm
       {
         lumTotal += src.getGreyScale(x, y);
       }
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
+      }
       setProgress((100 * pixelcount++) / (2 * height));
     }
 
@@ -51,6 +54,9 @@ public class Average extends  DitheringAlgorithm
       for (int x = 0; x < width; x++)
       {
         this.setBlack(src, target, x, y, src.getGreyScale(x, y) < thresh);
+      }
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
       }
       setProgress((100 * pixelcount++) / (2 * height));
     }

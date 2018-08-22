@@ -64,7 +64,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     }
   }
   
-  public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg, ProgressListener listener)
+  public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg, ProgressListener listener) throws InterruptedException
   {
     if (listener != null)
     {
@@ -80,17 +80,17 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     alg.ditherDirect(src, this);
   }
   
-  public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm, ProgressListener listener)
+  public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm, ProgressListener listener) throws InterruptedException
   {
     this(src, BlackWhiteRaster.getDitheringAlgorithm(dither_algorithm), listener);
   }
 
-  public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm)
+  public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm) throws InterruptedException
   {
     this(src, dither_algorithm, null);
   }
   
-  public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg)
+  public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg) throws InterruptedException
   {
     this(src, alg, null);
   }

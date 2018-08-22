@@ -48,7 +48,7 @@ public class Ordered extends DitheringAlgorithm
     return filter;
   }
   @Override
-  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target)
+  protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException
   {
     int width = src.getWidth();
     int height = src.getHeight();
@@ -84,6 +84,9 @@ public class Ordered extends DitheringAlgorithm
             this.setBlack(src, target, x + xdelta, y + ydelta, src.getGreyScale(x + xdelta, y + ydelta) < filter[xdelta][ydelta]);
           }
         }
+      }
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
       }
       setProgress((100 * pixelcount++) / (height));
     }
