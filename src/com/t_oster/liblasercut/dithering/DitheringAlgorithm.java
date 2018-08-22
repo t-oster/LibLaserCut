@@ -44,24 +44,24 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
     }
   }
 
-  public BlackWhiteRaster dither(GreyscaleRaster input)
+  public BlackWhiteRaster dither(GreyscaleRaster input) throws InterruptedException
   {
     BlackWhiteRaster target = new BlackWhiteRaster(input.getWidth(), input.getHeight());
     doDithering(input, target);
     return target;
   }
 
-  public void ditherDirect(GreyscaleRaster input)
+  public void ditherDirect(GreyscaleRaster input) throws InterruptedException
   {
     doDithering(input, null);
   }
 
-  public void ditherDirect(GreyscaleRaster input, BlackWhiteRaster output)
+  public void ditherDirect(GreyscaleRaster input, BlackWhiteRaster output) throws InterruptedException
   {
     doDithering(input, output);
   }
 
-  protected abstract void doDithering(GreyscaleRaster src, BlackWhiteRaster target);
+  protected abstract void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException;
 
   @Override
   public String[] getPropertyKeys() {
