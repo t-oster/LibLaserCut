@@ -210,12 +210,12 @@ public class MakeBlockXYPlotter extends LaserCutter
     }
   }
   
-  private void move(int x, int y, double resolution) throws Exception{
+  private void move(double x, double y, double resolution) throws Exception{
     toolOff();
     this.sendCommand(String.format(Locale.US, "G0 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution)));
   }
 
-  private void line(int x, int y, double resolution) throws Exception{
+  private void line(double x, double y, double resolution) throws Exception{
     toolOn();
     this.sendCommand(String.format(Locale.US, "G1 X%f Y%f", Util.px2mm(x, resolution), Util.px2mm(y, resolution)));
   }
@@ -227,8 +227,8 @@ public class MakeBlockXYPlotter extends LaserCutter
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
-          int x = cmd.getX();
-          int y = cmd.getY();
+          double x = cmd.getX();
+          double y = cmd.getY();
           this.move(x, y, resolution);
           break;
         case LINETO:

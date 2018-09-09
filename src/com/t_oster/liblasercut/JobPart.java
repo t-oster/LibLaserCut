@@ -27,12 +27,12 @@ public abstract class JobPart {
 
   public abstract double getDPI();
     
-  public abstract int getMinX();
+  public abstract double getMinX();
 
-  public abstract int getMinY();
+  public abstract double getMinY();
   
-  public abstract int getMaxX();
+  public abstract double getMaxX();
   
-  public abstract int getMaxY();
+  public abstract double getMaxY();
 
 }

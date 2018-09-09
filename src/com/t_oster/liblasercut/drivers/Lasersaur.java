@@ -152,8 +152,8 @@ public class Lasersaur extends LaserCutter {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
-          int x = cmd.getX();
-          int y = cmd.getY();
+          double x = cmd.getX();
+          double y = cmd.getY();
           move(out, x, y, resolution);
           break;
         case LINETO:
@@ -188,11 +188,11 @@ public class Lasersaur extends LaserCutter {
     }
   }
 
-  private void move(PrintStream out, int x, int y, double resolution) {
+  private void move(PrintStream out, double x, double y, double resolution) {
     out.printf(Locale.US, "G0 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
   }
 
-  private void line(PrintStream out, int x, int y, double resolution) {
+  private void line(PrintStream out, double x, double y, double resolution) {
     out.printf(Locale.US, "G1 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
   }
 

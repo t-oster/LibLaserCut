@@ -421,14 +421,15 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
+        // TODO: x,y should be changed to double because GCode has infinite vector resolution anyway
         case MOVETO:
-          int x = cmd.getX();
-          int y = cmd.getY();
+          int x = (int) cmd.getX();
+          int y = (int) cmd.getY();
           move(out, x, y, resolution);
           break;
         case LINETO:
-          x = cmd.getX();
-          y = cmd.getY();
+          x = (int) cmd.getX();
+          y = (int) cmd.getY();
           line(out, x, y, resolution);
           break;
         case SETPROPERTY:

@@ -39,7 +39,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
      * order ascending by this integer
      * inside objects should have the lowest values
      */
-    abstract int getValue(Element e);
+    abstract double getValue(Element e);
 
     /**
      * compare by getValue()
@@ -47,8 +47,8 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
     @Override
     public int compare(Element a, Element b)
     {
-      Integer av = new Integer(getValue(a));
-      Integer bv = new Integer(getValue(b));
+      Double av = new Double(getValue(a));
+      Double bv = new Double(getValue(b));
       return av.compareTo(bv);
     }
   }
@@ -57,7 +57,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
   {
     // compare by XMin a>b
     @Override
-    int getValue(Element e)
+    double getValue(Element e)
     {
       return -e.boundingBox().getXMin();
     }
@@ -67,7 +67,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
   {
     // compare by YMin a>b
     @Override
-    int getValue(Element e)
+    double getValue(Element e)
     {
       return -e.boundingBox().getYMin();
     }
@@ -77,7 +77,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
   {
     // compare by XMax a<b
     @Override
-    int getValue(Element e)
+    double getValue(Element e)
     {
       return e.boundingBox().getXMax();
     }
@@ -87,7 +87,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
   {
     // compare by YMax a<b
     @Override
-    int getValue(Element e)
+    double getValue(Element e)
     {
       return e.boundingBox().getYMax();
     }

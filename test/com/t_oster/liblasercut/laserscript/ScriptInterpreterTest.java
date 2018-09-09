@@ -105,10 +105,10 @@ public class ScriptInterpreterTest
     VectorPart vp = new VectorPart(new PowerSpeedFocusProperty(), 500d);
     VectorPartScriptInterface si = new VectorPartScriptInterface(vp, new AffineTransform());
     instance.execute(script, si);
-    assertEquals(0, vp.getMinX());
-    assertEquals(0, vp.getMinY());
-    assertEquals(20, vp.getMaxX());
-    assertEquals(30, vp.getMaxY());
+    assertEquals(0, vp.getMinX(), 1e-99);
+    assertEquals(0, vp.getMinY(), 1e-99);
+    assertEquals(20, vp.getMaxX(), 1e-99);
+    assertEquals(30, vp.getMaxY(), 1e-99);
   }
   
   /**

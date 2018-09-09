@@ -27,7 +27,7 @@ package com.t_oster.liblasercut.platform;
  * @see Point
  */
 public class Rectangle {
-  private int x1, x2, y1, y2;
+  private double x1, x2, y1, y2;
 
   /**
    * integer interval helper class
@@ -38,9 +38,9 @@ public class Rectangle {
   private class Interval
   {
 
-    private int min,max;
+    private double min,max;
 
-    private Interval(int min, int max)
+    private Interval(double min, double max)
     {
       this.min = min;
       this.max = max;
@@ -70,7 +70,7 @@ public class Rectangle {
   /**
    * construct a rectangle with the corners (x1,y1) and (x2,y2)
    */
-  public Rectangle(int x1, int y1, int x2, int y2)
+  public Rectangle(double x1, double y1, double x2, double y2)
   {
     this.x1=Math.min(x1,x2);
     this.x2=Math.max(x1,x2);
@@ -97,7 +97,7 @@ public class Rectangle {
    * add a point to the boundary of this rectangle
    * use this iteratively to get the boundingBox
    */
-  public void add (int x, int y) {
+  public void add (double x, double y) {
     if (x<x1) {
       this.x1=x;
     } else if (x>x2) {
@@ -121,28 +121,28 @@ public class Rectangle {
    * smallest X coordinate
    * @return int
    */
-  public int getXMin() {
+  public double getXMin() {
     return x1;
   }
 
   /**
    * greatest X coordinate
    */
-  public int getXMax() {
+  public double getXMax() {
     return x2;
   }
 
   /**
    * smallest Y coordinate
    */
-  public int getYMin() {
+  public double getYMin() {
     return y1;
   }
 
   /**
    * greatest Y coordinate
    */
-  public int getYMax() {
+  public double getYMax() {
     return y2;
   }
 

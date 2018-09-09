@@ -55,7 +55,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
                 }
             }
             if (!pass) {
-                throw new IllegalJobException("Resoluiton of " + p.getDPI() + " is not supported");
+                throw new IllegalJobException("Resolution of " + p.getDPI() + " is not supported");
             }
             if (p.getMinX() < 0 || p.getMinY() < 0) {
                 throw new IllegalJobException("The Job exceeds the laser-bed on the top or left edge");

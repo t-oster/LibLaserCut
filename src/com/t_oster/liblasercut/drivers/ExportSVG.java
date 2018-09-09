@@ -93,7 +93,7 @@ public class ExportSVG extends LaserCutter
       }
     }
     
-    private void setLocation(int x, int y) {
+    private void setLocation(double x, double y) {
       xPrev=xNow;
       yPrev=yNow;
       double factor = 25.4/dpi; // convert units to millimeters
@@ -106,7 +106,7 @@ public class ExportSVG extends LaserCutter
      * @param x
      * @param y 
      */
-    void moveTo(int x, int y) {
+    void moveTo(double x, double y) {
       setLocation(x,y);
       if (vectorPathActive) {
         // end the previous path
@@ -120,7 +120,7 @@ public class ExportSVG extends LaserCutter
      * @param x
      * @param y 
      */
-    void lineTo(int x, int y) {
+    void lineTo(double x, double y) {
       setLocation(x,y);
       if (!partActive) {
         throw new RuntimeException("lineTo called outside of a part!");

@@ -29,7 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * UNUSED????
  * @author oster
  */
 public class ShapeRecognizer extends TimeIntensiveOperation
@@ -120,12 +120,12 @@ public class ShapeRecognizer extends TimeIntensiveOperation
    */
   private Point getFollower(BlackWhiteRaster bwr, Point c, Point p)
   {
-    int xdiff = p == null ? 1 : c.x - p.x;
-    int ydiff = p == null ? 0 : c.y - p.y;
-    if (bwr.isBlack(c.x-ydiff, c.y+xdiff)==outerBlack){
+    double xdiff = p == null ? 1 : c.x - p.x;
+    double ydiff = p == null ? 0 : c.y - p.y;
+    if (bwr.isBlack((int) (c.x-ydiff), (int) (c.y+xdiff))==outerBlack){
       return (new Point(c.x-ydiff, c.y-xdiff));
     }
-    if (bwr.isBlack(c.x+xdiff, c.y+xdiff)==outerBlack){
+    if (bwr.isBlack((int) (c.x+xdiff), (int) (c.y+xdiff))==outerBlack){
       return (new Point(c.x-ydiff, c.y-xdiff));
     }
     return null;

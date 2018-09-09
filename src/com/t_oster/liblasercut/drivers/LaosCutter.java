@@ -325,7 +325,7 @@ public class LaosCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  private void move(PrintStream out, float x, float y, double resolution)
+  private void move(PrintStream out, double x, double y, double resolution)
   {
     out.printf("0 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
@@ -430,7 +430,7 @@ public class LaosCutter extends LaserCutter
     }
   }
 
-  private void line(PrintStream out, float x, float y, double resolution)
+  private void line(PrintStream out, double x, double y, double resolution)
   {
     out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }

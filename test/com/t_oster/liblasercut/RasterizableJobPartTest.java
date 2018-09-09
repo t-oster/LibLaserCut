@@ -21,6 +21,7 @@ package com.t_oster.liblasercut;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.utils.BufferedImageAdapter;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -517,25 +518,25 @@ public class RasterizableJobPartTest
     }
     
     @Override
-    public int getMaxY()
+    public double getMaxY()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override
-    public int getMaxX()
+    public double getMaxX()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override
-    public int getMinY()
+    public double getMinY()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override
-    public int getMinX()
+    public double getMinX()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -560,6 +561,18 @@ public class RasterizableJobPartTest
     public double getDPI()
     {
       return 72.0;
+    }
+
+    @Override
+    public void getRasterLine(int line, List<Byte> result)
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getBitsPerRasterPixel()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
   }
   

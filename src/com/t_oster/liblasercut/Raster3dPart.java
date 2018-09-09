@@ -29,7 +29,6 @@ public class Raster3dPart extends RasterizableJobPart
 {
 
   private LaserProperty property = null;
-  private double resolution = 500;
 
   public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {
@@ -39,59 +38,12 @@ public class Raster3dPart extends RasterizableJobPart
     this.start = offset;
   }
 
-  @Override
-  public double getDPI()
-  {
-      return resolution;
-  }
+
+
 
   @Override
-  public int getMinX()
-  {
-    return start.x;
-  }
-
-  @Override
-  public int getMaxX()
-  {
-    return start.x+image.getWidth();
-  }
-
-  @Override
-  public int getMinY()
-  {
-    return start.y;
-  }
-
-  @Override
-  public int getMaxY()
-  {
-    return start.y + image.getHeight();
-  }
-
-  /**
-   * Returns the upper left point of the given raster
-   *
-   * @param raster the raster which upper left corner is to determine
-   * @return
-   */
-  public Point getRasterStart()
-  {
-    return this.start;
-  }
-
-  /**
-   * Returns one line of the given rasterpart every byte represents one pixel
-   * and the value corresponds to the raster power
-   *
-   * @param line
-   * @return
-   */
-  public List<Byte> getRasterLine(int line)
-  {
-    ByteArrayList b = new ByteArrayList(image.getWidth());
-    getRasterLine(line, b);
-    return b;
+  public int getBitsPerRasterPixel() {
+    return 8;
   }
 
   /**
@@ -104,19 +56,19 @@ public class Raster3dPart extends RasterizableJobPart
    * @param line
    * @param result
    */
-  public List<Byte> getRasterLine(int line, List<Byte> result)
+  @Override
+  public void getRasterLine(int line, List<Byte> result)
   {
     if (result instanceof ByteArrayList) {
-	((ByteArrayList)result).clear(image.getWidth());
+      ((ByteArrayList)result).clear(image.getWidth());
     } else {
-	result.clear();
+      result.clear();
     }
     for (int x = 0; x < image.getWidth(); x++)
     {
       //TOTEST: Black white (byte converssion)
       result.add((byte) image.getGreyScale(x, line));
     }
-    return result;
   }
 
   public int getRasterWidth()

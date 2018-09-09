@@ -29,7 +29,7 @@ package com.t_oster.liblasercut;
 public class VectorCommand
 {
 
-  void setX(int d)
+  void setX(double d)
   {
     if (this.type == CmdType.MOVETO || this.type == CmdType.LINETO)
     {
@@ -41,7 +41,7 @@ public class VectorCommand
     }
   }
 
-  void setY(int d)
+  void setY(double d)
   {
     if (this.type == CmdType.MOVETO || this.type == CmdType.LINETO)
     {
@@ -61,16 +61,16 @@ public class VectorCommand
     LINETO
   }
   private CmdType type;
-  private int[] operands;
+  private double[] operands;
   private float foperand;
   private LaserProperty property;
 
-  public VectorCommand(CmdType type, int x, int y)
+  public VectorCommand(CmdType type, double x, double y)
   {
     if (type == CmdType.MOVETO || type == CmdType.LINETO)
     {
       this.type = type;
-      this.operands = new int[]
+      this.operands = new double[]
       {
         x, y
       };
@@ -99,7 +99,7 @@ public class VectorCommand
     return type;
   }
 
-  public int getX()
+  public double getX()
   {
     if (this.type == CmdType.MOVETO || this.type == CmdType.LINETO)
     {
@@ -108,7 +108,7 @@ public class VectorCommand
     throw new UnsupportedOperationException("getX not supported for " + type.toString());
   }
 
-  public int getY()
+  public double getY()
   {
     if (this.type == CmdType.MOVETO || this.type == CmdType.LINETO)
     {
