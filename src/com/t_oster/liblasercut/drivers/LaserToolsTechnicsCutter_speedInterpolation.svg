@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="800mm"
+   viewBox="0 0 210 800"
+   version="1.1"
+   id="svg1379"
+   inkscape:version="0.92.1 r15371"
+   sodipodi:docname="LaserToolsTechnicsCutter_speedInterpolation.svg">
+  <defs
+     id="defs1373">
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path2102"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker2438"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path2436"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker2383"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path2381"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend"
+       style="overflow:visible"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         id="path2096"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="475.97737"
+     inkscape:cy="2766.2418"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false" />
+  <metadata
+     id="metadata1376">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,503)">
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 26.726951,-410.99698 c 0,0 9.793825,-13.16073 27.45264,-24.87396 17.658815,-11.71323 54.686049,-0.0179 72.950539,0 18.26449,0.0179 31.89524,22.20127 41.78421,28.883"
+       id="path169"
+       inkscape:connector-curvature="0" />
+    <path
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#808000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       id="path621"
+       sodipodi:type="arc"
+       sodipodi:cx="54.179588"
+       sodipodi:cy="-435.87094"
+       sodipodi:rx="21.190414"
+       sodipodi:ry="21.190414"
+       sodipodi:start="5.6975118"
+       sodipodi:end="6.2760944"
+       d="m 71.838408,-447.58417 a 21.190414,21.190414 0 0 1 3.531062,11.56297 l -21.189882,0.15026 z" />
+    <circle
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96500003;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       id="circle2733"
+       r="30.666283"
+       cy="-358.78482"
+       cx="74.776924" />
+    <circle
+       cx="61.408073"
+       cy="-218.20103"
+       r="29.062662"
+       id="circle2731"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 30.029695,-328.89227 h 51.732773 l -6.99092,-29.85731 z"
+       id="path1385"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="18.708868"
+       y="-313.76559"
+       id="text1411"><tspan
+         sodipodi:role="line"
+         id="tspan1409"
+         x="18.708868"
+         y="-313.76559"
+         style="stroke-width:0.26458332px">speed at corner pBefore:</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-309.35587"
+         style="stroke-width:0.26458332px"
+         id="tspan1415">a = pBefore.speed * pBefore.deltaToPrevious().unityVector()</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-304.94614"
+         style="stroke-width:0.26458332px"
+         id="tspan1417">speed at corner p:</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-300.53644"
+         style="stroke-width:0.26458332px"
+         id="tspan1413">b = p.speed * p.deltaToPrevious().unityVector()</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-296.12671"
+         style="stroke-width:0.26458332px"
+         id="tspan1419">speed change:</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-291.71698"
+         style="stroke-width:0.26458332px"
+         id="tspan1421">c=acceleration * time </tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-287.30725"
+         style="stroke-width:0.26458332px"
+         id="tspan599" /><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-282.89752"
+         style="stroke-width:0.26458332px"
+         id="tspan601">alpha = vectorAngle(a,b) == angle at corner pBefore.</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-278.48782"
+         style="stroke-width:0.26458332px"
+         id="tspan2558" /><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-274.07809"
+         style="stroke-width:0.26458332px"
+         id="tspan1494">where the vector length of acceleration must be below the limit!</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-269.66837"
+         style="stroke-width:0.26458332px"
+         id="tspan2741">The acceleration is possible under the limit as long as c_max &lt;= acceleration_max * time_min.</tspan><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-265.25864"
+         style="stroke-width:0.26458332px"
+         id="tspan1496" /><tspan
+         sodipodi:role="line"
+         x="18.708868"
+         y="-260.84894"
+         style="stroke-width:0.26458332px"
+         id="tspan1498">In this case, c_max &gt;= sin(alpha) * a</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="52.919369"
+       y="-347.44156"
+       id="text1425"><tspan
+         sodipodi:role="line"
+         id="tspan1423"
+         x="52.919369"
+         y="-347.44156"
+         style="stroke-width:0.26458332px">a</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="82.853546"
+       y="-343.16525"
+       id="text1429"><tspan
+         sodipodi:role="line"
+         id="tspan1427"
+         x="82.853546"
+         y="-343.16525"
+         style="stroke-width:0.26458332px">c</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="59.868374"
+       y="-325.25818"
+       id="text1433"><tspan
+         sodipodi:role="line"
+         id="tspan1431"
+         x="59.868374"
+         y="-325.25818"
+         style="stroke-width:0.26458332px">b</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="13.096205"
+       y="-371.76306"
+       id="text1437"><tspan
+         sodipodi:role="line"
+         id="tspan1435"
+         x="13.096205"
+         y="-371.76306"
+         style="stroke-width:0.26458332px">Trigonometric relations for speed:</tspan><tspan
+         sodipodi:role="line"
+         x="13.096205"
+         y="-367.35333"
+         style="stroke-width:0.26458332px"
+         id="tspan2554" /><tspan
+         sodipodi:role="line"
+         x="13.096205"
+         y="-362.9436"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan1439">case 1: possible within acceleration limit</tspan></text>
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="path1441"
+       d="m 16.666218,-189.11031 h 44.78376 l -0.0419,-29.85731 z"
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       id="text1445"
+       y="-206.32326"
+       x="36.883198"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-206.32326"
+         x="36.883198"
+         id="tspan1443"
+         sodipodi:role="line">a</tspan></text>
+    <text
+       id="text1449"
+       y="-203.11603"
+       x="66.817368"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-203.11603"
+         x="66.817368"
+         id="tspan1447"
+         sodipodi:role="line">c</tspan></text>
+    <text
+       id="text1453"
+       y="-185.47621"
+       x="46.504894"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-185.47621"
+         x="46.504894"
+         id="tspan1451"
+         sodipodi:role="line">b</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="12.944387"
+       y="-252.99069"
+       id="text1437-4"><tspan
+         sodipodi:role="line"
+         x="12.944387"
+         y="-252.99069"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan1439-3">case 1b: at the acceleration limit, at the edge between possible and impossible</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="35.850529"
+       y="-329.95062"
+       id="text1478"><tspan
+         sodipodi:role="line"
+         id="tspan1476"
+         x="35.850529"
+         y="-329.95062"
+         style="stroke-width:0.26458332px">alpha</tspan></text>
+    <text
+       id="text1482"
+       y="-190.97047"
+       x="22.487055"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-190.97047"
+         x="22.487055"
+         id="tspan1480"
+         sodipodi:role="line">alpha</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="36.883194"
+       y="-176.12178"
+       id="text1488"><tspan
+         sodipodi:role="line"
+         id="tspan1486"
+         x="36.883194"
+         y="-176.12178"
+         style="stroke-width:0.26458332px">c = sin(alpha) * a</tspan><tspan
+         sodipodi:role="line"
+         x="36.883194"
+         y="-171.71205"
+         style="stroke-width:0.26458332px"
+         id="tspan1490" /><tspan
+         sodipodi:role="line"
+         x="36.883194"
+         y="-167.30234"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan2587">if the length of b is arbitrary: impossible as soon as c &lt; sin(alpha) * a</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 54.179592,-435.87094 44.74185,-29.85731"
+       id="path1385-9"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="77.06926"
+       y="-447.20392"
+       id="text1425-7"><tspan
+         sodipodi:role="line"
+         id="tspan1423-2"
+         x="77.06926"
+         y="-447.20392"
+         style="fill:#0000ff;stroke-width:0.26458332px">a = speed at pBefore</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
+       d="m 26.1439,-419.68452 28.035692,-16.18642 h 72.950538 l 33.40869,26.62855"
+       id="path1539"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="34.474903"
+       y="-435.62936"
+       id="text1543"><tspan
+         sodipodi:role="line"
+         id="tspan1541"
+         x="34.474903"
+         y="-435.62936"
+         style="stroke-width:0.26458332px">pBefore</tspan></text>
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path1545"
+       d="M 127.13013,-435.87094 H 178.8629"
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker2383)" />
+    <text
+       id="text2423"
+       y="-439.45309"
+       x="143.88664"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="fill:#0000ff;stroke-width:0.26458332px"
+         y="-439.45309"
+         x="143.88664"
+         id="tspan2421"
+         sodipodi:role="line">b = speed at p</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="126.41833"
+       y="-440.12039"
+       id="text2427"><tspan
+         sodipodi:role="line"
+         id="tspan2425"
+         x="126.41833"
+         y="-440.12039"
+         style="stroke-width:0.26458332px">p</tspan></text>
+    <circle
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       id="path2432"
+       cx="54.179588"
+       cy="-435.87094"
+       r="2.2333541" />
+    <circle
+       r="2.2333541"
+       cy="-435.87094"
+       cx="127.54508"
+       id="circle2434"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="2.6726944"
+       y="-492.30161"
+       id="text2552"><tspan
+         sodipodi:role="line"
+         id="tspan2550"
+         x="2.6726944"
+         y="-492.30161"
+         style="stroke-width:0.26458332px;-inkscape-font-specification:'Sans, Bold';font-family:Sans;font-weight:bold;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4.93888889px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal">Design document for the speed interpolation calculations for LTT.</tspan><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-487.89188"
+         style="stroke-width:0.26458332px"
+         id="tspan2755">LTT requires to compute the end velocities (blue arrows in the drawing) of polyline points in the driver.</tspan><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-483.48215"
+         style="stroke-width:0.26458332px"
+         id="tspan2759">These velocities should be as large as possible, but respect the acceleration limit.</tspan><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-479.07245"
+         style="stroke-width:0.26458332px"
+         id="tspan2751" /><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-474.66272"
+         style="stroke-width:0.26458332px"
+         id="tspan2749">Consider the black nominal path with two points, pBefore and p, which results in the interpolated gray machine path.</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="21.544643"
+       y="-402.40768"
+       id="text2583"><tspan
+         sodipodi:role="line"
+         id="tspan2581"
+         x="21.544643"
+         y="-402.40768"
+         style="stroke-width:0.26458332px">We assume all lengths and angles to be small, so that a discrete differential is a valid approximation.</tspan><tspan
+         sodipodi:role="line"
+         x="21.544643"
+         y="-397.99796"
+         style="stroke-width:0.26458332px"
+         id="tspan2585">Then, speed = speedBefore + acceleration * time.</tspan></text>
+    <text
+       id="text2593"
+       y="-155.09486"
+       x="12.944387"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan2591"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         y="-155.09486"
+         x="12.944387"
+         sodipodi:role="line">case 2: above the acceleration limit</tspan></text>
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="path2597"
+       d="m 76.218127,-101.1088 -5.856526,-25.01246 -44.741853,29.857305 h 51.732773"
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       id="text2601"
+       y="-112.14053"
+       x="39.422256"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-112.14053"
+         x="39.422256"
+         id="tspan2599"
+         sodipodi:role="line">a</tspan></text>
+    <text
+       id="text2605"
+       y="-110.53693"
+       x="78.443596"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-110.53693"
+         x="78.443596"
+         id="tspan2603"
+         sodipodi:role="line">c</tspan></text>
+    <text
+       id="text2609"
+       y="-92.629852"
+       x="34.29174"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-92.629852"
+         x="34.29174"
+         id="tspan2607"
+         sodipodi:role="line">desired direction of b</tspan></text>
+    <text
+       id="text2613"
+       y="-97.322296"
+       x="31.440582"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-97.322296"
+         x="31.440582"
+         id="tspan2611"
+         sodipodi:role="line">alpha</tspan></text>
+    <circle
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       id="path2615"
+       r="25.187254"
+       cy="-126.12128"
+       cx="70.361603" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="96.35067"
+       y="-129.82941"
+       id="text2619"><tspan
+         sodipodi:role="line"
+         id="tspan2617"
+         x="96.35067"
+         y="-129.82941"
+         style="stroke-width:0.26458332px">range of actually possible b (speed at p)</tspan><tspan
+         sodipodi:role="line"
+         x="96.35067"
+         y="-125.41968"
+         style="stroke-width:0.26458332px"
+         id="tspan2621">for given a (speed before) and length of c (max. acceleration)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="36.663689"
+       y="-82.478882"
+       id="text2625"><tspan
+         sodipodi:role="line"
+         id="tspan2623"
+         x="36.663689"
+         y="-82.478882"
+         style="stroke-width:0.26458332px">To fix this case for arbitrary b: Reduce a until we are at case 1b with c=sin(alpha)*a.</tspan></text>
+    <text
+       id="text2593-7"
+       y="-57.420578"
+       x="18.92137"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan2591-6"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         y="-57.420578"
+         x="18.92137"
+         sodipodi:role="line">case 3: possible (assuming b is arbitrary)</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 75.135354,-36.777422 19.810588,-26.375337 H 85.370931 Z"
+       id="path2649"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="46.792789"
+       y="-34.555519"
+       id="text2653"><tspan
+         sodipodi:role="line"
+         id="tspan2651"
+         x="46.792789"
+         y="-34.555519"
+         style="stroke-width:0.26458332px">a</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="80.616959"
+       y="-32.762928"
+       id="text2657"><tspan
+         sodipodi:role="line"
+         id="tspan2655"
+         x="80.616959"
+         y="-32.762928"
+         style="stroke-width:0.26458332px">c</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="41.240749"
+       y="-20.816845"
+       id="text2661"><tspan
+         sodipodi:role="line"
+         id="tspan2659"
+         x="41.240749"
+         y="-20.816845"
+         style="stroke-width:0.26458332px">maximum b</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="38.149658"
+       y="-27.296806"
+       id="text2665"><tspan
+         sodipodi:role="line"
+         id="tspan2663"
+         x="38.149658"
+         y="-27.296806"
+         style="stroke-width:0.26458332px">alpha</tspan></text>
+    <ellipse
+       cx="75.105621"
+       cy="-37.329071"
+       id="circle2667"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       rx="14.452284"
+       ry="14.50855" />
+    <text
+       id="text2673"
+       y="-41.377579"
+       x="94.460793"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-41.377579"
+         x="94.460793"
+         id="tspan2669"
+         sodipodi:role="line">range of actually possible b (speed at p)</tspan><tspan
+         id="tspan2671"
+         style="stroke-width:0.26458332px"
+         y="-36.967857"
+         x="94.460793"
+         sodipodi:role="line">for given a (speed before) and length of c (max. acceleration)</tspan></text>
+    <text
+       id="text2677"
+       y="-10.04884"
+       x="17.954823"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="-10.04884"
+         x="17.954823"
+         id="tspan2675"
+         sodipodi:role="line">Law of cosines: c^2 = a^2 + b^2 - 2*a*b*cos(alpha)</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="-5.6391172"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2681">solve to obtain two solutions b = a * cos(alpha) +- sqrt(a^2*(cos(alpha)^2 - 1) + c^2)</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="-1.2293946"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2725">where (cos^2-1) is equal to the numerically better -sin^2, so</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="3.1803279"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan179">b = a * cos(alpha) +- sqrt(a^2*(-1)*sin^2(alpha) + c^2)</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="7.5900507"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2685">The &quot;+&quot; solution is the maximum speed possible for b.</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="11.999773"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2689">The &quot;-&quot; solution is the minimum speed possible for b (!!!!)</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="16.409496"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2715" /><tspan
+         style="stroke-width:0.26458332px"
+         y="20.819218"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2717">b is not arbitrary because the algorithm never increases speed, just decreases, to ensure convergence.</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="25.228941"
+         x="17.954823"
+         sodipodi:role="line"
+         id="tspan2687" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="18.92137"
+       y="31.847445"
+       id="text2693"><tspan
+         sodipodi:role="line"
+         x="18.92137"
+         y="31.847445"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan2691">case 4: cannot decelerate fast enough</tspan><tspan
+         sodipodi:role="line"
+         x="18.92137"
+         y="36.257168"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan2727">(and the algorithm, by design, never increases the (candidate) velocity of a point)</tspan><tspan
+         sodipodi:role="line"
+         x="18.92137"
+         y="40.666889"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan2729" /><tspan
+         sodipodi:role="line"
+         x="18.92137"
+         y="45.076611"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold';stroke-width:0.26458332px"
+         id="tspan2719">(the currently stored value of b is less than the &quot;-&quot; solution from case 3)</tspan></text>
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="path2695"
+       d="M 85.370931,74.118005 75.135354,63.71592 19.810588,74.118005 h 36.507864"
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       id="text2699"
+       y="65.93782"
+       x="46.792789"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="65.93782"
+         x="46.792789"
+         id="tspan2697"
+         sodipodi:role="line">a</tspan></text>
+    <text
+       id="text2707"
+       y="77.975601"
+       x="16.672297"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="77.975601"
+         x="16.672297"
+         id="tspan2705"
+         sodipodi:role="line">current (=maximum) b</tspan></text>
+    <text
+       id="text2711"
+       y="73.421417"
+       x="33.3009"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.44663906px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="73.421417"
+         x="33.3009"
+         id="tspan2709"
+         sodipodi:role="line">alpha</tspan></text>
+    <ellipse
+       ry="14.50855"
+       rx="14.452284"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       id="ellipse2713"
+       cy="63.164272"
+       cx="75.105621" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="25.123335"
+       y="92.27153"
+       id="text2723"><tspan
+         sodipodi:role="line"
+         id="tspan2721"
+         x="25.123335"
+         y="92.27153"
+         style="stroke-width:0.26458332px">Solve this by going back to case 3 by reducing a until law of cosines is fulfilled:</tspan><tspan
+         sodipodi:role="line"
+         x="25.123335"
+         y="96.681252"
+         style="stroke-width:0.26458332px"
+         id="tspan177">solve c^2 = ... for a,  this yields  (note that the equation is symmetric w.r.t. swapping b and a)</tspan><tspan
+         sodipodi:role="line"
+         x="25.123335"
+         y="101.09097"
+         style="stroke-width:0.26458332px"
+         id="tspan181">a_reduced = b * cos(alpha) + sqrt(b^2*(-1)*sin^2(alpha) + c_max^2)</tspan><tspan
+         sodipodi:role="line"
+         x="25.123335"
+         y="105.50069"
+         style="stroke-width:0.26458332px"
+         id="tspan175" /></text>
+    <text
+       id="text2703"
+       y="67.730415"
+       x="80.616959"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="67.730415"
+         x="80.616959"
+         id="tspan2701"
+         sodipodi:role="line">c_max</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="108.24416"
+       y="-358.34488"
+       id="text2737"><tspan
+         sodipodi:role="line"
+         id="tspan2735"
+         x="108.24416"
+         y="-358.34488"
+         style="fill:#b3b3b3;stroke-width:0.26458332px">radius c</tspan></text>
+    <path
+       style="opacity:0.3;fill:none;fill-rule:evenodd;stroke:#00ff00;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 65.72061,-26.349401 19.650321,-0.02593"
+       id="path2743"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#008000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="90.336304"
+       y="-21.530224"
+       id="text2747"><tspan
+         sodipodi:role="line"
+         id="tspan2745"
+         x="90.336304"
+         y="-21.530224"
+         style="fill:#008000;stroke-width:0.26458332px">permissible range of b</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#808000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="62.22625"
+       y="-437.82513"
+       id="text1478-3"><tspan
+         sodipodi:role="line"
+         id="tspan1476-6"
+         x="62.22625"
+         y="-437.82513"
+         style="stroke-width:0.26458332px;fill:#808000;">alpha</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 58.586309,138.25808 11.533807,-8.99892 -48.041671,8.99892 h 36.507864"
+       id="path155"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="34.895363"
+       y="131.94878"
+       id="text159"><tspan
+         sodipodi:role="line"
+         id="tspan157"
+         x="34.895363"
+         y="131.94878"
+         style="stroke-width:0.26458332px">reduced a</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="18.940153"
+       y="142.11568"
+       id="text163"><tspan
+         sodipodi:role="line"
+         id="tspan161"
+         x="18.940153"
+         y="142.11568"
+         style="stroke-width:0.26458332px">current (=maximum) b</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.59079075px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="35.938076"
+       y="137.3425"
+       id="text167"><tspan
+         sodipodi:role="line"
+         id="tspan165"
+         x="35.938076"
+         y="137.3425"
+         style="stroke-width:0.26458332px">alpha</tspan></text>
+    <ellipse
+       cx="70.02356"
+       cy="129.3035"
+       id="ellipse169"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       rx="14.452284"
+       ry="14.50855" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="66.180466"
+       y="135.7459"
+       id="text173"><tspan
+         sodipodi:role="line"
+         id="tspan171"
+         x="66.180466"
+         y="135.7459"
+         style="stroke-width:0.26458332px">c_max</tspan></text>
+  </g>
+</svg>
