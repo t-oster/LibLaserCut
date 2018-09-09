@@ -27,7 +27,7 @@ package com.t_oster.liblasercut;
 public class FloatPowerSpeedFocusProperty implements LaserProperty
 {
 
-  private float power = 20;
+  private float power = 0;
   private float speed = 100;
   private float focus = 0;
 

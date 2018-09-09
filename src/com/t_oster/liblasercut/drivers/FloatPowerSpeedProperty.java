@@ -27,7 +27,7 @@ import com.t_oster.liblasercut.LaserProperty;
  */
 public class FloatPowerSpeedProperty implements LaserProperty
 {
-  private float power = 20;
+  private float power = 0;
   private float speed = 100;
 
   public FloatPowerSpeedProperty()
