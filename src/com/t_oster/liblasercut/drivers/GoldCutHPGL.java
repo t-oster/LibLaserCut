@@ -176,8 +176,8 @@ public class GoldCutHPGL extends LaserCutter {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
-          int x = cmd.getX();
-          int y = cmd.getY();
+          double x = cmd.getX();
+          double y = cmd.getY();
           move(out, x, y, resolution);
           break;
         case LINETO:
@@ -212,11 +212,11 @@ public class GoldCutHPGL extends LaserCutter {
     }
   }
 
-  private void move(PrintStream out, int x, int y, double resolution) {
+  private void move(PrintStream out, double x, double y, double resolution) {
     moveOrLine("PU", out, x, y, resolution);
   }
 
-  private void line(PrintStream out, int x, int y, double resolution) {
+  private void line(PrintStream out, double x, double y, double resolution) {
     moveOrLine("PD", out, x, y, resolution);
   }
 
@@ -228,7 +228,7 @@ public class GoldCutHPGL extends LaserCutter {
    * @param y coordinate (in pixels)
    * @param resolution dpi (coordinate pixels per inch)
    */
-  private void moveOrLine(String command, PrintStream out, int x, int y, double resolution) {
+  private void moveOrLine(String command, PrintStream out, double x, double y, double resolution) {
     double hw_scale = this.getHwDPI()/resolution;
     // Note: standard HPGL coordinates are: (0,0)=top-left, Y=right, X=down.
     hw_x = (int)(hw_scale * (isFlipXaxis() ? Util.mm2px(this.bedWidth, resolution) - y : y));

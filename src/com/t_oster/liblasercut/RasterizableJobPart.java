@@ -19,6 +19,7 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
+import java.util.List;
 
 /**
  * Common functions useful when rasterizing an image.
@@ -29,6 +30,13 @@ abstract public class RasterizableJobPart extends JobPart
   protected GreyscaleRaster image;
   protected Point start = null;
   protected boolean cutDirectionleftToRight = true;
+  protected double resolution = Double.NaN;
+
+  @Override
+  public double getDPI()
+  {
+      return resolution;
+  }
   
   /**
    * The initial laser settings to start a rasterization job with.
@@ -44,6 +52,33 @@ abstract public class RasterizableJobPart extends JobPart
     return this.image.getHeight();
   }
   
+    /**
+   * Returns one line of the given rasterpart
+   * every byte represents 8/getBitsPerRasterPixel() pixels and the value
+   * corresponds to (2^getBitsPerRasterPixel() - 1) when black or 0 when white
+   * @param line
+   * @return
+   */
+  public List<Byte> getRasterLine(int line)
+  {
+    ByteArrayList b = new ByteArrayList(image.getWidth());
+    getRasterLine(line, b);
+    return b;
+  }
+
+  /**
+   * write output of getRasterLine(line) into the given result list
+   * @param line
+   * @param result
+   */
+  abstract public void getRasterLine(int line, List<Byte> result);
+
+  /**
+   * bits for one pixel in getRasterLine() output
+   * @return 1 or 8
+   */
+  public abstract int getBitsPerRasterPixel();
+
   /**
    * Gets the width of the associated raster image 
    * @return width in pixels
@@ -202,6 +237,16 @@ abstract public class RasterizableJobPart extends JobPart
   }
   
   /**
+   * Returns the upper left point of the given raster
+   * @param raster the raster which upper left corner is to determine
+   * @return
+   */
+  public Point getRasterStart()
+  {
+    return getStartPosition(0);
+  }
+
+  /**
    * Returns the start position of the first column (x=0) for a given line
    * @param y y coordinate of the row in question
    * @return Point representing start of this row
@@ -211,6 +256,30 @@ abstract public class RasterizableJobPart extends JobPart
     Point start = this.start.clone();
     start.y += y;
     return start;
+  }
+
+  @Override
+  public double getMinX()
+  {
+    return this.start.x;
+  }
+
+  @Override
+  public double getMaxX()
+  {
+    return this.start.x + this.image.getWidth();
+  }
+
+  @Override
+  public double getMinY()
+  {
+    return start.y;
+  }
+
+  @Override
+  public double getMaxY()
+  {
+    return start.y+image.getHeight();
   }
   
   /**

@@ -27,10 +27,10 @@ package com.t_oster.liblasercut.platform;
 public class Point
 {
 
-  public int x;
-  public int y;
+  public double x;
+  public double y;
 
-  public Point(int x, int y)
+  public Point(double x, double y)
   {
     this.x = x;
     this.y = y;
@@ -43,24 +43,38 @@ public class Point
   }
 
   @Override
-  public boolean equals(Object o)
+  public int hashCode()
   {
-    if (o instanceof Point)
-    {
-      Point p = (Point) o;
-      return p.x == x && p.y == y;
-    }
-    return o == this;
+    int hash = 5;
+    hash = 97 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+    hash = 97 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+    return hash;
   }
 
   @Override
-  public int hashCode()
+  public boolean equals(Object obj)
   {
-    int hash = 7;
-    hash = 29 * hash + this.x;
-    hash = 29 * hash + this.y;
-    return hash;
+    if (obj == null)
+    {
+      return false;
+    }
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+    final Point other = (Point) obj;
+    if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x))
+    {
+      return false;
+    }
+    if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y))
+    {
+      return false;
+    }
+    return true;
   }
+
+
 
   public int compareTo(Point o)
   {
@@ -69,5 +83,64 @@ public class Point
     if (x < o.x) return -1;
     if (x > o.x) return 1;
     return 0;
+  }
+
+    /**
+   * compute euclidean distance to another point
+   * @param p other point
+   * @return
+   */
+  public double hypothenuseTo(Point p) {
+    return this.subtract(p).hypot();
+  }
+
+  public Point add(Point p) {
+    return new Point(x+p.x, y+p.y);
+  }
+
+  public Point subtract(Point p) {
+    return new Point(x-p.x, y-p.y);
+  }
+
+  /**
+   * absolute angle between this point and another point, if both points are interpreted as vector from zero to the point
+   *
+   * @param p other vector
+   * @return Result in the range 0 <= result <= pi
+   */
+  public double absAngleTo(Point p) {
+    // TODO: simplify ( = overapproximate). Before, double-check that all consumers understand this is an approximation!
+    double angle = Math.abs(Math.atan2(y, x) - Math.atan2(p.y, p.x));
+    // normalize to -pi ... pi
+    if (angle > Math.PI) {
+      angle = angle - 2*Math.PI;
+    }
+    return Math.abs(angle);
+  }
+
+  /**
+   * return a vector with same direction, but length 1
+   * @return
+   */
+  public Point unityVector() {
+    double l = hypot();
+    return new Point(x/l, y/l);
+  }
+
+  /**
+   * compute euclidean length
+   * @return sqrt(x^2 + y^2)
+   */
+  public double hypot() {
+    return Math.sqrt(x*x + y*y);
+  }
+
+  /**
+   * multiply with scalar
+   * @param factor
+   * @return scaled vector
+   */
+  public Point scale(double factor) {
+    return new Point(x*factor, y*factor);
   }
 }

@@ -40,12 +40,12 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
     @Override
     public int compare(Element a, Element b)
     {
-      Integer av = new Integer(getValue(a));
-      Integer bv = new Integer(getValue(b));
+      Double av = new Double(getValue(a));
+      Double bv = new Double(getValue(b));
       return av.compareTo(bv);
     }
 
-    int getValue(Element e)
+    double getValue(Element e)
     {
       return (e.boundingBox().getXMax() - e.boundingBox().getXMin()) * (e.boundingBox().getYMax() - e.boundingBox().getYMin());
     }

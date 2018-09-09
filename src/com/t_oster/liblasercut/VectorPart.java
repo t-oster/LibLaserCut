@@ -29,10 +29,10 @@ public class VectorPart extends JobPart
 {
 
   private LaserProperty currentCuttingProperty;
-  private int maxX;
-  private int maxY;
-  private int minX;
-  private int minY;
+  private double maxX;
+  private double maxY;
+  private double minX;
+  private double minY;
   private double resolution = 500;
   private List<VectorCommand> commands;
 
@@ -71,7 +71,7 @@ public class VectorPart extends JobPart
     return commands.toArray(new VectorCommand[0]);
   }
 
-  private void checkMin(int x, int y)
+  private void checkMin(double x, double y)
   {
     if (x < minX)
     {
@@ -83,7 +83,7 @@ public class VectorPart extends JobPart
     }
   }
 
-  private void checkMax(int x, int y)
+  private void checkMax(double x, double y)
   {
     if (x > maxX)
     {
@@ -95,14 +95,14 @@ public class VectorPart extends JobPart
     }
   }
 
-  public void moveto(int x, int y)
+  public void moveto(double x, double y)
   {
     commands.add(new VectorCommand(VectorCommand.CmdType.MOVETO, x, y));
     checkMin(x, y);
     checkMax(x, y);
   }
 
-  public void lineto(int x, int y)
+  public void lineto(double x, double y)
   {
     commands.add(new VectorCommand(VectorCommand.CmdType.LINETO, x, y));
     checkMin(x, y);
@@ -110,25 +110,25 @@ public class VectorPart extends JobPart
   }
 
   @Override
-  public int getMinX()
+  public double getMinX()
   {
     return minX;
   }
 
   @Override
-  public int getMaxX()
+  public double getMaxX()
   {
     return maxX;
   }
 
   @Override
-  public int getMinY()
+  public double getMinY()
   {
     return minY;
   }
 
   @Override
-  public int getMaxY()
+  public double getMaxY()
   {
     return maxY;
   }

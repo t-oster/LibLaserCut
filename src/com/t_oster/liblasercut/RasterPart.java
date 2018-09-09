@@ -30,7 +30,6 @@ public class RasterPart extends RasterizableJobPart
 
   LaserProperty blackPixelProperty = null;
   LaserProperty whitePixelProperty = null;
-  double resolution = 500;
 
   public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {
@@ -47,58 +46,10 @@ public class RasterPart extends RasterizableJobPart
     }
   }
 
-  @Override
-  public double getDPI()
-  {
-      return resolution;
-  }
 
   @Override
-  public int getMinX()
-  {
-    return this.start.x;
-  }
-
-  @Override
-  public int getMaxX()
-  {
-    return this.start.x + this.image.getWidth();
-  }
-
-  @Override
-  public int getMinY()
-  {
-    return start.y;
-  }
-
-  @Override
-  public int getMaxY()
-  {
-    return start.y+image.getHeight();
-  }
-
-  /**
-   * Returns the upper left point of the given raster
-   * @param raster the raster which upper left corner is to determine
-   * @return
-   */
-  public Point getRasterStart()
-  {
-    return this.start;
-  }
-
-  /**
-   * Returns one line of the given rasterpart
-   * every byte represents 8 pixel and the value corresponds to
-   * 1 when black or 0 when white
-   * @param line
-   * @return
-   */
-  public List<Byte> getRasterLine(int line)
-  {
-    ByteArrayList b = new ByteArrayList((image.getWidth() + 7) / 8);
-    getRasterLine(line, b);
-    return b;
+  public int getBitsPerRasterPixel() {
+    return 1;
   }
 
   /**
@@ -110,6 +61,7 @@ public class RasterPart extends RasterizableJobPart
    * @param line
    * @param result
    */
+  @Override
   public void getRasterLine(int line, List<Byte> result)
   {
     if (result instanceof ByteArrayList) {
