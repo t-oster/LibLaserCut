@@ -22,6 +22,7 @@
 package com.t_oster.liblasercut;
 
 import java.util.AbstractList;
+import java.util.Collections;
 
 /**
  * A specialized class to support the usage of List<Byte> within this library.
@@ -121,6 +122,77 @@ public class ByteArrayList extends AbstractList<Byte> {
 		       data, start + index, size - index);
     }
     return v;
+  }
+  /**
+   * If the list is interpreted as a bitstring, shift it x bits to the left,
+   * keeping the lenght constant.
+   * The bit order is as if you would write out the bytes from get(0) to get(N):
+   * byte:    get(0)     get(1)     get(2)     ...
+   * byte:    0b11000000 0b01111000 0b10000000 ...
+   * This is consistent with the pixel order in RasterizablePart.getByte(), and specifically with in BlackWhiteRaster.getByte().
+   * pixels:    BBWWWWWW   WBBBBWWW ...
+   * leftShiftBits(1) shifts the pixels 1 to the left, deleting the leftmost pixel:
+   *          0b10000000 0b11110001 ...
+   * @param shift number of bits to shift to the left (positive). Negative = shift to the right.
+   */
+  public void leftShiftBits(int shift) {
+    if (shift >= 0) {
+      while (shift >= 8) {
+        // to shift 8 bits to the left, remove the first byte, and append a zero byte
+        remove(0);
+        add((byte) 0);
+        shift -= 8;
+      }
+      if (shift == 0) {
+        // nothing left to do
+        return;
+      }
+      // now shift the remaining 1 ... 7 bits to the left
+      assert 0 < shift && shift < 8;
+      ByteArrayList l = new ByteArrayList(data.length);
+      for (int i=0; i < size(); i++)
+      {
+        byte nextByte;
+        if (i +1 < size()) {
+          nextByte = get(i+1);
+        } else {
+          nextByte = 0;
+        }
+        l.add((byte) ((((get(i) & 0xFF) << shift) | ((nextByte & 0xFF) >> (8-shift)))&0xFF));
+      }
+      this.data = l.data;
+      this.size = l.size;
+      this.start = l.start;
+    } else {
+      // this is stupid and inefficient, but it works and is currently not used.
+      reverseBits();
+      leftShiftBits(-shift);
+      reverseBits();
+    }
+  }
+
+  /**
+   * reverse all bits, so that the leftmost bit of the first byte becomes the rightmost bit of the last byte
+   * In pseudocode, this is (List<byte>) (((List<bit>) bytelist).reverse).
+   * The bit order is as defined in leftShiftBits.
+   */
+  public void reverseBits() {
+    // first, flip the bit order in-place
+      for (int i = 0; i < size(); i++)
+      {
+        byte b = get(i);
+        int bFlipped = 0;
+        for (int j = 0; j < 8; j++)
+        {
+          if ((b & (1 << j)) != 0)
+          {
+            bFlipped |= 1 << (7 - j);
+          }
+        }
+        set(i, (byte) bFlipped);
+      }
+      // then, flip the list order
+      Collections.reverse(this);
   }
 
   @Override
