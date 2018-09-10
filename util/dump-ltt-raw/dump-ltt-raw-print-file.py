@@ -8,7 +8,8 @@ import itertools
 
 # Dump the contents of a LTT lasercutter raw print file resulting from "Print to File" with the windows print driver (or "Export file" with the visicut driver)
 # USAGE: see end of this file
-# LICENSE: MIT, see LICENSE file
+# LICENSE: You may use this under either the the MIT License (see LICENSE file) or the GNU Lesser Public License (Version 3 or later, see ../../COPYING.LESSER). 
+# SPDX-License-Identifier: MIT OR LGPL-3.0+
 
 def vecAbs(vec):
     return math.sqrt(np.dot(vec, vec))
