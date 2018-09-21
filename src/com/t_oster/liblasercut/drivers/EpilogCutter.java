@@ -560,8 +560,8 @@ abstract class EpilogCutter extends LaserCutter
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-    out.printf("\033*r%dT", jp.getMaxY());//height);
-    out.printf("\033*r%dS", jp.getMaxX());//width);
+    out.printf("\033*r%dT", (int) jp.getMaxY());//height);
+    out.printf("\033*r%dS", (int) jp.getMaxX());//width);
         /* Raster compression:
      *  2 = TIFF encoding
      *  7 = TIFF encoding, 3d-mode,
@@ -737,18 +737,18 @@ abstract class EpilogCutter extends LaserCutter
           }
           case MOVETO:
           {
-            out.printf("PU%d,%d;", cmd.getX(), cmd.getY());
+            out.printf("PU%d,%d;", (int) cmd.getX(), (int) cmd.getY());
             break;
           }
           case LINETO:
           {
             if (lastType == null || lastType != VectorCommand.CmdType.LINETO)
             {
-              out.printf("PD%d,%d", cmd.getX(), cmd.getY());
+              out.printf("PD%d,%d", (int) cmd.getX(), (int) cmd.getY());
             }
             else
             {
-              out.printf(",%d,%d", cmd.getX(), cmd.getY());
+              out.printf(",%d,%d", (int) cmd.getX(), (int) cmd.getY());
             }
             break;
           }
