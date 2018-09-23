@@ -238,7 +238,6 @@ abstract public class RasterizableJobPart extends JobPart
   
   /**
    * Returns the upper left point of the given raster
-   * @param raster the raster which upper left corner is to determine
    * @return
    */
   public Point getRasterStart()

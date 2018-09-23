@@ -464,8 +464,8 @@ abstract class EpilogCutter extends LaserCutter
       /* Focus */
       out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-      out.printf("\033*r%dT", rp != null ? rp.getMaxY() : 10);//height);
-      out.printf("\033*r%dS", rp != null ? rp.getMaxX() : 10);//width);
+      out.printf("\033*r%dT", rp != null ? (int) rp.getMaxY() : 10);//height);
+      out.printf("\033*r%dS", rp != null ? (int) rp.getMaxX() : 10);//width);
             /* Raster compression:
        *  2 = TIFF encoding
        *  7 = TIFF encoding, 3d-mode,
@@ -509,8 +509,8 @@ abstract class EpilogCutter extends LaserCutter
         }
         if (line.size() > 0)
         {
-          out.printf("\033*p%dX", sp.x + jump);
-          out.printf("\033*p%dY", sp.y + y);
+          out.printf("\033*p%dX", (int) sp.x + jump);
+          out.printf("\033*p%dY", (int) sp.y + y);
           if (leftToRight)
           {
             out.printf("\033*b%dA", line.size());
@@ -595,8 +595,8 @@ abstract class EpilogCutter extends LaserCutter
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-    out.printf("\033*r%dT", rp.getMaxY());//height);
-    out.printf("\033*r%dS", rp.getMaxX());//width);
+    out.printf("\033*r%dT", (int) rp.getMaxY());//height);
+    out.printf("\033*r%dS", (int) rp.getMaxX());//width);
         /* Raster compression:
      *  2 = TIFF encoding
      *  7 = TIFF encoding, 3d-mode,
@@ -634,8 +634,8 @@ abstract class EpilogCutter extends LaserCutter
         }
         if (line.size() > 0)
         {
-          out.printf("\033*p%dX", sp.x + jump * 8);
-          out.printf("\033*p%dY", sp.y + y);
+          out.printf("\033*p%dX", (int) sp.x + jump * 8);
+          out.printf("\033*p%dY", (int) sp.y + y);
           if (leftToRight)
           {
             out.printf("\033*b%dA", line.size());
