@@ -45,6 +45,14 @@ public class Raster3dPart extends RasterizableJobPart
   public int getBitsPerRasterPixel() {
     return 8;
   }
+  
+   public void setBottomUp(boolean bottomUp) {
+    this.cutBottomUp = bottomUp;
+  }
+
+  public boolean getBottomUp() {
+    return this.cutBottomUp;
+  }
 
   /**
    * Sets one line of the given rasterpart in the given result list.

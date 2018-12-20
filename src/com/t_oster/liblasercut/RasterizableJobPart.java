@@ -31,6 +31,7 @@ abstract public class RasterizableJobPart extends JobPart
   protected Point start = null;
   protected boolean cutDirectionleftToRight = true;
   protected double resolution = Double.NaN;
+  protected boolean cutBottomUp = false;
 
   @Override
   public double getDPI()

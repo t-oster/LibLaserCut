@@ -51,7 +51,14 @@ public class RasterPart extends RasterizableJobPart
   public int getBitsPerRasterPixel() {
     return 1;
   }
+  
+  public void setBottomUp(boolean bottomUp) {
+    this.cutBottomUp = bottomUp;
+  }
 
+  public boolean getBottomUp() {
+    return this.cutBottomUp;
+  }
   /**
    * Sets one line of the given rasterpart into the given result list.
    * every byte represents 8 pixel and the value corresponds to

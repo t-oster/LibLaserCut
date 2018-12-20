@@ -483,9 +483,18 @@ abstract class EpilogCutter extends LaserCutter
       boolean leftToRight = true;
       ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
       ByteArrayList encoded = new ByteArrayList(rp.getRasterWidth());
-      for (int y = 0; y < rp.getRasterHeight(); y++)
+      int y = 0;
+      if (rp.getBottomUp()) {
+        y = rp.getRasterHeight()-1;
+      }
+      for (;;)
       {
-	rp.getInvertedRasterLine(y, line);
+        if (rp.getBottomUp()) {
+          if (--y < 0) break;
+        } else {
+          if (++y >= rp.getRasterHeight()) break;
+        }
+         rp.getInvertedRasterLine(y, line);
         for (int n = 0; n < line.size(); n++)
         {//Apperantly the other power settings are ignored, so we have to scale
           int x = line.get(n);
@@ -607,7 +616,7 @@ abstract class EpilogCutter extends LaserCutter
      */
     out.printf("\033*b2M");
     /* Raster direction (1 = up, 0=down) */
-    out.printf("\033&y%dO", 0);
+    out.printf("\033&y%dO", rp.getBottomUp()?1:0);
     /* start at current position */
     out.printf("\033*r1A");
 
@@ -617,8 +626,17 @@ abstract class EpilogCutter extends LaserCutter
       boolean leftToRight = true;
       ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
       ByteArrayList encoded = new ByteArrayList(rp.getRasterWidth());
-      for (int y = 0; y < rp.getRasterHeight(); y++)
+      int y = 0;
+      if (rp.getBottomUp()) {
+        y = rp.getRasterHeight()-1;
+      }
+      for (;;)
       {
+        if (rp.getBottomUp()) {
+          if (--y < 0) break;
+        } else {
+          if (++y >= rp.getRasterHeight()) break;
+        }
         rp.getRasterLine(y, line);
         //Remove leading zeroes, but keep track of the offset
         int jump = 0;
