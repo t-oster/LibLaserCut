@@ -66,10 +66,9 @@ public class LaosEngraveProperty extends LaosCutterProperty
   }
   
   @Override
-  public String[] getPropertyKeys()
-  {
+  protected String[] getPropertyKeys(boolean showHidden) {
     LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    result.addAll(Arrays.asList(super.getPropertyKeys(showHidden)));
     result.add(BOTTOM_UP);
     result.add(UNIDIRECTIONAL);
     return result.toArray(new String[0]);
@@ -112,8 +111,8 @@ public class LaosEngraveProperty extends LaosCutterProperty
   @Override
   public LaosEngraveProperty clone()
   {
-    LaosEngraveProperty result = new LaosEngraveProperty();
-    for (String s:this.getPropertyKeys())
+    LaosEngraveProperty result = new LaosEngraveProperty(hidePurge, hideVentilation, hideFocus, hideFrequency);
+    for (String s:this.getPropertyKeys(true))
     {
       result.setProperty(s, this.getProperty(s));
     }
