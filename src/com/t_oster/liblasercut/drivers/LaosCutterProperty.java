@@ -28,10 +28,10 @@ import java.util.LinkedList;
  */
 public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   
-  private boolean hidePurge = false;
-  private boolean hideVentilation = false;
-  private boolean hideFocus = false;
-  private boolean hideFrequency = false;
+  protected boolean hidePurge = false;
+  protected boolean hideVentilation = false;
+  protected boolean hideFocus = false;
+  protected boolean hideFrequency = false;
     
   private boolean ventilation = true;
 
@@ -92,25 +92,30 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   @Override
   public String[] getPropertyKeys()
   {
+    return getPropertyKeys(false);
+  }
+  
+  protected String[] getPropertyKeys(boolean showHidden) {
     LinkedList<String> result = new LinkedList<String>();
     result.addAll(Arrays.asList(super.getPropertyKeys()));
-    if (this.hideFocus)
-    {
-      result.remove("focus");
+    if (!showHidden) {
+      if (this.hideFocus)
+      {
+        result.remove("focus");
+      }
+      if (this.hideFrequency)
+      {
+        result.remove("frequency");
+      }
+      if (!this.hideVentilation)
+      {
+        result.add("ventilation");
+      }
+      if (!this.hidePurge)
+      {
+        result.add("purge");
+      }
     }
-    if (this.hideFrequency)
-    {
-      result.remove("frequency");
-    }
-    if (!this.hideVentilation)
-    {
-      result.add("ventilation");
-    }
-    if (!this.hidePurge)
-    {
-      result.add("purge");
-    }
-    
     return result.toArray(new String[0]);
   }
 
@@ -151,8 +156,8 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   @Override
   public LaosCutterProperty clone()
   {
-    LaosCutterProperty result = new LaosCutterProperty();
-    for (String s:this.getPropertyKeys())
+    LaosCutterProperty result = new LaosCutterProperty(hidePurge, hideVentilation, hideFocus, hideFrequency);
+    for (String s:this.getPropertyKeys(true))
     {
       result.setProperty(s, this.getProperty(s));
     }
