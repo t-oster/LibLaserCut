@@ -41,3 +41,18 @@ function echo(text)
 {
   _instance.echo(text);
 }
+
+function prompt(title, defaultValue)
+{
+  return _instance.prompt(title, defaultValue);
+}
+
+function promptFloat(title, defaultValue)
+{
+  var result = parseFloat(_instance.prompt(title, defaultValue.toString()));
+  if (isNaN(result)) {
+    return defaultValue;
+  } else {
+    return result;
+  }
+}

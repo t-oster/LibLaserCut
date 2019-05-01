@@ -84,5 +84,12 @@ public class VectorPartScriptInterface implements ScriptInterface
   {
     System.err.println("LaserScript: "+text);
   }
+
+  @Override
+  public String prompt(String title, String defaultValue)
+  {
+    throw new UnsupportedOperationException("prompt() is not yet supported in commandline mode.");
+  }
+
   
 }
