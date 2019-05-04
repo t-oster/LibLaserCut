@@ -79,6 +79,12 @@ public class ScriptInterpreterTest
         public void echo(String text)
         {
         }
+
+        @Override
+        public String prompt(String title, String defaultValue)
+        {
+          return null;
+        }
       });
     }
     catch (ScriptException e)
@@ -156,6 +162,13 @@ public class ScriptInterpreterTest
       public void echo(String text)
       {
         steps.add("echo ("+text+")");
+      }
+
+      @Override
+      public String prompt(String title, String defaultValue)
+      {
+        steps.add("prompt(" + title + "','" + defaultValue + "')");
+        return null;
       }
     });
     assertEquals(10, steps.size());

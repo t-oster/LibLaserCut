@@ -34,4 +34,6 @@ public interface ScriptInterface
   public Object get(String property);
   
   public void echo(String text);
+
+  public String prompt(String title, String defaultValue);
 }
