@@ -575,7 +575,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     out.write(color.value);
   }
 
-  private boolean laserOn = false;
+  private transient boolean laserOn = false;
 
   private void setLaserOn(PrintStream out, boolean on)
   {
@@ -757,13 +757,13 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
   // maximum position inaccuracy in mm
   // TODO!
-  final double lengthTolerance = 1e-1; // TODO try out different values
+  private static final double lengthTolerance = 1e-1; // TODO try out different values
   // maximal angle which may be smoothed, as long as position accuracy is satisfied
   // must be < 90° because otherwise the interpolation code breaks (180° may also be okay, but careful review would be required)
-  final double angleToleranceShort = Math.toRadians(40);
+  private static final double angleToleranceShort = Math.toRadians(40);
   // finer restriction on maximal angle for line segments which have a significant length
   // TODO has no effect, except if made really small for certain length???
-  final double angleToleranceLong = Math.toRadians(10);
+  private static final double angleToleranceLong = Math.toRadians(10);
 
   /**
    * Cut a smooth curve with given interpolation points.
@@ -1031,8 +1031,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   }
 
   // for convenience, we support double coordinates, but the lasercutter only knows integers.
-  private double currentX = -1;
-  private double currentY = -1;
+  private transient double currentX = -1;
+  private transient double currentY = -1;
 
   private void goToCoordinate(PrintStream out, double x, double y, double resolution, boolean sendAsRelative) throws IOException
   {
@@ -1086,7 +1086,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
   }
 
-  private float currentPower = -1;
+  private transient float currentPower = -1;
 
   private void setPower(PrintStream out, float power) throws IOException
   {
@@ -1098,7 +1098,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
   }
 
-  private float currentSpeed = -1;
+  private transient float currentSpeed = -1;
 
   private void setSpeed(PrintStream out, float speed) throws IOException
   {
@@ -1110,7 +1110,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
   }
 
-  private int currentFrequency = -1;
+  private transient int currentFrequency = -1;
 
   private void setFrequency(PrintStream out, int frequency) throws IOException
   {
@@ -1126,7 +1126,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
   }
 
-  private float currentFocus = 0;
+  private transient float currentFocus = 0;
 
   private void setFocus(PrintStream out, float focus)
   {
@@ -1138,15 +1138,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   }
 
   // Job mode:
-  private final int JOB_MODE_XY = 0x00;
-  private final int JOB_MODE_ROTARY_AXIS = 0x10;
+  private static final int JOB_MODE_XY = 0x00;
+  private static final int JOB_MODE_ROTARY_AXIS = 0x10;
   // TODO: DOCS inconsistent
-  private final int JOB_MODE_1BIT_PER_PIXEL = 0x00; // engrave normal
-  private final int JOB_MODE_4BIT_PER_PIXEL = 0x01; // suggested for stamp engrave3d ("rubber power")
-  private final int JOB_MODE_8BIT_PER_PIXEL = 0x02; // engrave3d
-  private final int JOB_MODE_MASK_BITS_PER_PX = 0x0f; // bitmask for "bits per pixel"
+  private static final int JOB_MODE_1BIT_PER_PIXEL = 0x00; // engrave normal
+  private static final int JOB_MODE_4BIT_PER_PIXEL = 0x01; // suggested for stamp engrave3d ("rubber power")
+  private static final int JOB_MODE_8BIT_PER_PIXEL = 0x02; // engrave3d
+  private static final int JOB_MODE_MASK_BITS_PER_PX = 0x0f; // bitmask for "bits per pixel"
 
-  private int currentJobMode = -1;
+  private transient int currentJobMode = -1;
 
   private void setJobMode(PrintStream out, int jobMode) throws IOException
   {
@@ -1718,7 +1718,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   {
     this.bedHeight = bedHeight;
   }
-  private final Integer[] engraveShiftListDefault = new Integer[]
+  private static final Integer[] engraveShiftListDefault = new Integer[]
   {
     -2, -4, -7, -10, -13, -15, -17, -19, -21, -23
   };
