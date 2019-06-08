@@ -730,6 +730,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     {
       double len = point.deltaToPrevious.hypot();
       myAssert(len < 1e6 * maxDistance); // input points must not be more apart than 1e6*maxDistance
+      if (len == 0) {
+        continue;
+      }
       if (len < maxDistance)
       {
         pointsNew.add(point);
@@ -737,10 +740,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       else
       {
         // in the end, we have the previous point, $numExtraPoints intermediate points, and the current point.
-        int numExtraPoints = (int) Math.floor(len / maxDistance);
+        // Number of intermediate points:
+        // 0 if len==maxDistance
+        // 1 for maxDist < len <= 2*maxDist
+        // ...
+        int numExtraPoints = (int) Math.ceil(len / maxDistance) - 1;
         for (int i = 0; i < numExtraPoints; i++)
         {
-          Point tmp = point.subtract(point.deltaToPrevious.scale((numExtraPoints - i + 1.f) / (2 + numExtraPoints)));
+          Point tmp = point.subtract(point.deltaToPrevious.scale((numExtraPoints - i + 0.d) / (1 + numExtraPoints)));
           PointWithSpeed intermediate = new PointWithSpeed(tmp.x, tmp.y);
           intermediate.absAngleAtCorner = 0;
           intermediate.deltaToPrevious = intermediate.subtract(previousPoint);
