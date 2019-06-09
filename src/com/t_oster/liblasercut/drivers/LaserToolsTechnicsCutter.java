@@ -32,7 +32,6 @@ import com.t_oster.liblasercut.VectorCommand;
 import static com.t_oster.liblasercut.VectorCommand.CmdType;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Point;
-import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -643,7 +642,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     double currentSpeedY = 0;
     double currentSpeedXY = 0;
     double maxXYAccelerationSeen = 0;
+    double avgXYAccelerationSeen = 0;
     double speed = Double.NaN;
+    double totalTime = 0;
     for (int i = 0; i < points.size(); i++)
     {
       double x = points.get(i).x;
@@ -674,10 +675,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       double newSpeedY = speed * speedToMmPerSec * newDy / newLength;
       double newSpeedXY = Math.hypot(newSpeedX, newSpeedY);
       double newTime = newLength / ((currentSpeedXY + newSpeedXY) / 2);
+      totalTime += newTime;
       double newAccelerationX = Math.abs(newSpeedX - currentSpeedX) / newTime;
       double newAccelerationY = Math.abs(newSpeedY - currentSpeedY) / newTime;
       double newAccelerationXY = Math.hypot(newAccelerationX, newAccelerationY);
       maxXYAccelerationSeen = Math.max(maxXYAccelerationSeen, newAccelerationXY);
+      avgXYAccelerationSeen += newAccelerationXY;
       final double tolerance = 1.00001; // 1 + epsilon,  against numerical errors
       if (Double.isNaN(newAccelerationX) || newAccelerationX > tangentCurveMaxAcceleration * tolerance)
       {
@@ -695,11 +698,32 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       currentSpeedY = newSpeedY;
       currentSpeedXY = newSpeedXY;
       out.print("PE"); // 50 45 End Speed (roughly like the F speed in GCode, maximum permitted in segment; but the laser may assume that a lookahead buffer of just one point is enough.)
-      writeU16(out, limit((int) Math.round(Math.max(speed, speedBefore) * 10), 1, 1000));
+      double sentSpeed = speed; // speed to send in the command
+      if (i == 0) {
+        // start point:
+        // this case does not happen, we don't send the start point,
+        // therefore we also don't send its speed (which is implicitly zero)
+        myAssert(false);
+      } else if (i == points.size() - 1) {
+        // end point:
+        // zero speed at the end point by definition.
+        myAssert(speed == 0);
+        // we can't send zero speed, because then the last segment will take very long,
+        // as the speed is valid for the whole segment and not just for the endpoint.
+        // as a workaround, send half the previous speed.
+        myAssert(points.size() >= 2);
+        sentSpeed = points.get(i - 1).speed / 2;
+      } else {
+        // normal points (neither start nor end) must have nonzero speed
+        myAssert(speed > 0);
+      }
+      writeU16(out, limit((int) Math.round(sentSpeed * 10), 1, 1000));
       line(out, x, y, resolution); // not actually a line, will be interpreted as smooth curve segment
       // currentX and currentY are set by the previous call
     }
-    System.out.println("Maximum acceleration used is " + maxXYAccelerationSeen / tangentCurveMaxAcceleration * 100 + " percent of maximum.");
+    avgXYAccelerationSeen = avgXYAccelerationSeen / points.size();
+    System.out.println("Maximum acceleration used is " + maxXYAccelerationSeen / tangentCurveMaxAcceleration * 100 + " percent of maximum, average is " + avgXYAccelerationSeen / tangentCurveMaxAcceleration * 100 + "%.");
+    System.out.println("Cutting time for this curve is " + totalTime + " s.");
     out.print("PF"); // end join
   }
 
@@ -742,7 +766,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         // in the end, we have the previous point, $numExtraPoints intermediate points, and the current point.
         // Number of intermediate points:
         // 0 if len==maxDistance
-        // 1 for maxDist < len <= 2*maxDist
+        // 1 if maxDist < len <= 2*maxDist
+        // 2 if 2*maxDist < len <= 3*maxDist
         // ...
         int numExtraPoints = (int) Math.ceil(len / maxDistance) - 1;
         for (int i = 0; i < numExtraPoints; i++)
@@ -806,9 +831,21 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       }
       return;
     }
+
     // more than two points: cut a smooth curve. For this, compute the interpolated speed.
 
+
+    // The final data format sent to the lasercutter is a polyline with speeds for each point.
+    //
+    // Experiments suggest that the lasercutter does not do spline interpolation
+    // on the curve that we send to it, but more or less tries to go along the polyline
+    // that we send to it. However, this polyline is effectively low-pass-filtered
+    // due to the servo control loop (especially due to belt elasticity). Most probably,
+    // it is also acceleration-limited per individual axis (at least implicitly
+    // due to the servo current limit).
+
     // Here be dragons:
+    //
     // Problem formulation (neglecting unit conversion):
     // given points p[i]
     // vector speed: speed[i] = p[i].speed * p[i].deltaToPrevious.unityVector()
@@ -817,23 +854,28 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // now, we want to maximize p[i].speed, under the condition that
     // abs(acceleration) < maxAcceleration.
     // This is not easy, because there are forward and backward dependencies!
+
     // Argh, all these stupid unit conversions.
     // Here we use: mm/s and mm/s^2 for speed (we convert back to manufacturer units in the very end)
     // and pixels (1/dpi, aargh) for the lengths.
     final double maxSpeed = (currentSpeed * nominalCuttingSpeed / 100);
+
     // conversion factor from mm/s to "% speed".
     final double relativeSpeedToMmPerSec = (100 / nominalCuttingSpeed);
     final double pxToMm = Util.px2mm(1, resolution);
+
+    // numerical safety factor:
     // in theory this may be 1.0, but we keep it slightly smaller to stay away
     // from the exact boundaries which may trouble with numerical comparisons.
     final double safetyFactor = 0.99;
 
     // reinterpolate the points
-    // TODO choose the right distance
-    // TODO do this even better: not here, but later, more like "maximum delta-v between two points"
-    //                           or: smaller distance here, and filter out later if delta-v is too small and points are collinear
-    // (The windows driver has a table for delta-v depending on v.)
-    points = reinterpolateWithMaximumDistance(points, Util.mm2px(.3, resolution));
+    // (The windows driver has a table for maximum change of speed between points.
+    //  For very low speeds, it effectively uses roughly 0.3mm maximum distance,
+    //  but a lot more for higher speeds. What we do here is only a rough
+    //  approximation of the Windows driver's behaviour.)
+    // TODO do this better, or at least do some postprocessing so that we don't send all these points to the cutter.
+    points = reinterpolateWithMaximumDistance(points, Util.mm2px(1, resolution));
 
     // set speed to maximum, and in the following only reduce it.
     for (PointWithSpeed p : points)
@@ -850,11 +892,46 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
     System.out.println("started.");
     // reduce speed wherever the acceleration limit is not hit
-    boolean somethingChanged = true;
-    int countIterations = 0;
-    while (somethingChanged)
+    boolean somethingChanged = true; // some speed was reduced in the current iteration
+    int countIterations = 0; // for logging only
+
+    /* "Warmup cycles":
+     * to prevent too pessimistic results, we use optimistic (unsafe)
+     * approximations while warmupCount>0, slowly going back to safe but
+     * pessimistic approximations.
+     * For warmupCount=0, everything is safely approximated, but we already know
+     * that the speed cannot be higher than what was computed before under
+     * optimistic approximations.
+     * (This is loosely related to "simulated annealing").
+     *
+     * If you don't understand this, just set WARMUP_ROUNDS=0.
+     * Everything will work fine, except that you have slightly lower speeds in
+     * some cases.
+     */
+    final int WARMUP_ROUNDS = 10; // number of overapproximated "warmup" rounds - increases computation time (linearly), but improves speed (by ca 15% for a typical curve, more for extreme cases with small radii)
+    final double WARMUP_FACTOR_MAX = 16; // overapproximation for first warmup round - should roughly be at least the typical factor between the maximum speed and a typical low speed on sharp bends of the curve
+    int warmupCount = WARMUP_ROUNDS;
+
+    while (somethingChanged || warmupCount > 0)
     {
+      for (PointWithSpeed point : points)
+      {
+        if (Double.isNaN(point.speed)) {
+          throw new AssertionError("point speed is NaN");
+        }
+      }
+      // translate warmupCount into an "unsafety" factor (>1 = unsafe but optimistic approximation)
+      double optimismFactor = 1; // 1 for a safe pessimistic approximation, larger for an optimistic approximation
+      if (warmupCount > 0) {
+        warmupCount--;
+      }
+      if (warmupCount > 0 && WARMUP_ROUNDS > 0) {
+        optimismFactor = Math.pow(WARMUP_FACTOR_MAX, warmupCount / (double) WARMUP_ROUNDS);
+      }
       System.out.println("iteration: " + countIterations++);
+      if (warmupCount > 0) {
+        System.out.println("this is a warmup iteration.");
+      }
       int count = 0;
       for (PointWithSpeed point : points)
       {
@@ -867,7 +944,23 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         PointWithSpeed pBefore = points.get(i - 1);
         PointWithSpeed p = points.get(i);
         double maxAvgSpeed = (p.speed + pBefore.speed) / 2; // this is an overapproximation of the actual average speed when the computation has finished, because we only decrease and never increase speed.
-        double minTime = p.deltaToPrevious.hypot() * pxToMm / maxAvgSpeed; // TODO: this is a underapproximation, assuming maximal velocity. We could accelerate more per length if the velocity is smaller!
+        double minTime = p.deltaToPrevious.hypot() * pxToMm / maxAvgSpeed; // This is an underapproximation, assuming maximal velocity. We could accelerate more per length if the velocity is smaller! (Therefore, the "warmup" iterations are used.)
+
+        // Special handling for segments which take longer than the "smoothing time" of the servo controller:
+        // Due to the way the machine works (polyline is directly sent to servo controller),
+        // the actual acceleration takes place within less than MAX_ACCEL_TIME (ca. 10ms), even if the following segment is very long!
+        final double MAX_ACCEL_TIME = 0.005;
+        if (minTime > MAX_ACCEL_TIME) {
+          minTime = MAX_ACCEL_TIME;
+          if (warmupCount == 0) {
+            System.out.println("point " + i +  " takes longer than MAX_ACCEL_TIME, it could have profited from finer interpolation.");
+          }
+          // reducing minTime is possible without breaking the assumptions of the following algorithm,
+          // because minTime is only used as an underapproximation (guaranteed lower bound).
+          // TODO: Instead of just artificially slowing down, we should rather
+          //       reinterpolate the path, i.e., insert intermediate points so that
+          //       the final output points are less than MAX_ACCEL_TIME apart in time
+        }
 
         // vectorial: newSpeed = oldSpeed + acceleration * time
         // new speed must point into the direction of p[i].deltaToPrevious.unityVector().
@@ -880,24 +973,24 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         // speed * sin(angle) < acceleration * time ?
         // TODO: switch from math.sin() to something faster, overapproximative.
         double alpha = pBefore.absAngleAtCorner;
-        if (pBefore.speed * Math.sin(alpha) > tangentCurveMaxAcceleration * minTime)
+        if (pBefore.speed * Math.sin(alpha) > tangentCurveMaxAcceleration * optimismFactor * minTime)
         {
           System.out.println("point " + i + ": Reducing previous velocity (corner too angled)");
           // It is impossible. The previous(!) velocity needs to be lowered.
           // see LaserToolsTechnicsCutter_speedInterpolation.svg, case 2.
           // Make it small enough so that we can just get around the corner.
           // Otherwise it would be impossible to compute a valid speed for the current point.
-          pBefore.speed = safetyFactor * tangentCurveMaxAcceleration * minTime / alpha;
+          pBefore.speed = safetyFactor * tangentCurveMaxAcceleration * optimismFactor * minTime / alpha;
           somethingChanged = true;
         }
 
         // Now limit the current speed to its maximum possible range
         double a = pBefore.speed;
-        double c = tangentCurveMaxAcceleration * minTime;
+        double c = tangentCurveMaxAcceleration * optimismFactor * minTime;
         double cosAlpha = Math.cos(alpha);
         double sinAlpha = Math.sin(alpha);
 
-        double maxSpeedForAccel = a * cosAlpha + Math.sqrt(a * a * (cosAlpha * cosAlpha - 1) + c * c);
+        double maxSpeedForAccel = a * cosAlpha + Math.sqrt(-a * a * sinAlpha * sinAlpha + c * c);
         double minSpeedForAccel = a * cosAlpha - Math.sqrt(-a * a * sinAlpha * sinAlpha + c * c);
         if (Double.isNaN(minSpeedForAccel) || Double.isNaN(maxSpeedForAccel))
         {
@@ -932,18 +1025,27 @@ public class LaserToolsTechnicsCutter extends LaserCutter
           // reduce a appropriately so that
           // a_reduced = b * cos(alpha) + sqrt(b^2*(-1)*sin^2(alpha) + c_max^2)
           // (see case 4, lower drawing).
-          // we reduce c, the maximum acceleration, by a safety factor, to guard against numerical trouble.
           double b = p.speed;
-          double newA = b * cosAlpha + Math.sqrt(b * b * (-1) * sinAlpha * sinAlpha + c * c * safetyFactor * safetyFactor);
+          double newAMaximum = b * cosAlpha + Math.sqrt(b * b * (-1) * sinAlpha * sinAlpha + c * c);
+          double newAMinimum = b * cosAlpha - Math.sqrt(b * b * (-1) * sinAlpha * sinAlpha + c * c);
+          if (newAMinimum < 0) {
+            newAMinimum = 0;
+          }
+          double newA = newAMaximum * safetyFactor + newAMinimum * (1-safetyFactor);
           pBefore.speed = newA;
           somethingChanged = true;
-          if (i >= 2)
+          if (Double.isNaN(newA)) {
+            throw new AssertionError("point speed is NaN when reducing due to decelleration limit");
+          }
+          if (i >= 2 && warmupCount <= 0)
           {
             // restart the loop at the previous point, because it will most likely change as well
             // (usually, one point causes lots of previous points to be changed)
             // this may be left out, but will make the algorithm waaaay slower.
 
             i = i - 2; // effectively i-1 because there is i++ at the start of the loop.
+
+            // TODO: it would be more efficient to switch the iteration direction: do not go one point backwards now, but later go backwards through the whole list
             continue;
           }
         }
@@ -988,7 +1090,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       return;
     }
 
-    // less than 1 pixel length tolerance doesn't make too much sense, because the pixel roundoff causes up to 1px error anyway.
+    // less than 1 pixel length tolerance doesn't make too much sense, because the conversion from spline to polyline in ShapeConverter causes up to 1px error anyway.
     double lengthTolerancePixels = Math.max(1.f, Util.mm2px(lengthTolerance, resolution));
 
     ArrayList<PointWithSpeed> points = new ArrayList<PointWithSpeed>();
@@ -1009,9 +1111,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         double absAngle = lastPoint.deltaToPrevious.absAngleTo(newPoint.deltaToPrevious);
         lastPoint.absAngleAtCorner = absAngle;
         // TODO: hardcoded factor: we actually use 5 times the configured smoothing tolerance!!!
-        // TODO: pass double values to LibLaserCut (or the raw splines, whatever), so that we can reinterpolate.
-        //       We have lots of quantisation noise on the segment angles, causing unnecessary deceleration.
-        // TODO (after the previous!): we need finer interpolation in VisiCut, or really use splines.
+        // TODO: we need finer interpolation in ShapeConverter, or really use splines.
+        // TODO: the following if-condition should be simplified or completely rewritten.
         if (absAngle * newLen > lengthTolerancePixels * 5 || absAngle > angleToleranceShort || (newLen > lengthTolerancePixels * 100 && absAngle > angleToleranceLong))
         {
           // The curvature is too large: We are at a corner.
@@ -1146,7 +1247,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   // Job mode:
   private static final int JOB_MODE_XY = 0x00;
   private static final int JOB_MODE_ROTARY_AXIS = 0x10;
-  // TODO: DOCS inconsistent
   private static final int JOB_MODE_1BIT_PER_PIXEL = 0x00; // engrave normal
   private static final int JOB_MODE_4BIT_PER_PIXEL = 0x01; // suggested for stamp engrave3d ("rubber power")
   private static final int JOB_MODE_8BIT_PER_PIXEL = 0x02; // engrave3d

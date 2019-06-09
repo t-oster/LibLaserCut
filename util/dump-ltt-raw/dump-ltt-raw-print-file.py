@@ -137,15 +137,14 @@ def dump(filename, graph=False, showEngrave=False):
             print("speed {}".format(v))
         elif cmd in [0x5045]:
             print("analyzing previous segment (very rough approximations!):")
-            # TODO: these approximations are not very good because:
-            # 1. vEnd is the maximum speed along the whole line segment, i.e. max(v, vBefore)
+            # these approximations are not very good because
+            # 1. the lasercutter "smoothes out" velocity transitions (settling time of servo control loop)
             # 2. the lasercutter has its own acceleration limit, so jumping from v=0 to v=100 does not mean that the acceleration is infinite.
             # dt, v, a, j as "backward differential"
             dv = vEndBefore*dxUnityBefore - vEnd*dxUnity
             dt = vecAbs(dx) / ((vEndBefore + vEnd)/2) + 1e-99
             a = dv/dt
-            j = (a-aBefore)/dt
-            print("dx {} v {} a {} jerk {} dt {}".format(dx, vEnd*dxUnity, a, j, dt))
+            print("dx {} v {} a {} dt {}".format(dx, vEnd*dxUnity, a, dt))
             print("new segment:")
             # 2 byte unsigned, 1/10 percent
             # "end speed"
@@ -259,6 +258,9 @@ def dump(filename, graph=False, showEngrave=False):
     if not graph:
         return
     positions = np.array(positions)
+    if positions.size == 0:
+        print("no 'joint curve' segments found, skipping plots.")
+        return
     speeds = np.array(speeds)
     lens = np.sqrt(np.sum(positions**2,1))
     dxUnity = positions/np.vstack((lens, lens)).transpose()
@@ -308,6 +310,21 @@ def dump(filename, graph=False, showEngrave=False):
     plt.plot(positionsAbsolute[:, 0],  positionsAbsolute[:, 1],  'b.-')
     plt.axis("equal")
     plt.title("Curve for 'joint curve', neglecting absolute moves")
+    print("close plot window to exit")
+    plt.show()
+
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    for i in range(1, positionsAbsolute.shape[0]):
+        ax.plot(positionsAbsolute[i-1:i+1, 0], positionsAbsolute[i-1:i+1, 1], speeds[i-1:i+1], '.-', c=(speeds[i]/100., 0, 0))
+    plt.title("3D plot: Curve for 'joint curve' + speed, neglecting absolute moves")
+    plt.xlabel('x')
+    plt.ylabel('y')
+    try:
+        ax.set_proj_type('ortho')
+    except AttributeError:
+        print("warning: your mplot3d lib is old")
     print("close plot window to exit")
     plt.show()
 

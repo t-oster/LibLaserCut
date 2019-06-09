@@ -87,9 +87,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="475.97737"
-     inkscape:cy="2766.2418"
+     inkscape:zoom="0.7"
+     inkscape:cx="869.77658"
+     inkscape:cy="515.69709"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false" />
@@ -804,10 +804,22 @@
          x="25.123335"
          y="101.09097"
          style="stroke-width:0.26458332px"
-         id="tspan181">a_reduced = b * cos(alpha) + sqrt(b^2*(-1)*sin^2(alpha) + c_max^2)</tspan><tspan
+         id="tspan181">a_reduced_max = b * cos(alpha) + sqrt(b^2*(-1)*sin^2(alpha) + c_max^2)</tspan><tspan
          sodipodi:role="line"
          x="25.123335"
          y="105.50069"
+         style="stroke-width:0.26458332px"
+         id="tspan182" /><tspan
+         sodipodi:role="line"
+         x="25.123335"
+         y="109.91042"
+         style="stroke-width:0.26458332px"
+         id="tspan184">(The minimum possible value for a would be a_reduced_min = ...<tspan
+   style="-inkscape-font-specification:'Sans Bold';font-family:Sans;font-weight:bold;font-style:normal;font-stretch:normal;font-variant:normal"
+   id="tspan186"> - </tspan>sqrt(...) )</tspan><tspan
+         sodipodi:role="line"
+         x="25.123335"
+         y="114.32014"
          style="stroke-width:0.26458332px"
          id="tspan175" /></text>
     <text
@@ -868,14 +880,14 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="34.895363"
-       y="131.94878"
+       x="18.642387"
+       y="130.43687"
        id="text159"><tspan
          sodipodi:role="line"
          id="tspan157"
-         x="34.895363"
-         y="131.94878"
-         style="stroke-width:0.26458332px">reduced a</tspan></text>
+         x="18.642387"
+         y="130.43687"
+         style="stroke-width:0.26458332px">a_reduced_max</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -916,5 +928,62 @@
          x="66.180466"
          y="135.7459"
          style="stroke-width:0.26458332px">c_max</tspan></text>
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="path162"
+       d="m 58.586309,190.64291 -13.223633,-6.92005 -23.284231,6.92005 h 36.507864"
+       style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       id="text166"
+       y="182.34923"
+       x="14.862625"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="182.34923"
+         x="14.862625"
+         id="tspan164"
+         sodipodi:role="line">a_reduced_min</tspan></text>
+    <text
+       id="text170"
+       y="194.5005"
+       x="18.940153"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="194.5005"
+         x="18.940153"
+         id="tspan168"
+         sodipodi:role="line">current (=maximum) b</tspan></text>
+    <text
+       id="text174"
+       y="190.0108"
+       x="31.118879"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.59079075px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="190.0108"
+         x="31.118879"
+         id="tspan172"
+         sodipodi:role="line">alpha</tspan></text>
+    <ellipse
+       ry="14.50855"
+       rx="14.452284"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#b3b3b3;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       id="ellipse176"
+       cy="190.38177"
+       cx="58.211803" />
+    <text
+       id="text180"
+       y="187.28027"
+       x="55.219154"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332px"
+         y="187.28027"
+         x="55.219154"
+         id="tspan178"
+         sodipodi:role="line">c_max</tspan></text>
   </g>
 </svg>
