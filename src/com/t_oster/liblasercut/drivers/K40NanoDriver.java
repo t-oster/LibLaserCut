@@ -70,6 +70,17 @@ import org.usb4java.LibUsbException;
 public class K40NanoDriver extends LaserCutter
 {
 
+  private static final String SETTING_BEDWIDTH = "Laserbed Width";
+  private static final String SETTING_BEDHEIGHT = "Laserbed Height";
+  private static final String SETTING_BOARD = "M2, B2, A/B/B1, M/M1, board selection";
+  private static final String SETTING_MOCK = "Use mock usb channel";
+
+  //TODO: Actually look these up.
+  double bedWidth = 600;
+  double bedHeight = 600;
+  String board = "M2";
+  boolean mock = false;
+
   /**
    * This is the core method of the driver. It is called, whenever VisiCut wants
    * your driver
@@ -193,6 +204,36 @@ public class K40NanoDriver extends LaserCutter
     });
   }
 
+  public String getBoard()
+  {
+    return board;
+  }
+
+  public void setBoard(String board)
+  {
+    this.board = board;
+  }
+
+  public boolean isMock()
+  {
+    return mock;
+  }
+
+  public void setMock(boolean mock)
+  {
+    this.mock = mock;
+  }
+
+  public void setBedWidth(double bedWidth)
+  {
+    this.bedWidth = bedWidth;
+  }
+
+  public void setBedHeight(double bedHeight)
+  {
+    this.bedHeight = bedHeight;
+  }
+
   /**
    * This method should return the width of the laser-bed. You can have
    * a config-setting in order to have different sizes for each instance of
@@ -203,7 +244,7 @@ public class K40NanoDriver extends LaserCutter
   @Override
   public double getBedWidth()
   {
-    return 600;
+    return this.bedWidth;
   }
 
   /**
@@ -216,7 +257,7 @@ public class K40NanoDriver extends LaserCutter
   @Override
   public double getBedHeight()
   {
-    return 300;
+    return this.bedHeight;
   }
 
   /**
@@ -241,36 +282,65 @@ public class K40NanoDriver extends LaserCutter
   public LaserCutter clone()
   {
     K40NanoDriver clone = new K40NanoDriver();
-    //TODO: copy all settings to the clone if present.
+    clone.bedHeight = this.bedHeight;
+    clone.bedWidth = this.bedWidth;
+    clone.board = this.board;
+    clone.mock = this.mock;
     return clone;
   }
 
-  /**
-   * The next mehtod allow for a generic GUI with settings for an instance of
-   * this
-   * driver to be created. For simplicity, this driver does not support any
-   * properties. Look at the other implementations for reference.
-   *
-   * @return
-   */
+  private static final String[] settingAttributes = new String[]
+  {
+    SETTING_BEDWIDTH, SETTING_BEDHEIGHT, SETTING_BOARD, SETTING_MOCK
+  };
+
   @Override
   public String[] getPropertyKeys()
   {
-    return new String[0];
+    return settingAttributes;
   }
 
   @Override
-  public void setProperty(String key, Object value)
+  public void setProperty(String attribute, Object value)
   {
-    //should never be called
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (SETTING_BEDWIDTH.equals(attribute))
+    {
+      this.setBedWidth((Double) value);
+    }
+    else if (SETTING_BEDHEIGHT.equals(attribute))
+    {
+      this.setBedHeight((Double) value);
+    }
+    else if (SETTING_BOARD.equals(attribute))
+    {
+      this.setBoard((String) value);
+    }
+    else if (SETTING_MOCK.equals(attribute))
+    {
+      this.setMock((Boolean) mock);
+    }
   }
 
   @Override
-  public Object getProperty(String key)
+  public Object getProperty(String attribute)
   {
-    //should never be called
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (SETTING_BEDWIDTH.equals(attribute))
+    {
+      return this.getBedWidth();
+    }
+    else if (SETTING_BEDHEIGHT.equals(attribute))
+    {
+      return this.getBedHeight();
+    }
+    else if (SETTING_BOARD.equals(attribute))
+    {
+      return this.getBoard();
+    }
+    else if (SETTING_MOCK.equals(attribute))
+    {
+      return this.isMock();
+    }
+    return null;
   }
 
   public class K40Device
