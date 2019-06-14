@@ -2,15 +2,15 @@
  * This file is part of LibLaserCut.
  * Copyright (C) 2011 - 2014 Thomas Oster <mail@thomas-oster.de>
  *
- * LibLaserCut is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * LibLaserCut is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * LibLaserCut is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
+ * LibLaserCut is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
@@ -48,21 +48,18 @@ import org.usb4java.LibUsbException;
 
 /**
  * This class should act as a starting-point, when implementing a new
- * Lasercutter driver.
- * It will take a Laserjob and just output the Vecor-Parts as G-Code.
+ * Lasercutter driver. It will take a Laserjob and just output the Vecor-Parts
+ * as G-Code.
  *
  * The file contains comments prefixed with "#<step>" which should guide you in
- * the process
- * of creating custom drivers. Also read the information in the Wiki on
- * https://github.com/t-oster/VisiCut/wiki/
+ * the process of creating custom drivers. Also read the information in the Wiki
+ * on https://github.com/t-oster/VisiCut/wiki/
  *
  * #1: Create a new JavaClass, which extends the
- * com.t_oster.liblasercut.drivers.LaserCutter class
- * #2: Implement all abstract methods. Each of them is explained in this
- * example.
- * #3: In Order to see your driver in VisiCut, add your class to the
- * getSupportedDrivers() method
- * in the com.t_oster.liblasercut.LibInfo class
+ * com.t_oster.liblasercut.drivers.LaserCutter class #2: Implement all abstract
+ * methods. Each of them is explained in this example. #3: In Order to see your
+ * driver in VisiCut, add your class to the getSupportedDrivers() method in the
+ * com.t_oster.liblasercut.LibInfo class
  * (src/com/t_oster/liblasercut/LibInfo.java)
  *
  * @author Thomas Oster
@@ -72,19 +69,18 @@ public class K40NanoDriver extends LaserCutter
 
   private static final String SETTING_BEDWIDTH = "Laserbed Width";
   private static final String SETTING_BEDHEIGHT = "Laserbed Height";
-  private static final String SETTING_BOARD = "M2, B2, A/B/B1, M/M1, board selection";
+  private static final String SETTING_BOARD = "M2, M1, M, B2, B1, B, A, board selection";
   private static final String SETTING_MOCK = "Use mock usb channel";
 
-  //TODO: Actually look these up.
-  double bedWidth = 600;
-  double bedHeight = 600;
+  //310mm by 220mm
+  double bedWidth = 310;
+  double bedHeight = 220;
   String board = "M2";
   boolean mock = false;
 
   /**
    * This is the core method of the driver. It is called, whenever VisiCut wants
-   * your driver
-   * to send a job to the lasercutter.
+   * your driver to send a job to the lasercutter.
    *
    * @param job This is an LaserJob object, containing all information on the
    * job, which is to be sent
@@ -102,6 +98,7 @@ public class K40NanoDriver extends LaserCutter
     //let's check the job for some errors
     checkJob(job);
     K40Device device = new K40Device();
+    device.setBoard(board);
 
     device.open();
 
@@ -128,13 +125,13 @@ public class K40NanoDriver extends LaserCutter
               /**
                * Move the laserhead (laser on) from the current position to the
                * x/y position of this command. All coordinates are in dots
-               * respecting
-               * to the job resolution
+               * respecting to the job resolution
                */
               int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
               int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
               //Native units are mils.
               device.cut_absolute(x, y);
+              device.execute();
               break;
             }
             case MOVETO:
@@ -147,6 +144,8 @@ public class K40NanoDriver extends LaserCutter
               int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
               //Native units are mils.
               device.move_absolute(x, y);
+              device.execute();
+              break;
             }
             case SETPROPERTY:
             {
@@ -155,15 +154,22 @@ public class K40NanoDriver extends LaserCutter
                * frequency, power... whatever your driver supports)
                */
               LaserProperty prop = cmd.getProperty();
-              System.out.println("Changing Device Parameters:");
               for (String key : prop.getPropertyKeys())
               {
                 String value = prop.getProperty(key).toString();
-                if (key.equalsIgnoreCase("speed"))
+                if ("speed".equals(key))
                 {
                   device.setSpeed(Double.valueOf(value));
                 }
-                System.out.println("  " + key + "=" + value);
+                else if ("power".equals(key))
+                {
+                  device.setPower(Double.valueOf(value));
+                }
+                else
+                {
+                  //warnings.add(Can't use this":  " + key + "=" + value);
+                }
+                System.out.println(" " + key + "=" + value);
               }
               break;
             }
@@ -175,10 +181,9 @@ public class K40NanoDriver extends LaserCutter
   }
 
   /**
-   * This method should return an Object of a class extending LaserProperty.
-   * A LaserProperty represents all settings for your device like power,speed
-   * and frequency
-   * which are necessary for a certain job-type (e.g. a VectorPart).
+   * This method should return an Object of a class extending LaserProperty. A
+   * LaserProperty represents all settings for your device like power,speed and
+   * frequency which are necessary for a certain job-type (e.g. a VectorPart).
    * See the different classes for examples. We will just use the default,
    * supporting power,speed focus and frequency.
    *
@@ -200,7 +205,7 @@ public class K40NanoDriver extends LaserCutter
   {
     return Arrays.asList(new Double[]
     {
-      1000.0
+      100.0, 200.0, 500.0, 1000.0
     });
   }
 
@@ -235,9 +240,9 @@ public class K40NanoDriver extends LaserCutter
   }
 
   /**
-   * This method should return the width of the laser-bed. You can have
-   * a config-setting in order to have different sizes for each instance of
-   * your driver. For simplicity we just assume a width of 600mm
+   * This method should return the width of the laser-bed. You can have a
+   * config-setting in order to have different sizes for each instance of your
+   * driver. For simplicity we just assume a width of 600mm
    *
    * @return
    */
@@ -248,9 +253,9 @@ public class K40NanoDriver extends LaserCutter
   }
 
   /**
-   * This method should return the height of the laser-bed. You can have
-   * a config-setting in order to have different sizes for each instance of
-   * your driver. For simplicity we just assume a height of 300mm
+   * This method should return the height of the laser-bed. You can have a
+   * config-setting in order to have different sizes for each instance of your
+   * driver. For simplicity we just assume a height of 300mm
    *
    * @return
    */
@@ -268,13 +273,12 @@ public class K40NanoDriver extends LaserCutter
   @Override
   public String getModelName()
   {
-    return "K40Nano";
+    return "K40 Stock-LIHUIYU M2/M1/M/B2/B1/B/A";
   }
 
   /**
    * This method must copy the current instance with all config settings,
-   * because
-   * it is used for save- and restoring
+   * because it is used for save- and restoring
    *
    * @return
    */
@@ -317,7 +321,7 @@ public class K40NanoDriver extends LaserCutter
     }
     else if (SETTING_MOCK.equals(attribute))
     {
-      this.setMock((Boolean) mock);
+      this.setMock((Boolean) value);
     }
   }
 
@@ -346,8 +350,9 @@ public class K40NanoDriver extends LaserCutter
   public class K40Device
   {
 
-    private static final int DEFAULT = 0;
-    private static final int COMPACT = 1;
+    private static final int UNINIT = 0;
+    private static final int DEFAULT = 1;
+    private static final int COMPACT = 2;
 
     static final char LASER_ON = 'D';
     static final char LASER_OFF = 'U';
@@ -361,15 +366,15 @@ public class K40NanoDriver extends LaserCutter
     K40Queue jobber;
     private StringBuilder builder = new StringBuilder();
 
-    private int mode = DEFAULT;
+    private int mode = UNINIT;
 
     private boolean is_top = false;
     private boolean is_left = false;
     private boolean is_on = false;
-    private boolean is_compact = false;
 
     private double speed = 30;
     private double power = 1;
+    private String board = "M2";
 
     private int x = 0;
     private int y = 0;
@@ -395,9 +400,19 @@ public class K40NanoDriver extends LaserCutter
     {
       if (mode == COMPACT)
       {
-        mode_to_default();
+        exit_compact_mode();
       }
       speed = mm_per_second;
+    }
+
+    public String getBoard()
+    {
+      return board;
+    }
+
+    public void setBoard(String board)
+    {
+      this.board = board;
     }
 
     void send()
@@ -417,11 +432,12 @@ public class K40NanoDriver extends LaserCutter
     {
       if (mode != DEFAULT)
       {
-        mode_to_default();
+        exit_compact_mode();
       }
       this.x += dx;
       this.y += dy;
       encode_default_move(dx, dy);
+      mode = UNINIT;
       send();
     }
 
@@ -436,7 +452,7 @@ public class K40NanoDriver extends LaserCutter
     {
       if (mode != COMPACT)
       {
-        mode_to_compact();
+        start_compact_mode();
       }
       this.x += dx;
       this.y += dy;
@@ -445,8 +461,13 @@ public class K40NanoDriver extends LaserCutter
       send();
     }
 
-    void mode_to_default()
+    void exit_compact_mode()
     {
+      if (mode == UNINIT)
+      {
+        builder.append('I');
+        mode = DEFAULT;
+      }
       if (mode == DEFAULT)
       {
         return;
@@ -456,12 +477,17 @@ public class K40NanoDriver extends LaserCutter
         builder.append("FNSE");
         send();
         jobber.wait_for_finish();
+        mode = UNINIT;
       }
-      mode = DEFAULT;
     }
 
-    void mode_to_compact()
+    void start_compact_mode()
     {
+      if (mode == UNINIT)
+      {
+        builder.append('I');
+        mode = DEFAULT;
+      }
       if (mode == COMPACT)
       {
         return;
@@ -497,14 +523,13 @@ public class K40NanoDriver extends LaserCutter
     {
       if (mode == COMPACT)
       {
-        mode_to_default();
+        exit_compact_mode();
       }
       jobber.execute();
     }
 
     void encode_default_move(int dx, int dy)
     {
-      builder.append("I");
       move_x(dx);
       move_y(dy);
       builder.append("S1P");
@@ -741,6 +766,7 @@ public class K40NanoDriver extends LaserCutter
       return getSpeed(mm_per_second, m, b, 1, true);
     }
 
+    //TODO: Use suffix C mode for boards that support it.
     String getSpeed(double mm_per_second, double m, double b, int gear, boolean expanded)
     {
       double frequency_kHz = mm_per_second / 25.4;
@@ -777,15 +803,20 @@ public class K40NanoDriver extends LaserCutter
   public class K40Queue
   {
 
-    ArrayList<String> queue = new ArrayList<String>();
+    final ArrayList<String> queue = new ArrayList<String>();
     final StringBuilder buffer = new StringBuilder();
-    //K40Usb usb;
-    MockUsb usb;
+    BaseUsb usb;
 
     public void open()
     {
-      //usb = new K40Usb();
-      usb = new MockUsb();
+      if (mock)
+      {
+        usb = new MockUsb();
+      }
+      else
+      {
+        usb = new K40Usb();
+      }
       usb.open();
     }
 
@@ -869,36 +900,21 @@ public class K40NanoDriver extends LaserCutter
 
   }
 
-  public class MockUsb
+  public interface BaseUsb
   {
 
-    void open()
-    {
-      System.out.println("Mock Usb Connected.");
-    }
+    void open();
 
-    void close()
-    {
-      System.out.println("Mock Usb Disconnected.");
-    }
+    void close();
 
-    void wait_for_ok()
-    {
-      System.out.println("Mock Usb: OKAY!");
-    }
+    void wait_for_ok();
 
-    void send_packet(CharSequence subSequence)
-    {
-      System.out.println("Mock Packst Sent:" + subSequence);
-    }
+    void wait_for_finish();
 
-    void wait_for_finish()
-    {
-      System.out.println("Mock Usb: Finished");
-    }
+    void send_packet(CharSequence s);
   }
 
-  public class K40Usb
+  public class K40Usb implements BaseUsb
   {
 
     public static final int K40VENDERID = 0x1A86;
@@ -936,8 +952,7 @@ public class K40NanoDriver extends LaserCutter
 
     /**
      * ******************
-     * CRC function via:
-     * License: 2-clause "simplified" BSD license Copyright
+     * CRC function via: License: 2-clause "simplified" BSD license Copyright
      * (C) 1992-2017 Arjen Lentz
      * https://lentz.com.au/blog/calculating-crc-with-a-tiny-32-entry-lookup-table
      * *******************
@@ -962,6 +977,7 @@ public class K40NanoDriver extends LaserCutter
     }
     //*//
 
+    @Override
     public void open() throws LibUsbException
     {
       openContext();
@@ -973,6 +989,7 @@ public class K40NanoDriver extends LaserCutter
       LibUsb.controlTransfer(handle, (byte) 64, (byte) 177, (short) 258, (short) 0, packet, 50);
     }
 
+    @Override
     public void close() throws LibUsbException
     {
       releaseInterface();
@@ -984,6 +1001,7 @@ public class K40NanoDriver extends LaserCutter
       closeContext();
     }
 
+    @Override
     public void send_packet(CharSequence cs)
     {
       if (cs.length() != PAYLOAD_LENGTH)
@@ -1052,11 +1070,13 @@ public class K40NanoDriver extends LaserCutter
       }
     }
 
+    @Override
     public void wait_for_finish()
     {
       wait(STATUS_FINISH);
     }
 
+    @Override
     public void wait_for_ok()
     {
       wait(STATUS_OK);
@@ -1232,5 +1252,58 @@ public class K40NanoDriver extends LaserCutter
         throw new LibUsbException("Data move failed.", results);
       }
     }
+
   }
+
+  public class MockUsb implements BaseUsb
+  {
+
+    private void sleep(int time)
+    {
+      try
+      {
+        Thread.sleep(time);
+      }
+      catch (InterruptedException ex)
+      {
+      }
+    }
+
+    @Override
+    public void open()
+    {
+      sleep(1000);
+      System.out.println("Mock Usb Connected.");
+    }
+
+    @Override
+    public void close()
+    {
+      sleep(1000);
+      System.out.println("Mock Usb Disconnected.");
+    }
+
+    @Override
+    public void wait_for_ok()
+    {
+      sleep(20);
+      System.out.println("Mock Usb: OKAY!");
+    }
+
+    @Override
+    public void send_packet(CharSequence subSequence)
+    {
+      sleep(100);
+      System.out.println("Mock Packst Sent:" + subSequence);
+    }
+
+    @Override
+    public void wait_for_finish()
+    {
+      sleep(4000);
+      System.out.println("Mock Usb: Finished");
+    }
+
+  }
+
 }
