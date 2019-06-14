@@ -31,9 +31,9 @@ import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.usb4java.Context;
 import org.usb4java.Device;
@@ -434,10 +434,10 @@ public class K40NanoDriver extends LaserCutter
       {
         exit_compact_mode();
       }
+      check_init();
       this.x += dx;
       this.y += dy;
       encode_default_move(dx, dy);
-      mode = UNINIT;
       send();
     }
 
@@ -450,6 +450,7 @@ public class K40NanoDriver extends LaserCutter
 
     void cut_relative(int dx, int dy)
     {
+      check_init();
       if (mode != COMPACT)
       {
         start_compact_mode();
@@ -461,33 +462,29 @@ public class K40NanoDriver extends LaserCutter
       send();
     }
 
-    void exit_compact_mode()
+    void check_init()
     {
       if (mode == UNINIT)
       {
         builder.append('I');
         mode = DEFAULT;
       }
-      if (mode == DEFAULT)
-      {
-        return;
-      }
+    }
+
+    void exit_compact_mode()
+    {
       if (mode == COMPACT)
       {
-        builder.append("FNSE");
+        builder.append("FNSE-\n");
         send();
-        jobber.wait_for_finish();
+        is_on = false;
         mode = UNINIT;
       }
     }
 
     void start_compact_mode()
     {
-      if (mode == UNINIT)
-      {
-        builder.append('I');
-        mode = DEFAULT;
-      }
+      check_init();
       if (mode == COMPACT)
       {
         return;
@@ -532,7 +529,8 @@ public class K40NanoDriver extends LaserCutter
     {
       move_x(dx);
       move_y(dy);
-      builder.append("S1P");
+      builder.append("S1P\n");
+      mode = UNINIT;
     }
 
     void encode_speed(double speed)
@@ -641,20 +639,24 @@ public class K40NanoDriver extends LaserCutter
       {
         dy = -dy;
         stepy = -1;
+        set_top();
       }
       else
       {
         stepy = 1;
+        set_bottom();
       }
 
       if (dx < 0)
       {
         dx = -dx;
         stepx = -1;
+        set_left();
       }
       else
       {
         stepx = 1;
+        set_right();
       }
       int straight = 0;
       int diagonal = 0;
@@ -673,6 +675,7 @@ public class K40NanoDriver extends LaserCutter
             if (straight != 0)
             {
               move_x(straight);
+              straight = 0;
             }
             diagonal++;
           }
@@ -681,6 +684,7 @@ public class K40NanoDriver extends LaserCutter
             if (diagonal != 0)
             {
               move_diagonal(diagonal);
+              diagonal = 0;
             }
             straight += stepx;
           }
@@ -690,6 +694,7 @@ public class K40NanoDriver extends LaserCutter
         if (straight != 0)
         {
           move_x(straight);
+          straight = 0;
         }
       }
       else
@@ -705,7 +710,8 @@ public class K40NanoDriver extends LaserCutter
             fraction -= dy;
             if (straight != 0)
             {
-              move_x(straight);
+              move_y(straight);
+              straight = 0;
             }
             diagonal++;
           }
@@ -714,6 +720,7 @@ public class K40NanoDriver extends LaserCutter
             if (diagonal != 0)
             {
               move_diagonal(diagonal);
+              diagonal = 0;
             }
             straight += stepy;
           }
@@ -723,11 +730,13 @@ public class K40NanoDriver extends LaserCutter
         if (straight != 0)
         {
           move_y(straight);
+          straight = 0;
         }
       }
       if (diagonal != 0)
       {
         move_diagonal(diagonal);
+        diagonal = 0;
       }
     }
 
@@ -803,8 +812,8 @@ public class K40NanoDriver extends LaserCutter
   public class K40Queue
   {
 
-    final ArrayList<String> queue = new ArrayList<String>();
-    final StringBuilder buffer = new StringBuilder();
+    final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+    private final StringBuilder buffer = new StringBuilder();
     BaseUsb usb;
 
     public void open()
@@ -826,14 +835,6 @@ public class K40NanoDriver extends LaserCutter
       usb = null;
     }
 
-    public void add_default(String element)
-    {
-      int len = K40Usb.PAYLOAD_LENGTH;
-      int pad = (len - (buffer.length() % len)) % len;
-      element += "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF".subSequence(0, pad);
-      queue.add(element);
-    }
-
     private void pad_buffer()
     {
       int len = K40Usb.PAYLOAD_LENGTH;
@@ -846,29 +847,35 @@ public class K40NanoDriver extends LaserCutter
       queue.add(element);
     }
 
-    void wait_for_finish()
+    void add_wait()
     {
-      add(null);
+      add("-\n");
     }
 
     public void execute()
     {
       while (true)
       {
-        if (!queue.isEmpty())
+        boolean wait = false;
+        while (!queue.isEmpty())
         {
-          int v = 0;
-          for (int s = queue.size(); v < s; v++)
+          String element = queue.poll();
+          if (element.endsWith("-\n"))
           {
-            String element = queue.get(v);
-            if (element == null)
-            {
-              break;
-            }
+            buffer.append(element.subSequence(0, element.length() - 2));
+            pad_buffer();
+            wait = true;
+            break;
+          }
+          else if (element.endsWith("\n"))
+          {
+            buffer.append(element.subSequence(0, element.length() - 1));
+            pad_buffer();
+          }
+          else
+          {
             buffer.append(element);
           }
-          queue.subList(0, v).clear();
-          pad_buffer();
         } //moved as much of the queue to the buffer as we could.
         while (buffer.length() >= K40Usb.PAYLOAD_LENGTH)
         {
@@ -878,19 +885,17 @@ public class K40NanoDriver extends LaserCutter
             usb.send_packet(buffer.subSequence(0, K40Usb.PAYLOAD_LENGTH));
             buffer.delete(0, K40Usb.PAYLOAD_LENGTH);
           }
-
         } //all sendable packets sent.
+        if (wait)
+        {
+          usb.wait_for_finish();
+          wait = false;
+        }
         if (queue.isEmpty())
         {
           break; //We finished.
         }
-        if (queue.get(0) == null)
-        { //a wait was requested.
-          queue.remove(0);
-          usb.wait_for_finish();
-        }
       }
-
     }
 
     public int size()
@@ -1037,7 +1042,7 @@ public class K40NanoDriver extends LaserCutter
       int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 500L);
       if (results < LibUsb.SUCCESS)
       {
-        throw new LibUsbException("Data move failed.", results);
+        throw new LibUsbException("Packet Send Failed.", results);
       }
     }
 
@@ -1049,14 +1054,14 @@ public class K40NanoDriver extends LaserCutter
       results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 500L);
       if (results < LibUsb.SUCCESS)
       {
-        throw new LibUsbException("Data move failed.", results);
+        throw new LibUsbException("Status Request Failed.", results);
       }
 
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(6);
       results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 500L);
       if (results < LibUsb.SUCCESS)
       {
-        throw new LibUsbException("Data move failed.", results);
+        throw new LibUsbException("Status Update Failed", results);
       }
 
       if (transfered.get(0) == 6)
