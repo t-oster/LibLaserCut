@@ -177,6 +177,7 @@ public class K40NanoDriver extends LaserCutter
         }
       }
     }
+
     device.close();
   }
 
@@ -518,10 +519,6 @@ public class K40NanoDriver extends LaserCutter
 
     void execute()
     {
-      if (mode == COMPACT)
-      {
-        exit_compact_mode();
-      }
       jobber.execute();
     }
 
@@ -1038,27 +1035,36 @@ public class K40NanoDriver extends LaserCutter
 
     private void transmit_packet()
     {
+
       transfered.clear();
-      int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 500L);
-      if (results < LibUsb.SUCCESS)
+      int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 2000L);
+      if (results == LibUsb.ERROR_TIMEOUT)
+
       {
-        throw new LibUsbException("Packet Send Failed.", results);
+        if (results < LibUsb.SUCCESS)
+        {
+          throw new LibUsbException("Packet Send Failed.", results);
+        }
       }
+
     }
 
     private void update_status()
     {
+      int results;
+
       transfered.clear();
       request_status.put(0, (byte) 160);
-      int results;
-      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 500L);
+      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 2000L);
+
       if (results < LibUsb.SUCCESS)
       {
         throw new LibUsbException("Status Request Failed.", results);
+
       }
 
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(6);
-      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 500L);
+      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 2000L);
       if (results < LibUsb.SUCCESS)
       {
         throw new LibUsbException("Status Update Failed", results);
@@ -1066,12 +1072,29 @@ public class K40NanoDriver extends LaserCutter
 
       if (transfered.get(0) == 6)
       {
-        byte_0 = read_buffer.get(0) & 0xFF;
-        status = read_buffer.get(1) & 0xFF;
-        byte_2 = read_buffer.get(2) & 0xFF;
-        byte_3 = read_buffer.get(3) & 0xFF;
-        byte_4 = read_buffer.get(4) & 0xFF;
-        byte_5 = read_buffer.get(5) & 0xFF;
+        int next_0 = read_buffer.get(0) & 0xFF;
+        int next_1 = read_buffer.get(1) & 0xFF;
+        int next_2 = read_buffer.get(2) & 0xFF;
+        int next_3 = read_buffer.get(3) & 0xFF;
+        int next_4 = read_buffer.get(4) & 0xFF;
+        int next_5 = read_buffer.get(5) & 0xFF;
+
+        if ((byte_0 != next_0)
+          //|| (status != next_0)
+          || (byte_2 != next_2)
+          || (byte_3 != next_3)
+          || (byte_4 != next_4)
+          || (byte_5 != next_5))
+        {
+          System.out.println(String.format("%d %d %d %d %d %d", next_0, next_1, next_2, next_3, next_4, next_5));
+        }
+
+        byte_0 = next_0;
+        status = next_1;
+        byte_2 = next_2;
+        byte_3 = next_3;
+        byte_4 = next_4;
+        byte_5 = next_5;
       }
     }
 
