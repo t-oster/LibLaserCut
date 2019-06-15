@@ -111,7 +111,7 @@ def dump(filename, graph=False, showEngrave=False):
             print(s)
             raise Exception("did not get known start of command, but {:02X}".format(start))
 
-        commands={0x30: "Engrave line L2R", 0x31: "Engrave line R2L", 0x41: "Air Assist", 0x42: "end of file", 0x4A: "power", 0x4D: "job mode", 0x4E: "color", 0x50: "PPI", 0x53: "speed", 0x76:"version", 0x5041: "Pos. absolute", 0x5044:"Laser on", 0x5046: "End join", 0x504A: "Start join", 0x5045: "End speed", 0x5052: "Pos. relative", 0x5055: "Laser off", 0x5A41: "Focus?"}
+        commands={0x30: "Engrave line L2R", 0x31: "Engrave line R2L", 0x41: "Air Assist", 0x42: "end of file", 0x4A: "power", 0x4D: "job mode", 0x4E: "color", 0x50: "PPI", 0x53: "speed", 0x76:"version", 0x5041: "Pos. absolute", 0x5042: "Circle clockwise", 0x5043: "Circle counterclockwise", 0x5044:"Laser on", 0x5046: "End join", 0x504A: "Start join", 0x5045: "End speed", 0x5052: "Pos. relative", 0x5055: "Laser off", 0x5A41: "Focus?"}
         print("\n■ Command {:02X} ".format(cmd) + commands.get(cmd, ""))
 
         # two-byte commands:
@@ -195,7 +195,12 @@ def dump(filename, graph=False, showEngrave=False):
                 vEnd = 0;
                 dvBefore = 0;
                 dt = 1e-42;
-
+        elif cmd in [0x5042, 0x5043]:
+            # 16 byte data
+            print("relative endpoint")
+            readPrintXY()
+            print("relative center point")
+            readPrintXY()
         elif cmd == 0x6E:
             # 8 byte data
             readPrint(8)
@@ -297,12 +302,20 @@ def dump(filename, graph=False, showEngrave=False):
     plt.show()
 
     ## a = dv/dt = dv/ds * ds/dt = dv/ds * v
-    #a_approx = np.hstack((np.diff(speedx),0))/lens * speedx
-    ## j = da/dt = da/ds * ds/dt = da/ds * v
-    #j_approx = np.hstack((np.diff(a_approx),0))/lens * speedx
-    #plt.plot(np.cumsum(lens), a_approx,  'g.-', label="approx local accel")
-    #plt.plot(np.cumsum(lens), j_approx,  'm-', label="approx local jerk")
-    #plt.xlabel("total length")
+    #a_approx_x = np.hstack((np.diff(speedx),0)) / np.hstack((np.diff(t),0))
+    #a_approx_y = np.hstack((np.diff(speedy),0)) / np.hstack((np.diff(t),0))
+    #a_approx_xy = np.sqrt(a_approx_x ** 2 + a_approx_y ** 2)
+    #a_approx_xy_smoothed = np.convolve(a_approx_xy, np.ones((10,))/10, 'same')
+    ### j = da/dt = da/ds * ds/dt = da/ds * v
+    ##j_approx = np.hstack((np.diff(a_approx),0))/lens * speedx
+    #plt.plot(t, np.hstack((np.diff(speedx),0)) , 'r.-', label='x')
+    #plt.plot(t, np.hstack((np.diff(t),0)), 'b.-', label='y')
+    #plt.plot(t, a_approx_xy,  'g.-', label="absolute")
+    #plt.plot(t, a_approx_xy_smoothed,  'c.-', label="absolute, smoothed")
+    ##plt.plot(np.cumsum(lens), j_approx,  'm-', label="approx local jerk")
+    #plt.title("approx. acceleration over approx time  (very noisy due to quantisation)")
+    #plt.xlabel("time (approximate) in [px/%], not in seconds!")
+    #plt.ylabel("acceleration in [px/%^2 or some strange unit]")
     #plt.legend()
     #plt.show()
 
