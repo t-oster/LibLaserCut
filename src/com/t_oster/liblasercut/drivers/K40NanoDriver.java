@@ -388,6 +388,11 @@ public class K40NanoDriver extends LaserCutter
 
     void close()
     {
+      if (mode == COMPACT)
+      {
+        exit_compact_mode();
+        execute();
+      }
       jobber.close();
       jobber = null;
     }
@@ -431,14 +436,18 @@ public class K40NanoDriver extends LaserCutter
 
     void move_relative(int dx, int dy)
     {
-      if (mode != DEFAULT)
-      {
-        exit_compact_mode();
-      }
       check_init();
       this.x += dx;
       this.y += dy;
-      encode_default_move(dx, dy);
+      laser_off();
+      if (mode == DEFAULT)
+      {
+        encode_default_move(dx, dy);
+      }
+      else
+      {
+        makeLine(0, 0, dx, dy);
+      }
       send();
     }
 
@@ -520,6 +529,7 @@ public class K40NanoDriver extends LaserCutter
     void execute()
     {
       jobber.execute();
+
     }
 
     void encode_default_move(int dx, int dy)
@@ -622,7 +632,7 @@ public class K40NanoDriver extends LaserCutter
       {
         builder.append(LASER_OFF);
       }
-      is_on = true;
+      is_on = false;
     }
 
     void makeLine(int x0, int y0, int x1, int y1)
@@ -764,32 +774,91 @@ public class K40NanoDriver extends LaserCutter
     }
 
     //TODO: Expand this to support other boards and gearing codes. Only M2 currently.
+    public int getGear(double mm_per_second)
+    {
+      if (mm_per_second < 7)
+      {
+        return 0;
+      }
+      if (mm_per_second < 25.4)
+      {
+        return 1;
+      }
+      if (mm_per_second < 60)
+      {
+        return 2;
+      }
+      if (mm_per_second < 127)
+      {
+        return 3;
+      }
+      return 4;
+    }
+
     public String getSpeed(double mm_per_second)
     {
       mm_per_second = validateSpeed(mm_per_second);
-      double b = 5120.0;
-      double m = 11148.0;
-      return getSpeed(mm_per_second, m, b, 1, true);
+      int gear = getGear(mm_per_second);
+      double b;
+      double m;
+      switch (gear)
+      {
+        case 0:
+          b = 8;
+          m = 929.0;
+        default:
+          b = 5120.0;
+          m = 11148.0;
+          break;
+        case 3:
+          b = 5632.0;
+          m = 11148.0;
+          break;
+        case 4:
+          b = 6144.0;
+          m = 11148.0;
+          break;
+      }
+
+      return getSpeed(mm_per_second, m, b, gear, true);
     }
 
     //TODO: Use suffix C mode for boards that support it.
     String getSpeed(double mm_per_second, double m, double b, int gear, boolean expanded)
     {
+      boolean suffix_c = false;
+      if (gear == 0)
+      {
+        gear = 1;
+        suffix_c = true;
+      }
       double frequency_kHz = mm_per_second / 25.4;
       double period_in_ms = 1.0 / frequency_kHz;
       double period_value = (m * period_in_ms) + b;
       int speed_value = 65536 - (int) Math.rint(period_value);
       if (!expanded)
       {
-        return String.format(
-          "CV%03d%03d%1d",
-          (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
-          gear);
+        if (suffix_c)
+        {
+          return String.format(
+            "CV%03d%03d%1dC",
+            (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
+            gear);
+        }
       }
       int step_value = (int) mm_per_second;
       double d_ratio = 0.2612;
       double d_value = d_ratio * (m * period_in_ms) / (double) step_value;
       int diag_add = (int) d_value;
+      if (suffix_c)
+      {
+        return String.format(
+          "CV%03d%03d%1d%03d%03d%03dC",
+          (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
+          gear,
+          step_value,
+          (diag_add >> 8) & 0xFF, (diag_add & 0xFF));
+      }
       return String.format(
         "CV%03d%03d%1d%03d%03d%03d",
         (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
@@ -798,9 +867,16 @@ public class K40NanoDriver extends LaserCutter
         (diag_add >> 8) & 0xFF, (diag_add & 0xFF));
     }
 
-    //TODO: Validate the speeds.
     double validateSpeed(double s)
     {
+      if (s < 0.361)
+      {
+        return 0.361;
+      }
+      if (s > 240)
+      {
+        return 240;
+      }
       return s;
     }
 
@@ -1270,7 +1346,7 @@ public class K40NanoDriver extends LaserCutter
     {
       transfered.clear();
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(32);
-      int results = LibUsb.interruptTransfer(handle, K40_ENDPOINT_READ_I, read_buffer, transfered, 500L);
+      int results = LibUsb.interruptTransfer(handle, K40_ENDPOINT_READ_I, read_buffer, transfered, 2000L);
       if (results == LibUsb.ERROR_TIMEOUT)
       {
         return;
