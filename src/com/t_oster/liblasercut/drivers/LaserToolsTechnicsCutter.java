@@ -1000,7 +1000,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       if (lastPoint.deltaToPrevious != null)
       {
         double absAngle = lastPoint.deltaToPrevious.absAngleTo(newPoint.deltaToPrevious);
-        assert (absAngle < Math.PI / 2);
         lastPoint.absAngleAtCorner = absAngle;
         // TODO: hardcoded factor: we actually use 5 times the configured smoothing tolerance!!!
         // TODO: pass double values to LibLaserCut (or the raw splines, whatever), so that we can reinterpolate.
