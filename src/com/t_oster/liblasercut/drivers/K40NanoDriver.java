@@ -46,24 +46,7 @@ import org.usb4java.DeviceList;
 import org.usb4java.LibUsb;
 import org.usb4java.LibUsbException;
 
-/**
- * This class should act as a starting-point, when implementing a new
- * Lasercutter driver. It will take a Laserjob and just output the Vecor-Parts
- * as G-Code.
- *
- * The file contains comments prefixed with "#<step>" which should guide you in
- * the process of creating custom drivers. Also read the information in the Wiki
- * on https://github.com/t-oster/VisiCut/wiki/
- *
- * #1: Create a new JavaClass, which extends the
- * com.t_oster.liblasercut.drivers.LaserCutter class #2: Implement all abstract
- * methods. Each of them is explained in this example. #3: In Order to see your
- * driver in VisiCut, add your class to the getSupportedDrivers() method in the
- * com.t_oster.liblasercut.LibInfo class
- * (src/com/t_oster/liblasercut/LibInfo.java)
- *
- * @author Thomas Oster
- */
+
 public class K40NanoDriver extends LaserCutter
 {
 
@@ -72,6 +55,11 @@ public class K40NanoDriver extends LaserCutter
   private static final String SETTING_BOARD = "M2, M1, M, B2, B1, B, A, board selection";
   private static final String SETTING_MOCK = "Use mock usb channel";
 
+  private static final String[] settingAttributes = new String[]
+  {
+    SETTING_BEDWIDTH, SETTING_BEDHEIGHT, SETTING_BOARD, SETTING_MOCK
+  };
+
   //310mm by 220mm
   double bedWidth = 310;
   double bedHeight = 220;
@@ -79,7 +67,7 @@ public class K40NanoDriver extends LaserCutter
   boolean mock = false;
 
   /**
-   * This is the core method of the driver. It is called, whenever VisiCut wants
+   * This is the core method of the driver. It is called, whenever LibLaseCut wants
    * your driver to send a job to the lasercutter.
    *
    * @param job This is an LaserJob object, containing all information on the
@@ -102,22 +90,18 @@ public class K40NanoDriver extends LaserCutter
 
     device.open();
 
-    //Well, first, let's iterate over the different parts of this job.
     for (JobPart p : job.getParts())
     {
-      //now we have to check, of which kind this part is. We only accept VectorParts and add a warning for other parts.
       if (!(p instanceof VectorPart))
       {
+        //TODO: Implement raster part of driver.
         warnings.add("Non-vector parts are ignored by this driver.");
       }
       else
       {
-        //so, we know it's a VectorPart. We cast it, so we get the real interface
         VectorPart vp = (VectorPart) p;
-        //A VectorPart consists of a command List. So let's iterate over this list
         for (VectorCommand cmd : vp.getCommandList())
         {
-          //There are three types of commands: MOVETO, LINETO and SETPROPERTY
           switch (cmd.getType())
           {
             case LINETO:
@@ -130,6 +114,7 @@ public class K40NanoDriver extends LaserCutter
               int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
               int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
               //Native units are mils.
+              
               device.cut_absolute(x, y);
               device.execute();
               break;
@@ -142,6 +127,7 @@ public class K40NanoDriver extends LaserCutter
                */
               int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
               int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
+              
               //Native units are mils.
               device.move_absolute(x, y);
               device.execute();
@@ -149,10 +135,6 @@ public class K40NanoDriver extends LaserCutter
             }
             case SETPROPERTY:
             {
-              /**
-               * Change properties of current laser-actions (e.g. speed,
-               * frequency, power... whatever your driver supports)
-               */
               LaserProperty prop = cmd.getProperty();
               for (String key : prop.getPropertyKeys())
               {
@@ -240,49 +222,28 @@ public class K40NanoDriver extends LaserCutter
     this.bedHeight = bedHeight;
   }
 
-  /**
-   * This method should return the width of the laser-bed. You can have a
-   * config-setting in order to have different sizes for each instance of your
-   * driver. For simplicity we just assume a width of 600mm
-   *
-   * @return
-   */
+
   @Override
   public double getBedWidth()
   {
     return this.bedWidth;
   }
 
-  /**
-   * This method should return the height of the laser-bed. You can have a
-   * config-setting in order to have different sizes for each instance of your
-   * driver. For simplicity we just assume a height of 300mm
-   *
-   * @return
-   */
+
   @Override
   public double getBedHeight()
   {
     return this.bedHeight;
   }
 
-  /**
-   * This method should return a name for this driver.
-   *
-   * @return
-   */
+ 
   @Override
   public String getModelName()
   {
     return "K40 Stock-LIHUIYU M2/M1/M/B2/B1/B/A";
   }
 
-  /**
-   * This method must copy the current instance with all config settings,
-   * because it is used for save- and restoring
-   *
-   * @return
-   */
+
   @Override
   public LaserCutter clone()
   {
@@ -293,11 +254,6 @@ public class K40NanoDriver extends LaserCutter
     clone.mock = this.mock;
     return clone;
   }
-
-  private static final String[] settingAttributes = new String[]
-  {
-    SETTING_BEDWIDTH, SETTING_BEDHEIGHT, SETTING_BOARD, SETTING_MOCK
-  };
 
   @Override
   public String[] getPropertyKeys()
