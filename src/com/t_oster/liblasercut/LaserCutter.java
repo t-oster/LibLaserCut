@@ -147,6 +147,23 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     public abstract double getBedHeight();
 
     /**
+     * Returns the required precision in px for interpolating curves as a poly-line.
+     * The default is 1, which means curves may be approximated within a tolerance of
+     * up to +- (1 inch / current DPI value) .
+     *
+     * A smaller value may be required if the driver does additional calculations
+     * with the path, such as computing an acceleration-limited velocity profile.
+     *
+     * A larger value may be helpful for cutters with very limited CPU power,
+     * which will slow down if a path has a high density of points per length.
+     * @see ShapeConverter.addShape() uses this value
+     * @return tolerance in machine pixels
+     */
+    public double getRequiredCurvePrecision() {
+      return 1;
+    }
+
+    /**
      * Override this method, return true and override the
      * estimateJobDuration-method to allow Programs to use
      * your driver to estimate the duration of a job before

@@ -18,6 +18,7 @@
  **/
 package com.t_oster.liblasercut.utils;
 
+import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.VectorPart;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -36,15 +37,22 @@ public class ShapeConverter
   /**
    * Adds the given Shape to the given VectorPart by converting it to
    * lineto and moveto commands, whose lines differs not more than
-   * 1 pixel from the original shape.
+   * n pixels from the original shape. n is usually 1, but depends on the
+   * LaserCutter used.
    * 
    * @param shape the Shape to be added
    * @param vectorpart the Vectorpart the shape shall be added to
+   * @param cutter LaserCutter
    */
-  public void addShape(Shape shape, VectorPart vectorpart)
+  public void addShape(Shape shape, VectorPart vectorpart, LaserCutter cutter)
   {
     AffineTransform scale = AffineTransform.getScaleInstance(1, 1);
-    PathIterator iter = shape.getPathIterator(scale, 1);
+    double precision = 1;
+    if (cutter != null) // this "if" guard is only needed for compatibility - change to 'if (True)' after the deprecated addShape(Shape,VectorPart) interface has been removed
+    {
+      precision = cutter.getRequiredCurvePrecision();
+    }
+    PathIterator iter = shape.getPathIterator(scale, precision);
     double startx = 0;
     double starty = 0;
     int lastx = 0;
@@ -79,5 +87,18 @@ public class ShapeConverter
       }
       iter.next();
     }
+  }
+
+  /**
+   * Fallback method for compatibility with old VisiCut code.
+   * Remove this as soon as VisiCut uses the new interface of addShape.
+   * @param shape
+   * @param vectorpart
+   * @deprecated
+   */
+  @Deprecated
+  public void addShape(Shape shape, VectorPart vectorpart)
+  {
+    addShape(shape, vectorpart, null);
   }
 }

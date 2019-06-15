@@ -1111,7 +1111,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         double absAngle = lastPoint.deltaToPrevious.absAngleTo(newPoint.deltaToPrevious);
         lastPoint.absAngleAtCorner = absAngle;
         // TODO: hardcoded factor: we actually use 5 times the configured smoothing tolerance!!!
-        // TODO: we need finer interpolation in ShapeConverter, or really use splines.
         // TODO: the following if-condition should be simplified or completely rewritten.
         if (absAngle * newLen > lengthTolerancePixels * 5 || absAngle > angleToleranceShort || (newLen > lengthTolerancePixels * 100 && absAngle > angleToleranceLong))
         {
@@ -1832,6 +1831,19 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   {
     this.bedHeight = bedHeight;
   }
+
+  @Override
+  public double getRequiredCurvePrecision() {
+    if (this.useTangentCurves) {
+      // "Joint tangent curve" is used.
+      // we need finely spaced points so that the velocity calculations work correctly
+      return 0.2;
+    } else {
+      // classic polyline - better use lower precision to gain speed.
+      return 1;
+    }
+  }
+
   private static final Integer[] engraveShiftListDefault = new Integer[]
   {
     -2, -4, -7, -10, -13, -15, -17, -19, -21, -23
