@@ -1600,6 +1600,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     currentPurge = false;
     currentVentilation = false;
     checkJob(job);
+    if (job.getStartX() != 0 || job.getStartY() != 0) {
+      throw new UnsupportedOperationException("Manual start point is not yet supported.");
+      // FIXME: We throw this error because manual start points currently dont work.
+      // To do: - signal to the laser cutter that the start point is manual
+      //        - fix all checks for coordinate limits
+      //        - test if it also works for negative coordinates (starting point at center of job)
+      //          especially for engrave (currently causes "negative array size" exception)
+    }
     job.applyStartPoint();
     this.writeJobCode(job, fileOutputStream, null);
   }
