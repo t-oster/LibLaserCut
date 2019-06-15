@@ -670,15 +670,15 @@ public class K40NanoDriver extends LaserCutter
 
       if (dx > dy)
       {
-        dy <<= 1;                                                  // dy is now 2*dy
+        dy <<= 1;// dy is now 2*dy
         dx <<= 1;
-        int fraction = dy - (dx >> 1);                         // same as 2*dy - dx
+        int fraction = dy - (dx >> 1);// same as 2*dx - dy
         while (x0 != x1)
         {
           if (fraction >= 0)
           {
             y0 += stepy;
-            fraction -= dx;                                // same as fraction -= 2*dx
+            fraction -= dx;// same as fraction -= 2*dx
             if (straight != 0)
             {
               move_x(straight);
@@ -696,18 +696,21 @@ public class K40NanoDriver extends LaserCutter
             straight += stepx;
           }
           x0 += stepx;
-          fraction += dy;                                    // same as fraction += 2*dy
+          fraction += dy;// same as fraction += 2*dy
         }
         if (straight != 0)
         {
           move_x(straight);
-          straight = 0;
+        }
+        if (diagonal != 0)
+        {
+          move_diagonal(diagonal);
         }
       }
       else
       {
-        dy <<= 1;                                                  // dy is now 2*dy
-        dx <<= 1;                                                  // dx is now 2*dx
+        dy <<= 1;
+        dx <<= 1;
         int fraction = dx - (dy >> 1);
         while (y0 != y1)
         {
@@ -737,17 +740,14 @@ public class K40NanoDriver extends LaserCutter
         if (straight != 0)
         {
           move_y(straight);
-          straight = 0;
         }
-      }
-      if (diagonal != 0)
-      {
-        move_diagonal(diagonal);
-        diagonal = 0;
+        if (diagonal != 0)
+        {
+          move_diagonal(diagonal);
+        }
       }
     }
 
-    //TODO: needs rechecking.
     public void distance(int v)
     {
       if (v >= 255)
@@ -759,21 +759,22 @@ public class K40NanoDriver extends LaserCutter
           builder.append("z");
         }
       }
-      if (v > 53)
+      if (v > 51)
       {
         builder.append(String.format("%03d", v));
+        return;
       }
       else if (v > 25)
       {
-        builder.append('|').append((char) ('a' + (v - 26)));
+        builder.append('|');
+        v -= 25;
       }
-      else if (v > 0)
+      if (v > 0)
       {
         builder.append((char) ('a' + (v - 1)));
       }
     }
 
-    //TODO: Expand this to support other boards and gearing codes. Only M2 currently.
     public int getGear(double mm_per_second)
     {
       if (mm_per_second < 7)
@@ -800,30 +801,93 @@ public class K40NanoDriver extends LaserCutter
       mm_per_second = validateSpeed(mm_per_second);
       int gear = getGear(mm_per_second);
       double b;
-      double m;
-      switch (gear)
+      double m = 11148.0;
+      if ("M2".equals(board))
       {
-        case 0:
-          b = 8;
-          m = 929.0;
-        default:
-          b = 5120.0;
-          m = 11148.0;
-          break;
-        case 3:
-          b = 5632.0;
-          m = 11148.0;
-          break;
-        case 4:
-          b = 6144.0;
-          m = 11148.0;
-          break;
+        switch (gear)
+        {
+          case 0:
+            b = 8;
+            m = 929.0;
+            break;
+          default:
+            b = 5120.0;
+            break;
+          case 3:
+            b = 5632.0;
+            break;
+          case 4:
+            b = 6144.0;
+            break;
+        }
+        return getSpeed(mm_per_second, m, b, gear, true);
       }
-
-      return getSpeed(mm_per_second, m, b, gear, true);
+      if ("M".equals(board) || "M1".equals(board))
+      {
+        if (gear == 0)
+        {
+          gear = 1;
+        }
+        m = 11148.0;
+        switch (gear)
+        {
+          default:
+            b = 5120.0;
+            break;
+          case 3:
+            b = 5632.0;
+            break;
+          case 4:
+            b = 6144.0;
+            break;
+        }
+        return getSpeed(mm_per_second, m, b, gear, "M1".equals(board));
+      }
+      if ("A".equals(board) || "B".equals(board) || "B1".equals(board))
+      {
+        if (gear == 0)
+        {
+          gear = 1;
+        }
+        m = 11148.0;
+        switch (gear)
+        {
+          default:
+            b = 5120.0;
+            break;
+          case 3:
+            b = 5632.0;
+            break;
+          case 4:
+            b = 6144.0;
+            break;
+        }
+        return getSpeed(mm_per_second, m, b, gear, true);
+      }
+      if ("B2".equals(board))
+      {
+        m = 22296.0;
+        switch (gear)
+        {
+          case 0:
+            b = 784.0;
+            m = 1858.0;
+            break;
+          default:
+            b = 784.0;
+            break;
+          case 3:
+            b = 896.0;
+            break;
+          case 4:
+            b = 1024.0;
+            break;
+        }
+        return getSpeed(mm_per_second, m, b, gear, true);
+      }
+      throw new UnsupportedOperationException("Board is not known.");
     }
 
-    //TODO: Use suffix C mode for boards that support it.
     String getSpeed(double mm_per_second, double m, double b, int gear, boolean expanded)
     {
       boolean suffix_c = false;
@@ -836,6 +900,14 @@ public class K40NanoDriver extends LaserCutter
       double period_in_ms = 1.0 / frequency_kHz;
       double period_value = (m * period_in_ms) + b;
       int speed_value = 65536 - (int) Math.rint(period_value);
+      if (speed_value < 0)
+      {
+        speed_value = 0;
+      }
+      if (speed_value > 65535)
+      {
+        speed_value = 65535;
+      }
       if (!expanded)
       {
         if (suffix_c)
@@ -879,7 +951,6 @@ public class K40NanoDriver extends LaserCutter
       }
       return s;
     }
-
   }
 
   public class K40Queue
