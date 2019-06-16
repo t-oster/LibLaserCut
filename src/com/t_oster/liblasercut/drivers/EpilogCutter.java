@@ -272,6 +272,17 @@ abstract class EpilogCutter extends LaserCutter
   @Override
   protected void checkJob(LaserJob job) throws IllegalJobException
   {
+    throw new AbstractMethodError("This should not be called.");
+  }
+
+  /**
+   * Check the laser job for obvious errors, such as physical dimensions
+   * @param job
+   * @param warnings list of warnings, which will be appended to if warnings are issued
+   * @throws IllegalJobException
+   */
+  protected void checkJobAndApplyStartPoint(LaserJob job, List<String> warnings) throws IllegalJobException
+  {
     super.checkJob(job);
     for (JobPart p : job.getParts())
     {
@@ -323,11 +334,28 @@ abstract class EpilogCutter extends LaserCutter
         }
       }
     }
+
+    // call applyStartPoint() because it changes the job and is required for the following check.
+    job.applyStartPoint();
+    for (JobPart p: job.getParts())
+    {
+      if ((p.getMinX()< 0 || p.getMinY() < 0))
+      {
+        // FIXME We raise this warning because the code probably doesn't work for jobs with a starting point (origin)
+        // inside the job's bounding box.
+        // We need to stop using job.applyStartPoint() and instead issue the proper commands. See the bugreport linked in the warning below.
+        //
+        // One user has reported an error, more testing is necessary.
+        // TODO:
+        // If we get more error reports, then change this warning to an IllegalJobException.
+        // If we get reports that everything is okay, triple-check the code and then remove this warning.
+        warnings.add("The laser result may be wrong because of a bug with manual starting points. Please report if it worked on https://github.com/t-oster/VisiCut/issues/496 ");
+      }
+    }
   }
 
   public void realSendJob(LaserJob job, ProgressListener pl, int number, int count) throws UnsupportedEncodingException, IOException, UnknownHostException, Exception
   {
-    job.applyStartPoint();
     String nb = count > 1 ? "("+number+"/"+count+")" : "";
     pl.taskChanged(this, "generating"+nb);
     //Generate all the data
@@ -350,8 +378,9 @@ abstract class EpilogCutter extends LaserCutter
   {
     pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
-    //Perform santiy checks
-    checkJob(job);
+    //Perform sanity checks
+    checkJobAndApplyStartPoint(job, warnings);
+
     //split the job because epilog doesn't support many combinations
     List<List<JobPart>> jobs = new LinkedList<List<JobPart>>();
     List<JobPart> toDo = job.getParts();
@@ -465,8 +494,8 @@ abstract class EpilogCutter extends LaserCutter
       /* Focus */
       out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-      out.printf("\033*r%dT", rp != null ? (int) rp.getMaxY() : 10);//height);
-      out.printf("\033*r%dS", rp != null ? (int) rp.getMaxX() : 10);//width);
+      out.printf("\033*r%dT", rp != null ? (int) rp.getMaxY() : 10);//height); // FIXME probably not correct if we use a nonzero starting point (origin)
+      out.printf("\033*r%dS", rp != null ? (int) rp.getMaxX() : 10);//width); // FIXME probably not correct if we use a nonzero starting point (origin)
             /* Raster compression:
        *  2 = TIFF encoding
        *  7 = TIFF encoding, 3d-mode,
@@ -562,8 +591,8 @@ abstract class EpilogCutter extends LaserCutter
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-    out.printf("\033*r%dT", (int) jp.getMaxY());//height);
-    out.printf("\033*r%dS", (int) jp.getMaxX());//width);
+    out.printf("\033*r%dT", (int) jp.getMaxY());//height); // FIXME probably not correct if we use a nonzero starting point (origin)
+    out.printf("\033*r%dS", (int) jp.getMaxX());//width); // FIXME probably not correct if we use a nonzero starting point (origin)
         /* Raster compression:
      *  2 = TIFF encoding
      *  7 = TIFF encoding, 3d-mode,
@@ -598,8 +627,8 @@ abstract class EpilogCutter extends LaserCutter
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
-    out.printf("\033*r%dT", (int) rp.getMaxY());//height);
-    out.printf("\033*r%dS", (int) rp.getMaxX());//width);
+    out.printf("\033*r%dT", (int) rp.getMaxY());//height); // FIXME probably not correct if we use a nonzero starting point (origin)
+    out.printf("\033*r%dS", (int) rp.getMaxX());//width); // FIXME probably not correct if we use a nonzero starting point (origin)
         /* Raster compression:
      *  2 = TIFF encoding
      *  7 = TIFF encoding, 3d-mode,
@@ -637,8 +666,8 @@ abstract class EpilogCutter extends LaserCutter
         }
         if (line.size() > 0)
         {
-          out.printf("\033*p%dX", (int) sp.x + jump * 8);
-          out.printf("\033*p%dY", (int) sp.y + y);
+          out.printf("\033*p%dX", (int) sp.x + jump * 8); // FIXME probably not correct if we use a nonzero starting point (origin)
+          out.printf("\033*p%dY", (int) sp.y + y); // FIXME probably not correct if we use a nonzero starting point (origin)
           if (leftToRight)
           {
             out.printf("\033*b%dA", line.size());
@@ -682,7 +711,7 @@ abstract class EpilogCutter extends LaserCutter
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
-    out.printf("\033%%1B");// Start HLGL
+    out.printf("\033%%1B");// Start HPGL
     out.printf("IN;");
     //Reset Focus to 0
     out.printf("WF%d;", 0);
@@ -695,7 +724,7 @@ abstract class EpilogCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, "US-ASCII");
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033%%1B");// Start HLGL
+    out.printf("\033%%1B");// Start HPGL
     out.printf("IN;");
 
     if (vp != null)
@@ -1053,7 +1082,8 @@ abstract class EpilogCutter extends LaserCutter
 
   @Override
   public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
-    job.applyStartPoint();
+    // TODO: there is currently no way to report warnings with saveJob().
+    checkJobAndApplyStartPoint(job, new LinkedList<String>());
     byte[] pjlData = generatePjlData(job);
     fileOutputStream.write(pjlData);
   }
