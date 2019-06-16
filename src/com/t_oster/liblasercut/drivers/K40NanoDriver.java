@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
- **/
-
+ *
+ */
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.IllegalJobException;
@@ -24,14 +24,16 @@ import com.t_oster.liblasercut.JobPart;
 import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.LaserProperty;
-import com.t_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
 import com.t_oster.liblasercut.ProgressListener;
+import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -45,7 +47,6 @@ import org.usb4java.InterfaceDescriptor;
 import org.usb4java.DeviceList;
 import org.usb4java.LibUsb;
 import org.usb4java.LibUsbException;
-
 
 public class K40NanoDriver extends LaserCutter
 {
@@ -67,7 +68,8 @@ public class K40NanoDriver extends LaserCutter
   boolean mock = false;
 
   /**
-   * This is the core method of the driver. It is called, whenever LibLaseCut wants
+   * This is the core method of the driver. It is called, whenever LibLaseCut
+   * wants
    * your driver to send a job to the lasercutter.
    *
    * @param job This is an LaserJob object, containing all information on the
@@ -92,12 +94,28 @@ public class K40NanoDriver extends LaserCutter
 
     for (JobPart p : job.getParts())
     {
-      if (!(p instanceof VectorPart))
+      if (p instanceof RasterPart)
       {
-        //TODO: Implement raster part of driver.
-        warnings.add("Non-vector parts are ignored by this driver.");
+        RasterPart rp = (RasterPart) p;
+        ArrayList<Byte> list = new ArrayList<Byte>();
+        device.raster_start();
+        int i = 0;
+        try
+        {
+          while (true)
+          {
+            rp.getRasterLine(i, list);
+            device.scanline_raster(list, (i & 1) == 1);
+            i++;
+          }
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+          //Out of scanlines
+        }
+        device.raster_end();
       }
-      else
+      if (p instanceof VectorPart)
       {
         VectorPart vp = (VectorPart) p;
         for (VectorCommand cmd : vp.getCommandList())
@@ -114,7 +132,7 @@ public class K40NanoDriver extends LaserCutter
               int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
               int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
               //Native units are mils.
-              
+
               device.cut_absolute(x, y);
               device.execute();
               break;
@@ -127,7 +145,7 @@ public class K40NanoDriver extends LaserCutter
                */
               int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
               int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
-              
+
               //Native units are mils.
               device.move_absolute(x, y);
               device.execute();
@@ -139,19 +157,22 @@ public class K40NanoDriver extends LaserCutter
               for (String key : prop.getPropertyKeys())
               {
                 String value = prop.getProperty(key).toString();
-                if ("speed".equals(key))
+                if (K40NanoVectorProperty.VAR_MM_PER_SECOND.equals(key) || "speed".equals(key))
                 {
                   device.setSpeed(Double.valueOf(value));
                 }
+                else if (K40NanoVectorProperty.VAR_D_RATIO.equals(key))
+                {
+                  device.setD_ratio(Double.valueOf(value));
+                }
+                else if (K40NanoRasterProperty.VAR_RASTER_STEP.equals(key))
+                {
+                  device.setRaster_step(Integer.valueOf(value));
+                }
                 else if ("power".equals(key))
                 {
-                  device.setPower(Double.valueOf(value));
+                  warnings.add("There is no board based power setting.");
                 }
-                else
-                {
-                  //warnings.add(Can't use this":  " + key + "=" + value);
-                }
-                System.out.println(" " + key + "=" + value);
               }
               break;
             }
@@ -163,23 +184,20 @@ public class K40NanoDriver extends LaserCutter
     device.close();
   }
 
-  /**
-   * This method should return an Object of a class extending LaserProperty. A
-   * LaserProperty represents all settings for your device like power,speed and
-   * frequency which are necessary for a certain job-type (e.g. a VectorPart).
-   * See the different classes for examples. We will just use the default,
-   * supporting power,speed focus and frequency.
-   *
-   * @return
-   */
   @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
-    return new PowerSpeedFocusFrequencyProperty();
+    return new K40NanoVectorProperty();
+  }
+
+  @Override
+  public LaserProperty getLaserPropertyForRasterPart()
+  {
+    return new K40NanoRasterProperty();
   }
 
   /**
-   * This method should return a list of all supported resolutions (in DPI)
+   * This method returns a list of all supported resolutions (in DPI)
    *
    * @return
    */
@@ -222,13 +240,11 @@ public class K40NanoDriver extends LaserCutter
     this.bedHeight = bedHeight;
   }
 
-
   @Override
   public double getBedWidth()
   {
     return this.bedWidth;
   }
-
 
   @Override
   public double getBedHeight()
@@ -236,13 +252,11 @@ public class K40NanoDriver extends LaserCutter
     return this.bedHeight;
   }
 
- 
   @Override
   public String getModelName()
   {
     return "K40 Stock-LIHUIYU M2/M1/M/B2/B1/B/A";
   }
-
 
   @Override
   public LaserCutter clone()
@@ -320,7 +334,7 @@ public class K40NanoDriver extends LaserCutter
     static final char BOTTOM = 'R';
     static final char DIAGONAL = 'M';
 
-    K40Queue jobber;
+    K40Queue queue;
     private StringBuilder builder = new StringBuilder();
 
     private int mode = UNINIT;
@@ -329,17 +343,18 @@ public class K40NanoDriver extends LaserCutter
     private boolean is_left = false;
     private boolean is_on = false;
 
-    private double speed = 30;
-    private double power = 1;
     private String board = "M2";
+    private double speed = 30;
+    private int raster_step = 1;
+    double d_ratio = 0.2612;
 
     private int x = 0;
     private int y = 0;
 
     void open()
     {
-      jobber = new K40Queue();
-      jobber.open();
+      queue = new K40Queue();
+      queue.open();
     }
 
     void close()
@@ -349,22 +364,8 @@ public class K40NanoDriver extends LaserCutter
         exit_compact_mode();
         execute();
       }
-      jobber.close();
-      jobber = null;
-    }
-
-    void setPower(double power)
-    {
-      this.power = power;
-    }
-
-    void setSpeed(double mm_per_second)
-    {
-      if (mode == COMPACT)
-      {
-        exit_compact_mode();
-      }
-      speed = mm_per_second;
+      queue.close();
+      queue = null;
     }
 
     public String getBoard()
@@ -377,10 +378,73 @@ public class K40NanoDriver extends LaserCutter
       this.board = board;
     }
 
+    void setSpeed(double mm_per_second)
+    {
+      if (mode == COMPACT)
+      {
+        exit_compact_mode();
+      }
+      speed = mm_per_second;
+    }
+
+    public int getRaster_step()
+    {
+      return raster_step;
+    }
+
+    public void setRaster_step(int raster_step)
+    {
+      if (raster_step > 64)
+      {
+        raster_step = 64;
+      }
+      if (raster_step < 1)
+      {
+        raster_step = 1;
+      }
+      this.raster_step = raster_step;
+    }
+
+    public double getD_ratio()
+    {
+      return d_ratio;
+    }
+
+    public void setD_ratio(double d_ratio)
+    {
+      this.d_ratio = d_ratio;
+    }
+
     void send()
     {
-      jobber.add(builder.toString());
+      queue.add(builder.toString());
       builder.delete(0, builder.length());
+    }
+
+    void home()
+    {
+      exit_compact_mode();
+      builder.append("IPP\n");
+      send();
+      mode = UNINIT;
+      x = 0;
+      y = 0;
+    }
+
+    void unlock_rail()
+    {
+      exit_compact_mode();
+      builder.append("IS2P\n");
+      send();
+      mode = UNINIT;
+    }
+
+    void lock_rail()
+    {
+      exit_compact_mode();
+      builder.append("IS1P\n");
+      send();
+      mode = UNINIT;
     }
 
     void move_absolute(int x, int y)
@@ -393,8 +457,6 @@ public class K40NanoDriver extends LaserCutter
     void move_relative(int dx, int dy)
     {
       check_init();
-      this.x += dx;
-      this.y += dy;
       laser_off();
       if (mode == DEFAULT)
       {
@@ -421,10 +483,115 @@ public class K40NanoDriver extends LaserCutter
       {
         start_compact_mode();
       }
-      this.x += dx;
-      this.y += dy;
       laser_on();
       makeLine(0, 0, dx, dy);
+      send();
+    }
+
+    void raster_start()
+    {
+      laser_off();
+      check_init();
+      if (mode == COMPACT)
+      {
+        exit_compact_mode();
+      }
+      builder.append(getSpeed(speed, true));
+      builder.append('N');
+      builder.append(BOTTOM);
+      builder.append(RIGHT);
+      builder.append("S1E");
+      is_top = false;
+      is_left = false;
+      mode = COMPACT;
+    }
+
+    void raster_end()
+    {
+      exit_compact_mode();
+    }
+
+    void scanline_raster(List<Byte> bytes, boolean reversed)
+    {
+      if (!reversed)
+      {
+        int count = 0;
+        for (Byte b : bytes)
+        {
+          for (int i = 0; i < 8; i++)
+          {
+            if (((b >> i) & 1) == 1)
+            {
+              if (is_on)
+              {
+                count++;
+              }
+              else
+              {
+                move_x(count);
+                laser_on();
+                count = 1;
+              }
+            }
+            else
+            {
+              if (!is_on)
+              {
+                count++;
+              }
+              else
+              {
+                move_x(count);
+                laser_off();
+                count = 1;
+              }
+            }
+          }
+        }
+        builder.append(LEFT);
+        is_on = false;
+        y += raster_step;
+      }
+      else
+      {
+        int count = 0;
+        Collections.reverse(bytes);
+        for (Byte b : bytes)
+        {
+          for (int i = 7; i >= 0; i--)
+          {
+            if (((b >> i) & 1) == 1)
+            {
+              if (is_on)
+              {
+                count++;
+              }
+              else
+              {
+                move_x(-count);
+                laser_on();
+                count = 1;
+              }
+            }
+            else
+            {
+              if (!is_on)
+              {
+                count++;
+              }
+              else
+              {
+                move_x(-count);
+                laser_off();
+                count = 1;
+              }
+            }
+          }
+        }
+        builder.append(RIGHT);
+        is_on = false;
+        y += raster_step;
+      }
       send();
     }
 
@@ -476,15 +643,13 @@ public class K40NanoDriver extends LaserCutter
           builder.append(RIGHT);
         }
         builder.append("S1E");
-        is_top = false;
-        is_left = false;
       }
       mode = COMPACT;
     }
 
     void execute()
     {
-      jobber.execute();
+      queue.execute();
 
     }
 
@@ -501,9 +666,9 @@ public class K40NanoDriver extends LaserCutter
       builder.append(getSpeed(speed));
     }
 
-    void move_x(int x)
+    void move_x(int dx)
     {
-      if (0 < x)
+      if (0 < dx)
       {
         builder.append(RIGHT);
         is_left = false;
@@ -513,12 +678,13 @@ public class K40NanoDriver extends LaserCutter
         builder.append(LEFT);
         is_left = true;
       }
-      distance(Math.abs(x));
+      distance(Math.abs(dx));
+      this.x += dx;
     }
 
-    void move_y(int y)
+    void move_y(int dy)
     {
-      if (0 < y)
+      if (0 < dy)
       {
         builder.append(BOTTOM);
         is_top = false;
@@ -528,13 +694,30 @@ public class K40NanoDriver extends LaserCutter
         builder.append(TOP);
         is_top = true;
       }
-      distance(Math.abs(y));
+      distance(Math.abs(dy));
+      this.y += dy;
     }
 
     void move_diagonal(int v)
     {
       builder.append(DIAGONAL);
       distance(Math.abs(v));
+      if (is_top)
+      {
+        this.y -= v;
+      }
+      else
+      {
+        this.y += v;
+      }
+      if (is_left)
+      {
+        this.x -= v;
+      }
+      else
+      {
+        this.x += v;
+      }
     }
 
     void set_top()
@@ -752,10 +935,47 @@ public class K40NanoDriver extends LaserCutter
       return 4;
     }
 
+    public int getGearRaster(double mm_per_second)
+    {
+      if (mm_per_second < 25.4)
+      {
+        return 1;
+      }
+      if (mm_per_second < 127)
+      {
+        return 2;
+      }
+      if (mm_per_second < 320)
+      {
+        return 3;
+      }
+      return 4;
+    }
+
     public String getSpeed(double mm_per_second)
     {
-      mm_per_second = validateSpeed(mm_per_second);
-      int gear = getGear(mm_per_second);
+      return getSpeed(mm_per_second, false);
+    }
+
+    public String getSpeed(double mm_per_second, boolean raster)
+    {
+      int gear = 1;
+      if (raster)
+      {
+        if (mm_per_second > 500)
+        {
+          mm_per_second = 500;
+        }
+        gear = getGearRaster(mm_per_second);
+      }
+      else
+      {
+        if (mm_per_second > 240)
+        {
+          mm_per_second = 240;
+        }
+        gear = getGear(mm_per_second);
+      }
       double b;
       double m = 11148.0;
       if ("M2".equals(board))
@@ -776,7 +996,7 @@ public class K40NanoDriver extends LaserCutter
             b = 6144.0;
             break;
         }
-        return getSpeed(mm_per_second, m, b, gear, true);
+        return getSpeed(mm_per_second, m, b, gear, true, raster);
       }
       if ("M".equals(board) || "M1".equals(board))
       {
@@ -797,7 +1017,7 @@ public class K40NanoDriver extends LaserCutter
             b = 6144.0;
             break;
         }
-        return getSpeed(mm_per_second, m, b, gear, "M1".equals(board));
+        return getSpeed(mm_per_second, m, b, gear, "M1".equals(board), raster);
       }
       if ("A".equals(board) || "B".equals(board) || "B1".equals(board))
       {
@@ -818,7 +1038,7 @@ public class K40NanoDriver extends LaserCutter
             b = 6144.0;
             break;
         }
-        return getSpeed(mm_per_second, m, b, gear, true);
+        return getSpeed(mm_per_second, m, b, gear, true, raster);
       }
       if ("B2".equals(board))
       {
@@ -839,12 +1059,12 @@ public class K40NanoDriver extends LaserCutter
             b = 1024.0;
             break;
         }
-        return getSpeed(mm_per_second, m, b, gear, true);
+        return getSpeed(mm_per_second, m, b, gear, true, raster);
       }
       throw new UnsupportedOperationException("Board is not known.");
     }
 
-    String getSpeed(double mm_per_second, double m, double b, int gear, boolean expanded)
+    String getSpeed(double mm_per_second, double m, double b, int gear, boolean diagonal_code_required, boolean raster)
     {
       boolean suffix_c = false;
       if (gear == 0)
@@ -864,7 +1084,14 @@ public class K40NanoDriver extends LaserCutter
       {
         speed_value = 65535;
       }
-      if (!expanded)
+      if (raster)
+      {
+        return String.format(
+          "V%03d%03d%1dG%03d",
+          (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
+          gear, raster_step);
+      }
+      if (!diagonal_code_required)
       {
         if (suffix_c)
         {
@@ -873,11 +1100,25 @@ public class K40NanoDriver extends LaserCutter
             (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
             gear);
         }
+        else
+        {
+          return String.format(
+            "CV%03d%03d%1d",
+            (speed_value >> 8) & 0xFF, (speed_value & 0xFF),
+            gear);
+        }
       }
       int step_value = (int) mm_per_second;
-      double d_ratio = 0.2612;
       double d_value = d_ratio * (m * period_in_ms) / (double) step_value;
       int diag_add = (int) d_value;
+      if (diag_add < 0)
+      {
+        diag_add = 0;
+      }
+      if (diag_add > 65535)
+      {
+        diag_add = 65535;
+      }
       if (suffix_c)
       {
         return String.format(
@@ -893,19 +1134,6 @@ public class K40NanoDriver extends LaserCutter
         gear,
         step_value,
         (diag_add >> 8) & 0xFF, (diag_add & 0xFF));
-    }
-
-    double validateSpeed(double s)
-    {
-      if (s < 0.361)
-      {
-        return 0.361;
-      }
-      if (s > 240)
-      {
-        return 240;
-      }
-      return s;
     }
   }
 
@@ -997,12 +1225,6 @@ public class K40NanoDriver extends LaserCutter
         }
       }
     }
-
-    public int size()
-    {
-      return queue.size();
-    }
-
   }
 
   public interface BaseUsb
@@ -1138,18 +1360,12 @@ public class K40NanoDriver extends LaserCutter
 
     private void transmit_packet()
     {
-
       transfered.clear();
       int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 2000L);
-      if (results == LibUsb.ERROR_TIMEOUT)
-
+      if (results < LibUsb.SUCCESS)
       {
-        if (results < LibUsb.SUCCESS)
-        {
-          throw new LibUsbException("Packet Send Failed.", results);
-        }
+        throw new LibUsbException("Packet Send Failed.", results);
       }
-
     }
 
     private void update_status()
@@ -1182,16 +1398,11 @@ public class K40NanoDriver extends LaserCutter
         int next_4 = read_buffer.get(4) & 0xFF;
         int next_5 = read_buffer.get(5) & 0xFF;
 
-        if ((byte_0 != next_0)
-          //|| (status != next_0)
-          || (byte_2 != next_2)
-          || (byte_3 != next_3)
-          || (byte_4 != next_4)
-          || (byte_5 != next_5))
-        {
-          System.out.println(String.format("%d %d %d %d %d %d", next_0, next_1, next_2, next_3, next_4, next_5));
-        }
-
+        /*
+        //Other than byte 1 being status these aren't known. They change
+        //sometimes, but what they mean is somewhat mysterious.
+        //System.out.println(String.format("%d %d %d %d %d %d", next_0, next_1, next_2, next_3, next_4, next_5));
+         */
         byte_0 = next_0;
         status = next_1;
         byte_2 = next_2;
@@ -1363,17 +1574,14 @@ public class K40NanoDriver extends LaserCutter
     }
 
     /*
-    
     This is a valid endpoint, but I don't know what it should actually do.
-    
     This shouldn't be called.
-    
      */
     private void get_interupt()
     {
       transfered.clear();
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(32);
-      int results = LibUsb.interruptTransfer(handle, K40_ENDPOINT_READ_I, read_buffer, transfered, 2000L);
+      int results = LibUsb.interruptTransfer(handle, K40_ENDPOINT_READ_I, read_buffer, transfered, 500L);
       if (results == LibUsb.ERROR_TIMEOUT)
       {
         return;
