@@ -30,6 +30,7 @@ import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -68,6 +69,7 @@ public class K40NanoDriver extends LaserCutter
   double bedHeight = 220;
   String board = "M2";
   boolean mock = false;
+  PrintStream saveJob = null;
 
   /**
    * This is the core method of the driver. It is called, whenever LibLaseCut
@@ -91,19 +93,49 @@ public class K40NanoDriver extends LaserCutter
     checkJob(job);
 
     K40Device device = new K40Device();
+
     device.x = this.x;
     device.y = this.y;
     device.setBoard(board);
-    device.open();
+    if (saveJob == null)
+    {
+      device.open();
+    }
+    else
+    {
+      device.open(new K40Queue()
+      {
+        @Override
+        public void execute()
+        {
+        }
+
+        @Override
+        public void add(String element)
+        {
+          saveJob.println(element);
+        }
+
+        @Override
+        public void close()
+        {
+        }
+
+        @Override
+        public void open()
+        {
+        }
+      });
+    }
 
     for (JobPart p : job.getParts())
     {
       if (p instanceof RasterPart)
       {
         RasterPart rp = (RasterPart) p;
-        int sx = (int) (Util.mm2inch(Util.px2mm(rp.getMinX(), p.getDPI())) * 1000.0);
-        int sy = (int) (Util.mm2inch(Util.px2mm(rp.getMinY(), p.getDPI())) * 1000.0);
-        device.move_absolute(sx, sy);
+//        int sx = (int) (Util.mm2inch(Util.px2mm(rp.getMinX(), p.getDPI())) * 1000.0);
+//        int sy = (int) (Util.mm2inch(Util.px2mm(rp.getMinY(), p.getDPI())) * 1000.0);
+//        device.move_absolute(sx, sy);
 
         device.raster_start();
         int step_x = 1;
@@ -246,6 +278,15 @@ public class K40NanoDriver extends LaserCutter
   }
 
   @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
+  {
+    saveJob = fileOutputStream;
+    this.sendJob(job);
+    fileOutputStream.close();
+    saveJob = null;
+  }
+
+  @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
     return new K40NanoVectorProperty();
@@ -267,7 +308,7 @@ public class K40NanoDriver extends LaserCutter
   {
     return Arrays.asList(new Double[]
     {
-      100.0, 200.0, 500.0, 1000.0
+      1000.0
     });
   }
 
@@ -416,8 +457,13 @@ public class K40NanoDriver extends LaserCutter
 
     void open()
     {
-      queue = new K40Queue();
-      queue.open();
+      open(new K40Queue());
+    }
+
+    void open(K40Queue q)
+    {
+      queue = q;
+      q.open();
     }
 
     void close()
