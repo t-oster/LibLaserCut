@@ -16,8 +16,6 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-
-
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.IllegalJobException;
@@ -137,24 +135,28 @@ public class K40NanoDriver extends LaserCutter
         K40NanoRasterProperty nrp = (K40NanoRasterProperty) property;
         double speed = (Float) nrp.getProperty(K40NanoRasterProperty.VAR_MM_PER_SECOND);
         device.setSpeed(speed);
-        int sx = (int) (Util.mm2inch(Util.px2mm(rp.getMinX(), p.getDPI())) * 1000.0);
-        int sy = (int) (Util.mm2inch(Util.px2mm(rp.getMinY(), p.getDPI())) * 1000.0);
+        int sx = (int) (rp.getMinX() * (1000 / p.getDPI()));
+        int sy = (int) (rp.getMinY() * (1000 / p.getDPI()));
         device.move_absolute(sx, sy);
-
+        
+        int step_size = (int) (1000.0 / p.getDPI());
+        device.setRaster_step(step_size);
+        
         device.raster_start();
-        int step_x = 1;
+        
+        int pixel_step_x = 1;
         for (int y = 0, ye = rp.getRasterHeight(); y < ye; y++)
         {
           device.laser_off();
           if (rp.lineIsBlank(y))
           {
-            device.move_y(1); //I can just skip blank lines.
+            device.move_y(device.raster_step); //I can just skip blank lines.
             continue;
           }
           int sequence = 0;
           int x;
           int xe;
-          if (step_x > 0)
+          if (pixel_step_x > 0)
           {
             x = -1;
             xe = rp.getRasterWidth() - 1;
@@ -166,49 +168,49 @@ public class K40NanoDriver extends LaserCutter
           }
           while (x != xe)
           {
-            x += step_x;
+            x += pixel_step_x;
             if (rp.isBlack(x, y))
             {
               if (device.is_on) //already cutting.
               {
-                sequence += step_x;
+                sequence += pixel_step_x;
               }
               else
               { //not cutting, but should be.
                 if (sequence != 0)
                 {
-                  device.move_x(sequence);
+                  device.move_x(sequence * step_size);
                 }
                 device.laser_on();
-                sequence = step_x;
+                sequence = pixel_step_x;
               }
             }
             else
             {
               if (!device.is_on) //already not-cutting
               {
-                sequence += step_x;
+                sequence += pixel_step_x;
               }
               else
               { //cutting, but shouldn't be.
                 if (sequence != 0)
                 {
-                  device.move_x(sequence);
+                  device.move_x(sequence * step_size);
                 }
                 device.laser_off();
-                sequence = step_x;
+                sequence = pixel_step_x;
               }
             }
           }
           if (sequence != 0)
           {
-            device.move_x(sequence); //whatever's left.
+            device.move_x(sequence * step_size); //whatever's left.
           }
           sequence = 0;
           device.h_switch(); //explicitly flip directions with no magnatude. 
           device.y += device.raster_step; //device triggered a raster step and changed y.
           device.is_on = false; //device turned off no matter what, update that state.
-          step_x = -step_x; //stepping in the other direction.
+          pixel_step_x = -pixel_step_x; //stepping in the other direction.
         }
         device.raster_end();
         device.move_absolute(sx, sy);
@@ -227,8 +229,8 @@ public class K40NanoDriver extends LaserCutter
                * x/y position of this command. All coordinates are in dots
                * respecting to the job resolution
                */
-              int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
-              int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
+              int x = (int) (cmd.getX() * (1000 / p.getDPI()));
+              int y = (int) (cmd.getY() * (1000 / p.getDPI()));
               //Native units are mils.
 
               device.cut_absolute(x, y);
@@ -241,8 +243,8 @@ public class K40NanoDriver extends LaserCutter
                * Move the laserhead (laser off) from the current position to the
                * x/y position of this command. All coordinates are in mm
                */
-              int x = (int) (Util.mm2inch(Util.px2mm(cmd.getX(), p.getDPI())) * 1000.0);
-              int y = (int) (Util.mm2inch(Util.px2mm(cmd.getY(), p.getDPI())) * 1000.0);
+              int x = (int) (cmd.getX() * (1000 / p.getDPI()));
+              int y = (int) (cmd.getY() * (1000 / p.getDPI()));
 
               //Native units are mils.
               device.move_absolute(x, y);
@@ -263,10 +265,6 @@ public class K40NanoDriver extends LaserCutter
                 {
                   device.setD_ratio(Double.valueOf(value));
                 }
-                else if (K40NanoRasterProperty.VAR_RASTER_STEP.equals(key))
-                {
-                  device.setRaster_step(Integer.valueOf(value));
-                }
                 else if ("power".equals(key))
                 {
                   warnings.add("There is no board based power setting.");
@@ -278,11 +276,10 @@ public class K40NanoDriver extends LaserCutter
         }
       }
     }
-    if (saveJob == null)
-    { //don't preserve this if we weren't doing it for real.
-      this.x = device.x;
-      this.y = device.y;
-    }
+
+    device.home(); //Home the device after the job.
+    this.x = 0;
+    this.y = 0;
     device.close();
   }
 
@@ -317,7 +314,7 @@ public class K40NanoDriver extends LaserCutter
   {
     return Arrays.asList(new Double[]
     {
-      1000.0
+      250.0, 500.0, 1000.0
     });
   }
 
@@ -824,174 +821,230 @@ public class K40NanoDriver extends LaserCutter
       this.y += dy;
     }
 
-    void move_angle(int dx, int dy) {
-        //assert(abs(dx) == abs(dy));
-        if (0 < dx) {
-            if (is_left) {
-                builder.append(RIGHT);
-            }
-            is_left = false;
-        } else {
-            if (!is_left) {
-                builder.append(LEFT);
-            }
-            is_left = true;
-        }
-        if (0 < dy) {
-            if (is_top) {
-                builder.append(BOTTOM);
-            }
-            is_top = false;
-        } else {
-            if (!is_top) {
-                builder.append(TOP);
-            }
-            is_top = true;
-        }
-        builder.append(DIAGONAL);
-        distance(Math.abs(dx));
-        this.x += dx;
-        this.y += dy;
-    }
-
-    void move_diagonal(int v) {
-        builder.append(DIAGONAL);
-        distance(Math.abs(v));
-        if (is_top) {
-            this.y -= v;
-        } else {
-            this.y += v;
-        }
-        if (is_left) {
-            this.x -= v;
-        } else {
-            this.x += v;
-        }
-    }
-
-    void set_top() {
-        if (!is_top) {
-            builder.append(TOP);
-        }
-        is_top = true;
-    }
-
-    void set_bottom() {
-        if (is_top) {
-            builder.append(BOTTOM);
-        }
-        is_top = false;
-    }
-
-    void set_left() {
-        if (!is_left) {
-            builder.append(LEFT);
-        }
-        is_left = true;
-    }
-
-    void set_right() {
-        if (is_left) {
-            builder.append(RIGHT);
+    void move_angle(int dx, int dy)
+    {
+      //assert(abs(dx) == abs(dy));
+      if (0 < dx)
+      {
+        if (is_left)
+        {
+          builder.append(RIGHT);
         }
         is_left = false;
+      }
+      else
+      {
+        if (!is_left)
+        {
+          builder.append(LEFT);
+        }
+        is_left = true;
+      }
+      if (0 < dy)
+      {
+        if (is_top)
+        {
+          builder.append(BOTTOM);
+        }
+        is_top = false;
+      }
+      else
+      {
+        if (!is_top)
+        {
+          builder.append(TOP);
+        }
+        is_top = true;
+      }
+      builder.append(DIAGONAL);
+      distance(Math.abs(dx));
+      this.x += dx;
+      this.y += dy;
     }
 
-    void laser_on() {
-        if (!is_on) {
-            builder.append(LASER_ON);
-        }
-        is_on = true;
+    void move_diagonal(int v)
+    {
+      builder.append(DIAGONAL);
+      distance(Math.abs(v));
+      if (is_top)
+      {
+        this.y -= v;
+      }
+      else
+      {
+        this.y += v;
+      }
+      if (is_left)
+      {
+        this.x -= v;
+      }
+      else
+      {
+        this.x += v;
+      }
     }
 
-    void laser_off() {
-        if (is_on) {
-            builder.append(LASER_OFF);
-        }
-        is_on = false;
+    void set_top()
+    {
+      if (!is_top)
+      {
+        builder.append(TOP);
+      }
+      is_top = true;
     }
 
-    void makeLine(int x0, int y0, int x1, int y1) {
-        int dy = y1 - y0; //BRESENHAM LINE DRAW ALGORITHM
-        int dx = x1 - x0;
+    void set_bottom()
+    {
+      if (is_top)
+      {
+        builder.append(BOTTOM);
+      }
+      is_top = false;
+    }
 
-        int stepx = 0, stepy = 0;
+    void set_left()
+    {
+      if (!is_left)
+      {
+        builder.append(LEFT);
+      }
+      is_left = true;
+    }
 
-        if (dy < 0) {
-            dy = -dy;
-            stepy = -1;
-        } else {
-            stepy = 1;
+    void set_right()
+    {
+      if (is_left)
+      {
+        builder.append(RIGHT);
+      }
+      is_left = false;
+    }
+
+    void laser_on()
+    {
+      if (!is_on)
+      {
+        builder.append(LASER_ON);
+      }
+      is_on = true;
+    }
+
+    void laser_off()
+    {
+      if (is_on)
+      {
+        builder.append(LASER_OFF);
+      }
+      is_on = false;
+    }
+
+    void makeLine(int x0, int y0, int x1, int y1)
+    {
+      int dy = y1 - y0; //BRESENHAM LINE DRAW ALGORITHM
+      int dx = x1 - x0;
+
+      int stepx = 0, stepy = 0;
+
+      if (dy < 0)
+      {
+        dy = -dy;
+        stepy = -1;
+      }
+      else
+      {
+        stepy = 1;
+      }
+
+      if (dx < 0)
+      {
+        dx = -dx;
+        stepx = -1;
+      }
+      else
+      {
+        stepx = 1;
+      }
+      int straight = 0;
+      int diagonal = 0;
+
+      if (dx > dy)
+      {
+        dy <<= 1;// dy is now 2*dy
+        dx <<= 1;
+        int fraction = dy - (dx >> 1);// same as 2*dx - dy
+        while (x0 != x1)
+        {
+          if (fraction >= 0)
+          {
+            y0 += stepy;
+            fraction -= dx;// same as fraction -= 2*dx
+            if (straight != 0)
+            {
+              move_x(straight);
+              straight = 0;
+            }
+            diagonal++;
+          }
+          else
+          {
+            if (diagonal != 0)
+            {
+              move_angle(diagonal * stepx, diagonal * stepy);
+              diagonal = 0;
+            }
+            straight += stepx;
+          }
+          x0 += stepx;
+          fraction += dy;// same as fraction += 2*dy
         }
-
-        if (dx < 0) {
-            dx = -dx;
-            stepx = -1;
-        } else {
-            stepx = 1;
+        if (straight != 0)
+        {
+          move_x(straight);
         }
-        int straight = 0;
-        int diagonal = 0;
-
-        if (dx > dy) {
-            dy <<= 1;// dy is now 2*dy
-            dx <<= 1;
-            int fraction = dy - (dx >> 1);// same as 2*dx - dy
-            while (x0 != x1) {
-                if (fraction >= 0) {
-                    y0 += stepy;
-                    fraction -= dx;// same as fraction -= 2*dx
-                    if (straight != 0) {
-                        move_x(straight);
-                        straight = 0;
-                    }
-                    diagonal++;
-                } else {
-                    if (diagonal != 0) {
-                        move_angle(diagonal * stepx, diagonal * stepy);
-                        diagonal = 0;
-                    }
-                    straight += stepx;
-                }
-                x0 += stepx;
-                fraction += dy;// same as fraction += 2*dy
-            }
-            if (straight != 0) {
-                move_x(straight);
-            }
-            if (diagonal != 0) {
-                move_angle(diagonal * stepx, diagonal * stepy);
-            }
-        } else {
-            dy <<= 1;
-            dx <<= 1;
-            int fraction = dx - (dy >> 1);
-            while (y0 != y1) {
-                if (fraction >= 0) {
-                    x0 += stepx;
-                    fraction -= dy;
-                    if (straight != 0) {
-                        move_y(straight);
-                        straight = 0;
-                    }
-                    diagonal++;
-                } else {
-                    if (diagonal != 0) {
-                        move_angle(diagonal * stepx, diagonal * stepy);
-                        diagonal = 0;
-                    }
-                    straight += stepy;
-                }
-                y0 += stepy;
-                fraction += dx;
-            }
-            if (straight != 0) {
-                move_y(straight);
-            }
-            if (diagonal != 0) {
-                move_angle(diagonal * stepx, diagonal * stepy);
-            }
+        if (diagonal != 0)
+        {
+          move_angle(diagonal * stepx, diagonal * stepy);
         }
+      }
+      else
+      {
+        dy <<= 1;
+        dx <<= 1;
+        int fraction = dx - (dy >> 1);
+        while (y0 != y1)
+        {
+          if (fraction >= 0)
+          {
+            x0 += stepx;
+            fraction -= dy;
+            if (straight != 0)
+            {
+              move_y(straight);
+              straight = 0;
+            }
+            diagonal++;
+          }
+          else
+          {
+            if (diagonal != 0)
+            {
+              move_angle(diagonal * stepx, diagonal * stepy);
+              diagonal = 0;
+            }
+            straight += stepy;
+          }
+          y0 += stepy;
+          fraction += dx;
+        }
+        if (straight != 0)
+        {
+          move_y(straight);
+        }
+        if (diagonal != 0)
+        {
+          move_angle(diagonal * stepx, diagonal * stepy);
+        }
+      }
     }
 
     public void distance(int v)

@@ -28,10 +28,8 @@ public class K40NanoRasterProperty implements LaserProperty
 {
   
   static final String VAR_MM_PER_SECOND = "mm per second";
-  static final String VAR_RASTER_STEP = "raster step";
 
   private float mm_per_second = 60;
-  private int raster_step = 1;
 
   public K40NanoRasterProperty()
   {
@@ -42,13 +40,12 @@ public class K40NanoRasterProperty implements LaserProperty
   {
     K40NanoRasterProperty p = new K40NanoRasterProperty();
     p.mm_per_second = this.mm_per_second;
-    p.raster_step = this.raster_step;
     return p;
   }
 
   private static String[] propertyNames = new String[]
   {
-    VAR_MM_PER_SECOND, VAR_RASTER_STEP
+    VAR_MM_PER_SECOND
   };
 
   @Override
@@ -64,10 +61,6 @@ public class K40NanoRasterProperty implements LaserProperty
     {
       return (Float) this.mm_per_second;
     }
-    else if (VAR_RASTER_STEP.equals(name))
-    {
-      return (Integer) this.raster_step;
-    }
     return null;
   }
 
@@ -77,10 +70,6 @@ public class K40NanoRasterProperty implements LaserProperty
     if (VAR_MM_PER_SECOND.equals(name))
     {
       this.mm_per_second = (Float) value;
-    }
-    else if (VAR_RASTER_STEP.equals(name))
-    {
-      this.raster_step = (Integer) value;
     }
     else
     {
@@ -94,10 +83,6 @@ public class K40NanoRasterProperty implements LaserProperty
     {
       return (Float) 5f;
     }
-    else if (VAR_RASTER_STEP.equals(name))
-    {
-      return (Integer) 1;
-    }
     else
     {
       throw new IllegalArgumentException("Unknown setting '" + name + "'");
@@ -110,10 +95,6 @@ public class K40NanoRasterProperty implements LaserProperty
     if (VAR_MM_PER_SECOND.equals(name))
     {
       return (Float) 500f;
-    }
-    else if (VAR_RASTER_STEP.equals(name))
-    {
-      return (Integer) 64;
     }
     else
     {
@@ -132,7 +113,6 @@ public class K40NanoRasterProperty implements LaserProperty
   {
     int hash = 5;
     hash = 47 * hash + Float.floatToIntBits(this.mm_per_second);
-    hash = 47 * hash + this.raster_step;
     return hash;
   }
 
@@ -153,10 +133,6 @@ public class K40NanoRasterProperty implements LaserProperty
     }
     final K40NanoRasterProperty other = (K40NanoRasterProperty) obj;
     if (Float.floatToIntBits(this.mm_per_second) != Float.floatToIntBits(other.mm_per_second))
-    {
-      return false;
-    }
-    if (this.raster_step != other.raster_step)
     {
       return false;
     }
