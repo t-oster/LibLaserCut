@@ -27,7 +27,6 @@ import com.t_oster.liblasercut.ProgressListener;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
-import com.t_oster.liblasercut.platform.Util;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -61,8 +60,6 @@ public class K40NanoDriver extends LaserCutter
   };
 
   //310mm by 220mm
-  int x = 0;
-  int y = 0;
   double bedWidth = 310;
   double bedHeight = 220;
   String board = "M2";
@@ -95,8 +92,6 @@ public class K40NanoDriver extends LaserCutter
     device.setBoard(board);
     if (saveJob == null)
     {
-      device.x = this.x;
-      device.y = this.y;
       device.open();
     }
     else
@@ -278,8 +273,7 @@ public class K40NanoDriver extends LaserCutter
     }
 
     device.home(); //Home the device after the job.
-    this.x = 0;
-    this.y = 0;
+    device.execute();
     device.close();
   }
 
@@ -374,8 +368,6 @@ public class K40NanoDriver extends LaserCutter
     clone.bedWidth = this.bedWidth;
     clone.board = this.board;
     clone.mock = this.mock;
-    clone.x = this.x;
-    clone.y = this.y;
     return clone;
   }
 
@@ -1533,7 +1525,7 @@ public class K40NanoDriver extends LaserCutter
     private void transmit_packet()
     {
       transfered.clear();
-      int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 2000L);
+      int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 5000L);
       if (results < LibUsb.SUCCESS)
       {
         throw new LibUsbException("Packet Send Failed.", results);
@@ -1546,7 +1538,8 @@ public class K40NanoDriver extends LaserCutter
 
       transfered.clear();
       request_status.put(0, (byte) 160);
-      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 2000L);
+      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 5000L);
+      //While the device is fast moving this packet will not be accepted.
 
       if (results < LibUsb.SUCCESS)
       {
@@ -1555,7 +1548,7 @@ public class K40NanoDriver extends LaserCutter
       }
 
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(6);
-      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 2000L);
+      results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 5000L);
       if (results < LibUsb.SUCCESS)
       {
         throw new LibUsbException("Status Update Failed", results);
@@ -1743,25 +1736,6 @@ public class K40NanoDriver extends LaserCutter
       InterfaceDescriptor setting = iface.altsetting()[0];
       interface_number = setting.bInterfaceNumber();
       LibUsb.freeConfigDescriptor(config);
-    }
-
-    /*
-    This is a valid endpoint, but I don't know what it should actually do.
-    This shouldn't be called.
-     */
-    private void get_interupt()
-    {
-      transfered.clear();
-      ByteBuffer read_buffer = ByteBuffer.allocateDirect(32);
-      int results = LibUsb.interruptTransfer(handle, K40_ENDPOINT_READ_I, read_buffer, transfered, 500L);
-      if (results == LibUsb.ERROR_TIMEOUT)
-      {
-        return;
-      }
-      if (results < LibUsb.SUCCESS)
-      {
-        throw new LibUsbException("Data move failed.", results);
-      }
     }
 
   }
