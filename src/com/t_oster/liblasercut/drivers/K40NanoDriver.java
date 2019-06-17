@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
- **/
+ *
+ */
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.IllegalJobException;
@@ -30,7 +31,6 @@ import com.t_oster.liblasercut.VectorPart;
 import com.t_oster.liblasercut.platform.Util;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +61,8 @@ public class K40NanoDriver extends LaserCutter
   };
 
   //310mm by 220mm
+  int x = 0;
+  int y = 0;
   double bedWidth = 310;
   double bedHeight = 220;
   String board = "M2";
@@ -86,9 +88,11 @@ public class K40NanoDriver extends LaserCutter
   {
     //let's check the job for some errors
     checkJob(job);
-    K40Device device = new K40Device();
-    device.setBoard(board);
 
+    K40Device device = new K40Device();
+    device.x = this.x;
+    device.y = this.y;
+    device.setBoard(board);
     device.open();
 
     for (JobPart p : job.getParts())
@@ -96,25 +100,81 @@ public class K40NanoDriver extends LaserCutter
       if (p instanceof RasterPart)
       {
         RasterPart rp = (RasterPart) p;
-        ArrayList<Byte> list = new ArrayList<Byte>();
+        int sx = (int) (Util.mm2inch(Util.px2mm(rp.getMinX(), p.getDPI())) * 1000.0);
+        int sy = (int) (Util.mm2inch(Util.px2mm(rp.getMinY(), p.getDPI())) * 1000.0);
+        device.move_absolute(sx, sy);
+
         device.raster_start();
-        int i = 0;
-        try
+        int step_x = 1;
+        for (int y = 0, ye = rp.getRasterHeight(); y < ye; y++)
         {
-          while (true)
+          device.laser_off();
+          if (rp.lineIsBlank(y))
           {
-            rp.getRasterLine(i, list);
-            device.scanline_raster(list, (i & 1) == 1);
-            i++;
+            device.move_y(1); //I can just skip blank lines.
+            continue;
           }
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
-          //Out of scanlines
+          int sequence = 0;
+          int x;
+          int xe;
+          if (step_x > 0)
+          {
+            x = -1;
+            xe = rp.getRasterWidth() - 1;
+          }
+          else
+          {
+            x = rp.getRasterWidth();
+            xe = 0;
+          }
+          while (x != xe)
+          {
+            x += step_x;
+            if (rp.isBlack(x, y))
+            {
+              if (device.is_on) //already cutting.
+              {
+                sequence += step_x;
+              }
+              else
+              { //not cutting, but should be.
+                if (sequence != 0)
+                {
+                  device.move_x(sequence);
+                }
+                device.laser_on();
+                sequence = step_x;
+              }
+            }
+            else
+            {
+              if (!device.is_on) //already not-cutting
+              {
+                sequence += step_x;
+              }
+              else
+              { //cutting, but shouldn't be.
+                if (sequence != 0)
+                {
+                  device.move_x(sequence);
+                }
+                device.laser_off();
+                sequence = step_x;
+              }
+            }
+          }
+          if (sequence != 0)
+          {
+            device.move_x(sequence); //whatever's left.
+          }
+          sequence = 0;
+          device.h_switch(); //explicitly flip directions with no magnatude. 
+          device.is_on = false; //device turned off no matter what, update that state.
+          step_x = -step_x; //stepping in the other direction.
         }
         device.raster_end();
       }
-      if (p instanceof VectorPart)
+      else if (p instanceof VectorPart)
       {
         VectorPart vp = (VectorPart) p;
         for (VectorCommand cmd : vp.getCommandList())
@@ -179,7 +239,8 @@ public class K40NanoDriver extends LaserCutter
         }
       }
     }
-
+    this.x = device.x;
+    this.y = device.y;
     device.close();
   }
 
@@ -265,6 +326,8 @@ public class K40NanoDriver extends LaserCutter
     clone.bedWidth = this.bedWidth;
     clone.board = this.board;
     clone.mock = this.mock;
+    clone.x = this.x;
+    clone.y = this.y;
     return clone;
   }
 
@@ -1133,6 +1196,18 @@ public class K40NanoDriver extends LaserCutter
         gear,
         step_value,
         (diag_add >> 8) & 0xFF, (diag_add & 0xFF));
+    }
+
+    private void h_switch()
+    {
+      if (is_left)
+      {
+        this.set_right();
+      }
+      else
+      {
+        this.set_left();
+      }
     }
   }
 
