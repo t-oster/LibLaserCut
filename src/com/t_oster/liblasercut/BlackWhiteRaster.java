@@ -142,10 +142,11 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
    * @param y the y offset
    * @return
    */
-  public byte getByte(int x, int y)
+ public byte getByte(int x, int y)
   {
     int index = y * scanline + (x / 4);
-    int ix = (8 * (x % 4));
+    int index_in_byte = (3 - (x % 4));
+    int ix = (8 * index_in_byte);
     int mask = 0xFF << ix;
     return (byte) ((raster[index] >> ix) & 0xFF);
   }
