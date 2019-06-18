@@ -66,12 +66,28 @@ public class BlackWhiteRasterTest
     BlackWhiteRaster ras = new BlackWhiteRaster(500, 600);
     assertEquals(500, ras.getWidth());
     assertEquals(600, ras.getHeight());
+    for (int y = 0; y < ras.getHeight(); y++) {
+      assertTrue(ras.isLineBlank(y));
+    }
     for (int x = 0; x < ras.getWidth(); x++)
     {
       for (int y = 0; y < ras.getHeight(); y++)
-      {
+      {    
+        ras.setBlack(x, y, true);
+        assertEquals(ras.firstBlackPixel(y),x);
+        assertEquals(ras.lastBlackPixel(y),x);
+        ras.setBlack(x, y, false);
+      }
+    }
+    for (int x = 0; x < ras.getWidth(); x++)
+    {
+      for (int y = 0; y < ras.getHeight(); y++)
+      {    
         ras.setBlack(x, y, true);
       }
+    }
+    for (int y = 0; y < ras.getHeight(); y++) {
+      assertFalse(ras.isLineBlank(y));
     }
     for (int x = 0; x < ras.getWidth(); x++)
     {
@@ -102,6 +118,11 @@ public class BlackWhiteRasterTest
         ras.setBlack(x, y, black);
         assertEquals(black, ras.isBlack(x, y));
       }
+    }
+    for (int y =0; y < ras.getHeight(); y++) {
+    if (!ras.isLineBlank(y)) {
+      assertTrue(ras.firstBlackPixel(y) <= ras.lastBlackPixel(y));
+    }
     }
   }
 }
