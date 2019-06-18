@@ -189,7 +189,63 @@ abstract public class RasterizableJobPart extends JobPart
         return x;
     return 0;
   }
+
+  /**
+   * Finds the last x coordinate for last non-white pixel on this or the next
+   * line
+   * @param y
+   * @return x coordinate of last non-white pixel on this or the next line
+   */  
+  public int lastNonWhitePixelOnThisOrNextLine(int y) {
+    return cutDirectionleftToRight
+      ? rightMostNonWhitePixelOnThisOrNextLine(y)
+      : leftMostNonWhitePixelOnThisOrNextLine(y);
+  }
   
+  /**
+   * Finds the first x coordinate first non-white pixel on this or the next
+   * line
+   * @param y
+   * @return x coordinate of first non-white pixel on this or the next line
+   */  
+  public int firstNonWhitePixelOnThisOrNextLine(int y) {
+    return cutDirectionleftToRight
+      ? leftMostNonWhitePixelOnThisOrNextLine(y)
+      : rightMostNonWhitePixelOnThisOrNextLine(y);
+  }
+  
+  /**
+   * Finds the rightmost non-white pixel on this or the next line
+   * @param y
+   * @return x coordinate of first non-white pixel on this or the next line
+   */  
+  public int rightMostNonWhitePixelOnThisOrNextLine(int y)
+  {
+    int max = rightMostNonWhitePixel(y);
+    if (y >= this.getMaxY())
+    {
+      return max;
+    }
+    return Math.max(max, rightMostNonWhitePixel(y + 1));
+  }
+  
+  
+  /**
+   * Finds the leftmost non-white pixel on this or the next line
+   * @param y
+   * @return x coordinate of first non-white pixel on this or the next line
+   */  
+  public int leftMostNonWhitePixelOnThisOrNextLine(int y)
+  {
+    int min = leftMostNonWhitePixel(y);
+    if (y >= this.getMaxY())
+    {
+      return min;
+    }
+    return Math.max(min, rightMostNonWhitePixel(y + 1));
+  }
+  
+    
   /**
    * Given a pixel in a row of an image, finds the next pixel that has a different
    * color. If no more color changes take place, returns the last interesting pixel.

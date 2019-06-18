@@ -209,7 +209,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     return -1;
   }
 
-  public int firstBlackPixel(int y)
+  public int leftmostBlackPixel(int y)
   {
     for (int i = y * scanline, ie = (y + 1) * scanline; i < ie; i++)
     {
@@ -221,7 +221,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     return width;
   }
 
-  public int lastBlackPixel(int y)
+  public int rightmostBlackPixel(int y)
   {
     for (int i = ((y + 1) * scanline) - 1, ie = y * scanline; i >= ie; i--)
     {
@@ -231,26 +231,6 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
       }
     }
     return -1;
-  }
-
-  public int lastBlackPixelOnThisOrNextLine(int y)
-  {
-    int max = lastBlackPixel(y);
-    if (y >= height)
-    {
-      return max;
-    }
-    return Math.max(max, lastBlackPixel(y + 1));
-  }
-  
-  public int firstBlackPixelOnThisOrNextLine(int y)
-  {
-    int min = firstBlackPixel(y);
-    if (y >= height)
-    {
-      return min;
-    }
-    return Math.min(min, firstBlackPixel(y + 1));
   }
 
   /**
