@@ -20,8 +20,6 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.dithering.*;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  *
@@ -202,11 +200,11 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   {
     for (int bitIndex = 0; bitIndex < 32; bitIndex++)
     {
-      i >>>= 1;
       if ((i & 1) != 0)
       {
         return bitIndex;
       }
+      i >>>= 1;
     }
     return -1;
   }
@@ -217,7 +215,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     {
       if (raster[i] != 0)
       {
-        return i * 32 + mostSignificantBit(raster[i]);
+        return (i % scanline) * 32 + (31-mostSignificantBit(raster[i]));
       }
     }
     return width;
@@ -225,11 +223,11 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
 
   public int lastBlackPixel(int y)
   {
-    for (int i = (y + 1) * scanline - 1, ie = y * scanline; i >= ie; i++)
+    for (int i = ((y + 1) * scanline) - 1, ie = y * scanline; i >= ie; i--)
     {
       if (raster[i] != 0)
       {
-        return i * 32 + leastSignificantBit(raster[i]);
+        return (i % scanline) * 32 + (31-leastSignificantBit(raster[i]));
       }
     }
     return -1;
