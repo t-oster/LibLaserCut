@@ -74,8 +74,8 @@ public class BlackWhiteRasterTest
       for (int y = 0; y < ras.getHeight(); y++)
       {    
         ras.setBlack(x, y, true);
-        assertEquals(ras.firstBlackPixel(y),x);
-        assertEquals(ras.lastBlackPixel(y),x);
+        assertEquals(ras.leftmostBlackPixel(y),x);
+        assertEquals(ras.rightmostBlackPixel(y),x);
         ras.setBlack(x, y, false);
       }
     }
@@ -121,7 +121,7 @@ public class BlackWhiteRasterTest
     }
     for (int y =0; y < ras.getHeight(); y++) {
     if (!ras.isLineBlank(y)) {
-      assertTrue(ras.firstBlackPixel(y) <= ras.lastBlackPixel(y));
+      assertTrue(ras.leftmostBlackPixel(y) <= ras.rightmostBlackPixel(y));
     }
     }
   }
