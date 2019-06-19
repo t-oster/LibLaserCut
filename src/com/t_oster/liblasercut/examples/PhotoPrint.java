@@ -18,16 +18,15 @@
  **/
 package com.t_oster.liblasercut.examples;
 
-import com.t_oster.liblasercut.BlackWhiteRaster;
-import com.t_oster.liblasercut.BlackWhiteRaster.DitherAlgorithm;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
 import com.t_oster.liblasercut.PowerSpeedFocusProperty;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorPart;
+import com.t_oster.liblasercut.dithering.DitherFunctions;
+import com.t_oster.liblasercut.dithering.GreyscaleFunctions;
 import com.t_oster.liblasercut.drivers.EpilogZing;
-import com.t_oster.liblasercut.utils.BufferedImageAdapter;
 import com.t_oster.liblasercut.platform.Point;
 import com.t_oster.liblasercut.platform.Util;
 import java.awt.Color;
@@ -105,7 +104,7 @@ public class PhotoPrint {
         g.drawRenderedImage(img, at);
         final BufferedImage outImg = new BufferedImage(scaledImg.getWidth(), scaledImg.getHeight(), BufferedImage.TYPE_INT_RGB);
         final JComboBox cbDa = new JComboBox();
-        for (DitherAlgorithm da : BlackWhiteRaster.DitherAlgorithm.values()) {
+        for (DitherFunctions.DitherAlgorithm da : DitherFunctions.DitherAlgorithm.values()) {
             cbDa.addItem(da);
         }
         final JPanel prev = new JPanel();
@@ -135,30 +134,17 @@ public class PhotoPrint {
             public void actionPerformed(ActionEvent ae) {
                 lab.setText("dithering...");
                 lab.repaint();
-                DitherAlgorithm da = (DitherAlgorithm) cbDa.getSelectedItem();
-                BufferedImageAdapter ad = new BufferedImageAdapter(scaledImg);
-                ad.setColorShift(filter.getValue());
-                BlackWhiteRaster bw;
-                try
-                {
-                  bw = new BlackWhiteRaster(ad, da);
-                }
-                catch (InterruptedException ex)
-                {
-                  throw new RuntimeException("this must not happen");
-                }
-                for (int y = 0; y < bw.getHeight(); y++) {
-                    for (int x = 0; x < bw.getWidth(); x++) {
-                        outImg.setRGB(x, y, bw.isBlack(x, y) ^ cbInvert.isSelected() ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
-                    }
-                }
+                DitherFunctions.DitherAlgorithm da = (DitherFunctions.DitherAlgorithm) cbDa.getSelectedItem();
+                BufferedImage bw = DitherFunctions.dither(
+                  GreyscaleFunctions.greyscale(scaledImg, GreyscaleFunctions.GreyscaleAlgorithm.LUMINANCE, filter.getValue(),false),
+                  da);
                 Graphics2D g = buf.createGraphics();
                 AffineTransform at =
                         AffineTransform.getScaleInstance((double) buf.getWidth() / bw.getWidth(),
                         (double) buf.getWidth() / bw.getWidth());
                 g.setColor(Color.WHITE);
                 g.fillRect(0, 0, buf.getWidth(), buf.getHeight());
-                g.drawRenderedImage(outImg, at);
+                g.drawRenderedImage(bw, at); //bw is a bufferedimage now, none of that stuff is needed.
                 lab.setText("");
                 prev.repaint();
             }
@@ -184,7 +170,7 @@ public class PhotoPrint {
             //}
             //JOptionPane.showMessageDialog(null, material);
             //TODO: repair Material Selection
-            RasterPart rp = new RasterPart(new BlackWhiteRaster(new BufferedImageAdapter(outImg), BlackWhiteRaster.DitherAlgorithm.AVERAGE), new PowerSpeedFocusProperty(), new Point(0, 0), dpi);
+            RasterPart rp = new RasterPart(DitherFunctions.Average(GreyscaleFunctions.luminance(outImg)), new PowerSpeedFocusProperty(), new Point(0, 0), dpi);
             VectorPart vp = null;
             if (cbCut.isSelected()) {
                 vp = new VectorPart(new PowerSpeedFocusFrequencyProperty(), dpi);
