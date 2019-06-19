@@ -19,6 +19,7 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class RasterPart extends RasterizableJobPart
   LaserProperty blackPixelProperty = null;
   LaserProperty whitePixelProperty = null;
 
-  public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset, double resolution)
+  public RasterPart(BufferedImage image, LaserProperty laserProperty, Point offset, double resolution)
   {
     this.image = image;
     this.start = offset;
@@ -64,20 +65,25 @@ public class RasterPart extends RasterizableJobPart
   @Override
   public void getRasterLine(int line, List<Byte> result)
   {
-    if (result instanceof ByteArrayList) {
-	((ByteArrayList)result).clear((image.getWidth() + 7) / 8);
-    } else {
-	result.clear();
-    }
-    for (int x = 0; x < (image.getWidth() + 7) / 8; x++)
+    result.clear();
+    int bx = 0;
+    byte b = 0;
+    for (int x = 0, xe = image.getWidth(); x < xe; x++)
     {
-      result.add(((BlackWhiteRaster) image).getByte(x, line));
+      if (getGreyScale(image,x,line) != 0) {
+        b |= 1;
+      }
+      if ((x % 8) == 7) {
+        result.set(line, b);
+        b = 0;
+      }
+      b <<= 1;
     }
   }
 
   public boolean isBlack(int x, int y)
   {
-    return ((BlackWhiteRaster) image).isBlack(x, y);
+    return getGreyScale(image,x,y) == 0;
   }
 
   @Override

@@ -19,6 +19,8 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.platform.Point;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,7 +29,7 @@ import java.util.List;
  */
 abstract public class RasterizableJobPart extends JobPart
 {
-  protected GreyscaleRaster image;
+  protected BufferedImage image;
   protected Point start = null;
   protected boolean cutDirectionleftToRight = true;
   protected double resolution = Double.NaN;
@@ -61,9 +63,13 @@ abstract public class RasterizableJobPart extends JobPart
    */
   public List<Byte> getRasterLine(int line)
   {
-    ByteArrayList b = new ByteArrayList(image.getWidth());
-    getRasterLine(line, b);
-    return b;
+    int[] array = new int[image.getWidth()];
+    image.getRGB(0, line, image.getWidth(), 1, array,0,image.getWidth());
+    Byte[] bytearray = new Byte[array.length];
+    for (int i = 0, ie = array.length; i < ie; i++) {
+      bytearray[i] = (byte)(array[i] & 0xFF);
+    }
+    return Arrays.asList(bytearray);
   }
 
   /**
@@ -94,9 +100,10 @@ abstract public class RasterizableJobPart extends JobPart
    */
   public boolean lineIsBlank(int y)
   {
-    for (int x=0; x<getRasterWidth(); x++)
-      if (image.getGreyScale(x, y) < 255)
-        return false;
+    for (int x=0; x<getRasterWidth(); x++) {
+      int pixel = getGreyScale(image,x, y);
+      if (pixel < 255) return false;
+    }
     return true;
   }
   
@@ -159,7 +166,7 @@ abstract public class RasterizableJobPart extends JobPart
   protected int leftMostNonWhitePixel(int y)
   {
     for (int x=0; x<getRasterWidth(); x++)
-      if (image.getGreyScale(x, y) < 255)
+      if (getGreyScale(image, x, y) < 255)
         return x;
     return getRasterWidth();
   }
@@ -185,7 +192,7 @@ abstract public class RasterizableJobPart extends JobPart
   protected int rightMostNonWhitePixel(int y)
   {
     for (int x=getRasterWidth()-1; x >= 0; x--)
-      if (image.getGreyScale(x, y) < 255)
+      if (getGreyScale(image,x, y) < 255)
         return x;
     return 0;
   }
@@ -212,9 +219,9 @@ abstract public class RasterizableJobPart extends JobPart
    */
   protected int nextColorChangeHeadingRight(int x, int y)
   {
-    int color = image.getGreyScale(x, y);
+    int color = getGreyScale(image,x, y);
     for (int i=x; i<getRasterWidth(); i++)
-      if (image.getGreyScale(i, y) != color)
+      if (getGreyScale(image, i, y) != color)
         return i;
     // rest of line is the same color, so next colour change is past end of line
     return getRasterWidth();
@@ -228,9 +235,9 @@ abstract public class RasterizableJobPart extends JobPart
    */
   protected int nextColorChangeHeadingLeft(int x, int y)
   {
-    int color = image.getGreyScale(x, y);
+    int color = getGreyScale(image, x, y);
     for (int i=x; i>=0; i--)
-      if (image.getGreyScale(i, y) != color)
+      if (getGreyScale(image, i, y) != color)
         return i;
     // rest of line is the same color, so next colour change is past the beginning of line
     return -1;
@@ -289,7 +296,7 @@ abstract public class RasterizableJobPart extends JobPart
    */
   public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForPixel(int x, int y)
   {
-    return getPowerSpeedFocusPropertyForColor(image.getGreyScale(x, y));
+    return getPowerSpeedFocusPropertyForColor(getGreyScale(image,x, y));
   }
   
   /**
@@ -300,4 +307,10 @@ abstract public class RasterizableJobPart extends JobPart
    * @return laser property appropriate for this color
    */
   public abstract FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color);
+  
+  static int getGreyScale(BufferedImage src, int x, int y)
+  {
+    return src.getRGB(x, y) & 0xFF;
+  }
+
 }
