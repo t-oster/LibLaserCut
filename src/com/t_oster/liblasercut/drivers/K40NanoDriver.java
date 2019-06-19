@@ -28,6 +28,7 @@ import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
 import java.io.PrintStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -1510,7 +1511,7 @@ public class K40NanoDriver extends LaserCutter
 
     private void create_packet(CharSequence cs)
     {
-      packet.clear();
+      ((Buffer)packet).clear(); // Explicit cast for cross compatibility with JDK9
       packet.put((byte) 166);
       packet.put((byte) 0);
       for (int i = 0; i < cs.length(); i++)
@@ -1524,7 +1525,7 @@ public class K40NanoDriver extends LaserCutter
 
     private void transmit_packet()
     {
-      transfered.clear();
+      ((Buffer)transfered).clear(); // Explicit cast for cross compatibility with JDK9
       int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 5000L);
       if (results < LibUsb.SUCCESS)
       {
@@ -1536,7 +1537,7 @@ public class K40NanoDriver extends LaserCutter
     {
       int results;
 
-      transfered.clear();
+      ((Buffer)transfered).clear(); // Explicit cast for cross compatibility with JDK9
       request_status.put(0, (byte) 160);
       results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 5000L);
       //While the device is fast moving this packet will not be accepted.
