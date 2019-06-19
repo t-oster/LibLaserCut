@@ -4,6 +4,7 @@ for Lasercutters on any platform.
 Currently it supports most Epilog Lasers,
 the current LAOS board. (www.laoslaser.org),
 the SmoothieBoard (www.smoothieware.org),
+K40,
 generic GRBL based boards,
 and some untested work-in-progress drivers like the Roland iModela and the Lasersaur.
 
