@@ -808,7 +808,7 @@ public class GenericGcodeDriver extends LaserCutter {
       {
         if (p instanceof Raster3dPart || p instanceof RasterPart)
         {
-          p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI(), getUseBidirectionalRastering());
+          p = ((RasterizableJobPart) p).convertToVectorPart(getRasterPadding(), getUseBidirectionalRastering());
         }
         if (p instanceof VectorPart)
         {
@@ -848,7 +848,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 	{
 		if (p instanceof Raster3dPart || p instanceof RasterPart)
 		{
-			p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI(), getUseBidirectionalRastering());
+      p = ((RasterizableJobPart) p).convertToVectorPart(getRasterPadding(), getUseBidirectionalRastering());
 		}
     		if (p instanceof VectorPart)
 		{
