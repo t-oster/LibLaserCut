@@ -24,214 +24,50 @@ package com.t_oster.liblasercut;
  *
  * @author oster
  */
-public class FloatPowerSpeedFocusProperty implements LaserProperty
+public class FloatPowerSpeedFocusProperty extends AbstractLaserProperty
 {
-
-  private float power = 0;
-  private float speed = 100;
-  private float focus = 0;
 
   public FloatPowerSpeedFocusProperty()
   {
+    super();
+    addPropertyRanged("power", 0.0, 0.0, 100.0);
+    addPropertyRanged("speed", 100.0, 0.0, 100.0);
+    addProperty("focus", 0.0);
+    //addProperty("frequency", 500.0);
   }
 
-  /**
-   * Sets the Laserpower. Valid values are from 0 to 100.
-   * In 3d-Raster mode, the intensity is scaled to this power setting
-   * @param power 
-   */
-  public void setPower(float power)
+  public void setPower(float p)
   {
-    power = power < 0 ? 0 : power;
-    power = power > 100 ? 100 : power;
-    this.power = power;
+    this.setProperty("power", p);
   }
-
-  public float getPower()
-  {
-    return power;
+  
+  public void setSpeed(float p) {
+    this.setProperty("speed", p);
   }
-
-  /**
-   * Sets the speed for the Laser. Valid values is from 0 to 100
-   * @param speed 
-   */
-  public void setSpeed(float speed)
-  {
-    speed = speed < 0 ? 0 : speed;
-    speed = speed > 100 ? 100 : speed;
-    this.speed = speed;
+  
+  public void setFocus(float p) {
+    this.setProperty("focus", p);
+  }
+  
+  public void setFrequencey(float p) {
+    this.setProperty("frequency",p);
+  }
+  
+  public float getPower() {
+    return this.getFloat("power",0.0f);
   }
 
   public float getSpeed()
   {
-    return speed;
+    return this.getFloat("speed");
   }
 
-  /**
-   * Sets the Focus aka moves the Z axis. Values are given in mm.
-   * Positive values move the Z axis down aka makes the distance between
-   * laser and object bigger.
-   * The possible range depends on the LaserCutter, so wrong setting
-   * may result in IllegalJobExceptions
-   * @param focus the relative Distance from object to Laser in mm
-   */
-  public void setFocus(float focus)
+  public double getFocus()
   {
-    this.focus = focus;
+    return this.getFloat("focus");
   }
-
-  /**
-   * Returns the relative (to the distance at starting the job) distance
-   * between laser and object in mm/10s
-   */
-  public float getFocus()
-  {
-    return this.focus;
-  }
-
-  @Override
-  public FloatPowerSpeedFocusProperty clone()
-  {
-    FloatPowerSpeedFocusProperty p = new FloatPowerSpeedFocusProperty();
-    p.focus = focus;
-    p.power = power;
-    p.speed = speed;
-    return p;
-  }
-
-  private static String[] propertyNames = new String[]{"power", "speed", "focus"};
   
-  @Override
-  public String[] getPropertyKeys()
-  {
-    return propertyNames;
+  public float getFrequency() {
+    return this.getFloat("frequency");
   }
-
-  @Override
-  public Object getProperty(String name)
-  {
-    if ("power".equals(name))
-    {
-      return (Float) this.getPower();
-    }
-    else if ("speed".equals(name))
-    {
-      return (Float) this.getSpeed();
-    }
-    else if ("focus".equals(name))
-    {
-      return (Float) this.getFocus();
-    }
-    return null;
-  }
-
-  @Override
-  public void setProperty(String name, Object value)
-  {
-    if ("power".equals(name))
-    {
-      this.setPower((Float) value);
-    }
-    else if ("speed".equals(name))
-    {
-      this.setSpeed((Float) value);
-    }
-    else if ("focus".equals(name))
-    {
-      this.setFocus((Float) value);
-    }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }
-  }
-
-  @Override
-  public Object getMinimumValue(String name)
-  {
-  if ("power".equals(name))
-    {
-      return (Float) 0f;
-    }
-    else if ("speed".equals(name))
-    {
-      return (Float) 0f;
-    }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
-    {
-      return null;
-    }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }  
-  }
-
-  @Override
-  public Object getMaximumValue(String name)
-  {
-    if ("power".equals(name))
-    {
-      return (Float) 100f;
-    }
-    else if ("speed".equals(name))
-    {
-      return (Float) 100f;
-    }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
-    {
-      return null;
-    }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }
-  }  
-
-  @Override
-  public Object[] getPossibleValues(String name)
-  {
-    return null;
-  }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FloatPowerSpeedFocusProperty other = (FloatPowerSpeedFocusProperty) obj;
-        if (Float.floatToIntBits(this.power) != Float.floatToIntBits(other.power)) {
-            return false;
-        }
-        if (Float.floatToIntBits(this.speed) != Float.floatToIntBits(other.speed)) {
-            return false;
-        }
-        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + Float.floatToIntBits(this.power);
-        hash = 67 * hash + Float.floatToIntBits(this.speed);
-        hash = 67 * hash + Float.floatToIntBits(this.focus);
-        return hash;
-    }
-  
-
 }

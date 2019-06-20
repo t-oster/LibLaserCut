@@ -48,24 +48,23 @@ public class AbstractLaserProperty implements LaserProperty
     properties = new HashMap<String, Object>(p.properties);
   }
 
-  public void addPropertyRanged(String name, Object value, Object min, Object max)
+  final public void addPropertyRanged(String name, Object value, Object min, Object max)
   {
     properties.put(name, value);
     properties.put(name + MIN_SUFFIX, min);
     properties.put(name + MAX_SUFFIX, max);
   }
   
-  public void addProperty(String name, Object value)
+  final public void addProperty(String name, Object value)
   {
     properties.put(name, value);
   }
-  public void addPropertySpecific(String name, Object... values) {
+  
+  final public void addPropertySpecific(String name, Object... values) {
     properties.put(name, values[0]);
     properties.put(name + VALUES_SUFFIX, values);
   }
   
-  
-
   @Override
   public Object getMinimumValue(String name)
   {

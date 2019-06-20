@@ -24,146 +24,55 @@ package com.t_oster.liblasercut;
  *
  * @author oster
  */
-public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
+public class PowerSpeedFocusFrequencyProperty extends AbstractLaserProperty
 {
-
-  private int frequency = 5000;
 
   public PowerSpeedFocusFrequencyProperty()
   {
+    this(false);
   }
 
   /** Make a new PowerSpeedFocusFrequencyProperty that optionally utilizes the focus setting */
   public PowerSpeedFocusFrequencyProperty(boolean hideFocus)
   {
-    super(hideFocus);
+    addPropertyRanged("power", 0.0, 0, 100);
+    addPropertyRanged("speed", 100, 0, 100);
+    if (!hideFocus) addProperty("focus", 0.0);
+    addPropertyRanged("frequency", 5000, 10, 5000);
   }
-
-  public void setFrequency(int frequency)
+    
+  public void setPower(int p)
   {
-    frequency = frequency < 10 ? 10 : frequency;
-    frequency = frequency > 5000 ? 5000 : frequency;
-    this.frequency = frequency;
-  }
-
-  public int getFrequency()
-  {
-    return frequency;
-  }
-
-  private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
-  private static String[] propertyNamesNoFocus = new String[]{"power", "speed", "frequency"};
-
-  @Override
-  public String[] getPropertyKeys()
-  {
-    if (isHideFocus()) {
-      return propertyNamesNoFocus;
-    } else {
-      return propertyNames;
-    }
-  }
-
-  @Override
-  public Object getProperty(String name)
-  {
-    if ("frequency".equals(name))
-    {
-      return this.getFrequency();
-    }
-    else
-    {
-      return super.getProperty(name);
-    }
+    this.setProperty("power", p);
   }
   
-  @Override
-  public void setProperty(String name, Object value)
-  {
-    if ("frequency".equals(name))
-    {
-      this.setFrequency((Integer) value);
-    }
-    else
-    {
-      super.setProperty(name, value);
-    }
+  public void setSpeed(int p) {
+    this.setProperty("speed", p);
   }
   
-  @Override
-  public Object getMinimumValue(String name)
-  {
-    if ("frequency".equals(name))
-    {
-      return (Integer) 100;
-    }
-    else
-    {
-      return super.getMinimumValue(name);
-    }
+  public void setFocus(float p) {
+    this.setProperty("focus", p);
   }
   
-  @Override
-  public Object getMaximumValue(String name)
-  {
-     if ("frequency".equals(name))
-     {
-       return (Integer) 5000;
-     }
-     else
-     {
-       return super.getMaximumValue(name);
-     }
+  public void setFrequencey(int p) {
+    this.setProperty("frequency",p);
   }
-
-  @Override
-  public Object[] getPossibleValues(String name)
-  {
-    if ("frequency".equals(name))
-    {
-      return null;
-    }
-    else
-    {
-      return super.getPossibleValues(name);
-    }
-  }
-
-  @Override
-  public PowerSpeedFocusFrequencyProperty clone()
-  {
-    PowerSpeedFocusFrequencyProperty p = new PowerSpeedFocusFrequencyProperty();
-    p.frequency = this.frequency;
-    p.setPower(getPower());
-    p.setSpeed(getSpeed());
-    p.setFocus(getFocus());
-    p.setHideFocus(isHideFocus());
-    return p;
-  }
-
-    @Override
-    public int hashCode() {
-        int hash = 7*frequency + super.hashCode();
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final PowerSpeedFocusFrequencyProperty other = (PowerSpeedFocusFrequencyProperty) obj;
-        if (this.frequency != other.frequency) {
-            return false;
-        }
-        return super.equals(obj);
-    }
   
-  public String toString()
+  public int getPower() {
+    return this.getInteger("power",0);
+  }
+
+  public int getSpeed()
   {
-      return "PowerSpeedFocusFrequencyProperty(power="+getPower()+",speed="+getSpeed()+",focus="+getFocus()+",frequency="+getFrequency()+")";
+    return this.getInteger("speed");
+  }
+
+  public float getFocus()
+  {
+    return this.getFloat("focus");
+  }
+  
+  public int getFrequency() {
+    return this.getInteger("frequency");
   }
 }

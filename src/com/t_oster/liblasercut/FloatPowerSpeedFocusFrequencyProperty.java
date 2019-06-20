@@ -24,238 +24,48 @@ package com.t_oster.liblasercut;
  *
  * @author oster
  */
-public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
+public class FloatPowerSpeedFocusFrequencyProperty extends AbstractLaserProperty
 {
-
-  private float power = 0;
-  private float speed = 100;
-  private float focus = 0;
-  private int frequency = 500;
-
   public FloatPowerSpeedFocusFrequencyProperty()
   {
+    super();
+    addPropertyRanged("power", 0.0, 0.0, 100.0);
+    addPropertyRanged("speed", 100.0, 0.0, 100.0);
+    addProperty("focus", 0.0);
+    addProperty("frequency", 500);
   }
-
-  /**
-   * Sets the Laserpower. Valid values are from 0 to 100.
-   * In 3d-Raster mode, the intensity is scaled to this power setting
-   * @param power 
-   */
-  public void setPower(float power)
+  public void setPower(float p)
   {
-    power = power < 0 ? 0 : power;
-    power = power > 100 ? 100 : power;
-    this.power = power;
+    this.setProperty("power", p);
   }
-
-  public float getPower()
-  {
-    return power;
+  
+  public void setSpeed(float p) {
+    this.setProperty("speed", p);
   }
-
-  /**
-   * Sets the speed for the Laser. Valid values is from 0 to 100
-   * @param speed 
-   */
-  public void setSpeed(float speed)
-  {
-    speed = speed < 0 ? 0 : speed;
-    speed = speed > 100 ? 100 : speed;
-    this.speed = speed;
+  
+  public void setFocus(float p) {
+    this.setProperty("focus", p);
+  }
+  
+  public void setFrequency(int p) {
+    this.setProperty("frequency",p);
+  }
+  
+  public float getPower() {
+    return this.getFloat("power",0.0f);
   }
 
   public float getSpeed()
   {
-    return speed;
+    return this.getFloat("speed");
   }
 
-  /**
-   * Sets the Focus aka moves the Z axis. Values are given in mm.
-   * Positive values move the Z axis down aka makes the distance between
-   * laser and object bigger.
-   * The possible range depends on the LaserCutter, so wrong setting
-   * may result in IllegalJobExceptions
-   * @param focus the relative Distance from object to Laser in mm
-   */
-  public void setFocus(float focus)
-  {
-    this.focus = focus;
-  }
-
-  /**
-   * Returns the relative (to the distance at starting the job) distance
-   * between laser and object in mm/10s
-   */
   public float getFocus()
   {
-    return this.focus;
+    return this.getFloat("focus");
   }
   
-  public void setFrequency(int f)
-  {
-    this.frequency = f;
+  public int getFrequency() {
+    return this.getInteger("frequency");
   }
-  
-  public int getFrequency()
-  {
-    return this.frequency;
-  }
-
-  @Override
-  public FloatPowerSpeedFocusFrequencyProperty clone()
-  {
-    FloatPowerSpeedFocusFrequencyProperty p = new FloatPowerSpeedFocusFrequencyProperty();
-    p.focus = focus;
-    p.frequency = frequency;
-    p.power = power;
-    p.speed = speed;
-    return p;
-  }
-
-  private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
-  
-  @Override
-  public String[] getPropertyKeys()
-  {
-    return propertyNames;
-  }
-
-  @Override
-  public Object getProperty(String name)
-  {
-    if ("power".equals(name))
-    {
-      return (Float) this.getPower();
-    }
-    else if ("speed".equals(name))
-    {
-      return (Float) this.getSpeed();
-    }
-    else if ("focus".equals(name))
-    {
-      return (Float) this.getFocus();
-    }
-    else if ("frequency".equals(name))
-    {
-      return (Integer) this.getFrequency();
-    }
-    return null;
-  }
-
-  @Override
-  public void setProperty(String name, Object value)
-  {
-    if ("power".equals(name))
-    {
-      this.setPower((Float) value);
-    }
-    else if ("speed".equals(name))
-    {
-      this.setSpeed((Float) value);
-    }
-    else if ("focus".equals(name))
-    {
-      this.setFocus((Float) value);
-    }
-    else if ("frequency".equals(name))
-    {
-      this.setFrequency((Integer) value);
-    }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }
-  }
-
-  @Override
-  public Object getMinimumValue(String name)
-  {
-  if ("power".equals(name))
-    {
-      return (Float) 0f;
-    }
-    else if ("speed".equals(name))
-    {
-      return (Float) 0f;
-    }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
-    {
-      return null;
-    }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }  
-  }
-
-  @Override
-  public Object getMaximumValue(String name)
-  {
-    if ("power".equals(name))
-    {
-      return (Float) 100f;
-    }
-    else if ("speed".equals(name))
-    {
-      return (Float) 100f;
-    }
-    else if ("focus".equals(name))
-    {
-      return null;
-    }
-    else if ("frequency".equals(name))
-    {
-      return null;
-    }
-    else
-    {
-      throw new IllegalArgumentException("Unknown setting '"+name+"'");
-    }
-  }  
-
-  @Override
-  public Object[] getPossibleValues(String name)
-  {
-    return null;
-  }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FloatPowerSpeedFocusFrequencyProperty other = (FloatPowerSpeedFocusFrequencyProperty) obj;
-        if (Float.floatToIntBits(this.power) != Float.floatToIntBits(other.power)) {
-            return false;
-        }
-        if (Float.floatToIntBits(this.speed) != Float.floatToIntBits(other.speed)) {
-            return false;
-        }
-        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
-            return false;
-        }
-        if (this.frequency != other.frequency) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + Float.floatToIntBits(this.power);
-        hash = 67 * hash + Float.floatToIntBits(this.speed);
-        hash = 67 * hash + Float.floatToIntBits(this.focus);
-        hash = 67 * hash + this.frequency;
-        return hash;
-    }
-  
-
 }
