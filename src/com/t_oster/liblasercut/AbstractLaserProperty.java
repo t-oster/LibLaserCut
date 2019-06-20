@@ -108,7 +108,7 @@ public class AbstractLaserProperty implements LaserProperty
   public String[] getPropertyKeys()
   {
     Set<String> keys = properties.keySet();
-    ArrayList<String> list = new ArrayList<>();
+    ArrayList<String> list = new ArrayList<String>();
     for (String key : keys)
     {
       if ((!key.endsWith(MIN_SUFFIX))
