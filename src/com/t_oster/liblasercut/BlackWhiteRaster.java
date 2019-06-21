@@ -211,7 +211,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     {
       if (imageData[offset + i] != 0)
       {
-        return offset + (i * 8) + (7-mostSignificantBit(imageData[offset + i]));
+        return (i * 8) + (7-mostSignificantBit(imageData[offset + i]));
       }
     }
     return image.getWidth();
@@ -224,7 +224,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     {
       if (imageData[offset + i] != 0)
       {
-        return offset + i * 8 + (7-leastSignificantBit(imageData[offset + i]));
+        return (i * 8) + (7-leastSignificantBit(imageData[offset + i]));
       }
     }
     return -1;
