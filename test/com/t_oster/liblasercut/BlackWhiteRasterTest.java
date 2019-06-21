@@ -60,6 +60,60 @@ public class BlackWhiteRasterTest
   {
   }
 
+  
+  @Test
+  public void testGreyRepresentation()
+  {
+    BlackWhiteRaster ras = new BlackWhiteRaster(500, 600, 8);
+    assertEquals(500, ras.getWidth());
+    assertEquals(600, ras.getHeight());
+    for (int y = 0; y < ras.getHeight(); y++) {
+      assertTrue(ras.isLineBlank(y));
+    }
+    for (int x = 0; x < ras.getWidth(); x++)
+    {
+      for (int y = 0; y < ras.getHeight(); y++)
+      {
+        assertFalse(ras.isBlack(x, y));
+        ras.setBlack(x, y, true);
+        assertTrue(ras.isBlack(x, y));
+        ras.setBlack(x, y, false);
+        assertFalse(ras.isBlack(x, y));
+        for (int i = 0; i < 256; i++) {
+          ras.setGreyScale(x, y, i);
+          assertEquals(ras.getGreyScale(x, y),i); 
+        }
+      }
+    }
+  }
+
+  
+  @Test
+  public void testOddRepresentation()
+  {
+    BlackWhiteRaster ras = new BlackWhiteRaster(17, 23, 3); //these will span the byte barriers.
+    assertEquals(17, ras.getWidth());
+    assertEquals(23, ras.getHeight());
+    for (int y = 0; y < ras.getHeight(); y++) {
+      assertTrue(ras.isLineBlank(y));
+    }
+    for (int x = 0; x < ras.getWidth(); x++)
+    {
+      for (int y = 0; y < ras.getHeight(); y++)
+      {
+        assertFalse(ras.isBlack(x, y));
+        ras.setBlack(x, y, true);
+        assertTrue(ras.isBlack(x, y));
+        ras.setBlack(x, y, false);
+        assertFalse(ras.isBlack(x, y));
+        for (int i = 0; i < 8; i++) {
+          ras.setGreyScale(x, y, i);
+          assertEquals(ras.getGreyScale(x, y),i); 
+        }
+      }
+    }
+  }
+  
   @Test
   public void testByteRepresentation()
   {
@@ -72,7 +126,7 @@ public class BlackWhiteRasterTest
     for (int x = 0; x < ras.getWidth(); x++)
     {
       for (int y = 0; y < ras.getHeight(); y++)
-      {    
+      {
         ras.setBlack(x, y, true);
         assertEquals(ras.leftmostBlackPixel(y),x);
         assertEquals(ras.rightmostBlackPixel(y),x);
