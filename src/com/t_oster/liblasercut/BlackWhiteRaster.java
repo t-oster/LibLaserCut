@@ -20,10 +20,6 @@
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.dithering.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
 /**
@@ -43,10 +39,6 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     HALFTONE,
     BRIGHTENED_HALFTONE
   }
-  
-  public BufferedImage image;
-  public byte[] imageData;
-  public int scanline;
 
   public static DitheringAlgorithm getDitheringAlgorithm(DitherAlgorithm alg)
   {
@@ -70,9 +62,14 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
         throw new IllegalArgumentException("Desired Dithering Algorithm (" + alg + ") does not exist");
     }
   }
-
-    public BlackWhiteRaster() {
-    }
+  
+  private byte[] imageData;
+  private int stride;
+  private int width;
+  private int height;
+  private int bitDepth;
+  private int samplesPerPixel;
+  
 
   public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg, ProgressListener listener) throws InterruptedException
   {
@@ -107,67 +104,106 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   
   public BlackWhiteRaster(int width, int height)
   {
-    this(BlackWhiteRaster.getBWImage(width, height));
+    this(width,height,1,1);
   }
   
-  public BlackWhiteRaster(BufferedImage image) {
-    if (image.getType() != BufferedImage.TYPE_BYTE_BINARY) throw new UnsupportedOperationException("Only permitted 1 Bit Color.");
-    this.image = image;
-    this.imageData = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
-    scanline = (image.getWidth() + 7) / 8;
+  
+  public BlackWhiteRaster(int width, int height, int bitDepth)
+  {
+    this(width,height,bitDepth,1);
   }
-
+  
+  
+  public BlackWhiteRaster(int width, int height, int bitDepth, int samplesPerPixel) {
+    this.width = width;
+    this.height = height;
+    this.bitDepth = bitDepth;
+    this.samplesPerPixel = samplesPerPixel;
+    this.stride = (int)Math.ceil(bitDepth * samplesPerPixel * ((float)width) / 8.0);
+    this.imageData  = new byte[stride * height];
+  }
+  
+  
+  public int getPixel(int x, int y) {
+    return getPixel(x,y,0,false);
+  }
+  public int setPixel(int x, int y, int v) {
+    return getPixel(x,y,v,true);
+  }
+  
+  private int getPixel(int x, int y, int replace, boolean set) {
+    int offset = stride * y;
+    int pixelLengthInBits = samplesPerPixel * bitDepth;
+    int startPosInBits = (offset * 8) + x * pixelLengthInBits;
+    int endPosInBits = startPosInBits + pixelLengthInBits - 1;
+    int startPosInBytes = startPosInBits / 8;
+    int endPosInBytes = endPosInBits / 8;
+    int value = 0;
+    for (int i = startPosInBytes; i <= endPosInBytes; i++) {
+      value <<= 8;
+      value |= (imageData[i] & 0xFF);
+    }
+    int unusedBitsRightOfSample = (8 - (endPosInBits + 1) % 8) % 8;
+    int maskSampleBits = (1 << pixelLengthInBits) - 1;
+    int pixel = (value >> unusedBitsRightOfSample) & maskSampleBits;
+    if (!set) return pixel;
+    
+    value &= ~(maskSampleBits << unusedBitsRightOfSample);
+    value |= (replace & maskSampleBits) << unusedBitsRightOfSample;
+    for (int i = endPosInBytes; i >= startPosInBytes; i--) {
+      imageData[i] = (byte)(value & 0xff);
+      value >>= 8;
+    }
+    return pixel;
+  }
+ 
   public boolean isBlack(int x, int y)
   {
-    int bx = x / 8;
-    int ix = 7 - (x % 8);
-    int value = imageData[y * scanline + bx];
-    int mask = 1 << ix;
-    return (value & mask) != 0;
+    int pixel = getPixel(x,y);
+    return (pixel != 0);
   }
 
   public void setBlack(int x, int y, boolean black)
   {
-    int bx = x / 8;
-    int ix = 7 - (x % 8);
-    
-    int index = y * scanline + bx;
-    int mask = 1 << ix;
-    imageData[index] &= ~mask;
-    if (black)
-    {
-      imageData[index] |= mask;
+    if (black) {
+    setPixel(x,y,-1);
     }
-
+    else {
+      setPixel(x,y,0);
+    }
   }
 
   /**
-   * Returns the byte where every bit represents one pixel 0=white and 1=black
+   * In bitDepth 1.
+   * Returns byte where every bit represents one pixel 0=white and 1=black
    * Note: the bit order is bigendian. Meaning the most significant digit is the
    * first pixel.
    *
+   * In bitDepth 8.
+   * Returns the byte representing the specific grey.
+   * 
    * @param x the x index of the byte, meaning 0 is the first 8 pixels (0-7), 1
-   * the pixels 8-15 ...
+   * the pixels 8-15...
    * @param y the y offset
    * @return
    */
  public byte getByte(int x, int y)
   {
-    int index = y * scanline + x;
+    int index = y * stride + x;
     return imageData[index];
   }
  
  public byte[] getRasterLine(int y, byte[] bytes) {
-    if ((bytes == null) || (bytes.length < scanline)) {
-        return Arrays.copyOfRange(imageData, y * scanline, (y+1) * scanline);
+    if ((bytes == null) || (bytes.length < stride)) {
+        return Arrays.copyOfRange(imageData, y * stride, (y+1) * stride);
     }
-    System.arraycopy(imageData, y * scanline, bytes, 0, scanline);
+    System.arraycopy(imageData, y * stride, bytes, 0, stride);
     return bytes;
  }
  
   public boolean isLineBlank(int y)
   {
-    for (int i = y * scanline, ie = (y + 1) * scanline; i < ie; i++)
+    for (int i = y * stride, ie = (y + 1) * stride; i < ie; i++)
     {
       if (imageData[i] != 0)
       {
@@ -206,21 +242,21 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
 
   public int leftmostBlackPixel(int y)
   {
-    int offset = y * scanline;
-    for (int i = 0; i < scanline; i++)
+    int offset = y * stride;
+    for (int i = 0; i < stride; i++)
     {
       if (imageData[offset + i] != 0)
       {
         return (i * 8) + (7-mostSignificantBit(imageData[offset + i]));
       }
     }
-    return image.getWidth();
+    return width;
   }
 
   public int rightmostBlackPixel(int y)
   {
-    int offset = y * scanline;
-    for (int i = scanline-1; i >= 0; i--)
+    int offset = y * stride;
+    for (int i = stride-1; i >= 0; i--)
     {
       if (imageData[offset + i] != 0)
       {
@@ -240,35 +276,40 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   @Override
   public int getGreyScale(int x, int y)
   {
-    return isBlack(x, y) ? 0 : 255;
+    return getPixel(x,y);
   }
 
   @Override
   public void setGreyScale(int x, int y, int color)
   {
-    this.setBlack(x, y, color < 128);
+    setPixel(x,y, color);
   }
 
   @Override
   public int getWidth()
   {
-    return image.getWidth();
+    return width;
   }
 
   @Override
   public int getHeight()
   {
-    return image.getHeight();
+    return height;
   }
 
-  public static BufferedImage getBWImage(int w, int h)
+  public byte[] getImageData()
   {
-    byte[] v = new byte[]
-    {
-      (byte) 0, (byte) 0xFF
-    };
-    IndexColorModel cm = new IndexColorModel(1, v.length, v, v, v);
-    WritableRaster wr = cm.createCompatibleWritableRaster(w, h);
-    return new BufferedImage(cm, wr, false, null);
+    return imageData;
   }
+
+  public int getBitDepth()
+  {
+    return bitDepth;
+  }
+
+  public int getSamplesPerPixel()
+  {
+    return samplesPerPixel;
+  }
+  
 }
