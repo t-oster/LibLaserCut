@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.Arrays;
 
 /**
  *
@@ -44,7 +45,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   }
   
   public BufferedImage image;
-  private byte[] imageData;
+  public byte[] imageData;
   public int scanline;
 
   public static DitheringAlgorithm getDitheringAlgorithm(DitherAlgorithm alg)
@@ -70,9 +71,9 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     }
   }
 
-  public BlackWhiteRaster(){
-      
-  }
+    public BlackWhiteRaster() {
+    }
+
   public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg, ProgressListener listener) throws InterruptedException
   {
     this(src.getWidth(), src.getHeight());
@@ -156,6 +157,14 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     return imageData[index];
   }
  
+ public byte[] getRasterLine(int y, byte[] bytes) {
+    if ((bytes == null) || (bytes.length < scanline)) {
+        return Arrays.copyOfRange(imageData, y * scanline, (y+1) * scanline);
+    }
+    System.arraycopy(imageData, y * scanline, bytes, 0, scanline);
+    return bytes;
+ }
+ 
   public boolean isLineBlank(int y)
   {
     for (int i = y * scanline, ie = (y + 1) * scanline; i < ie; i++)
@@ -197,11 +206,12 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
 
   public int leftmostBlackPixel(int y)
   {
-    for (int i = y * scanline, ie = (y + 1) * scanline; i < ie; i++)
+    int offset = y * scanline;
+    for (int i = 0; i < scanline; i++)
     {
-      if (imageData[i] != 0)
+      if (imageData[offset + i] != 0)
       {
-        return (i % scanline) * 8 + (7-mostSignificantBit(imageData[i]));
+        return offset + (i * 8) + (7-mostSignificantBit(imageData[offset + i]));
       }
     }
     return image.getWidth();
@@ -209,11 +219,12 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
 
   public int rightmostBlackPixel(int y)
   {
-    for (int i = ((y + 1) * scanline) - 1, ie = y * scanline; i >= ie; i--)
+    int offset = y * scanline;
+    for (int i = scanline-1; i >= 0; i--)
     {
-      if (imageData[i] != 0)
+      if (imageData[offset + i] != 0)
       {
-        return (i % scanline) * 8 + (7-leastSignificantBit(imageData[i]));
+        return offset + i * 8 + (7-leastSignificantBit(imageData[offset + i]));
       }
     }
     return -1;
