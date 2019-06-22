@@ -71,11 +71,11 @@ public class DummyImage extends LaserCutter
 
   private void writeJob(File file, LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
   {
-    int width = (int)(Util.mm2inch(getBedWidth()) * 500);
-    int height = (int)(Util.mm2inch(getBedHeight()) * 500);
-    BufferedImage bout = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+    int width = (int) (Util.mm2inch(getBedWidth()) * 1000);
+    int height = (int) (Util.mm2inch(getBedHeight()) * 1000);
+    BufferedImage bout = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     DataBuffer buffer = bout.getRaster().getDataBuffer();
-    DataBufferInt ibuffer = (DataBufferInt)buffer;
+    DataBufferInt ibuffer = (DataBufferInt) buffer;
     int[] array = ibuffer.getData();
     Arrays.fill(array, 0xFFFFFFFF);
     int color = 0xFF000000;
@@ -92,7 +92,46 @@ public class DummyImage extends LaserCutter
       if (p instanceof Raster3dPart)
       {
         Raster3dPart rp = (Raster3dPart) p;
-        p = rp.convertToVectorPart(getRasterPadding(), true);
+        RasterBuilder rb = new RasterBuilder(rp.image, new RasterBuilder.PropertiesUpdate()
+        {
+          @Override
+          public void update(AbstractLaserProperty properties, int pixel)
+          {
+            properties.addProperty("color", pixel);
+          }
+        }, 0, 255, 97);
+        rb.setProgressListener(pl);
+        rb.setOffsetPosition(rp.getMinX(), rp.getMinY());
+        
+        for (VectorCommand cmd : rb) {
+          switch (cmd.getType())
+          {
+            case SETPROPERTY:
+              AbstractLaserProperty prop = (AbstractLaserProperty) cmd.getProperty();
+              int g = prop.getInteger("color", 0);
+              color = 0xff000000 | g << 16 | g << 8 | g;
+              continue;
+            case LINETO:
+              int cx = (int) Math.rint((cmd.getX() * (1000 / p.getDPI())));
+              int cy = (int) Math.rint((cmd.getY() * (1000 / p.getDPI())));
+              try
+              {
+                //System.out.println(x + " " + y + " > " + cx + " " + cy);
+                line(array, width, color, x, y, cx, cy);
+              }
+              catch (ArrayIndexOutOfBoundsException e)
+              {
+                //must have drawn somewhere strange.
+              }
+              x = cx;
+              y = cy;
+              break;
+            default:
+              x = (int) Math.rint((cmd.getX() * (1000 / p.getDPI())));
+              y = (int) Math.rint((cmd.getY() * (1000 / p.getDPI())));
+              break;
+          }
+        }
       }
       if (p instanceof VectorPart)
       {
@@ -101,16 +140,20 @@ public class DummyImage extends LaserCutter
           switch (cmd.getType())
           {
             case SETPROPERTY:
-              //TODO: change the color based on the power / speed;
+              AbstractLaserProperty prop = (AbstractLaserProperty) cmd.getProperty();
+              int g = prop.getInteger("color", 0);
+              color = 0xff000000 | g << 16 | g << 8 | g;
               continue;
             case LINETO:
               int cx = (int) Math.rint((cmd.getX() * (1000 / p.getDPI())));
               int cy = (int) Math.rint((cmd.getY() * (1000 / p.getDPI())));
-              try {
+              try
+              {
                 System.out.println(x + " " + y + " > " + cx + " " + cy);
                 line(array, width, color, x, y, cx, cy);
               }
-              catch (ArrayIndexOutOfBoundsException e) {
+              catch (ArrayIndexOutOfBoundsException e)
+              {
                 //must have drawn somewhere strange.
               }
               x = cx;
@@ -168,7 +211,7 @@ public class DummyImage extends LaserCutter
     }
     return resolutions;
   }
-  protected double bedWidth = 250;
+  protected double bedWidth = 100;
 
   /**
    * Get the value of bedWidth
@@ -190,7 +233,7 @@ public class DummyImage extends LaserCutter
   {
     this.bedWidth = bedWidth;
   }
-  protected double bedHeight = 280;
+  protected double bedHeight = 140;
 
   /**
    * Get the value of bedHeight
