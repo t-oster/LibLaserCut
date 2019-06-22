@@ -218,11 +218,11 @@ public abstract class LaserCutter implements Cloneable, Customizable
     {
       if (jp instanceof RasterPart)
       {
-        jp = ((RasterPart) jp).convertToVectorPart(getRasterPadding(), true);
+        jp = ((RasterPart) jp).convertToVectorPart(null, getRasterPadding(), true);
       }
       if (jp instanceof Raster3dPart)
       {
-        jp = ((RasterPart) jp).convertToVectorPart(getRasterPadding(), true);
+        jp = ((RasterPart) jp).convertToVectorPart3D(null, getRasterPadding(), true);
       }
       VectorPart vp = (VectorPart) jp;
       for (VectorCommand cmd : vp.getCommandList())

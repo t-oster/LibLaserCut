@@ -16,10 +16,7 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.t_oster.liblasercut;
 
 /**
@@ -60,11 +57,14 @@ public class VectorCommand
     MOVETO,
     LINETO
   }
-  private CmdType type;
-  private double[] operands;
-  private float foperand;
-  private LaserProperty property;
+  protected CmdType type;
+  protected double[] operands;
+  protected float foperand;
+  protected LaserProperty property;
 
+  protected VectorCommand() {
+  }
+  
   public VectorCommand(CmdType type, double x, double y)
   {
     if (type == CmdType.MOVETO || type == CmdType.LINETO)
@@ -127,6 +127,22 @@ public class VectorCommand
     {
       throw new UnsupportedOperationException("Only valid for PROPERTY");
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    switch(type) {
+      case SETPROPERTY:
+        return "VectorCommand{" + "type=" + type + ", property=" + this.property + '}';
+      case LINETO:
+        if ((this.operands == null) || (this.operands.length != 2)) break;
+        return "VectorCommand{ LINE " + this.operands[0] + ',' + this.operands[1] + '}';
+      case MOVETO:
+        if ((this.operands == null) || (this.operands.length != 2)) break;
+        return "VectorCommand{ MOVE " + this.operands[0] + ',' + this.operands[1] + '}';
+    }
+    return super.toString();
   }
 
 }
