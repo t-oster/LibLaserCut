@@ -60,11 +60,14 @@ public class VectorCommand
     MOVETO,
     LINETO
   }
-  private CmdType type;
-  private double[] operands;
-  private float foperand;
-  private LaserProperty property;
+  protected CmdType type;
+  protected double[] operands;
+  protected float foperand;
+  protected LaserProperty property;
 
+  protected VectorCommand() {
+  }
+  
   public VectorCommand(CmdType type, double x, double y)
   {
     if (type == CmdType.MOVETO || type == CmdType.LINETO)
