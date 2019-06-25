@@ -66,6 +66,8 @@ public class K40NanoDriver extends LaserCutter
   String board = "M2";
   boolean mock = false;
   PrintStream saveJob = null;
+  List<String> warnings = null;
+  ProgressListener progress = null;
 
   /**
    * This is the core method of the driver. It is called, whenever LibLaseCut
@@ -85,12 +87,15 @@ public class K40NanoDriver extends LaserCutter
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
+    this.progress = pl;
+    this.warnings = warnings;
     //let's check the job for some errors
     checkJob(job);
 
     K40Device device = new K40Device();
 
     device.setBoard(board);
+    this.progress.taskChanged(this, "Opening Device.");
     if (saveJob == null)
     {
       device.open();
@@ -126,6 +131,7 @@ public class K40NanoDriver extends LaserCutter
     {
       if (p instanceof RasterPart)
       {
+        this.progress.taskChanged(this, "Opening Device.");
         RasterPart rp = (RasterPart) p;
         LaserProperty property = rp.getLaserProperty();
         K40NanoRasterProperty nrp = (K40NanoRasterProperty) property;
@@ -133,6 +139,7 @@ public class K40NanoDriver extends LaserCutter
         device.setSpeed(speed);
         int sx = (int) (rp.getMinX() * (1000 / p.getDPI()));
         int sy = (int) (rp.getMinY() * (1000 / p.getDPI()));
+        this.progress.taskChanged(this, "Positioning to Raster");
         device.move_absolute(sx, sy);
         
         int step_size = (int) (1000.0 / p.getDPI());
@@ -140,9 +147,12 @@ public class K40NanoDriver extends LaserCutter
         
         device.raster_start();
         
+        this.progress.taskChanged(this, "Sending Raster");
         int pixel_step_x = 1;
         for (int y = 0, ye = rp.getRasterHeight(); y < ye; y++)
         {
+          this.progress.taskChanged(this, "Raster Part");
+          this.progress.progressChanged(this, (100 * y) / ye);
           device.laser_off();
           if (rp.lineIsBlank(y))
           {
@@ -214,8 +224,12 @@ public class K40NanoDriver extends LaserCutter
       else if (p instanceof VectorPart)
       {
         VectorPart vp = (VectorPart) p;
+        int i = 0;
+        int total = vp.getCommandList().length;
         for (VectorCommand cmd : vp.getCommandList())
         {
+          this.progress.taskChanged(this, "Vector Part");  
+          this.progress.progressChanged(this, (100 * i++) / total);
           switch (cmd.getType())
           {
             case LINETO:
@@ -272,7 +286,6 @@ public class K40NanoDriver extends LaserCutter
         }
       }
     }
-
     device.home(); //Home the device after the job.
     device.execute();
     device.close();
@@ -766,7 +779,6 @@ public class K40NanoDriver extends LaserCutter
     void execute()
     {
       queue.execute();
-
     }
 
     void encode_default_move(int dx, int dy)
@@ -1429,11 +1441,13 @@ public class K40NanoDriver extends LaserCutter
     private int interface_number = 0;
 
     public static final int STATUS_OK = 206;
-    public static final int STATUS_CRC = 207;
+    public static final int STATUS_PACKET_REJECTED = 207;
 
     public static final int STATUS_FINISH = 236;
     public static final int STATUS_BUSY = 238;
     public static final int STATUS_POWER = 239;
+
+    public static final int STATUS_DEVICE_ERROR = -1;
 
     public int byte_0 = 0;
     public int status = 0;
@@ -1441,6 +1455,8 @@ public class K40NanoDriver extends LaserCutter
     public int byte_3 = 0;
     public int byte_4 = 0;
     public int byte_5 = 0;
+
+    public int recovery = 0;
 
     /**
      * ******************
@@ -1493,6 +1509,13 @@ public class K40NanoDriver extends LaserCutter
       closeContext();
     }
 
+    public void error(String error)
+    {
+      //error message to be sent to GUI.
+      warnings.add(error);
+      System.out.println(error);
+    }
+
     @Override
     public void send_packet(CharSequence cs)
     {
@@ -1501,17 +1524,23 @@ public class K40NanoDriver extends LaserCutter
         throw new LibUsbException("Packets must be exactly " + PAYLOAD_LENGTH + " bytes.", 0);
       }
       create_packet(cs);
+      int count = 0;
       do
       {
         transmit_packet();
         update_status();
+        if (count >= 50)
+        {
+          throw new LibUsbException("All packets are being rejected.", 0);
+        }
+        count++;
       }
-      while (status == STATUS_CRC);
+      while (status == STATUS_PACKET_REJECTED);
     }
 
     private void create_packet(CharSequence cs)
     {
-      ((Buffer)packet).clear(); // Explicit cast for cross compatibility with JDK9
+      ((Buffer) packet).clear(); // Explicit cast for cross compatibility with JDK9
       packet.put((byte) 166);
       packet.put((byte) 0);
       for (int i = 0; i < cs.length(); i++)
@@ -1525,12 +1554,106 @@ public class K40NanoDriver extends LaserCutter
 
     private void transmit_packet()
     {
-      ((Buffer)transfered).clear(); // Explicit cast for cross compatibility with JDK9
+      ((Buffer) transfered).clear(); // Explicit cast for cross compatibility with JDK9
       int results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, packet, transfered, 5000L);
       if (results < LibUsb.SUCCESS)
       {
         throw new LibUsbException("Packet Send Failed.", results);
       }
+    }
+
+    private boolean waitForStatus()
+    {
+      recovery += 1;
+      Thread waitForStatusThread = new Thread()
+      {
+        int count = 0;
+
+        @Override
+        public void run()
+        {
+          if (progress != null)
+          {
+            progress.taskChanged(this, "Waiting for USB");
+          }
+          int results = -1;
+          synchronized (this)
+          {
+            while (results != LibUsb.SUCCESS)
+            {
+              try
+              {
+                Thread.sleep(2000);
+              }
+              catch (InterruptedException ex)
+              {
+              }
+              ((Buffer)transfered).clear(); // Explicit cast for cross compatibility with JDK9
+              request_status.put(0, (byte) 160);
+              if (handle == null)
+              {
+                //If device not found and restart fails there might no longer be a handle.
+                //If this is the case, our state is ERROR_NO_DEVICE.
+                results = LibUsb.ERROR_NO_DEVICE;
+              }
+              else
+              {
+                results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 5000L);
+              }
+              switch (results)
+              {
+                case LibUsb.ERROR_NO_DEVICE:
+                  error("Device was not found. Attempting restart.");
+                  try
+                  {
+                    close();
+                    open();
+                  }
+                  catch (LibUsbException e)
+                  {
+                    error("Restart failed because: " + e.getLocalizedMessage());
+                  }
+                  break;
+                case LibUsb.ERROR_PIPE:
+                  error("USB pipe failed.");
+                  break;
+                case LibUsb.ERROR_TIMEOUT:
+                  error("USB timedout.");
+                  break;
+                case LibUsb.SUCCESS:
+                  notify();
+                  progress.taskChanged(this, "Sending Job");
+
+                  return;// Okay, we're back on track.
+                }
+              count++;
+              if (count >= 15)
+              {
+                throw new LibUsbException("Failed to recover from USB errors.", LibUsb.ERROR_TIMEOUT);
+              }
+              if (progress != null)
+              {
+                progress.progressChanged(this, (100 * count) / 15);
+              }
+            }
+          }
+        }
+      };
+      waitForStatusThread.start();
+      synchronized (waitForStatusThread)
+      {
+        try
+        {
+          error("A problem getting status was detected. We will wait for the device.");
+          waitForStatusThread.wait();
+        }
+        catch (Exception e)
+        {
+          return false;
+        }
+      }
+      //Status must have been successful.
+      return true;
     }
 
     private void update_status()
@@ -1544,15 +1667,21 @@ public class K40NanoDriver extends LaserCutter
 
       if (results < LibUsb.SUCCESS)
       {
-        throw new LibUsbException("Status Request Failed.", results);
-
+        boolean recoverable = waitForStatus(); //put in holding pattern.
+        if (!recoverable)
+        {
+          throw new LibUsbException("Status Request Failed.", results);
+        }
       }
-
+      if (handle == null) throw new LibUsbException("Status Request Failed.", results);
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(6);
       results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 5000L);
       if (results < LibUsb.SUCCESS)
       {
-        throw new LibUsbException("Status Update Failed", results);
+        //If the read failed, after successfully sending request, we say status is error.
+        status = STATUS_DEVICE_ERROR;
+        error("Status read failed. After 160 sent.");
+        return;
       }
 
       if (transfered.get(0) == 6)
@@ -1567,7 +1696,7 @@ public class K40NanoDriver extends LaserCutter
         /*
         //Other than byte 1 being status these aren't known. They change
         //sometimes, but what they mean is somewhat mysterious.
-        //System.out.println(String.format("%d %d %d %d %d %d", next_0, next_1, next_2, next_3, next_4, next_5));
+        System.out.println(String.format("%d %d %d %d %d %d", next_0, next_1, next_2, next_3, next_4, next_5));
          */
         byte_0 = next_0;
         status = next_1;
@@ -1791,5 +1920,4 @@ public class K40NanoDriver extends LaserCutter
     }
 
   }
-
 }
