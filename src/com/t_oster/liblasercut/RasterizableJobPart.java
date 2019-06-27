@@ -37,6 +37,11 @@ abstract public class RasterizableJobPart extends JobPart
   {
       return resolution;
   }
+
+  public GreyscaleRaster getImage()
+  {
+    return image;
+  }
   
   /**
    * The initial laser settings to start a rasterization job with.
