@@ -490,6 +490,7 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   {
     getUpdatedPixelAtLocation();
     x_position = nextColorChangeHeadingLeft(x_position, y_position, end);
+    x_position = Math.max(x_position,end);
     commitPosition();
 
     if (end < x_position)
@@ -506,6 +507,7 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   {
     getUpdatedPixelAtLocation();
     y_position = nextColorChangeHeadingTop(x_position, y_position, end);
+    y_position = Math.max(y_position,end);
     commitPosition();
 
     if (end < y_position)
@@ -522,6 +524,7 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   {
     getUpdatedPixelAtLocation();
     x_position = nextColorChangeHeadingRight(x_position, y_position, end);
+    x_position = Math.min(x_position,end);
     commitPosition();
 
     if (x_position < end)
@@ -538,6 +541,7 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   {
     getUpdatedPixelAtLocation();
     y_position = nextColorChangeHeadingBottom(x_position, y_position, end);
+    y_position = Math.min(y_position,end);
     commitPosition();
 
     if (y_position < end)
@@ -643,7 +647,6 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
    */
   public int nextColorChangeHeadingLeft(int x, int y, int def)
   {
-    
     if (x <= -1) return def;
     if (x == 0) return -1;
     if (x == image.getWidth()) return image.getWidth()-1;
