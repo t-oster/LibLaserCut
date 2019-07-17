@@ -16,16 +16,21 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
+
 package com.t_oster.liblasercut;
 
 import com.t_oster.liblasercut.dithering.*;
 
 /**
- *
- * @author Thomas Oster <thomas.oster@rwth-aachen.de>
+ *@author Thomas Oster <thomas.oster@rwth-aachen.de>
+ * 
+ * BlackWhiteRaster is a 1 bit raster with 1 considered black and 0 considered white.
+ * 
  */
 public class BlackWhiteRaster extends TimeIntensiveOperation implements GreyscaleRaster
 {
+
+  protected RasterElement raster;
 
   public static enum DitherAlgorithm
   {
@@ -37,9 +42,6 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
     HALFTONE,
     BRIGHTENED_HALFTONE
   }
-  private int width;
-  private int height;
-  private byte[][] raster;
 
   public static DitheringAlgorithm getDitheringAlgorithm(DitherAlgorithm alg)
   {
@@ -60,26 +62,25 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
       case BRIGHTENED_HALFTONE:
         return new BrightenedHalftone();
       default:
-        throw new IllegalArgumentException("Desired Dithering Algorithm ("+alg+") does not exist");
+        throw new IllegalArgumentException("Desired Dithering Algorithm (" + alg + ") does not exist");
     }
   }
-  
+
   public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg, ProgressListener listener) throws InterruptedException
   {
+    this(src.getWidth(), src.getHeight());
     if (listener != null)
     {
       this.addProgressListener(listener);
     }
-    this.width = src.getWidth();
-    this.height = src.getHeight();
-    raster = new byte[(src.getWidth() + 7) / 8][src.getHeight()];
+
     if (listener != null)
     {
       alg.addProgressListener(listener);
     }
     alg.ditherDirect(src, this);
   }
-  
+
   public BlackWhiteRaster(GreyscaleRaster src, DitherAlgorithm dither_algorithm, ProgressListener listener) throws InterruptedException
   {
     this(src, BlackWhiteRaster.getDitheringAlgorithm(dither_algorithm), listener);
@@ -89,77 +90,158 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   {
     this(src, dither_algorithm, null);
   }
-  
+
   public BlackWhiteRaster(GreyscaleRaster src, DitheringAlgorithm alg) throws InterruptedException
   {
     this(src, alg, null);
   }
 
-  public BlackWhiteRaster(int width, int height, byte[][] raster)
-  {
-    this.width = width;
-    this.height = height;
-    this.raster = raster;
-  }
-
   public BlackWhiteRaster(int width, int height)
   {
-    this.width = width;
-    this.height = height;
-    this.raster = new byte[(width + 7) / 8][height];
-  }
-
-  public boolean isBlack(int x, int y)
-  {
-    int bx = x / 8;
-    int ix = 7 - (x % 8);
-    return ((raster[bx][y] & 0xFF) & (int) Math.pow(2,ix)) != 0;
-  }
-
-  public void setBlack(int x, int y, boolean black)
-  {
-    int bx = x / 8;
-    int ix = 7 - (x % 8);
-    raster[bx][y] = (byte) (((raster[bx][y] & 0xFF) & ~((int) Math.pow(2,ix))) | (black ? (int) Math.pow(2,ix) : 0 ));
-  }
-
-  /**
-   * Returns the Byte where every bit represents one pixel 0=white and 1=black
-   * NOTE THAT THE BITORDER IS [BBBBBBWW] = 0b11111100;
-   * @param x the x index of the byte, meaning 0 is the first 8 pixels (0-7), 1 
-   * the pixels 8-15 ...
-   * @param y the y offset
-   * @return 
-   */
-  public byte getByte(int x, int y)
-  {
-    return raster[x][y];
+    //create a delegate class for all the rastering.
+    //BlackWhiteRasters are required to be 1 bit and 1 sample per color.
+    this.raster = new RasterElement(width, height, 1, 1);
   }
   
   /**
-   * Convenience function to pretend this B&W image is greyscale
-   * @param x
-   * @param y
-   * @return 0 for black, 255 for white
-   */
-  public int getGreyScale(int x, int y)
+   * Gets the pixel in the form of an integer where bitDepth of the pixel is relevant.
+   * In 1 bit rasters, like BlackWhiteRaster, this is 0 or 1.
+   * 
+   * @param x location horizontal to set the pixel
+   * @param y location vertical to set the pixel
+   * @return the bit of the set pixel either 1 for black, 0 for white.
+   **/
+  public int getPixel(int x, int y)
   {
-    return isBlack(x, y) ? 0 : 255;
+    return raster.getPixel(x, y);
   }
   
-  public void setGreyScale(int x, int y, int color)
+  /**
+   * Sets the physical bits within the raster.
+   * Only the rightmost bitDepth bits of the integer are used.
+   * For 1 bit rasters like BlackWhiteRaster this should typically be 1 or 0
+   * 1 traditionally means black in this type of raster.
+   * 
+   * The delegated function works for all bitDepth values (n greater than 32). 
+   * Here it just sets the one bit that matters. So 3 is 0b11 and sets the lowest
+   * bit as as 1. 4 is 0b100 and sets the lowest bit to be 0. Only 1 and 0 should
+   * be used.
+   * 
+   * @param x location horizontal to set the pixel
+   * @param y location vertical to set the pixel
+   * @param v binary value
+   **/
+  public int setPixel(int x, int y, int v)
   {
-    this.setBlack(x, y, color < 128);
+    return raster.setPixel(x, y, v);
   }
 
+  public byte[] getRasterLine(int y, byte[] bytes)
+  {
+    return raster.getRasterLine(y, bytes);
+  }
+
+
+  @Override
   public int getWidth()
   {
-    return width;
+    return raster.getWidth();
   }
 
+  @Override
   public int getHeight()
   {
-    return height;
+    return raster.getHeight();
+  }
+
+  public RasterElement getRaster() {
+    return raster;
   }
   
+  public byte[] getImageData()
+  {
+    return raster.getImageData();
+  }
+
+  public int getBitDepth()
+  {
+    return raster.getBitDepth();
+  }
+
+  public int getSamplesPerPixel()
+  {
+    return raster.getSamplesPerPixel();
+  }
+
+  public byte getByte(int x, int line)
+  {
+    return raster.getByte(x, line);
+  }
+
+  /**
+   * Sets black according to the definitions used in GreyRaster and BlackWhiteRaster
+   * In BlackWhiteRaster this was 1 for Black. This is maintained. For 8 bit images
+   * the more traditional value definition is used.
+   * 
+   * @param x location horizontal to set the pixel
+   * @param y location vertical to set the pixel
+   * @param black are we setting black or white.
+  **/
+  public void setBlack(int x, int y, boolean black)
+  {
+    if (raster.getBitDepth() == 1)
+    {
+      if (black)
+      {
+        setPixel(x, y, raster.getWhite());
+      }
+      else
+      {
+        setPixel(x, y, raster.getBlack());
+      }
+    }
+    else
+    {
+      if (black)
+      {
+        setPixel(x, y, raster.getBlack());
+      }
+      else
+      {
+        setPixel(x, y, raster.getWhite());
+      }
+    }
+  }
+
+  /**
+   * Gets black according to the definitions used in GreyRaster and BlackWhiteRaster
+   * In BlackWhiteRaster this is any pixel equal to 1.
+   * In 8-bit greys this refers to pixel values equal to 0.
+   * 
+   * @param x location horizontal to set the pixel
+   * @param y location vertical to set the pixel
+   * @return is the pixel black?
+  **/
+  public boolean isBlack(int x, int y)
+  {
+    if (raster.getBitDepth() == 1)
+    {
+      int value = getPixel(x, y);
+      return value == raster.getWhite();
+    }
+    return raster.isBlack(x, y);
+  }
+
+  @Override
+  public int getGreyScale(int x, int y)
+  {
+    return getPixel(x, y);
+  }
+
+  @Override
+  public void setGreyScale(int x, int y, int grey)
+  {
+    setPixel(x, y, grey);
+  }
+
 }
