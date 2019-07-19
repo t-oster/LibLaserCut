@@ -280,6 +280,11 @@ abstract public class RasterizableJobPart extends JobPart
   {
     return start.y+image.getHeight();
   }
+
+  public GreyscaleRaster getImage()
+  {
+    return image;
+  }
   
   /**
    * Calculate power/speed/focus required to laser a given pixel
