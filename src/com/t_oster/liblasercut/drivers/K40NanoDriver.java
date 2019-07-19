@@ -18,12 +18,16 @@
  **/
 package com.t_oster.liblasercut.drivers;
 
+import com.t_oster.liblasercut.AbstractLaserProperty;
+import com.t_oster.liblasercut.BlackWhiteRaster;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.JobPart;
 import com.t_oster.liblasercut.LaserCutter;
 import com.t_oster.liblasercut.LaserJob;
 import com.t_oster.liblasercut.LaserProperty;
 import com.t_oster.liblasercut.ProgressListener;
+import com.t_oster.liblasercut.RasterBuilder;
+import com.t_oster.liblasercut.RasterElement;
 import com.t_oster.liblasercut.RasterPart;
 import com.t_oster.liblasercut.VectorCommand;
 import com.t_oster.liblasercut.VectorPart;
@@ -49,7 +53,8 @@ import org.usb4java.LibUsbException;
 
 public class K40NanoDriver extends LaserCutter
 {
-
+  private static final String VAR_MM_PER_SECOND = "mm per second";
+  private static final String VAR_D_RATIO = "mm per second";
   private static final String SETTING_BEDWIDTH = "Laserbed Width";
   private static final String SETTING_BEDHEIGHT = "Laserbed Height";
   private static final String SETTING_BOARD = "M2, M1, M, B2, B1, B, A, board selection";
@@ -131,95 +136,74 @@ public class K40NanoDriver extends LaserCutter
     {
       if (p instanceof RasterPart)
       {
-        this.progress.taskChanged(this, "Opening Device.");
         RasterPart rp = (RasterPart) p;
         LaserProperty property = rp.getLaserProperty();
-        K40NanoRasterProperty nrp = (K40NanoRasterProperty) property;
-        double speed = (Float) nrp.getProperty(K40NanoRasterProperty.VAR_MM_PER_SECOND);
+        double speed = (Float) property.getProperty("mm per second");
+
         device.setSpeed(speed);
         int sx = (int) (rp.getMinX() * (1000 / p.getDPI()));
         int sy = (int) (rp.getMinY() * (1000 / p.getDPI()));
-        this.progress.taskChanged(this, "Positioning to Raster");
         device.move_absolute(sx, sy);
-        
         int step_size = (int) (1000.0 / p.getDPI());
         device.setRaster_step(step_size);
-        
-        device.raster_start();
-        
-        this.progress.taskChanged(this, "Sending Raster");
-        int pixel_step_x = 1;
-        for (int y = 0, ye = rp.getRasterHeight(); y < ye; y++)
+        RasterElement element = ((BlackWhiteRaster)rp.getImage()).getRaster();
+        RasterBuilder rasterbuild = new RasterBuilder(element, new RasterBuilder.PropertiesUpdate()
         {
-          this.progress.taskChanged(this, "Raster Part");
-          this.progress.progressChanged(this, (100 * y) / ye);
-          device.laser_off();
-          if (rp.lineIsBlank(y))
+          @Override
+          public void update(AbstractLaserProperty properties, int pixel)
           {
-            device.move_y(device.raster_step); //I can just skip blank lines.
-            continue;
+            properties.setProperty("pixel", pixel);
           }
-          int sequence = 0;
-          int x;
-          int xe;
-          if (pixel_step_x > 0)
+        }, 0, 0, 0);
+        rasterbuild.setOffsetPosition(rp.getMinX(), rp.getMinY());
+        
+        int pixel = 0;
+        device.raster_start();  
+        for (VectorCommand cmd : rasterbuild)
+        {
+          if ((cmd.getType() == VectorCommand.CmdType.MOVETO) || ((cmd.getType() == VectorCommand.CmdType.LINETO) && (pixel == 0))) //treat moveto with pixel 0 as a lineto.
           {
-            x = -1;
-            xe = rp.getRasterWidth() - 1;
+            int x = (int) (cmd.getX() * (1000 / p.getDPI()));
+            int y = (int) (cmd.getY() * (1000 / p.getDPI()));
+            int dx = x - device.x;
+            int dy = y - device.y;
+            if (dy > device.raster_step) {
+              device.move_absolute(x, y-device.raster_step);
+              //if we're moving in the y direction, but more than the raster step,
+              //we still need to h_switch to change the directionality. But, that will
+              //step, so we go down to where the raster-step will put us on the correct line.
+            }
+            if (dy == device.raster_step)
+            {
+              device.h_switch();
+              device.y += device.raster_step;
+            }
+            
+            device.move_absolute(x, y);
+            device.execute();
           }
           else
           {
-            x = rp.getRasterWidth();
-            xe = 0;
-          }
-          while (x != xe)
-          {
-            x += pixel_step_x;
-            if (rp.isBlack(x, y))
+            switch (cmd.getType())
             {
-              if (device.is_on) //already cutting.
+              case LINETO:
               {
-                sequence += pixel_step_x;
+                int x = (int) (cmd.getX() * (1000 / p.getDPI()));
+                int y = (int) (cmd.getY() * (1000 / p.getDPI()));
+                //Native units are mils.
+                device.cut_absolute(x, y);
+                device.execute();
+                break;
               }
-              else
-              { //not cutting, but should be.
-                if (sequence != 0)
-                {
-                  device.move_x(sequence * step_size);
-                }
-                device.laser_on();
-                sequence = pixel_step_x;
-              }
-            }
-            else
-            {
-              if (!device.is_on) //already not-cutting
+              case SETPROPERTY:
               {
-                sequence += pixel_step_x;
-              }
-              else
-              { //cutting, but shouldn't be.
-                if (sequence != 0)
-                {
-                  device.move_x(sequence * step_size);
-                }
-                device.laser_off();
-                sequence = pixel_step_x;
+                AbstractLaserProperty prop = (AbstractLaserProperty) cmd.getProperty();
+                pixel = prop.getInteger("pixel", pixel);
+                break;
               }
             }
           }
-          if (sequence != 0)
-          {
-            device.move_x(sequence * step_size); //whatever's left.
-          }
-          sequence = 0;
-          device.h_switch(); //explicitly flip directions with no magnatude. 
-          device.y += device.raster_step; //device triggered a raster step and changed y.
-          device.is_on = false; //device turned off no matter what, update that state.
-          pixel_step_x = -pixel_step_x; //stepping in the other direction.
         }
-        device.raster_end();
-        device.move_absolute(sx, sy);
       }
       else if (p instanceof VectorPart)
       {
@@ -267,11 +251,11 @@ public class K40NanoDriver extends LaserCutter
               for (String key : prop.getPropertyKeys())
               {
                 String value = prop.getProperty(key).toString();
-                if (K40NanoVectorProperty.VAR_MM_PER_SECOND.equals(key) || "speed".equals(key))
+                if (VAR_MM_PER_SECOND.equals(key) || "speed".equals(key))
                 {
                   device.setSpeed(Double.valueOf(value));
                 }
-                else if (K40NanoVectorProperty.VAR_D_RATIO.equals(key))
+                else if (VAR_D_RATIO.equals(key))
                 {
                   device.setD_ratio(Double.valueOf(value));
                 }
@@ -303,14 +287,20 @@ public class K40NanoDriver extends LaserCutter
   @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
-    return new K40NanoVectorProperty();
+    AbstractLaserProperty property = new AbstractLaserProperty();
+    property.addPropertyRanged("mm per second", 30f, 0.4f, 240f);
+    property.addPropertyRanged("diagonal speed adjustment", 0.2612f, 0f, 1f);
+    return property;
   }
 
   @Override
   public LaserProperty getLaserPropertyForRasterPart()
   {
-    return new K40NanoRasterProperty();
+    AbstractLaserProperty property = new AbstractLaserProperty();
+    property.addPropertyRanged("mm per second", 60f, 5f, 500f);
+    return property;
   }
+
 
   /**
    * This method returns a list of all supported resolutions (in DPI)
