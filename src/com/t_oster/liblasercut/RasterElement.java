@@ -158,4 +158,8 @@ public class RasterElement
     return samplesPerPixel;
   }
   
+  public interface Provider {
+    public RasterElement getRaster();
+  }
+  
 }
