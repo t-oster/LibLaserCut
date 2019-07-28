@@ -27,7 +27,7 @@ import com.t_oster.liblasercut.dithering.*;
  * BlackWhiteRaster is a 1 bit raster with 1 considered black and 0 considered white.
  * 
  */
-public class BlackWhiteRaster extends TimeIntensiveOperation implements GreyscaleRaster
+public class BlackWhiteRaster extends TimeIntensiveOperation implements GreyscaleRaster, RasterElement.Provider
 {
 
   protected RasterElement raster;
@@ -153,7 +153,8 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   {
     return raster.getHeight();
   }
-
+  
+  @Override
   public RasterElement getRaster() {
     return raster;
   }
