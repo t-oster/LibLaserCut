@@ -85,6 +85,35 @@ public class RasterizableJobPartTest
     assertEquals(true, instance.lineIsBlank(4));
   }
 
+   /**
+   * Test of lineIsBlank method, of class RasterizableJobPart.
+   */
+  
+  @Test
+  public void testGetRasterLine()
+  {
+    RasterElement element = getTest8bitRasterElement();
+    RasterPart instance = new RasterPart(new GreyRaster(element),
+      new AbstractLaserProperty(), new Point(0,0), 500.0f);
+    List<Byte> line0 = instance.getRasterLine(0);
+    assertEquals((byte)line0.get(0),(byte)-1);
+    assertEquals((byte)line0.get(1),(byte)-1);
+    assertEquals((byte)line0.get(2),(byte)0);
+    assertEquals((byte)line0.get(3),(byte)0);
+    assertEquals((byte)line0.get(4),(byte)-1);
+    assertEquals((byte)line0.get(5),(byte)0);
+    assertEquals((byte)line0.get(6),(byte)0);
+    assertEquals((byte)line0.get(7),(byte)0);
+    assertEquals((byte)line0.get(8),(byte)-1);
+    RasterElement element1bit = getTest1bitRasterElement();
+    RasterPart instance1bit = new RasterPart(new GreyRaster(element1bit),
+      new AbstractLaserProperty(), new Point(0,0), 500.0f);
+    line0 = instance1bit.getRasterLine(0);
+    assertEquals((byte)line0.get(0), (byte)0xc8); //0b11001000
+    assertEquals((byte)line0.get(1), (byte)0x80); //0b10000000
+  }
+
+  
   /**
    * Test of setRasteringCutDirection method, of class RasterizableJobPart.
    */
@@ -576,4 +605,140 @@ public class RasterizableJobPartTest
     }
   }
   
+  public RasterElement getTest8bitRasterElement() {
+    RasterElement image = new RasterElement(9,6,8);
+      
+      // key...
+      // 255 = white = don't laser = -
+      // 0 = black = laser lots! = X
+      
+      // fist row (B&W) => --XX-XXX-
+      image.setPixel(0, 0, 255);
+      image.setPixel(1, 0, 255);
+      image.setPixel(2, 0, 0);
+      image.setPixel(3, 0, 0);
+      image.setPixel(4, 0, 255);
+      image.setPixel(5, 0, 0);
+      image.setPixel(6, 0, 0);
+      image.setPixel(7, 0, 0);
+      image.setPixel(8, 0, 255);
+      // second row (B&W) => ---X--XX-
+      image.setPixel(0, 1, 255);
+      image.setPixel(1, 1, 255);
+      image.setPixel(2, 1, 255);
+      image.setPixel(3, 1, 0);
+      image.setPixel(4, 1, 255);
+      image.setPixel(5, 1, 255);
+      image.setPixel(6, 1, 0);
+      image.setPixel(7, 1, 0);
+      image.setPixel(8, 1, 255);
+      // third row (greyscale) => 3-3333333
+      image.setPixel(0, 2, 63);
+      image.setPixel(1, 2, 255);
+      image.setPixel(2, 2, 63);
+      image.setPixel(3, 2, 63);
+      image.setPixel(4, 2, 63);
+      image.setPixel(5, 2, 63);
+      image.setPixel(6, 2, 63);
+      image.setPixel(7, 2, 63);
+      image.setPixel(8, 2, 63);
+      // fourth row (greyscale) => --7777777
+      image.setPixel(0, 3, 255);
+      image.setPixel(1, 3, 255);
+      image.setPixel(2, 3, 127);
+      image.setPixel(3, 3, 127);
+      image.setPixel(4, 3, 127);
+      image.setPixel(5, 3, 127);
+      image.setPixel(6, 3, 127);
+      image.setPixel(7, 3, 127);
+      image.setPixel(8, 3, 127);
+      // fifth row (blank) => 000000000
+      image.setPixel(0, 4, 255);
+      image.setPixel(1, 4, 255);
+      image.setPixel(2, 4, 255);
+      image.setPixel(3, 4, 255);
+      image.setPixel(4, 4, 255);
+      image.setPixel(5, 4, 255);
+      image.setPixel(6, 4, 255);
+      image.setPixel(7, 4, 255);
+      image.setPixel(8, 4, 255);
+      // sixth row => FF0000000
+      image.setPixel(0, 5, 0);
+      image.setPixel(1, 5, 0);
+      image.setPixel(2, 5, 255);
+      image.setPixel(3, 5, 255);
+      image.setPixel(4, 5, 255);
+      image.setPixel(5, 5, 255);
+      image.setPixel(6, 5, 255);
+      image.setPixel(7, 5, 255);
+      image.setPixel(8, 5, 255);
+      return image;
+  }
+  
+  public RasterElement getTest1bitRasterElement() {
+    RasterElement image = new RasterElement(9,6,1);
+      
+      
+      // fist row (B&W) => 110010001
+      image.setPixel(0, 0, 1);
+      image.setPixel(1, 0, 1);
+      image.setPixel(2, 0, 0);
+      image.setPixel(3, 0, 0);
+      image.setPixel(4, 0, 1);
+      image.setPixel(5, 0, 0);
+      image.setPixel(6, 0, 0);
+      image.setPixel(7, 0, 0);
+      image.setPixel(8, 0, 1);
+      // second row (B&W) => 111011001
+      image.setPixel(0, 1, 1);
+      image.setPixel(1, 1, 1);
+      image.setPixel(2, 1, 1);
+      image.setPixel(3, 1, 0);
+      image.setPixel(4, 1, 1);
+      image.setPixel(5, 1, 1);
+      image.setPixel(6, 1, 0);
+      image.setPixel(7, 1, 0);
+      image.setPixel(8, 1, 1);
+      // third row (greyscale) => 111111111
+      image.setPixel(0, 2, 1);
+      image.setPixel(1, 2, 1);
+      image.setPixel(2, 2, 1);
+      image.setPixel(3, 2, 1);
+      image.setPixel(4, 2, 1);
+      image.setPixel(5, 2, 1);
+      image.setPixel(6, 2, 1);
+      image.setPixel(7, 2, 1);
+      image.setPixel(8, 2, 1);
+      // fourth row (greyscale) => 110000000
+      image.setPixel(0, 3, 1);
+      image.setPixel(1, 3, 1);
+      image.setPixel(2, 3, 0);
+      image.setPixel(3, 3, 0);
+      image.setPixel(4, 3, 0);
+      image.setPixel(5, 3, 0);
+      image.setPixel(6, 3, 0);
+      image.setPixel(7, 3, 0);
+      image.setPixel(8, 3, 0);
+      // fifth row (blank) => 111111111
+      image.setPixel(0, 4, 1);
+      image.setPixel(1, 4, 1);
+      image.setPixel(2, 4, 1);
+      image.setPixel(3, 4, 1);
+      image.setPixel(4, 4, 1);
+      image.setPixel(5, 4, 1);
+      image.setPixel(6, 4, 1);
+      image.setPixel(7, 4, 1);
+      image.setPixel(8, 4, 1);
+      // sixth row => 001111111
+      image.setPixel(0, 5, 0);
+      image.setPixel(1, 5, 0);
+      image.setPixel(2, 5, 1);
+      image.setPixel(3, 5, 1);
+      image.setPixel(4, 5, 1);
+      image.setPixel(5, 5, 1);
+      image.setPixel(6, 5, 1);
+      image.setPixel(7, 5, 1);
+      image.setPixel(8, 5, 1);
+      return image;
+  }
 }
