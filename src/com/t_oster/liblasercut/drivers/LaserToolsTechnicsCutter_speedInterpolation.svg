@@ -9,15 +9,61 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="210mm"
-   height="800mm"
-   viewBox="0 0 210 800"
+   width="283.37842mm"
+   height="1390.8663mm"
+   viewBox="0 0 283.37842 1390.8664"
    version="1.1"
    id="svg1379"
-   inkscape:version="0.92.1 r15371"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
    sodipodi:docname="LaserToolsTechnicsCutter_speedInterpolation.svg">
   <defs
      id="defs1373">
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker1442"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend">
+      <path
+         inkscape:connector-curvature="0"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path1440" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker1392"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend">
+      <path
+         inkscape:connector-curvature="0"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path1390" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker1342"
+       style="overflow:visible"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         id="path1340"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
     <marker
        inkscape:stockid="Arrow1Mend"
        orient="auto"
@@ -79,6 +125,262 @@
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
          inkscape:connector-curvature="0" />
     </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5056"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5054"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#008080;fill-opacity:1;fill-rule:evenodd;stroke:#008080;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker2383-9"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path2381-9"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend-4"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path2102-5"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="simplify"
+       id="path-effect6585"
+       is_visible="true"
+       steps="1"
+       threshold="0.0125103"
+       smooth_angles="360"
+       helper_size="0"
+       simplify_individual_paths="false"
+       simplify_just_coalesce="false"
+       simplifyindividualpaths="false"
+       simplifyJustCoalesce="false" />
+    <inkscape:path-effect
+       simplifyJustCoalesce="false"
+       simplifyindividualpaths="false"
+       simplify_just_coalesce="false"
+       simplify_individual_paths="false"
+       helper_size="0"
+       smooth_angles="360"
+       threshold="0.0125103"
+       steps="1"
+       is_visible="true"
+       id="path-effect6581"
+       effect="simplify" />
+    <inkscape:path-effect
+       effect="simplify"
+       id="path-effect6577"
+       is_visible="true"
+       steps="1"
+       threshold="0.0125103"
+       smooth_angles="360"
+       helper_size="0"
+       simplify_individual_paths="false"
+       simplify_just_coalesce="false"
+       simplifyindividualpaths="false"
+       simplifyJustCoalesce="false" />
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker6605"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path6603"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(0.6)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker6609"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path6607"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       simplifyJustCoalesce="false"
+       simplifyindividualpaths="false"
+       simplify_just_coalesce="false"
+       simplify_individual_paths="false"
+       helper_size="0"
+       smooth_angles="360"
+       threshold="0.0125103"
+       steps="1"
+       is_visible="true"
+       id="path-effect5941"
+       effect="simplify" />
+    <inkscape:path-effect
+       effect="simplify"
+       id="path-effect5937"
+       is_visible="true"
+       steps="1"
+       threshold="0.0125103"
+       smooth_angles="360"
+       helper_size="0"
+       simplify_individual_paths="false"
+       simplify_just_coalesce="false"
+       simplifyindividualpaths="false"
+       simplifyJustCoalesce="false" />
+    <inkscape:path-effect
+       simplifyJustCoalesce="false"
+       simplifyindividualpaths="false"
+       simplify_just_coalesce="false"
+       simplify_individual_paths="false"
+       helper_size="0"
+       smooth_angles="360"
+       threshold="0.0125103"
+       steps="1"
+       is_visible="true"
+       id="path-effect5933"
+       effect="simplify" />
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker5973"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mstart"
+       inkscape:collect="always">
+      <path
+         inkscape:connector-curvature="0"
+         transform="scale(0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path5971" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker5977"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Mend"
+       inkscape:collect="always">
+      <path
+         inkscape:connector-curvature="0"
+         transform="scale(-0.6)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path5975" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5056-0"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5054-6"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#008080;fill-opacity:1;fill-rule:evenodd;stroke:#008080;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker4847"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:collect="always">
+      <path
+         inkscape:connector-curvature="0"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path4845" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker2383-9-4"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path2381-9-3"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend-4-3"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path2102-5-6"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend-1"
+       style="overflow:visible"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         id="path2096-0"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -88,11 +390,22 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="869.77658"
-     inkscape:cy="515.69709"
+     inkscape:cx="442.83358"
+     inkscape:cy="1290.8107"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false" />
+     inkscape:current-layer="g4921"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1015"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     showguides="true"
+     inkscape:guide-bbox="true" />
   <metadata
      id="metadata1376">
     <rdf:RDF>
@@ -101,7 +414,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -109,7 +422,7 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,503)">
+     transform="translate(-2.6623592,508.22502)">
     <path
        style="fill:none;fill-rule:evenodd;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 26.726951,-410.99698 c 0,0 9.793825,-13.16073 27.45264,-24.87396 17.658815,-11.71323 54.686049,-0.0179 72.950539,0 18.26449,0.0179 31.89524,22.20127 41.78421,28.883"
@@ -440,33 +753,53 @@
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="2.6726944"
-       y="-492.30161"
+       y="-504.47263"
        id="text2552"><tspan
          sodipodi:role="line"
          id="tspan2550"
          x="2.6726944"
-         y="-492.30161"
-         style="stroke-width:0.26458332px;-inkscape-font-specification:'Sans, Bold';font-family:Sans;font-weight:bold;font-style:normal;font-stretch:normal;font-variant:normal;font-size:4.93888889px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal">Design document for the speed interpolation calculations for LTT.</tspan><tspan
+         y="-504.47263"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px">Design document for the speed interpolation calculations for LTT.</tspan><tspan
          sodipodi:role="line"
          x="2.6726944"
-         y="-487.89188"
+         y="-500.0629"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan5311" /><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-495.28662"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan5313">Part A: The simplified model used for computations</tspan><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-490.87689"
          style="stroke-width:0.26458332px"
          id="tspan2755">LTT requires to compute the end velocities (blue arrows in the drawing) of polyline points in the driver.</tspan><tspan
          sodipodi:role="line"
          x="2.6726944"
-         y="-483.48215"
+         y="-486.46716"
          style="stroke-width:0.26458332px"
          id="tspan2759">These velocities should be as large as possible, but respect the acceleration limit.</tspan><tspan
          sodipodi:role="line"
          x="2.6726944"
-         y="-479.07245"
+         y="-482.05746"
          style="stroke-width:0.26458332px"
          id="tspan2751" /><tspan
          sodipodi:role="line"
          x="2.6726944"
-         y="-474.66272"
+         y="-477.64774"
          style="stroke-width:0.26458332px"
-         id="tspan2749">Consider the black nominal path with two points, pBefore and p, which results in the interpolated gray machine path.</tspan></text>
+         id="tspan2749">Consider the black nominal path with two points, pBefore and p, which results in the interpolated gray machine path.</tspan><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-473.23801"
+         style="stroke-width:0.26458332px"
+         id="tspan3026">Note that this is a simplification. At the very end of this document there's a transformation from this simple model</tspan><tspan
+         sodipodi:role="line"
+         x="2.6726944"
+         y="-468.82828"
+         style="stroke-width:0.26458332px"
+         id="tspan3028">to what the machine actually needs, and a look into the bloody details of the machine.</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -563,7 +896,7 @@
          style="stroke-width:0.26458332px">range of actually possible b (speed at p)</tspan><tspan
          sodipodi:role="line"
          x="96.35067"
-         y="-125.41968"
+         y="-125.41969"
          style="stroke-width:0.26458332px"
          id="tspan2621">for given a (speed before) and length of c (max. acceleration)</tspan></text>
     <text
@@ -815,7 +1148,7 @@
          y="109.91042"
          style="stroke-width:0.26458332px"
          id="tspan184">(The minimum possible value for a would be a_reduced_min = ...<tspan
-   style="-inkscape-font-specification:'Sans Bold';font-family:Sans;font-weight:bold;font-style:normal;font-stretch:normal;font-variant:normal"
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold'"
    id="tspan186"> - </tspan>sqrt(...) )</tspan><tspan
          sodipodi:role="line"
          x="25.123335"
@@ -862,7 +1195,7 @@
          style="fill:#008000;stroke-width:0.26458332px">permissible range of b</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#808000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#808000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="62.22625"
        y="-437.82513"
        id="text1478-3"><tspan
@@ -870,7 +1203,7 @@
          id="tspan1476-6"
          x="62.22625"
          y="-437.82513"
-         style="stroke-width:0.26458332px;fill:#808000;">alpha</tspan></text>
+         style="fill:#808000;stroke-width:0.26458332px">alpha</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 58.586309,138.25808 11.533807,-8.99892 -48.041671,8.99892 h 36.507864"
@@ -985,5 +1318,1122 @@
          x="55.219154"
          id="tspan178"
          sodipodi:role="line">c_max</tspan></text>
+    <text
+       id="text3044"
+       y="218.63533"
+       x="2.6726944"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         y="218.63533"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3046">Part B: &quot;The ugly truth&quot; - transformation to machine data</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         y="223.04506"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan4373" /><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         y="227.82133"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan4369">B.1 From Corner to Midpoint</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.93888903px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         y="232.23105"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan4371" /><tspan
+         id="tspan3042"
+         style="stroke-width:0.26458332px"
+         y="236.64078"
+         x="2.6726944"
+         sodipodi:role="line">Above, we calculated the velocities at the corner points, assuming the machine does some magical smooth</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="241.05051"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3070">interpolation inbetween. Reality rather looks like the following.</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="245.46022"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3888" /><tspan
+         style="stroke-width:0.26458332px"
+         y="249.86995"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3892">In the following, all <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Sans;-inkscape-font-specification:'Sans Bold'"
+   id="tspan3894">bold-print</tspan> variables are vectors.</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="254.27966"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3890" /><tspan
+         style="stroke-width:0.26458332px"
+         y="258.68939"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3882">Consider the following sequence of commands and the resulting path and speed:</tspan><tspan
+         style="stroke-width:0.26458332px"
+         y="263.09912"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3884" /><tspan
+         style="stroke-width:0.26458332px"
+         y="267.50885"
+         x="2.6726944"
+         sodipodi:role="line"
+         id="tspan3886" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="2.9418712"
+       y="269.7135"
+       id="text6031"><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="269.7135"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan6045">PA &lt;<tspan
+   style="font-weight:bold;stroke-width:0.26458332"
+   id="tspan5093">Start</tspan>&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="275.23477"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan4540">PJ</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="280.75601"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan4532">PE &lt;PE_speed_A&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="286.27728"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan6043">PR &lt;(<tspan
+   style="font-weight:bold;stroke-width:0.26458332"
+   id="tspan5066">A <tspan
+   style="font-weight:normal;stroke-width:0.26458332"
+   id="tspan5091">-</tspan> Start</tspan>)&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="291.79852"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan6033">PE &lt;PE_speed_B&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="297.31979"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan6035">PR &lt;(<tspan
+   style="font-weight:bold;stroke-width:0.26458332"
+   id="tspan5070">B <tspan
+   style="font-weight:normal;stroke-width:0.26458332"
+   id="tspan5076">- </tspan>A</tspan>)&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="302.84106"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan6047">PE &lt;PE_speed_C&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="308.3623"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan4534">PR &lt;(<tspan
+   style="font-weight:bold;stroke-width:0.26458332"
+   id="tspan5072">C</tspan> - <tspan
+   style="font-weight:bold;stroke-width:0.26458332"
+   id="tspan5074">B</tspan>)&gt;</tspan><tspan
+         sodipodi:role="line"
+         x="2.9418712"
+         y="313.88358"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';stroke-width:0.26458332"
+         id="tspan4538">PF</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path5516"
+       d="m 5.9935574,412.79217 v 24.55005 H 203.97615"
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker5973);marker-end:url(#marker5977)" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path5536"
+       d="m 5.9935574,437.34223 14.4092476,-4.08585 h 29.655763 l 21.435709,-24.49122 h 79.283133 l 26.61883,25.55072 h 7.56898 l 4.96172,2.76967"
+       style="fill:none;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       sodipodi:nodetypes="cccccccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.34748077px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.32606104px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="16.501476"
+       y="430.40588"
+       id="text5552"><tspan
+         sodipodi:role="line"
+         x="16.501476"
+         y="430.40588"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.32606104px"
+         id="tspan5550">PE_speed_A</tspan></text>
+    <path
+       style="fill:#008080;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 32.832188,433.35968 h 7.039808"
+       id="path5554"
+       inkscape:connector-curvature="0" />
+    <text
+       id="text5558"
+       y="415.70618"
+       x="98.285957"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.34748077px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.32606104px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan5556"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.32606104px"
+         y="415.70618"
+         x="98.285957"
+         sodipodi:role="line">PE_speed_B</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path5560"
+       d="m 106.59857,408.77088 h 7.03981"
+       style="fill:#008080;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.34748077px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.32606104px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="177.39772"
+       y="430.53955"
+       id="text5564"><tspan
+         sodipodi:role="line"
+         x="177.39772"
+         y="430.53955"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.32606104px"
+         id="tspan5562">PE_speed_C</tspan></text>
+    <path
+       style="fill:#008080;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 176.86707,434.31588 h 7.03981"
+       id="path5566"
+       inkscape:connector-curvature="0" />
+    <path
+       transform="translate(-13.322139,94.325126)"
+       inkscape:original-d="m 69.846964,319.98824 v 23.45115"
+       inkscape:path-effect="#path-effect5933"
+       inkscape:connector-curvature="0"
+       id="path5931"
+       d="m 69.846964,319.98824 c 0,7.81705 0,15.6341 0,23.45115"
+       style="fill:none;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       transform="translate(-13.322139,94.325126)"
+       style="fill:none;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 184.18463,319.98824 c 0,7.81705 0,15.6341 0,23.45115"
+       id="path5935"
+       inkscape:connector-curvature="0"
+       inkscape:path-effect="#path-effect5937"
+       inkscape:original-d="m 184.18463,319.98824 v 23.45115" />
+    <path
+       transform="translate(-13.322139,94.325126)"
+       inkscape:original-d="m 203.749,336.82622 v 6.61317"
+       inkscape:path-effect="#path-effect5941"
+       inkscape:connector-curvature="0"
+       id="path5939"
+       d="m 203.749,336.82622 c 0,2.20439 0,4.40878 0,6.61317"
+       style="fill:none;stroke:#999999;stroke-width:0.53103453;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="58.038204"
+       y="435.31335"
+       id="text1543-8-1"><tspan
+         sodipodi:role="line"
+         id="tspan1541-5-3"
+         x="58.038204"
+         y="435.31335"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="167.64499"
+       y="435.38489"
+       id="text2427-0-1"><tspan
+         sodipodi:role="line"
+         id="tspan2425-6-2"
+         x="167.64499"
+         y="435.38489"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px">B</tspan></text>
+    <text
+       id="text5969"
+       y="435.38489"
+       x="191.96652"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px"
+         y="435.38489"
+         x="191.96652"
+         id="tspan5967"
+         sodipodi:role="line">C</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="3.7328482"
+       y="401.04059"
+       id="text6477"><tspan
+         sodipodi:role="line"
+         id="tspan6475"
+         x="3.7328482"
+         y="401.04059"
+         style="stroke-width:0.26458332">Actually, if the segment is much longer than needed for acceleration, it may also look like this:</tspan></text>
+    <path
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker6605);marker-end:url(#marker6609)"
+       d="m 5.9935574,357.60248 v 24.55005 H 203.97615"
+       id="path6545"
+       inkscape:connector-curvature="0" />
+    <text
+       id="text6559"
+       y="375.21643"
+       x="16.501476"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.34748077px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.32606104px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan6557"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.32606104px"
+         y="375.21643"
+         x="16.501476"
+         sodipodi:role="line">PE_speed_A</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path6561"
+       d="m 32.832188,378.16999 h 7.039808"
+       style="fill:#008080;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.34748077px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.32606104px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="98.285957"
+       y="360.51675"
+       id="text6565"><tspan
+         sodipodi:role="line"
+         x="98.285957"
+         y="360.51675"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.32606104px"
+         id="tspan6563">PE_speed_B</tspan></text>
+    <path
+       style="fill:#008080;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 106.59857,353.58119 h 7.03981"
+       id="path6567"
+       inkscape:connector-curvature="0" />
+    <text
+       id="text6571"
+       y="375.35016"
+       x="177.39772"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.34748077px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.32606104px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan6569"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.32606104px"
+         y="375.35016"
+         x="177.39772"
+         sodipodi:role="line">PE_speed_C</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path6573"
+       d="m 176.86707,379.12619 h 7.03981"
+       style="fill:#008080;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       transform="translate(-13.322139,83.145112)"
+       style="fill:none;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 69.846964,275.97857 c 0,7.81705 0,15.6341 0,23.45115"
+       id="path6575"
+       inkscape:connector-curvature="0"
+       inkscape:path-effect="#path-effect6577"
+       inkscape:original-d="m 69.846964,275.97857 v 23.45115" />
+    <path
+       transform="translate(-13.322139,83.145112)"
+       inkscape:original-d="m 184.18463,275.97857 v 23.45115"
+       inkscape:path-effect="#path-effect6581"
+       inkscape:connector-curvature="0"
+       id="path6579"
+       d="m 184.18463,275.97857 c 0,7.81705 0,15.6341 0,23.45115"
+       style="fill:none;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       transform="translate(-13.322139,83.145112)"
+       style="fill:none;stroke:#999999;stroke-width:0.53103453;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 203.749,292.81655 c 0,2.20439 0,4.40878 0,6.61317"
+       id="path6583"
+       inkscape:connector-curvature="0"
+       inkscape:path-effect="#path-effect6585"
+       inkscape:original-d="m 203.749,292.81655 v 6.61317" />
+    <text
+       id="text6589"
+       y="380.12393"
+       x="58.038204"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px"
+         y="380.12393"
+         x="58.038204"
+         id="tspan6587"
+         sodipodi:role="line">A</tspan></text>
+    <text
+       id="text6593"
+       y="380.19547"
+       x="167.64499"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px"
+         y="380.19547"
+         x="167.64499"
+         id="tspan6591"
+         sodipodi:role="line">B</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="191.96652"
+       y="380.19547"
+       id="text6597"><tspan
+         sodipodi:role="line"
+         id="tspan6595"
+         x="191.96652"
+         y="380.19547"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px">C</tspan></text>
+    <text
+       id="text6601"
+       y="326.81979"
+       x="3.6386395"
+       style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.26458332"
+         y="326.81979"
+         x="3.6386395"
+         id="tspan6599"
+         sodipodi:role="line">The details of angled curves will be described in the next section.</tspan><tspan
+         style="stroke-width:0.26458332"
+         y="332.11145"
+         x="3.6386395"
+         sodipodi:role="line"
+         id="tspan4387">For now, assume that ABC is a straight line only in X-direction, </tspan><tspan
+         style="stroke-width:0.26458332"
+         y="337.40314"
+         x="3.6386395"
+         sodipodi:role="line"
+         id="tspan4383">and take a look at the resulting velocity over time:</tspan><tspan
+         style="stroke-width:0.26458332"
+         y="342.69479"
+         x="3.6386395"
+         sodipodi:role="line"
+         id="tspan4385" /><tspan
+         style="stroke-width:0.26458332"
+         y="347.98645"
+         x="3.6386395"
+         sodipodi:role="line"
+         id="tspan4381">For computations, you can assume that it's linearly interpolated:</tspan></text>
+    <path
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#0000ff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 5.9935574,382.15251 30.0482536,-4.05138 73.699569,-24.45517 70.15826,25.39061 10.52723,3.53825"
+       id="path6611"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="2.9478326"
+       y="454.3056"
+       id="text4335"><tspan
+         sodipodi:role="line"
+         id="tspan4333"
+         x="2.9478326"
+         y="454.3056"
+         style="stroke-width:0.26458332">(Reality is a little more complicated, you can &quot;measure&quot; it by accessing the servo controllers with</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="459.59726"
+         style="stroke-width:0.26458332"
+         id="tspan5148">the SigmaWin Windows software and a USB cable. But the above is detailed enough for the computations.)</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="464.88895"
+         style="stroke-width:0.26458332"
+         id="tspan5146" /><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="470.1806"
+         style="stroke-width:0.26458332"
+         id="tspan5144">The speed specified by the PE command is the setpoint between the previous and the following point,</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="475.47226"
+         style="stroke-width:0.26458332"
+         id="tspan4339">for example, in the middle between A and B the speed is PE_speed_B.</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="480.76395"
+         style="stroke-width:0.26458332"
+         id="tspan4361">The computations described in the first part of this document compute v_A and v_B. </tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="486.0556"
+         style="stroke-width:0.26458332"
+         id="tspan4379">To convert to machine commands, choose PE_speed_B = v_A/2 + v_B/2.</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="491.34726"
+         style="stroke-width:0.26458332"
+         id="tspan4365" /><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="498.51169"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.3499999px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.26458332"
+         id="tspan4367">B.2 Angled curves and the actual computation goal</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="504.57645"
+         style="stroke-width:0.26458332"
+         id="tspan4351" /><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="509.8681"
+         style="stroke-width:0.26458332"
+         id="tspan4353">For angled curves (not only in X- or Y-direction, but diagonal), the story is a little more complicated</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="515.15979"
+         style="stroke-width:0.26458332"
+         id="tspan4939">than shown above: </tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="520.45142"
+         style="stroke-width:0.26458332"
+         id="tspan4357" /><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="525.7431"
+         style="stroke-width:0.26458332"
+         id="tspan4347">The machine's interpolation is kind of stupid, not what you'd expect from high-price engineering.</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="531.03479"
+         style="stroke-width:0.26458332"
+         id="tspan4925">The machine only cares about the faster axis (the one which travels more in the current move),</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="536.32642"
+         style="stroke-width:0.26458332"
+         id="tspan4929">does all acceleration limiting only for this axis, and the other axis just blindly follows this pace</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="541.6181"
+         style="stroke-width:0.26458332"
+         id="tspan4931">along the polyline. Of course, it's physically impossible to make an angled corner with finite</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="546.90979"
+         style="stroke-width:0.26458332"
+         id="tspan4933">acceleration but nonzero speed, so the servo controller will get an impossible setpoint trajectory</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="552.20142"
+         style="stroke-width:0.26458332"
+         id="tspan4941">and the lowpass dynamics of the control loop and the mechanics will smooth out the corner a little.</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="557.4931"
+         style="stroke-width:0.26458332"
+         id="tspan4943">See the following sketch at A and B:</tspan><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="562.78479"
+         style="stroke-width:0.26458332"
+         id="tspan4349" /><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="568.07642"
+         style="stroke-width:0.26458332"
+         id="tspan4343" /><tspan
+         sodipodi:role="line"
+         x="2.9478326"
+         y="573.3681"
+         style="stroke-width:0.26458332"
+         id="tspan4345" /></text>
+    <g
+       id="g4921"
+       transform="translate(0.75595238,23.695276)">
+      <path
+         sodipodi:nodetypes="csssssssc"
+         inkscape:connector-curvature="0"
+         id="path169-3"
+         d="m 11.001406,627.42658 50.887165,-29.59867 c 6.303042,-3.66617 7.112092,-6.14044 13.955347,-3.12715 2.133367,0.93939 3.891651,3.51091 5.620142,3.95194 3.33302,0.85045 1.499206,-0.73585 13.654294,-0.7843 14.349996,-0.0572 32.223326,0.0688 39.720746,-0.0405 18.12549,-0.2642 7.88901,8.74826 16.53665,12.66866 3.6054,1.6345 10.01271,8.54725 16.07917,13.63379 l 26.74429,22.42429"
+         style="fill:none;fill-rule:evenodd;stroke:#999999;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path1385-9-7"
+         d="M 61.888571,597.82791 106.63042,567.9706"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-1)" />
+      <path
+         sodipodi:nodetypes="cccc"
+         inkscape:connector-curvature="0"
+         id="path1539-8"
+         d="M 11.001406,627.42658 61.888571,597.82791 H 134.8391 l 66.29263,54.22083"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.96499997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend-4-3)" />
+      <text
+         id="text1543-8"
+         y="597.76709"
+         x="55.791031"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px"
+           y="597.76709"
+           x="55.791031"
+           id="tspan1541-6"
+           sodipodi:role="line">A</tspan></text>
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker2383-9-4)"
+         d="m 134.8391,597.82791 h 51.73278"
+         id="path1545-0"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cc" />
+      <text
+         id="text2427-4"
+         y="593.57843"
+         x="134.12727"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px"
+           y="593.57843"
+           x="134.12727"
+           id="tspan2425-6"
+           sodipodi:role="line">B</tspan></text>
+      <circle
+         r="2.2333546"
+         cy="599.41534"
+         cx="61.888569"
+         id="path2432-7"
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path7842"
+         d="m 61.990655,602.67012 v 3.841"
+         style="fill:none;stroke:#800000;stroke-width:0.17840634px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path7844"
+         d="M 61.990655,604.35916 H 82.766371"
+         style="fill:none;stroke:#800000;stroke-width:0.25230461px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         style="fill:none;stroke:#800000;stroke-width:0.17840634px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 82.650949,602.41896 v 3.84101"
+         id="path7846"
+         inkscape:connector-curvature="0" />
+      <text
+         id="text7850"
+         y="612.50049"
+         x="72.522049"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.10951877px;line-height:1.25;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';letter-spacing:0px;word-spacing:0px;fill:#800000;fill-opacity:1;stroke:none;stroke-width:0.19434492"
+         xml:space="preserve"><tspan
+           id="tspan7852"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';text-align:center;text-anchor:middle;fill:#800000;stroke-width:0.19434492"
+           y="612.50049"
+           x="72.522049"
+           sodipodi:role="line">Length for settling time</tspan></text>
+      <circle
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+         id="circle7860"
+         cx="11.428753"
+         cy="626.74304"
+         r="2.2333546" />
+      <circle
+         r="2.2333546"
+         cy="626.74304"
+         cx="11.428753"
+         id="circle8042"
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+      <circle
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+         id="circle2434-7"
+         cx="193.37518"
+         cy="645.78448"
+         r="2.2333546" />
+      <path
+         style="fill:none;stroke:#800000;stroke-width:0.17840634px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 128.55409,605.238 -2.48705,2.92709"
+         id="path8050"
+         inkscape:connector-curvature="0" />
+      <path
+         style="fill:none;stroke:#800000;stroke-width:0.25230461px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 127.29782,606.71655 15.83247,13.45224"
+         id="path8052"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path8054"
+         d="m 144.29861,618.61549 -2.48703,2.9271"
+         style="fill:none;stroke:#800000;stroke-width:0.17840634px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         transform="rotate(40.353217)"
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.10951877px;line-height:1.25;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';letter-spacing:0px;word-spacing:0px;fill:#800000;fill-opacity:1;stroke:none;stroke-width:0.19434492"
+         x="500.38855"
+         y="388.07507"
+         id="text8060"><tspan
+           sodipodi:role="line"
+           x="500.38855"
+           y="388.07507"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';text-align:center;text-anchor:middle;fill:#800000;stroke-width:0.19434492"
+           id="tspan8058">Length for settling time</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="92.24292"
+         y="580.53693"
+         id="text4837"><tspan
+           sodipodi:role="line"
+           id="tspan4835"
+           x="92.24292"
+           y="580.53693"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.26458332px">v_A</tspan></text>
+      <text
+         id="text4841"
+         y="601.91852"
+         x="161.19846"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.26458332px"
+           y="601.91852"
+           x="161.19846"
+           id="tspan4839"
+           sodipodi:role="line">v_B</tspan></text>
+      <g
+         id="g4869"
+         transform="translate(-3.7394051,515.85001)">
+        <g
+           id="g4857"
+           style="stroke:#ffffff;stroke-width:1">
+          <path
+             sodipodi:nodetypes="ccccc"
+             style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+             d="m 128.92615,81.447266 -24.67029,0.01758 v 0.5 l 24.67029,-0.01758 z"
+             id="path4851"
+             inkscape:connector-curvature="0" />
+          <path
+             inkscape:connector-curvature="0"
+             style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-opacity:1"
+             d="m 128.34383,81.700128 -1.99882,2.001176 6.99882,-2.004115 -7.00117,-1.995885 z"
+             id="path4863" />
+        </g>
+        <path
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path4843"
+           d="m 104.25523,81.714289 29.0886,-0.0171"
+           style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4847)" />
+      </g>
+      <circle
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.75;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+         id="circle4849"
+         cx="100.64265"
+         cy="597.54449"
+         r="2.2333546" />
+      <text
+         id="text4873"
+         y="592.25421"
+         x="104.14917"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.26458332px"
+           y="592.25421"
+           x="104.14917"
+           id="tspan4871"
+           sodipodi:role="line">v_AB_mid</tspan></text>
+      <g
+         transform="rotate(40.055546,-607.29532,436.20965)"
+         id="g4885">
+        <g
+           style="stroke:#ffffff;stroke-width:1"
+           id="g4881">
+          <path
+             sodipodi:nodetypes="ccccc"
+             inkscape:connector-curvature="0"
+             id="path4877"
+             d="m 130.49154,81.468784 -26.23568,-0.0039 v 0.5 l 26.23568,0.0039 z"
+             style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+          <path
+             id="path4879"
+             d="m 128.34383,81.700128 -1.99882,2.001176 6.99882,-2.004115 -7.00117,-1.995885 z"
+             style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-opacity:1"
+             inkscape:connector-curvature="0" />
+        </g>
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4847)"
+           d="m 104.25523,81.714289 29.0886,-0.0171"
+           id="path4883"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc" />
+      </g>
+      <circle
+         transform="rotate(40.055546)"
+         r="2.2333543"
+         cy="370.18158"
+         cx="527.55475"
+         id="circle4887"
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.75;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+      <text
+         transform="rotate(40.055546)"
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="531.06128"
+         y="364.8913"
+         id="text4891"><tspan
+           sodipodi:role="line"
+           id="tspan4889"
+           x="531.06128"
+           y="364.8913"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#0000ff;stroke-width:0.26458332px">v_BC_mid</tspan></text>
+      <g
+         inkscape:transform-center-y="9.1999638"
+         inkscape:transform-center-x="-12.019789"
+         transform="rotate(39.774749,-593.51102,382.17283)"
+         id="g5046">
+        <g
+           style="stroke:#ffffff;stroke-width:1"
+           id="g5042">
+          <path
+             inkscape:connector-curvature="0"
+             id="path5038"
+             d="m 128.92615,81.447266 -24.67029,0.01758 v 0.5 l 24.67029,-0.01758 z"
+             style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+             sodipodi:nodetypes="ccccc" />
+          <path
+             id="path5040"
+             d="m 128.34383,81.700128 -1.99882,2.001176 6.99882,-2.004115 -7.00117,-1.995885 z"
+             style="fill:#0000ff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-opacity:1"
+             inkscape:connector-curvature="0" />
+        </g>
+        <path
+           style="fill:#008080;fill-rule:evenodd;stroke:#008080;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker5056-0)"
+           d="m 104.25523,81.714289 29.0886,-0.0171"
+           id="path5044"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc" />
+      </g>
+      <text
+         inkscape:transform-center-y="7.6111548"
+         inkscape:transform-center-x="-19.878407"
+         transform="rotate(39.774749)"
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="487.21231"
+         y="378.82187"
+         id="text5052"><tspan
+           sodipodi:role="line"
+           id="tspan5050"
+           x="487.21231"
+           y="378.82187"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';fill:#008080;stroke-width:0.26458332px">v_target_shortly_after_B</tspan></text>
+      <circle
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;vector-effect:none;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+         id="circle2434-6"
+         cx="135.25406"
+         cy="597.82788"
+         r="2.2333546" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="11.567818"
+         y="633.29681"
+         id="text5064"><tspan
+           sodipodi:role="line"
+           id="tspan5062"
+           x="11.567818"
+           y="633.29681"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px">Start</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="193.46112"
+         y="640.88513"
+         id="text5204"><tspan
+           sodipodi:role="line"
+           id="tspan5202"
+           x="193.46112"
+           y="640.88513"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'TeX Gyre Pagella';-inkscape-font-specification:'TeX Gyre Pagella';stroke-width:0.26458332px">C</tspan></text>
+      <g
+         id="g1276"
+         transform="rotate(40.055546,-939.99721,461.93294)">
+        <path
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path1274"
+           d="M 105.41902,87.458214 132.25286,76.229146"
+           style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1342)" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1442)"
+           d="m 105.41902,87.458214 5.5816,6.638812"
+           id="path1436"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc" />
+      </g>
+      <g
+         transform="rotate(40.055546,-939.99721,461.93294)"
+         id="g1386">
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker1392)"
+           d="M 105.41902,87.458214 126.60928,69.516612"
+           id="path1384"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc" />
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="103.5442"
+         y="845.12769"
+         id="text1546"><tspan
+           sodipodi:role="line"
+           id="tspan1544"
+           x="103.5442"
+           y="845.12769"
+           style="stroke-width:0.26458332">dx (faster axis)</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="93.130959"
+         y="854.53925"
+         id="text1550"><tspan
+           sodipodi:role="line"
+           id="tspan1548"
+           x="93.130959"
+           y="854.53925"
+           style="stroke-width:0.26458332">dy</tspan></text>
+      <text
+         id="text1554"
+         y="845.0899"
+         x="97.383202"
+         style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.26458332"
+           y="845.0899"
+           x="97.383202"
+           id="tspan1552"
+           sodipodi:role="line">B</tspan></text>
+      <text
+         id="text1562"
+         y="858.88605"
+         x="130.26714"
+         style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.26458332"
+           y="858.88605"
+           x="130.26714"
+           id="tspan1560"
+           sodipodi:role="line">C</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="10.423512"
+       y="677.32458"
+       id="text4947"><tspan
+         sodipodi:role="line"
+         id="tspan4945"
+         x="10.423512"
+         y="677.32458"
+         style="stroke-width:0.26458332">Shortly before B, the velocity is <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan4955">v_B</tspan> pointing in (<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan4949">B</tspan>-<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan4951">A</tspan>) direction. Then it jumps to</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="682.61627"
+         style="stroke-width:0.26458332"
+         id="tspan4953"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5036">v_target_shortly_after_B</tspan> of same magnitude, but direction (<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan4965">C</tspan>-<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan4963">B</tspan>).</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="687.9079"
+         style="stroke-width:0.26458332"
+         id="tspan5028" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="693.19958"
+         style="stroke-width:0.26458332"
+         id="tspan5030">Therefore, if the time for the segment BC is significantly longer than the settling time (assume ca 5-10ms),</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="698.49127"
+         style="stroke-width:0.26458332"
+         id="tspan5038">then the problematic acceleration is due to this jump:</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="703.7829"
+         style="stroke-width:0.26458332"
+         id="tspan5040">a_corner = |<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5042">v_B</tspan> - <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5044">v_target_shortly_after_B|</tspan> / (settling time).</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="709.07458"
+         style="stroke-width:0.26458332"
+         id="tspan5046" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="714.36627"
+         style="stroke-width:0.26458332"
+         id="tspan5034">To simplify the algorithm, in this case just assume that the entire time dt from B to C is only the settling time,</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="719.6579"
+         style="stroke-width:0.26458332"
+         id="tspan5067">and continue with the following normal case:</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="724.94958"
+         style="stroke-width:0.26458332"
+         id="tspan5069" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="730.24127"
+         style="stroke-width:0.26458332"
+         id="tspan5071" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="735.5329"
+         style="stroke-width:0.26458332"
+         id="tspan5073">Normally (i.e., if there is no corner at B, or the time BC is less than the settling time discussed before),</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="740.82458"
+         style="stroke-width:0.26458332"
+         id="tspan5075">the acceleration which must be limited is</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="746.11627"
+         style="stroke-width:0.26458332"
+         id="tspan5077">a = dv / dt</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="751.4079"
+         style="stroke-width:0.26458332"
+         id="tspan5079">dv = |<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5089">v_AB_mid</tspan> - <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5092">v_BC_mid</tspan>|</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="756.69958"
+         style="stroke-width:0.26458332"
+         id="tspan5209">dt = ds / v_average     <tspan
+   style="font-size:3.52777767px"
+   id="tspan5627">(if dt &gt; settling_time and ABC is not a straight line, use dt=settling_time instead to handle the &quot;corner jump&quot; acceleration.)</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="761.99127"
+         style="stroke-width:0.26458332"
+         id="tspan5083">ds = |((<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5094">A</tspan>/2+<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5096">B</tspan>/2) - (<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5098">C</tspan>/2 + <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5100">B</tspan>/2))|</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="767.2829"
+         style="stroke-width:0.26458332"
+         id="tspan5085">v_average = (|<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5102">v_AB_mid</tspan>|/2+ |<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5104">v_BC_mid</tspan>|/2)</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="772.57458"
+         style="stroke-width:0.26458332"
+         id="tspan5198" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="777.86627"
+         style="stroke-width:0.26458332"
+         id="tspan5203">This means we can just use the computations from section A and in the end transform them as in section B.1,</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="783.1579"
+         style="stroke-width:0.26458332"
+         id="tspan5207">and don't really need to understand what's going on except for the settling-time </tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="788.44958"
+         style="stroke-width:0.26458332"
+         id="tspan5194" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="793.74127"
+         style="stroke-width:0.26458332"
+         id="tspan5196">Start and endpoints have v_Start = v_C = 0. The equations are analogous to above.</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="799.0329"
+         style="stroke-width:0.26458332"
+         id="tspan5106" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="806.19733"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.3499999px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.26458332"
+         id="tspan5128">B.3 Arc Compensation Setting</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="812.26208"
+         style="stroke-width:0.26458332"
+         id="tspan5132" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="817.55377"
+         style="stroke-width:0.26458332"
+         id="tspan5309">If &quot;Arc compensation&quot; is disabled in the laser's firmware (not recommended), then,</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="822.8454"
+         style="stroke-width:0.26458332"
+         id="tspan5138">in the middle of every line the <tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5150">faster</tspan> axis has the speed given by the PE command. Effectively,</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="828.13708"
+         style="stroke-width:0.26458332"
+         id="tspan5156">|<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5162">v_AB_mid</tspan>| = PE_speed_B * sqrt(dx^2 + dy^2)/max(|dx|,|dy|).</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="833.42877"
+         style="stroke-width:0.26458332"
+         id="tspan5158" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="838.7204"
+         style="stroke-width:0.26458332"
+         id="tspan5136">If &quot;Arc compensation&quot; is enabled (recommended), then in the middle of every line the actual velocity is what you want:</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="844.01208"
+         style="stroke-width:0.26458332"
+         id="tspan5130">|<tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"
+   id="tspan5164">v_AB_mid</tspan>| = PE_speed_B.  (This is uncertain, you may want to do own measurements with different angles in joint-curve mode).</tspan><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="849.30377"
+         style="stroke-width:0.26458332"
+         id="tspan5120" /><tspan
+         sodipodi:role="line"
+         x="10.423512"
+         y="854.5954"
+         style="stroke-width:0.26458332"
+         id="tspan5087" /></text>
   </g>
 </svg>
