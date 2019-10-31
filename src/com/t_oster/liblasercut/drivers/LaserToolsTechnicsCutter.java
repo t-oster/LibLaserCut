@@ -745,6 +745,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       // - the laser may assume that a lookahead buffer of just one point is enough
       //   (that's why we need all these complicated computations).
       // - the speed we send is the target speed at the *middle* of the segment:
+      //   (see LaserToolsTechnicsCutter_speedInterpolation.svg, section B.1)
       double sentSpeed = (speedPercentBefore + speedPercent)/2;
       double diagonalCorrection;
       if (isLaserArcCompensationEnabled())
@@ -755,6 +756,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         diagonalCorrection = 1;
       } else {
         //   If it is disabled (unusual), this would need to be changed,
+        //   (see LaserToolsTechnicsCutter_speedInterpolation.svg, section B.3)
         //   because the speed we send is then used as the speed value of the
         //   faster axis, max(abs(v_x), abs(v_y)):
         //   speedPercent points in the (dx,dy) direction, compute the largest component:
@@ -1020,6 +1022,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         double minTime = distanceToPrevious / maxAvgSpeed; // This is an underapproximation, assuming maximal velocity. We could accelerate more per length if the velocity is smaller! (Therefore, the "warmup" iterations are used.)
 
         // Special handling for *angled* segments which take longer than the "smoothing time" of the servo controller:
+        // (see LaserToolsTechnicsCutter_speedInterpolation.svg, section B.2)
         // Due to the way the machine works (polyline is directly sent to servo controller),
         // the actual acceleration at angled line segments takes place within less than MAX_ACCEL_TIME (ca. 10ms), even if the following segment is very long!
         final double MAX_ACCEL_TIME = 0.005;
@@ -1047,7 +1050,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         // and abs(acceleration) < maxAcceleration.
         // Direction of acceleration is arbitrary.
         // Now, what is the minimum and maximum possible length of newSpeed?
-        // see LaserToolsTechnicsCutter_speedInterpolation.svg, case 1 and 1b.
+        // see LaserToolsTechnicsCutter_speedInterpolation.svg, section A, case 1 and 1b.
         // Is it possible to reach any speed pointing in the fixed direction of newSpeed?
         // speed * sin(angle) < acceleration * time ?
         // TODO: switch from math.sin() to something faster, overapproximative.
@@ -1056,7 +1059,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         {
           System.out.println("point " + i + ": Reducing previous velocity (corner too angled)");
           // It is impossible. The previous(!) velocity needs to be lowered.
-          // see LaserToolsTechnicsCutter_speedInterpolation.svg, case 2.
+          // see LaserToolsTechnicsCutter_speedInterpolation.svg, section A, case 2.
           // Make it small enough so that we can just get around the corner.
           // Otherwise it would be impossible to compute a valid speed for the current point.
           pBefore.speed = safetyFactor * tangentCurveMaxAcceleration * optimismFactor * minTime / alpha;
