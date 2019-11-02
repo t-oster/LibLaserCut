@@ -1229,6 +1229,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
     // If there were no corners, the path may be a full circle, which we can send more efficiently as a circle command instead of a generic curve.
     Circle detectedCircle = Circle.fromPointList(points, lengthTolerancePixels);
+    detectedCircle = null; // FIXME: The circle command is disabled as it seems broken in hardware: Large circles cause so much acceleration (loud "BANG!" sound) that the mechanics may be damaged.
     if (detectedCircle != null) {
       // we found a circle -- use it and send the specialized command
       System.out.println("We found a circle:" + detectedCircle);
