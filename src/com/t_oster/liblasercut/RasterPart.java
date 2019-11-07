@@ -31,7 +31,7 @@ public class RasterPart extends RasterizableJobPart
   LaserProperty blackPixelProperty = null;
   LaserProperty whitePixelProperty = null;
 
-  public RasterPart(BlackWhiteRaster image, LaserProperty laserProperty, Point offset, double resolution)
+  public RasterPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {
     this.image = image;
     this.start = offset;
@@ -64,20 +64,28 @@ public class RasterPart extends RasterizableJobPart
   @Override
   public void getRasterLine(int line, List<Byte> result)
   {
+    RasterElement raster = ((RasterElement.Provider)image).getRaster();
+    byte[] byte_array = raster.getRasterLine(line, null);
     if (result instanceof ByteArrayList) {
-	((ByteArrayList)result).clear((image.getWidth() + 7) / 8);
+      ((ByteArrayList)result).clear(byte_array.length);
     } else {
-	result.clear();
+       result.clear();
     }
-    for (int x = 0; x < (image.getWidth() + 7) / 8; x++)
+    for (int x = 0; x < byte_array.length; x++)
     {
-      result.add(((BlackWhiteRaster) image).getByte(x, line));
+      result.add(byte_array[x]);
     }
   }
 
   public boolean isBlack(int x, int y)
   {
-    return ((BlackWhiteRaster) image).isBlack(x, y);
+    RasterElement raster = ((RasterElement.Provider)image).getRaster();
+    if (raster.getBitDepth() == 1)
+    {
+      int value = raster.getPixel(x, y);
+      return value == raster.getWhite();
+    }
+    return raster.isBlack(x, y);
   }
 
   @Override

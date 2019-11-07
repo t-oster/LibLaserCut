@@ -19,7 +19,6 @@
 package com.t_oster.liblasercut.drivers;
 
 import com.t_oster.liblasercut.AbstractLaserProperty;
-import com.t_oster.liblasercut.BlackWhiteRaster;
 import com.t_oster.liblasercut.IllegalJobException;
 import com.t_oster.liblasercut.JobPart;
 import com.t_oster.liblasercut.LaserCutter;
@@ -146,7 +145,7 @@ public class K40NanoDriver extends LaserCutter
         device.move_absolute(sx, sy);
         int step_size = (int) (1000.0 / p.getDPI());
         device.setRaster_step(step_size);
-        RasterElement element = ((BlackWhiteRaster)rp.getImage()).getRaster();
+        RasterElement element = ((RasterElement.Provider)rp.getImage()).getRaster();
         RasterBuilder rasterbuild = new RasterBuilder(element, new RasterBuilder.PropertiesUpdate()
         {
           @Override
