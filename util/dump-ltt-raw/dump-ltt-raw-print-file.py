@@ -111,7 +111,37 @@ def dump(filename, graph=False, showEngrave=False):
             print(s)
             raise Exception("did not get known start of command, but {:02X}".format(start))
 
-        commands={0x30: "Engrave line L2R", 0x31: "Engrave line R2L", 0x41: "Air Assist", 0x42: "end of file", 0x4A: "power", 0x4D: "job mode", 0x4E: "color", 0x50: "PPI", 0x53: "speed", 0x76:"version", 0x5041: "Pos. absolute", 0x5042: "Circle clockwise", 0x5043: "Circle counterclockwise", 0x5044:"Laser on", 0x5046: "End join", 0x504A: "Start join", 0x5045: "End speed", 0x5052: "Pos. relative", 0x5055: "Laser off", 0x5A41: "Focus?"}
+        commands = {
+            0x30: "Engrave line L2R",
+            0x31: "Engrave line R2L",
+            0x41: "Air Assist",
+            0x42: "end of file",
+            0x43: "set compression escape character",
+            0x44: "pitch (raster engrave  DPI = 4000 / pitch)",
+            0x45: "pulse mode (for cutting dashed or dotted lines, 0 = normal)",
+            0x4A: "power",
+            0x4D: "job mode",
+            0x4E: "color code (not used by lasercutter)",
+            0x4F: "operation mode (autorun, autofocus)",
+            0x50: "PPI (vector cut DPI = 4000 / PPI)",
+            0x51: "number of copies (0 = normal)",
+            0x52: "rotation unit: radius",
+            0x53: "speed",
+            0x54: "'rubber' (4bit raster engrave) power table",
+            0x56: "Start of vector data -- once per file; rest of the file contains only vector; engrave must be before this command.",
+            0x59: "do not use -- formerly: Y axis for rotary",
+            0x76:"version",
+            0x5041: "Pos. absolute",
+            0x5042: "Circle clockwise",
+            0x5043: "Circle counterclockwise",
+            0x5044:"Laser on",
+            0x5046: "End join",
+            0x504A: "Start join",
+            0x5045: "End speed",
+            0x5052: "Pos. relative",
+            0x5053: "Vector Pause flag (starts a group of vector paths, has no effect?)",
+            0x5055: "Laser off",
+            0x5A41: "Focus?"}
         print("\n■ Command {:02X} ".format(cmd) + commands.get(cmd, ""))
 
         # two-byte commands:
