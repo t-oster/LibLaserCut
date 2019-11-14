@@ -7,6 +7,11 @@ the SmoothieBoard (www.smoothieware.org),
 K40, generic GRBL based boards,
 and some untested work-in-progress drivers like the Roland iModela and the Lasersaur.
 
+## Tested/Supported devices
+|Manufacturer     |Model       | Interface    | Driver              |Notes
+----------------------------------------------------------------------------------------------
+|Epliog                   | Zing         | Ethernet     | EplilogZing
+
 It was created for VisiCut (http://visicut.org)
 but you are invited to use it for your own programs.
 
