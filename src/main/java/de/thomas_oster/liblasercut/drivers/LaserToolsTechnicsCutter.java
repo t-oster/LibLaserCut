@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -483,10 +484,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     writeU32(out, value);
   }
 
-  private byte[] generateVectorCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException
+  private double generateVectorCode(ByteArrayOutputStream outputstream, VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException
   {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(outputstream, true, "US-ASCII");
 
     out.write(toBytes("1B 56")); // start vector mode
 
@@ -529,8 +529,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
     setLaserOn(out, false);
-    System.out.println("cutting time TOTAL:" + cuttingTime);
-    return result.toByteArray();
+    return cuttingTime;
   }
 
   private void setCurrentDPI(PrintStream out, double resolution, boolean isVectorActive) throws IOException
@@ -1507,10 +1506,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
   }
 
-  private byte[] generateRasterCode(RasterizableJobPart rp, double resolution) throws UnsupportedEncodingException, IOException
+  private double generateRasterCode(ByteArrayOutputStream outputstream, RasterizableJobPart rp, double resolution) throws UnsupportedEncodingException, IOException
   {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    double laserTime = 0;
+    PrintStream out = new PrintStream(outputstream, true, "US-ASCII");
     // TODO: handle the special case if the engraving is near the left or right end of the coordinate system.
     // -> we may use slightly negative or too large coordinates (check original driver output!)
     // -> and if that's not enough, accept that the first 25mm or so are slower and apply a compensation table which reduces the intensity (or scales the pixels? whatever...) at the start
@@ -1603,14 +1602,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         }
 
         // move to the first point of the line and engrave the pixels:
-        engraveBitmapLine(out, bytes, lineStart, dirRight, offsetPixelsDirRight, resolution);
+        laserTime += engraveBitmapLine(out, bytes, lineStart, dirRight, offsetPixelsDirRight, resolution, pixelsPerByte);
       }
       if (!prop.isEngraveUnidirectional())
       {
         dirRight = !dirRight;
       }
     }
-    return result.toByteArray();
+    return laserTime;
   }
 
   final static int COMPRESS_MAGIC_CONSTANT = 0xC0;
@@ -1726,8 +1725,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * scanlines are positioned x pixels earlier to compensate the laser tube
    * delay, zero means disabled
    * @param resolution DPI
+   * @param pixelsPerByte 1 or 8 pixels per byte (8-bit or 1-bit engrave mode)
+   * @return estimated engrave time
    */
-  private void engraveBitmapLine(PrintStream out, ByteArrayList bytes, Point lineStart, boolean dirLeftToRight, double pixelOffset, double resolution) throws IOException
+  private double engraveBitmapLine(PrintStream out, ByteArrayList bytes, Point lineStart, boolean dirLeftToRight, double pixelOffset, double resolution, int pixelsPerByte) throws IOException
   {
     if (dirLeftToRight)
     {
@@ -1737,7 +1738,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     {
       out.write(toBytes("1B 31"));
       // right-to-left. We need to flip the whole bit and byte order.
-      bytes.reverseBits();
+      if (pixelsPerByte == 8) {
+        bytes.reverseBits();
+      } else {
+        myAssert(pixelsPerByte == 1);
+        Collections.reverse(bytes);
+      }
     }
     ByteArrayList compressed = compressData(bytes);
 
@@ -1749,6 +1755,24 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     for (byte b : compressed)
     {
       out.write(b);
+    }
+    // TODO: this time estimate doesn't include the travel time to the start point
+    return cuttingTimeForPxDistance(bytes.size() * pixelsPerByte, resolution);
+  }
+  
+
+  @Override
+    public boolean canEstimateJobDuration() {
+        return true;
+    }
+
+  @Override
+  public int estimateJobDuration(LaserJob job) {
+    try {
+        return (int) writeJobCode(job, OutputStream.nullOutputStream(), null);
+    } catch (IOException ex) {
+        Logger.getLogger(LaserToolsTechnicsCutter.class.getName()).log(Level.SEVERE, null, ex);
+        return -1;
     }
   }
 
@@ -1816,8 +1840,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  protected void writeJobCode(LaserJob job, OutputStream os, ProgressListener pl) throws UnsupportedEncodingException, IOException
+  protected double writeJobCode(LaserJob job, OutputStream os, ProgressListener pl) throws UnsupportedEncodingException, IOException
   {
+    double duration = 0;
     currentX = 0;
     currentY = 0;
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -1846,11 +1871,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     {
       if (p instanceof Raster3dPart || p instanceof RasterPart)
       {
-        out.write(this.generateRasterCode((RasterizableJobPart) p, p.getDPI()));
+        duration += this.generateRasterCode(out, (RasterizableJobPart) p, p.getDPI());
       }
       else if (p instanceof VectorPart)
       {
-        out.write(this.generateVectorCode((VectorPart) p, p.getDPI()));
+        duration += this.generateVectorCode(out, (VectorPart) p, p.getDPI());
       }
       i++;
       if (pl != null)
@@ -1874,6 +1899,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // total length
     writeU32(out, result.length + 6);
     os.write(out.toByteArray());
+    return duration;
   }
 
   @Override
