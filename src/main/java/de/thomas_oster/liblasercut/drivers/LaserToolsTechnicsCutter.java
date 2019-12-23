@@ -656,22 +656,76 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     goToCoordinate(out, x, y, resolution, true);
     return time;
   }
+  
+  
+  class UnsupportedCircleException extends Exception
+  {
 
+        public UnsupportedCircleException(String s) {
+            super(s);
+        }
+  }
+  
 /**
  * Switch on the laser and cut a full circle, starting from the current point,
  * around the given center point.
+ * Note that the radius in mm must not be larger than CIRCLE_MAX_RADIUS_MM,
+ * otherwise UnsupportedCircleException will be thrown and nothing will be written
+ * to the output.
+ * 
  * @param out PrintStream for writing the commands
  * @param center Center point
  * @param resolution DPI for converting pixels to mm
  * @throws IOException
+ * @throws UnsupportedCircleException if the circle is too large and it must be sent in a different way
  * @return cutting time
  */
-
+          
   // Note for future development: The same command can also be used for arcs (e.g., quarter circles).
-  private double circle(PrintStream out, Point center, double resolution) throws IOException
+  private double circle(PrintStream out, Point center, double resolution) throws IOException, UnsupportedCircleException
   {
+    
+    // the firmware works correctly up to this radius:
+    final double CIRCLE_MAX_RADIUS_MM = 101.0;
+    final double radiusPx = center.hypothenuseTo(new Point(currentX, currentY));
+    final double radiusMm = Util.px2mm(radiusPx, resolution);
+    if (radiusMm > CIRCLE_MAX_RADIUS_MM) {
+        // CAUTION: The circle command is disabled for large radii as it seems broken in hardware: Large circles (radius > 105mm) cause so much acceleration (loud "BANG!" sound) that the mechanics may be damaged.
+        throw new UnsupportedCircleException("Circle command radius must not be larger than CIRCLE_MAX_RADIUS_MM due to firmware bugs.");
+    }
+    if (resolution != 500) {
+        // Currently, the driver only supports 500dpi. It is unknown if CIRCLE_MAX_RADIUS_MM is different for different resolutions.
+        // If other resolutions are added:
+        // Please test all other resolutions with circle radius up to CIRCLE_MAX_RADIUS_MM before removing this exception:
+        Logger.getLogger(LaserToolsTechnicsCutter.class.getName()).log(Level.WARNING, "Circle with != 500dpi is not yet supported.");
+        throw new UnsupportedCircleException("Circle command with != 500dpi is untested and therefore not yet supported.");
+    }
+    if (!useTangentCurves) {
+        throw new UnsupportedCircleException("joint tangent curves must be enabled to use the circle command");
+    }
+
+    // Limit speed to what's possible for the given radius
+    // Note: for a circle with constant speed:
+    // acceleration = speed^2 / radius
+    // -> speed = sqrt(acceleration * radius)
+    float maxSpeedPercent = (float) (Math.sqrt(tangentCurveMaxAcceleration * radiusMm) / speedPercentToMmPerSec(1));
+    // safety factor: leave some margin for longitudinal acceleration, which adds to the radial acceleration at the start and end
+    maxSpeedPercent = maxSpeedPercent * 0.7f;
+    // remember previous speed and apply new limit
+    float oldSpeedPercent = currentSpeed;
+    float oldPower = currentPower;
+    if (currentSpeed > maxSpeedPercent)
+    {
+      setSpeed(out, maxSpeedPercent);
+      // speed was reduced; also reduce the power
+      setPower(out, oldPower * maxSpeedPercent / oldSpeedPercent);
+    }
+    
     // the start point is implicitly the current point.
+    // enclosing the circle command in PJ...PF (without PE!) helps for smoother acceleration
+    // (even if that doesn't make too much sense, but well, the protocol is a bit weird anyway)
     setLaserOn(out, true);
+    out.print("PJ"); 
     out.print("PB"); // PB: clockwise, PC: counterclockwise
     // end point relative to start point
     // here: 0,0 because we cut a full circle
@@ -679,7 +733,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     writeS32(out, 0);
     // center point relative to start point
     sendCoordinate(out, (int) center.x - (int) currentX, (int) center.y - (int) currentY, resolution, true);
-    return cuttingTimeForPxDistance(2 * Math.PI * center.hypothenuseTo(new Point(currentX, currentY)), resolution);
+    out.print("PF");
+    // restore previous speed and power setting
+    setSpeed(out, oldSpeedPercent);
+    setPower(out, oldPower);
+    return cuttingTimeForPxDistance(2 * Math.PI * radiusPx, resolution);
   }
 
 
@@ -1293,14 +1351,21 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
     // If there were no corners, the path may be a full circle, which we can send more efficiently as a circle command instead of a generic curve.
     Circle detectedCircle = Circle.fromPointList(points, lengthTolerancePixels);
-    detectedCircle = null; // FIXME: The circle command is disabled as it seems broken in hardware: Large circles cause so much acceleration (loud "BANG!" sound) that the mechanics may be damaged.
     if (detectedCircle != null) {
       // we found a circle -- use it and send the specialized command
       System.out.println("We found a circle:" + detectedCircle);
       // The circle implicitly starts at the current point,
-      cuttingTime += circle(out, detectedCircle.center, resolution);
-    } else {
-      // It's a normal curve, just send it.
+      try {
+        cuttingTime += circle(out, detectedCircle.center, resolution);
+      } catch (UnsupportedCircleException exception) {
+        System.out.println("unsupported circle, sending as normal curve: " + exception.getMessage());
+        detectedCircle = null;
+      }
+    }
+    if (detectedCircle == null)
+    {
+      // It's a normal curve, or sending as circle was unsupported.
+      // -> just send it as normal curve
       cuttingTime += curve(out, points, resolution);
     }
     return cuttingTime;
