@@ -55,6 +55,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_FLIP_Y = "Flip Y Axis";
   protected static final String SETTING_HTTP_UPLOAD_URL = "HTTP Upload URL";
   protected static final String SETTING_AUTOPLAY = "Start Job after HTTP Upload";
+  protected static final String SETTING_POST_HTTP_UPLOAD_GCODE = "GCode to send after HTTP Upload";
   protected static final String SETTING_LINEEND = "Lineend (CR,LF,CRLF)";
   protected static final String SETTING_MAX_SPEED = "Max speed (in mm/min)";
   protected static final String SETTING_TRAVEL_SPEED = "Travel (non laser moves) speed (in mm/min)";
@@ -161,6 +162,12 @@ public class GenericGcodeDriver extends LaserCutter {
   {
     this.autoPlay = autoPlay;
   }
+
+  private String postHttpUploadGcode = "";
+
+  public String getPostHttpUploadGcode() { return postHttpUploadGcode; }
+
+  public void setPostHttpUploadGcode(String postHttpUploadGcode) { this.postHttpUploadGcode = postHttpUploadGcode; }
 
   protected String supportedResolutions = "100,500,1000";
 
@@ -549,8 +556,23 @@ public class GenericGcodeDriver extends LaserCutter {
 
   protected void http_play(String filename) throws IOException, URISyntaxException
   {
+    String command = "play /sd/"+filename;
+    http_command(command);
+  }
+
+  protected void http_commands(String commands, String filename) throws IOException, URISyntaxException
+  {
+    for (String command : commands.split(","))
+    {
+      command = command.replace("$filename", filename);
+      http_command(command);
+    }
+  }
+
+  protected void http_command(String command) throws IOException, URISyntaxException
+  {
+    command = command + "\n";
     URI url = new URI(getHttpUploadUrl().replace("upload", "command"));
-    String command = "play /sd/"+filename+"\n";
     HttpClient client = new HttpClient(url);
     HttpResponse response = client.sendData(HttpClient.HTTP_METHOD.POST, command);
     if (response == null || response.hasError())
@@ -764,6 +786,10 @@ public class GenericGcodeDriver extends LaserCutter {
       {
         http_play(jobname);
       }
+      if (this.getPostHttpUploadGcode() != null && !this.getPostHttpUploadGcode().equals(""))
+      {
+        http_commands(this.getPostHttpUploadGcode(), jobname);
+      }
     }
     else
     {
@@ -947,6 +973,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     SETTING_HOST,
     SETTING_HTTP_UPLOAD_URL,
     SETTING_AUTOPLAY,
+    SETTING_POST_HTTP_UPLOAD_GCODE,
     SETTING_IDENTIFICATION_STRING,
     SETTING_INIT_DELAY,
     SETTING_LINEEND,
@@ -991,6 +1018,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.getHttpUploadUrl();
     } else if (SETTING_AUTOPLAY.equals(attribute)) {
       return this.isAutoPlay();
+    } else if (SETTING_POST_HTTP_UPLOAD_GCODE.equals(attribute)) {
+      return this.getPostHttpUploadGcode();
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       return this.getIdentificationLine();
     } else if (SETTING_INIT_DELAY.equals(attribute)) {
@@ -1050,6 +1079,8 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setHttpUploadUrl((String) value);
     } else if (SETTING_AUTOPLAY.equals(attribute)) {
       this.setAutoPlay((Boolean) value);
+    } else if (SETTING_POST_HTTP_UPLOAD_GCODE.equals(attribute)) {
+      this.setPostHttpUploadGcode((String) value);
     } else if (SETTING_IDENTIFICATION_STRING.equals(attribute)) {
       this.setIdentificationLine((String) value);
     } else if (SETTING_INIT_DELAY.equals(attribute)) {
