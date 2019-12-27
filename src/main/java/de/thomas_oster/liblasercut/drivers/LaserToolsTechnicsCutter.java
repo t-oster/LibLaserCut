@@ -500,6 +500,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     setFrequency(out, 1000); // default frequency (will be overriden later by the profile, except if "enable frequency" is false in the config)
     ArrayList<Double> x = new ArrayList<Double>();
     ArrayList<Double> y = new ArrayList<Double>();
+    double cuttingTime = 0;
     for (VectorCommand cmd : vp.getCommandList())
     {
       if (cmd.getType() == CmdType.LINETO)
@@ -509,13 +510,13 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       }
       else
       {
-        curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
+        cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
         x = new ArrayList<Double>();
         y = new ArrayList<Double>();
         switch (cmd.getType())
         {
           case MOVETO:
-            move(out, cmd.getX(), cmd.getY(), resolution);
+            cuttingTime += move(out, cmd.getX(), cmd.getY(), resolution);
             break;
           case SETPROPERTY:
           {
@@ -525,8 +526,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         }
       }
     }
-    curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
+    cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
     setLaserOn(out, false);
+    System.out.println("cutting time TOTAL:" + cuttingTime);
     return result.toByteArray();
   }
 
@@ -607,23 +609,52 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       laserOn = on;
     }
   }
+  
+  /**
+   * cutting time for cutting a line at the current speed
+   * @param distancePx length given in device coordinates
+   * @param resolution current DPI
+   * @param speedPercent speed in percent of maximum
+   * @return time in seconds
+   */
+  private double cuttingTimeForPxDistance(double distancePx, double resolution, double speedPercent) {
+    final double speedPercentToMmPerSec = (1 / 100. * nominalCuttingSpeed);
+    final double pxToMm = Util.px2mm(1, resolution);
+    return (distancePx * pxToMm) / (speedPercent * speedPercentToMmPerSec);
+  }
+  /**
+   * cutting time for cutting a line at the current speed
+   * @param distancePx length given in device coordinates
+   * @param resolution current DPI
+   * @return time in seconds
+   */
+  private double cuttingTimeForPxDistance(double distancePx, double resolution) {
+    return cuttingTimeForPxDistance(distancePx, resolution, currentSpeed);
+  }
 
   /**
    * Switch off laser and move to coordinate
+   * @return travel time
    */
-  private void move(PrintStream out, double x, double y, double resolution) throws IOException
+  private double move(PrintStream out, double x, double y, double resolution) throws IOException
   {
     setLaserOn(out, false);
+    // we assume that the travel speed is the maximum cutting speed.
+    double time = cuttingTimeForPxDistance(Math.hypot(x - currentX, y - currentY), resolution, 100);
     goToCoordinate(out, x, y, resolution, false);
+    return time;
   }
 
   /**
    * Switch on laser and cut a line to the given coordinate
+   * @return cutting time
    */
-  private void line(PrintStream out, double x, double y, double resolution) throws IOException
+  private double line(PrintStream out, double x, double y, double resolution) throws IOException
   {
     setLaserOn(out, true);
+    double time = cuttingTimeForPxDistance(Math.hypot(x - currentX, y - currentY), resolution);
     goToCoordinate(out, x, y, resolution, true);
+    return time;
   }
 
 /**
@@ -633,10 +664,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
  * @param center Center point
  * @param resolution DPI for converting pixels to mm
  * @throws IOException
+ * @return cutting time
  */
 
   // Note for future development: The same command can also be used for arcs (e.g., quarter circles).
-  private void circle(PrintStream out, Point center, double resolution) throws IOException
+  private double circle(PrintStream out, Point center, double resolution) throws IOException
   {
     // the start point is implicitly the current point.
     setLaserOn(out, true);
@@ -647,6 +679,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     writeS32(out, 0);
     // center point relative to start point
     sendCoordinate(out, (int) center.x - (int) currentX, (int) center.y - (int) currentY, resolution, true);
+    return cuttingTimeForPxDistance(2 * Math.PI * center.hypothenuseTo(new Point(currentX, currentY)), resolution);
   }
 
 
@@ -674,8 +707,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * maximum speed (nominalCuttingSpeed), MUST obey the acceleration limit)
    * @param resolution
    * @throws IOException
+   * @returns cutting time
    */
-  private void curveWithKnownSpeed(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
+  private double curveWithKnownSpeed(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
   {
     setLaserOn(out, true);
     out.print("PJ"); // start join
@@ -785,6 +819,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     System.out.println("Maximum acceleration used is " + maxXYAccelerationSeen / tangentCurveMaxAcceleration * 100 + " percent of maximum, average is " + avgXYAccelerationSeen / tangentCurveMaxAcceleration * 100 + "%.");
     System.out.println("Cutting time for this curve is " + totalTime + " s.");
     out.print("PF"); // end join
+    return totalTime;
   }
 
   /**
@@ -866,30 +901,20 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    *
    * @param out
    * @param points
+   * @return cutting time
    */
-  private void curve(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
+  private double curve(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
   {
     if (points.size() <= 1)
     {
-      return;
+      return 0;
     }
     if (points.size() == 2)
     {
+      var currentPoint = points.get(0);
+      var nextPoint = points.get(1);
       // only two points: cut a line segment
-      boolean firstPoint = true;
-      for (Point point : points)
-      {
-        if (firstPoint)
-        {
-          // skip first point in list, it is just there to simplify the code
-          firstPoint = false;
-        }
-        else
-        {
-          line(out, point.x, point.y, resolution);
-        }
-      }
-      return;
+      return line(out, nextPoint.x, nextPoint.y, resolution);
     }
 
     // more than two points: cut a smooth curve. For this, compute the interpolated speed.
@@ -1142,7 +1167,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     {
       point.speed *= relativeSpeedToMmPerSec;
     }
-    curveWithKnownSpeed(out, points, resolution);
+    return curveWithKnownSpeed(out, points, resolution);
   }
 
   /**
@@ -1165,22 +1190,22 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @param resolution DPI for converting pixels to mm
    * @throws IOException
    */
-  private void curveOrLine(PrintStream out, Double[] x, Double[] y, double resolution) throws IOException
+  private double curveOrLine(PrintStream out, Double[] x, Double[] y, double resolution) throws IOException
   {
-
+    double cuttingTime = 0;
     if (!this.useTangentCurves)
     {
       // smooth curves are disabled, fall back to line segments
       for (int i = 0; i < x.length; i++)
       {
-        line(out, x[i], y[i], resolution);
+        cuttingTime += line(out, x[i], y[i], resolution);
       }
-      return;
+      return cuttingTime;
     }
 
     if (x.length == 0)
     {
-      return;
+      return 0;
     }
 
     // less than 1 pixel length tolerance doesn't make too much sense, because the conversion from spline to polyline in ShapeConverter causes up to 1px error anyway.
@@ -1210,7 +1235,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
           // The curvature is too large: We are at a corner.
           // Split the list of points at the corner = at lastPoint.
           // Note that newPoint has not yet been added to the list.
-          curve(out, points, resolution);
+          cuttingTime += curve(out, points, resolution);
           points = new ArrayList<PointWithSpeed>();
           // copy the last point, but discard angle and deltaToPrevious because that doesn't make sense at the start of the list
           lastPoint = new PointWithSpeed(lastPoint.x, lastPoint.y);
@@ -1223,7 +1248,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     if (points.size() == 1)
     {
       // after removing duplicates, there is no movement
-      return;
+      return cuttingTime;
     }
     // we have at least 2 segments remaining (since the last corner).
 
@@ -1234,11 +1259,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       // we found a circle -- use it and send the specialized command
       System.out.println("We found a circle:" + detectedCircle);
       // The circle implicitly starts at the current point,
-      circle(out, detectedCircle.center, resolution);
+      cuttingTime += circle(out, detectedCircle.center, resolution);
     } else {
       // It's a normal curve, just send it.
-      curve(out, points, resolution);
+      cuttingTime += curve(out, points, resolution);
     }
+    return cuttingTime;
   }
 
   // for convenience, we support double coordinates, but the lasercutter only knows integers.
@@ -1752,6 +1778,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
   protected void writeJobCode(LaserJob job, OutputStream os, ProgressListener pl) throws UnsupportedEncodingException, IOException
   {
+    currentX = 0;
+    currentY = 0;
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     out.write(this.generateInitializationCode(job.getName()));
     if (pl != null)
