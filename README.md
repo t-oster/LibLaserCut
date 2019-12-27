@@ -5,12 +5,14 @@ for Lasercutters on any platform.
 It was created for VisiCut (http://visicut.org)
 but you are invited to use it for your own programs.
 
-Currently it supports older Epilog Lasers (Zing/Mini/Helix),
-the current LAOS board. (www.laoslaser.org),
+Currently it supports older [Epilog](https://www.epiloglaser.com/) Lasers (Zing/Mini/Helix),
 the SmoothieBoard (www.smoothieware.org),
+generic GCode,
+the LAOS board (www.laoslaser.org),
 K40,
 generic GRBL based boards,
 LTT iLaser 4000,
+generic HPGL plotters
 and some untested work-in-progress drivers like the Roland iModela and the Lasersaur.
 
 A detailed list of tested devices can be found in the VisiCut wiki:
