@@ -975,7 +975,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     //  but a lot more for higher speeds. However, it seems that sending so many
     // intermediate points isn't actually required.)
     // TODO do this better, or at least do some postprocessing so that we don't send all these points to the cutter.
-    points = reinterpolateWithMaximumDistance(points, Util.mm2px(3, resolution));
+    points = reinterpolateWithMaximumDistance(points, Util.mm2px(0.9, resolution));
 
     // set speed to maximum, and in the following only reduce it.
     for (PointWithSpeed p : points)
