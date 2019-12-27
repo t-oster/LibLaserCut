@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -1162,11 +1163,50 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         System.out.println("Nothing changed. stopping after " + countIterations + " iterations");
       }
     }
+    // filter points on *straight* segments with a small change of velocity.
+    // Note that because this part of the problem is mathematically convex,
+    // points in the middle of a straight line can be omitted without violating the maximum acceleration.
+    // This makes transmission faster, but can also be omitted.
+    boolean[] deletePoint = new boolean[points.size()];
+    double speedNow = points.get(0).speed;
+    double distanceSinceLastPointMm = 0;
+    for (int i=1; i < points.size() - 1; i++) {
+        // required speed change in percent to trigger output of a point:
+        // if distance to last point is small: 0.2% + 10% of current speed
+        // if distance to last point is 5.0mm: 0.2% (required so that we don't omit all points with 100% speed while we are at 90% speed)
+        // inbetween: linearly interpolated.
+        final double speedChangeThreshold = 0.2 + Math.max(0, 0.1 * speedNow * (1.0 - distanceSinceLastPointMm/5.0));
+        if ((points.get(i).absAngleAtCorner == 0)
+               // && (points.get(i + 1).absAngleAtCorner == 0)
+                && (Math.abs(points.get(i).speed - speedNow) < speedChangeThreshold)
+                )
+        {
+            // drop point i
+            deletePoint[i] = true;
+            distanceSinceLastPointMm += points.get(i).deltaToPrevious.hypot() * pxToMm;
+        } else {
+            // keep point i
+            speedNow = points.get(i).speed;
+            distanceSinceLastPointMm = 0;
+        }
+    }
+    int i=0;
+    // TODO this is slower than necessary
+    Iterator<PointWithSpeed> iterator = points.iterator();
+    while (iterator.hasNext()) {
+        iterator.next();
+        if (deletePoint[i]) {
+            iterator.remove();
+            System.out.println("removed point");
+        }
+        i++;
+    }
     // convert back to manufacturer units
     for (PointWithSpeed point : points)
     {
       point.speed *= relativeSpeedToMmPerSec;
     }
+
     return curveWithKnownSpeed(out, points, resolution);
   }
 
