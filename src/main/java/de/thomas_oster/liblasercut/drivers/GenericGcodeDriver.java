@@ -782,13 +782,13 @@ public class GenericGcodeDriver extends LaserCutter {
     {
       out.close();
       http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString("UTF-8"), jobname);
-      if (this.isAutoPlay())
-      {
-        http_play(jobname);
-      }
       if (this.getPostHttpUploadGcode() != null && !this.getPostHttpUploadGcode().equals(""))
       {
         http_commands(this.getPostHttpUploadGcode(), jobname);
+      }
+      if (this.isAutoPlay())
+      {
+        http_play(jobname);
       }
     }
     else
