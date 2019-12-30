@@ -194,6 +194,16 @@ public class ByteArrayList extends AbstractList<Byte> {
       // then, flip the list order
       Collections.reverse(this);
   }
+  /**
+   * invert all bits.
+   * For unsigned 8-bit integer, this means x becomes 255-x (binary complement).
+   */
+  public void invertBits() {
+      for (int i = 0; i < size(); i++)
+      {
+          set(i, (byte) ~get(i));
+      }
+  }
 
   @Override
   public void clear() {

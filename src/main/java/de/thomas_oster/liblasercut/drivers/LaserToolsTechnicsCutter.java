@@ -1383,8 +1383,17 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
   }
 
+  /**
+   * current speed in percent
+   */
   private transient float currentSpeed = -1;
 
+  /**
+   * set speed
+   * @param out stream for writing the commands
+   * @param speed speed in percent
+   * @throws IOException 
+   */
   private void setSpeed(PrintStream out, float speed) throws IOException
   {
     if (currentSpeed != speed)
@@ -1565,6 +1574,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       final double offsetPixelsDirRight = this.getEngraveShiftPixels(speedPercent, resolution);
       if (bytes.size() > 0)
       {
+        if (pixelsPerByte == 1) {
+          // 8bit per pixel ("engrave 3D") -- high/low is inverted
+          bytes.invertBits();
+        }
+        
         //add space on the left side
         int space = overscan;
         // but not too much: there must still be space for the pixel offset.
@@ -1715,10 +1729,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   }
 
   /**
-   * engrave a single line of 1bit pixels
+   * engrave a single line of pixels
    *
    * @param out move to the first point of the line and engrave it
-   * @param bytes array of bytes, each contains 8 black/white pixels
+   * @param bytes array of bytes, each contains $pixelsPerByte black/white pixels
    * @param lineStart left point of line
    * @param dirLeftToRight left-to-right engrave (true) of right-to-left (false)
    * @param pixelOffset shift the pixels: negative value means that the
@@ -1750,14 +1764,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // length
     writeU32(out, compressed.size() + 8);
     // X, Y
-    sendCoordinate(out, (int) (lineStart.x + (dirLeftToRight ? pixelOffset : (bytes.size() * 8 - pixelOffset))), (int) lineStart.y, resolution, false);
+    sendCoordinate(out, (int) (lineStart.x + (dirLeftToRight ? pixelOffset : (bytes.size() * pixelsPerByte - pixelOffset))), (int) lineStart.y, resolution, false);
     // data (length-8 bytes)
     for (byte b : compressed)
     {
       out.write(b);
     }
     // TODO: this time estimate doesn't include the travel time to the start point
-    return cuttingTimeForPxDistance(bytes.size() * pixelsPerByte, resolution);
+    final double engraveSpeedFactor = 2; // FIXME: this is a rough estimate. Calibrate the engrave speed and take acceleration into account.
+    return cuttingTimeForPxDistance(bytes.size() * pixelsPerByte, resolution, currentSpeed  * engraveSpeedFactor);
   }
   
 
