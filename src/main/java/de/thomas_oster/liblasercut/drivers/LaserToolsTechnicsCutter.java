@@ -611,6 +611,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   }
   
   /**
+   * convert speed in percent to mm/s
+   * @param speedPercent speed in %
+   * @return speed in mm/s
+   */
+  private double speedPercentToMmPerSec(double speedPercent) {
+      return speedPercent / 100. * nominalCuttingSpeed;
+  }
+  
+  /**
    * cutting time for cutting a line at the current speed
    * @param distancePx length given in device coordinates
    * @param resolution current DPI
@@ -618,9 +627,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @return time in seconds
    */
   private double cuttingTimeForPxDistance(double distancePx, double resolution, double speedPercent) {
-    final double speedPercentToMmPerSec = (1 / 100. * nominalCuttingSpeed);
-    final double pxToMm = Util.px2mm(1, resolution);
-    return (distancePx * pxToMm) / (speedPercent * speedPercentToMmPerSec);
+    return Util.px2mm(distancePx, resolution) / speedPercentToMmPerSec(speedPercent);
   }
   /**
    * cutting time for cutting a line at the current speed
@@ -796,15 +803,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       {
         throw new IllegalArgumentException("curve contains a duplicate point");
       }
-      final double speedPercentToMmPerSec = (1 / 100. * nominalCuttingSpeed);
 
       // all the following double variables are in mm, mm/s, s or mm/s^2 respectively.
       double newDx = Util.px2mm(x - currentX, resolution);
       double newDy = Util.px2mm(y - currentY, resolution);
       double newLength = Math.hypot(newDx, newDy);
       // The speed vector at xy[i] has the direction (xy[i] - xy[i-1]).
-      double newSpeedX = speedPercent * speedPercentToMmPerSec * newDx / newLength;
-      double newSpeedY = speedPercent * speedPercentToMmPerSec * newDy / newLength;
+      double newSpeedX = speedPercentToMmPerSec(speedPercent) * newDx / newLength;
+      double newSpeedY = speedPercentToMmPerSec(speedPercent) * newDy / newLength;
       double newSpeedXY = Math.hypot(newSpeedX, newSpeedY);
       double newTime = newLength / ((currentSpeedXY + newSpeedXY) / 2);
       totalTime += newTime;
