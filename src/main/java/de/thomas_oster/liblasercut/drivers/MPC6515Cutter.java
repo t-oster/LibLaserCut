@@ -41,27 +41,29 @@
  * - convert position information to integer format throughout to keep 100% precision in relative movements
  */
 
-package com.t_oster.liblasercut.drivers;
+package de.thomas_oster.liblasercut.drivers;
 
-import com.apple.crypto.provider.Debug;
-import com.t_oster.liblasercut.IllegalJobException;
-import com.t_oster.liblasercut.JobPart;
-import com.t_oster.liblasercut.LaserCutter;
-import com.t_oster.liblasercut.LaserJob;
-import com.t_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
-import com.t_oster.liblasercut.ProgressListener;
-import com.t_oster.liblasercut.Raster3dPart;
-import com.t_oster.liblasercut.RasterPart;
-import com.t_oster.liblasercut.VectorCommand;
-import static com.t_oster.liblasercut.VectorCommand.CmdType.LINETO;
-import static com.t_oster.liblasercut.VectorCommand.CmdType.MOVETO;
-import static com.t_oster.liblasercut.VectorCommand.CmdType.SETPROPERTY;
-import com.t_oster.liblasercut.VectorPart;
-import com.t_oster.liblasercut.platform.Util;
+import de.thomas_oster.liblasercut.IllegalJobException;
+import de.thomas_oster.liblasercut.JobPart;
+import de.thomas_oster.liblasercut.LaserCutter;
+import de.thomas_oster.liblasercut.LaserJob;
+import de.thomas_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.Raster3dPart;
+import de.thomas_oster.liblasercut.RasterPart;
+import de.thomas_oster.liblasercut.VectorCommand;
+import static de.thomas_oster.liblasercut.VectorCommand.CmdType.LINETO;
+import static de.thomas_oster.liblasercut.VectorCommand.CmdType.MOVETO;
+import static de.thomas_oster.liblasercut.VectorCommand.CmdType.SETPROPERTY;
+import de.thomas_oster.liblasercut.VectorPart;
+import de.thomas_oster.liblasercut.platform.Util;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -770,11 +772,47 @@ public class MPC6515Cutter extends LaserCutter
   private void molFixBlock0600(RandomAccessFile out) throws IOException
   {
   }
+  
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
+    File tempFile = saveJobToTemporaryFile(job, null, null);
+    FileInputStream fileInputStream = new FileInputStream(tempFile);
+    fileInputStream.transferTo(fileOutputStream);
+    fileInputStream.close();
+  }
 
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
-    // This is a first try in Java. All data is saved into ~/RUN.MOL until we figure out the USB communication
+    File tempFile = saveJobToTemporaryFile(job, pl, warnings);
+    
+    pl.taskChanged(this, "sending...");
+    warnings.add("Sending is not yet implemented. Please use File - Export Laser Code... instead.\nThe file was saved to:\n" + tempFile.getCanonicalPath());
+    //TODO: send contents of tempFile to laser-cutter
+    pl.progressChanged(this, 100);
+  }
+  
+  private File saveJobToTemporaryFile(LaserJob job, ProgressListener pl, List<String> warnings) throws IOException, IllegalJobException
+  {
+    if (pl == null) {
+      pl = new ProgressListener()
+      {
+        @Override
+        public void progressChanged(Object source, int percent)
+        {
+        }
+
+        @Override
+        public void taskChanged(Object source, String taskName)
+        {
+        }
+      };
+    }
+    if (warnings == null)
+    {
+      warnings = new LinkedList<String>();
+    }
+    
     currentPower = 40.0;
     currentSpeed = 80.0;
     motionBlockStart = -1;
@@ -821,18 +859,9 @@ public class MPC6515Cutter extends LaserCutter
     pl.progressChanged(this, 20);
     pl.taskChanged(this, "buffering...");
     
-    // - delete the file
-    try {
-      File f = new File("/Users/matt/RUN.MOL");
-      if (f.exists()) {
-        f.delete();
-      }
-    } catch (Exception e) {
-    }
-    
     // - create a random access file (some data can only be patched after the entire file was written)
     File file;
-    file = new File("/Users/matt/RUN.MOL");
+    file = File.createTempFile("visicut-mpc6515-", ".mol");
     RandomAccessFile out = new RandomAccessFile(file, "rw");
     
     // taken from MOL file 0030.MOL
@@ -896,7 +925,7 @@ public class MPC6515Cutter extends LaserCutter
               if (firstVector) {
                 firstVector = false;
                 // 0a38: Laser Power
-                Debug.println("Setting power and speed");
+                System.err.println("Setting power and speed");
                 molSetPowerAndSpeed(out, currentPower*cornerPowerFactor, currentPower, 5.0, currentSpeed);
                 // 0a70: Begin Motion Block
                 molCmdBeginMotionBlock(out);
@@ -928,13 +957,13 @@ public class MPC6515Cutter extends LaserCutter
               PowerSpeedFocusFrequencyProperty prop = (PowerSpeedFocusFrequencyProperty) c.getProperty();
               currentPower = prop.getPower(); //power in 0-100
               currentSpeed = prop.getSpeed(); //speed in 0-100
-              Debug.println("Set Power to " + Double.toString(currentPower) + "  Speed to " + Double.toString(currentSpeed));
+              System.err.println("Set Power to " + Double.toString(currentPower) + "  Speed to " + Double.toString(currentSpeed));
               //out.write(prop.getPower());//power in 0-100
               //out.write(prop.getSpeed());//speed in 0-100
               //out.write((int) prop.getFocus());//focus in mm
               //out.write(prop.getFrequency());//frequency in Hz
               if (!firstVector) {
-                Debug.println("Changing power and speed");
+                System.err.println("Changing power and speed");
                 molChangePowerAndSpeed(out, currentPower*cornerPowerFactor, currentPower, 5.0, currentSpeed);
               }
               break;
@@ -962,9 +991,7 @@ public class MPC6515Cutter extends LaserCutter
     out.close();
     
     pl.progressChanged(this, 80);
-    pl.taskChanged(this, "sending...");
-    //TODO: contents of buffer.toByteArray() to laser-cutter
-    pl.progressChanged(this, 100);
+    return file;
   }
 
   @Override
@@ -976,7 +1003,7 @@ public class MPC6515Cutter extends LaserCutter
   @Override
   public String getModelName()
   {
-    return "MPC6515";
+    return "MPC6515 (EXPERIMENTAL!)";
   }
 
   @Override
