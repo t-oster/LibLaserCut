@@ -903,11 +903,11 @@ public class MPC6515Cutter extends LaserCutter
     {
       if (p instanceof RasterPart)
       {
-        throw new IllegalJobException("The MPC6515 currently does not support engraving");
+        warnings.add("The MPC6515 currently does not support engraving");
       }
       else if (p instanceof Raster3dPart)
       {
-        throw new IllegalJobException("The MPC6515 currently does not support 3d engraving");
+        warnings.add("The MPC6515 currently does not support 3d engraving");
       }
       if (p instanceof VectorPart)
       {
