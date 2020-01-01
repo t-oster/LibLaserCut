@@ -43,7 +43,7 @@ abstract class EpilogCutter extends LaserCutter
 {
 
   public static boolean SIMULATE_COMMUNICATION = false;
-  public static final int NETWORK_TIMEOUT = 3000;
+  public static final int NETWORK_TIMEOUT = 10000; /// timeout in ms
   /* Resolutions in DPI */
 
   private static final int MINFOCUS = -500;//Minimal focus value (not mm)
@@ -116,13 +116,13 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public EpilogEngraveProperty getLaserPropertyForRaster3dPart() {
-    return new EpilogEngraveProperty(isHideSoftwareFocus());
+  public EpilogEngraveProperty getLaserPropertyForRaster3dPart() { 
+   return new EpilogEngraveProperty(isHideSoftwareFocus());
   }
 
   private void waitForResponse(int expected) throws IOException, Exception
   {
-    waitForResponse(expected, 3);
+    waitForResponse(expected, NETWORK_TIMEOUT/1000);
   }
 
   private void waitForResponse(int expected, int timeout) throws IOException, Exception
