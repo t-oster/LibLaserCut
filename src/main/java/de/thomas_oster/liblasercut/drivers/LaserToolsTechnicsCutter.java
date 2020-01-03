@@ -1688,10 +1688,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
         // move to the first point of the line and engrave the pixels:
         laserTime += engraveBitmapLine(out, bytes, lineStart, dirRight, offsetPixelsDirRight, resolution, pixelsPerByte);
-      }
-      if (!prop.isEngraveUnidirectional())
-      {
-        dirRight = !dirRight;
+        if (!prop.isEngraveUnidirectional())
+        {
+          dirRight = !dirRight;
+        }
       }
     }
     return laserTime;
@@ -1830,12 +1830,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         Collections.reverse(bytes);
       }
     }
+    int bitsPerPixel = 8 / pixelsPerByte;
+    bytes.leftShiftBits((int) (-pixelOffset * bitsPerPixel));
     ByteArrayList compressed = compressData(bytes);
 
     // length
     writeU32(out, compressed.size() + 8);
     // X, Y
-    sendCoordinate(out, (int) (lineStart.x + (dirLeftToRight ? pixelOffset : (bytes.size() * pixelsPerByte - pixelOffset))), (int) lineStart.y, resolution, false);
+    sendCoordinate(out, (int) (lineStart.x + (dirLeftToRight ? 0 : (bytes.size() * pixelsPerByte))), (int) lineStart.y, resolution, false);
     // data (length-8 bytes)
     for (byte b : compressed)
     {
