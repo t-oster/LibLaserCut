@@ -627,7 +627,30 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @return time in seconds
    */
   private double cuttingTimeForPxDistance(double distancePx, double resolution, double speedPercent) {
-    return Util.px2mm(distancePx, resolution) / speedPercentToMmPerSec(speedPercent);
+    double speedMmPerSec = speedPercentToMmPerSec(speedPercent);
+    double distanceMm = Util.px2mm(distancePx, resolution);
+    // for the value of the acceleration, we assume the same as configured for "joint tangential curve".
+    if (!isUseTangentCurves())
+    {
+      // acceleration is not configured, fall back to simple computation without acceleration
+      return distanceMm / speedMmPerSec;
+    }
+    // v = a t, x = 1/2 a t² => t = v² / a², x = 1/2 v² / a
+    // distance x for accelerating to full speed:
+    double accelDistanceMm = 0.5 * Math.sqrt(speedMmPerSec * speedMmPerSec / tangentCurveMaxAcceleration);
+    if (distanceMm > 2 * accelDistanceMm)
+    {
+      // Accelerating to full speed.
+      // during acceleration, the effective speed is half the speed.
+      return (distanceMm + 2 * accelDistanceMm) / speedMmPerSec;
+    }
+    else
+    {
+      // path is too short for full acceleration.
+      // x = 1/2 v² / a => v_max = sqrt(2 a x), where x is half the length
+      double peakSpeed = Math.sqrt(tangentCurveMaxAcceleration * distanceMm);
+      return 2 * distanceMm / peakSpeed;
+    }
   }
   /**
    * cutting time for cutting a line at the current speed
@@ -1844,8 +1867,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       out.write(b);
     }
     // TODO: this time estimate doesn't include the travel time to the start point
-    final double engraveSpeedFactor = 2; // FIXME: this is a rough estimate. Calibrate the engrave speed and take acceleration into account.
-    return cuttingTimeForPxDistance(bytes.size() * pixelsPerByte, resolution, currentSpeed  * engraveSpeedFactor);
+    // TODO make the following parameters configurable
+    final double engraveSpeedVersusCutSpeed = 6.4; // Factor between full engrave speed and full cut speed.
+    final double engraveExtraSecondsPerLine = 0.1; // extra time per engrave line
+    return engraveExtraSecondsPerLine + cuttingTimeForPxDistance(bytes.size() * pixelsPerByte, resolution, currentSpeed  * engraveSpeedVersusCutSpeed);
   }
   
 
