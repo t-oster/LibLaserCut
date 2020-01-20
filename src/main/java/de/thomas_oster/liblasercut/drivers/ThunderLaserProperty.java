@@ -54,6 +54,9 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
    */
   public void setMinPower(int power)
   {
+    if (power > this.getPower()) { /* minimum must not be larger than maximum */
+      power = (int)this.getPower();
+    }
     this.min_power = power;
   }
 
@@ -130,6 +133,13 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
   {
     if (propertyNames[0].equals(name)) {
       this.setMinPower((Integer) value);
+    }
+    else if (propertyNames[1].equals(name)) {
+      float power = (float)(Float)value;
+      if (power < this.min_power) { /* (max) power must not be smaller than minimum power */
+        power = (float)this.min_power;
+      }
+      this.setSpeed(power);
     }
     else if (propertyNames[2].equals(name)) {
       this.setSpeed((float)(Float)value);
