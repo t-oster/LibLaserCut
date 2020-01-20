@@ -60,26 +60,6 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
     this.min_power = power;
   }
 
-  private int speed = 100;
-  private static final int MAXSPEED = 10000; // mm/s
-  /**
-   * Sets the speed for the Laser. Valid values is from 0 to MAXSPEED
-   * @param speed
-   */
-  @Override
-  public void setSpeed(float speed)
-  {
-    speed = speed < 0 ? 0 : speed;
-    speed = speed > MAXSPEED ? MAXSPEED : speed;
-    this.speed = (int)speed;
-  }
-
-  @Override
-  public float getSpeed()
-  {
-    return (float)speed;
-  }
-
   private int frequency = 100;
 
   /**
@@ -111,9 +91,6 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
     if (propertyNames[0].equals(name)) {
       return (Integer) this.getMinPower();
     }
-    else if (propertyNames[2].equals(name)) {
-      return this.getSpeed();
-    }
     else if (propertyNames[4].equals(name)) {
       return this.getFrequency();
     }
@@ -139,10 +116,7 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
       if (power < this.min_power) { /* (max) power must not be smaller than minimum power */
         power = (float)this.min_power;
       }
-      this.setSpeed(power);
-    }
-    else if (propertyNames[2].equals(name)) {
-      this.setSpeed((float)(Float)value);
+      this.setPower(power);
     }
     else if (propertyNames[4].equals(name)) {
       this.setFrequency((float)(Float)value);
