@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  *
@@ -197,6 +198,49 @@ public class AbstractLaserProperty implements LaserProperty
     }
     return def;
   }
+  
+  /**
+   * get value in numeric datatype, if available
+   * @param key
+   * @return numeric value converted to Double; 0 if not present or a non-numeric datatype
+   */
+  public double getNumeric(String key)
+  {
+    if (getDouble(key) != null) {
+      return getDouble(key);
+    }
+    if (getFloat(key) != null) {
+      return getFloat(key);
+    }
+    if (getInteger(key) != null) {
+      return getInteger(key);
+    }
+    return 0;
+  }
+  
+  /**
+   * set existing property to numeric value, automatically converting to the used datatype.
+   * A warning is printed if the key does not exist.
+   * @param key
+   * @param value 
+   */
+  public void setNumeric(String key, double value)
+  {
+    if (getDouble(key) != null) {
+      this.setProperty(key, (Double) value);
+      return;
+    }
+    if (getFloat(key) != null) {
+      this.setProperty(key, (Float) (float) value);
+      return;
+    }
+    if (getInteger(key) != null) {
+      this.setProperty(key, (Integer) (int) value);
+      return;
+    }
+    Logger.getLogger(this.getClass().getName()).warning("tried to set nonexistent property " + key);
+  }
+  
   public Boolean getBoolean(String key)
   {
     return getBoolean(key, null);
@@ -254,6 +298,24 @@ public class AbstractLaserProperty implements LaserProperty
       return false;
     }
     return true;
+  }
+
+  @Override
+  public float getPower()
+  {
+    return (float) getNumeric("power");
+  }
+
+  @Override
+  public void setPower(float p)
+  {
+    setNumeric("power", p);
+  }
+
+  @Override
+  public float getSpeed()
+  {
+    return (float) getNumeric("speed");
   }
 
 }

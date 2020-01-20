@@ -38,12 +38,7 @@ public class RasterPart extends RasterizableJobPart
     this.resolution = resolution;
     this.blackPixelProperty = laserProperty;
     this.whitePixelProperty = blackPixelProperty.clone();
-    if (whitePixelProperty instanceof FloatPowerSpeedFocusFrequencyProperty || whitePixelProperty instanceof FloatPowerSpeedFocusProperty) {
-      whitePixelProperty.setProperty("power", 0.0f);
-    }
-    else {
-      whitePixelProperty.setProperty("power", 0);
-    }
+    whitePixelProperty.setProperty("power", 0);
   }
 
 
@@ -95,11 +90,11 @@ public class RasterPart extends RasterizableJobPart
   }
   
   @Override
-  public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color)
+  public LaserProperty getPowerSpeedFocusPropertyForColor(int color)
   {
     return color <= 127
-      ? (FloatPowerSpeedFocusProperty) blackPixelProperty
-      : (FloatPowerSpeedFocusProperty) whitePixelProperty;
+      ? blackPixelProperty
+      : whitePixelProperty;
   }
 
 }

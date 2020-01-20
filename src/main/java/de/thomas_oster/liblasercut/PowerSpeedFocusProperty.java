@@ -50,14 +50,16 @@ public class PowerSpeedFocusProperty implements LaserProperty
    * In 3d-Raster mode, the intensity is scaled to this power setting
    * @param power 
    */
-  public void setPower(int power)
+  @Override
+  public void setPower(float power)
   {
     power = power < 0 ? 0 : power;
     power = power > 100 ? 100 : power;
-    this.power = power;
+    this.power = (int) power;
   }
 
-  public int getPower()
+  @Override
+  public float getPower()
   {
     return power;
   }
@@ -66,14 +68,15 @@ public class PowerSpeedFocusProperty implements LaserProperty
    * Sets the speed for the Laser. Valid values is from 0 to 100
    * @param speed 
    */
-  public void setSpeed(int speed)
+  public void setSpeed(float speed)
   {
     speed = speed < 0 ? 0 : speed;
     speed = speed > 100 ? 100 : speed;
-    this.speed = speed;
+    this.speed = (int) speed;
   }
 
-  public int getSpeed()
+  @Override
+  public float getSpeed()
   {
     return speed;
   }
@@ -137,11 +140,11 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Integer) this.getPower();
+      return (Integer) (int) this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Integer) this.getSpeed();
+      return (Integer) (int) this.getSpeed();
     }
     else if ("focus".equals(name))
     {

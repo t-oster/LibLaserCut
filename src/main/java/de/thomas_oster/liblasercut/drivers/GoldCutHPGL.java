@@ -187,8 +187,8 @@ public class GoldCutHPGL extends LaserCutter {
           break;
         case SETPROPERTY:
           PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
-          setPower(out, p.getPower());
-          setSpeed(out, p.getSpeed());
+          setPower(out, (int) p.getPower());
+          setSpeed(out, (int) p.getSpeed());
           break;
       }
     }
@@ -242,7 +242,7 @@ public class GoldCutHPGL extends LaserCutter {
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    setSpeed(out, prop.getSpeed());
+    setSpeed(out, (int) prop.getSpeed());
     ByteArrayList bytes = new ByteArrayList(rp.getRasterWidth());
     for (int line = 0; line < rp.getRasterHeight(); line++) {
       Point lineStart = rasterStart.clone();
@@ -267,7 +267,7 @@ public class GoldCutHPGL extends LaserCutter {
               if (old == 0) {
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               } else {
-                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
                 line(out, lineStart.x + pix - 1, lineStart.y, resolution);
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               }
@@ -275,7 +275,7 @@ public class GoldCutHPGL extends LaserCutter {
             }
           }
           //last point is also not "white"
-          setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
+          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
           line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
         } else {
           //move to the last nonempty point of the line
@@ -286,7 +286,7 @@ public class GoldCutHPGL extends LaserCutter {
               if (old == 0) {
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               } else {
-                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
                 line(out, lineStart.x + pix + 1, lineStart.y, resolution);
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               }
@@ -294,7 +294,7 @@ public class GoldCutHPGL extends LaserCutter {
             }
           }
           //last point is also not "white"
-          setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
+          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(0)) / 255);
           line(out, lineStart.x, lineStart.y, resolution);
         }
       }
@@ -309,8 +309,8 @@ public class GoldCutHPGL extends LaserCutter {
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    setSpeed(out, prop.getSpeed());
-    setPower(out, prop.getPower());
+    setSpeed(out, (int) prop.getSpeed());
+    setPower(out, (int) prop.getPower());
     for (int line = 0; line < rp.getRasterHeight(); line++) {
       Point lineStart = rasterStart.clone();
       lineStart.y += line;
@@ -344,7 +344,7 @@ public class GoldCutHPGL extends LaserCutter {
               if (old == 0) {
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               } else {
-                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
                 line(out, lineStart.x + pix - 1, lineStart.y, resolution);
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               }
@@ -352,7 +352,7 @@ public class GoldCutHPGL extends LaserCutter {
             }
           }
           //last point is also not "white"
-          setPower(out, prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
+          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
           line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
           //add some space to the right
           move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
@@ -367,7 +367,7 @@ public class GoldCutHPGL extends LaserCutter {
               if (old == 0) {
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               } else {
-                setPower(out, prop.getPower() * (0xFF & old) / 255);
+                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
                 line(out, lineStart.x + pix + 1, lineStart.y, resolution);
                 move(out, lineStart.x + pix, lineStart.y, resolution);
               }
@@ -375,7 +375,7 @@ public class GoldCutHPGL extends LaserCutter {
             }
           }
           //last point is also not "white"
-          setPower(out, prop.getPower() * (0xFF & bytes.get(0)) / 255);
+          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(0)) / 255);
           line(out, lineStart.x, lineStart.y, resolution);
           //add some space to the left
           move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);

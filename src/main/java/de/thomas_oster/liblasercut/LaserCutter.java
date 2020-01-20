@@ -183,6 +183,111 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     public int estimateJobDuration(LaserJob job) {
         throw new RuntimeException("Method not implemented");
     }
+    
+  protected int estimateJobDuration(LaserJob job, double VECTOR_MOVESPEED_X, double VECTOR_MOVESPEED_Y, double VECTOR_LINESPEED, double RASTER_LINEOFFSET, double RASTER_LINESPEED, double RASTER3D_LINEOFFSET, double RASTER3D_LINESPEED)
+  {
+    //Holds the current Laser Head position in Pixels
+    Point p = new Point(0, 0);
+
+    double result = 0;//usual offset
+    for (JobPart jp : job.getParts())
+    {
+      if (jp instanceof RasterPart)
+      {
+        RasterPart rp = (RasterPart) jp;
+        Point sp = rp.getRasterStart();
+        result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
+          (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
+        double linespeed = ((double) RASTER_LINESPEED * rp.getLaserProperty().getSpeed()) / 100;
+        ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
+        for (int y = 0; y < rp.getRasterHeight(); y++)
+        {//Find any black point
+          boolean lineEmpty = true;
+      	  rp.getRasterLine(y, line);
+          for (byte b : line)
+          {
+            if (b != 0)
+            {
+              lineEmpty = false;
+              break;
+            }
+          }
+          if (!lineEmpty)
+          {
+            int w = rp.getRasterWidth();
+            result += (double) RASTER_LINEOFFSET + (double) w / linespeed;
+            p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
+            p.y = sp.y + y;
+          }
+          else
+          {
+            result += RASTER_LINEOFFSET;
+          }
+        }
+      }
+      if (jp instanceof Raster3dPart)
+      {
+        Raster3dPart rp = (Raster3dPart) jp;
+        Point sp = rp.getRasterStart();
+        result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
+          (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
+        double linespeed = ((double) RASTER3D_LINESPEED * rp.getLaserProperty().getSpeed()) / 100;
+      	ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
+        for (int y = 0; y < rp.getRasterHeight(); y++)
+        {//Check if
+          boolean lineEmpty = true;
+          rp.getRasterLine(y, line);
+          for (byte b : line)
+          {
+            if (b != 0)
+            {
+              lineEmpty = false;
+              break;
+            }
+          }
+          if (!lineEmpty)
+          {
+            int w = rp.getRasterWidth();
+            result += (double) RASTER3D_LINEOFFSET + (double) w / linespeed;
+            p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
+            p.y = sp.y + y;
+          }
+        }
+      }
+      if (jp instanceof VectorPart)
+      {
+        double speed = VECTOR_LINESPEED;
+        VectorPart vp = (VectorPart) jp;
+        for (VectorCommand cmd : vp.getCommandList())
+        {
+          switch (cmd.getType())
+          {
+            case SETPROPERTY:
+            {
+              speed = VECTOR_LINESPEED * cmd.getProperty().getSpeed() / 100;
+              break;
+            }
+            case MOVETO:
+              result += Math.max((double) (p.x - cmd.getX()) / VECTOR_MOVESPEED_X,
+                (double) (p.y - cmd.getY()) / VECTOR_MOVESPEED_Y);
+              p = new Point(cmd.getX(), cmd.getY());
+              break;
+            case LINETO:
+              double dist = distance(cmd.getX(), cmd.getY(), p);
+              p = new Point(cmd.getX(), cmd.getY());
+              result += dist / speed;
+              break;
+          }
+        }
+      }
+    }
+    return (int) result;
+  }
+  
+  private double distance(double x, double y, Point p)
+  {
+    return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
+  }
 
     public LaserProperty getLaserPropertyForVectorPart() {
         return new PowerSpeedFocusFrequencyProperty();

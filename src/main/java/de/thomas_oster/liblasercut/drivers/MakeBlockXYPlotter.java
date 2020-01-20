@@ -239,12 +239,12 @@ public class MakeBlockXYPlotter extends LaserCutter
         case SETPROPERTY: // called once per part to set chosen properties
           MakeBlockXYPlotterProperty p = (MakeBlockXYPlotterProperty) cmd.getProperty(); // only set with LASER tool
           // ensure percent power
-          int pPercent = p.getPower();
+          int pPercent = (int) p.getPower();
           pPercent = pPercent<0?0:pPercent;
           pPercent = pPercent>100?100:pPercent;
-          this.setPower(pPercent);
+          this.setPower((int) pPercent);
           // ensure percent speed
-          int sPercent = p.getSpeed();
+          int sPercent = (int) p.getSpeed();
           sPercent = sPercent<0?0:sPercent;
           sPercent = sPercent>100?100:sPercent;
           int dPercent = 100-sPercent; // convert speed to delay
@@ -267,8 +267,8 @@ public class MakeBlockXYPlotter extends LaserCutter
     
     // called once per part to set chosen properties
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    this.setDelay(prop.getSpeed());
-    this.setPower(prop.getPower());
+    this.setDelay((int) prop.getSpeed());
+    this.setPower((int) prop.getPower());
     
     for (int line = 0; line < rp.getRasterHeight(); line++) {
       Point lineStart = rasterStart.clone();
@@ -303,7 +303,7 @@ public class MakeBlockXYPlotter extends LaserCutter
               if (old == 0) {
                 this.move(lineStart.x + pix, lineStart.y, resolution);
               } else {
-                this.setPower(prop.getPower() * (0xFF & old) / 255);
+                this.setPower((int) prop.getPower() * (0xFF & old) / 255);
                 this.line(lineStart.x + pix - 1, lineStart.y, resolution);
                 this.move(lineStart.x + pix, lineStart.y, resolution);
               }
@@ -311,7 +311,7 @@ public class MakeBlockXYPlotter extends LaserCutter
             }
           }
           //last point is also not "white"
-          this.setPower(prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
+          this.setPower((int) prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
           this.line(lineStart.x + bytes.size() - 1, lineStart.y, resolution);
           //add some space to the right
           this.move(Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
@@ -326,7 +326,7 @@ public class MakeBlockXYPlotter extends LaserCutter
               if (old == 0) {
                 this.move(lineStart.x + pix, lineStart.y, resolution);
               } else {
-                this.setPower(prop.getPower() * (0xFF & old) / 255);
+                this.setPower((int) prop.getPower() * (0xFF & old) / 255);
                 this.line(lineStart.x + pix + 1, lineStart.y, resolution);
                 this.move(lineStart.x + pix, lineStart.y, resolution);
               }
@@ -334,7 +334,7 @@ public class MakeBlockXYPlotter extends LaserCutter
             }
           }
           //last point is also not "white"
-          this.setPower(prop.getPower() * (0xFF & bytes.get(0)) / 255);
+          this.setPower((int) prop.getPower() * (0xFF & bytes.get(0)) / 255);
           this.line(lineStart.x, lineStart.y, resolution);
           //add some space to the left
           this.move(Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);

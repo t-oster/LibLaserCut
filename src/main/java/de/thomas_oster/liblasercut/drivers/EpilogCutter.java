@@ -488,9 +488,9 @@ abstract class EpilogCutter extends LaserCutter
       /* Raster Orientation: Printed in current direction */
       out.printf("\033*r0F");
       /* Raster power */
-      out.printf("\033&y%dP", prop.getPower());
+      out.printf("\033&y%dP", (int) prop.getPower());
       /* Raster speed */
-      out.printf("\033&z%dS", prop.getSpeed());
+      out.printf("\033&z%dS", (int) prop.getSpeed());
       /* Focus */
       out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
@@ -520,7 +520,7 @@ abstract class EpilogCutter extends LaserCutter
         {//Apperantly the other power settings are ignored, so we have to scale
           int x = line.get(n);
           x = x >= 0 ? x : 256 + x;
-          int scalex = x * prop.getPower() / 100;
+          int scalex = x * (int) prop.getPower() / 100;
           byte bx = (byte) (scalex < 128 ? scalex : scalex - 256);
           line.set(n, bx);
         }
@@ -585,9 +585,9 @@ abstract class EpilogCutter extends LaserCutter
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
-    out.printf("\033&y%dP", prop.getPower());
+    out.printf("\033&y%dP", (int) prop.getPower());
     /* Raster speed */
-    out.printf("\033&z%dS", prop.getSpeed());
+    out.printf("\033&z%dS", (int) prop.getSpeed());
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
@@ -621,9 +621,9 @@ abstract class EpilogCutter extends LaserCutter
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
-    out.printf("\033&y%dP", prop.getPower());
+    out.printf("\033&y%dP", (int) prop.getPower());
     /* Raster speed */
-    out.printf("\033&z%dS", prop.getSpeed());
+    out.printf("\033&z%dS", (int) prop.getSpeed());
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
@@ -757,13 +757,13 @@ abstract class EpilogCutter extends LaserCutter
             }
             if (currentPower == null || !currentPower.equals(p.getPower()))
             {
-              out.printf("YP%03d;", p.getPower());
-              currentPower = p.getPower();
+              out.printf("YP%03d;", (int) p.getPower());
+              currentPower = (int) p.getPower();
             }
             if (currentSpeed == null || !currentSpeed.equals(p.getSpeed()))
             {
-              out.printf("ZS%03d;", p.getSpeed());
-              currentSpeed = p.getSpeed();
+              out.printf("ZS%03d;", (int) p.getSpeed());
+              currentSpeed = (int) p.getSpeed();
             }
             break;
           }
@@ -976,108 +976,8 @@ abstract class EpilogCutter extends LaserCutter
     //TODO: The Raster3d values are not tested yet, theyre just copies
     double RASTER3D_LINEOFFSET = 0.08;
     double RASTER3D_LINESPEED = 100000d / ((268d / 50) - RASTER3D_LINEOFFSET);
-
-    //Holds the current Laser Head position in Pixels
-    Point p = new Point(0, 0);
-
-    double result = 0;//usual offset
-    for (JobPart jp : job.getParts())
-    {
-      if (jp instanceof RasterPart)
-      {
-        RasterPart rp = (RasterPart) jp;
-        Point sp = rp.getRasterStart();
-        result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
-          (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
-        ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
-        for (int y = 0; y < rp.getRasterHeight(); y++)
-        {//Find any black point
-          boolean lineEmpty = true;
-	  rp.getRasterLine(y, line);
-          for (byte b : line)
-          {
-            if (b != 0)
-            {
-              lineEmpty = false;
-              break;
-            }
-          }
-          if (!lineEmpty)
-          {
-            int w = rp.getRasterWidth();
-            result += (double) RASTER_LINEOFFSET + (double) w / linespeed;
-            p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
-            p.y = sp.y + y;
-          }
-          else
-          {
-            result += RASTER_LINEOFFSET;
-          }
-        }
-      }
-      if (jp instanceof Raster3dPart)
-      {
-        Raster3dPart rp = (Raster3dPart) jp;
-        Point sp = rp.getRasterStart();
-        result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
-          (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER3D_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
-	ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
-        for (int y = 0; y < rp.getRasterHeight(); y++)
-        {//Check if
-          boolean lineEmpty = true;
-	  rp.getRasterLine(y, line);
-          for (byte b : line)
-          {
-            if (b != 0)
-            {
-              lineEmpty = false;
-              break;
-            }
-          }
-          if (!lineEmpty)
-          {
-            int w = rp.getRasterWidth();
-            result += (double) RASTER3D_LINEOFFSET + (double) w / linespeed;
-            p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
-            p.y = sp.y + y;
-          }
-        }
-      }
-      if (jp instanceof VectorPart)
-      {
-        double speed = VECTOR_LINESPEED;
-        VectorPart vp = (VectorPart) jp;
-        for (VectorCommand cmd : vp.getCommandList())
-        {
-          switch (cmd.getType())
-          {
-            case SETPROPERTY:
-            {
-              speed = VECTOR_LINESPEED * ((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).getSpeed() / 100;
-              break;
-            }
-            case MOVETO:
-              result += Math.max((double) (p.x - cmd.getX()) / VECTOR_MOVESPEED_X,
-                (double) (p.y - cmd.getY()) / VECTOR_MOVESPEED_Y);
-              p = new Point(cmd.getX(), cmd.getY());
-              break;
-            case LINETO:
-              double dist = distance(cmd.getX(), cmd.getY(), p);
-              p = new Point(cmd.getX(), cmd.getY());
-              result += dist / speed;
-              break;
-          }
-        }
-      }
-    }
-    return (int) result;
-  }
-
-  private double distance(double x, double y, Point p)
-  {
-    return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2));
+    
+    return estimateJobDuration(job, VECTOR_MOVESPEED_X, VECTOR_MOVESPEED_Y, VECTOR_LINESPEED, RASTER_LINEOFFSET, RASTER_LINESPEED, RASTER3D_LINEOFFSET, RASTER3D_LINESPEED);
   }
 
   @Override
