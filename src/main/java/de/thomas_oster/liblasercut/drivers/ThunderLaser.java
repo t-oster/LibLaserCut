@@ -123,7 +123,7 @@ public class ThunderLaser extends LaserCutter
    * When rastering, whether to always cut from left to right, or to cut in both
    * directions? (i.e. use the return stroke to raster as well)
    */
-  protected boolean useBidirectionalRastering = false;
+  protected boolean useBidirectionalRastering = true;
 
   public boolean getUseBidirectionalRastering()
   {
