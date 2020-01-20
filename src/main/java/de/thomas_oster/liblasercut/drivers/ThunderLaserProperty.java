@@ -1,7 +1,7 @@
 /**
  * This file is part of LibLaserCut.
  * Copyright (C) 2011 - 2014 Thomas Oster <mail@thomas-oster.de>
- * Copyright (c) 2018 Klaus Kämpf <kkaempf@suse.de>
+ * Copyright (c) 2018 - 2020 Klaus Kämpf <kkaempf@suse.de>
  *
  * LibLaserCut is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by

@@ -1,10 +1,9 @@
 /**
  * This file is part of LibLaserCut.
  *
- * Support for ThunderLaser lasers, just vector cuts.
+ * Support for "ThunderLaser" lasers (Ruida controller).
  *
- * @author Klaus Kämpf <kkaempf@suse.de>
- * Copyright (C) 2017,2018 Klaus Kämpf <kkaempf@suse.de>
+ * Copyright (c) 2018 - 2020 Klaus Kämpf <kkaempf@suse.de>
  *
  * LibLaserCut is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
