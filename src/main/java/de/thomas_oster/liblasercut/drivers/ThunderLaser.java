@@ -1,8 +1,6 @@
 /**
  * This file is part of LibLaserCut.
  *
- * Support for "ThunderLaser" lasers (Ruida controller).
- *
  * Copyright (c) 2018 - 2020 Klaus Kämpf <kkaempf@suse.de>
  *
  * LibLaserCut is free software: you can redistribute it and/or modify
@@ -19,6 +17,10 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
+
+/* *
+ * Support for "ThunderLaser" lasers (Ruida controller).
+ */
 
 package de.thomas_oster.liblasercut.drivers;
 
