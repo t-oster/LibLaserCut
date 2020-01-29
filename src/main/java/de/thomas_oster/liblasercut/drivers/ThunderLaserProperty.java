@@ -19,8 +19,10 @@
  **/
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.FloatPowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  *
@@ -29,14 +31,29 @@ import java.util.Arrays;
  * It's all pretty ugly. This should rather extend PowerSpeedFocusFrequencyProperty.
  * But this is incompatible with RasterizableJobPart(), which is expecting a FloatPowerSpeedFocusProperty :-/
  */
-public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
+public class ThunderLaserProperty extends FloatPowerSpeedFocusFrequencyProperty {
 
   private int min_power = 10;
+  private static final String MIN_POWER = "Min Power(%)";
 
   public ThunderLaserProperty()
   {
   }
 
+  public ThunderLaserProperty(LaserProperty o)
+  {
+    for (String k : o.getPropertyKeys())
+    {
+      try
+      {
+        this.setProperty(k, o.getProperty(k));
+      }
+      catch (Exception e)
+      {
+      }
+    }
+  }
+  
   /**
    * Get the value of min power
    *
@@ -60,74 +77,34 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
     this.min_power = power;
   }
 
-  private int frequency = 100;
-
-  /**
-   * Sets the frequency for the Laser.
-   * @param speed
-   */
-  public void setFrequency(float frequency)
-  {
-    frequency = frequency < 0 ? 0 : frequency;
-    this.frequency = (int)frequency;
-  }
-
-  public float getFrequency()
-  {
-    return (float)frequency;
-  }
-                                                      // 0              1               2              3            4
-  private static String[] propertyNames = new String[]{"Min Power(%)", "Max Power(%)", "Speed(mm/s)", "Focus(mm)", "Frequency(Hz)"};
-  private static String[] superPropertyNames = new String[]{null,      "power",        "speed",       "focus",     "frequency"};
   @Override
   public String[] getPropertyKeys()
   {
-    return propertyNames;
+    LinkedList<String> result = new LinkedList<String>();
+    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    result.add(MIN_POWER);
+    return result.toArray(new String[0]);
   }
 
   @Override
   public Object getProperty(String name)
   {
-    if (propertyNames[0].equals(name)) {
+    if (MIN_POWER.equals(name)) {
       return (Integer) this.getMinPower();
     }
-    else if (propertyNames[4].equals(name)) {
-      return this.getFrequency();
-    }
     else {
-      int l = superPropertyNames.length;
-      for (int i = 1; i < l; i++) {
-        if (propertyNames[i].equals(name)) {
-          return super.getProperty(superPropertyNames[i]);
-        }
-      }
+      return super.getProperty(name);
     }
-    return null;
   }
 
   @Override
   public void setProperty(String name, Object value)
   {
-    if (propertyNames[0].equals(name)) {
+    if (MIN_POWER.equals(name)) {
       this.setMinPower((Integer) value);
     }
-    else if (propertyNames[1].equals(name)) {
-      float power = (float)(Float)value;
-      if (power < this.min_power) { /* (max) power must not be smaller than minimum power */
-        power = (float)this.min_power;
-      }
-      this.setPower(power);
-    }
-    else if (propertyNames[4].equals(name)) {
-      this.setFrequency((float)(Float)value);
-    }
     else {
-      int l = superPropertyNames.length;
-      for (int i = 1; i < l; i++) {
-        if (propertyNames[i].equals(name)) {
-          super.setProperty(superPropertyNames[i], value);
-        }
-      }
+      super.setProperty(name, value);
     }
   }
 
@@ -135,10 +112,16 @@ public class ThunderLaserProperty extends FloatPowerSpeedFocusProperty {
   public ThunderLaserProperty clone()
   {
     ThunderLaserProperty result = new ThunderLaserProperty();
-    for (String s:this.getPropertyKeys())
-    {
-      result.setProperty(s, this.getProperty(s));
+    try {
+      for (String s:this.getPropertyKeys())
+      {
+        result.setProperty(s, this.getProperty(s));
+      }
     }
+    catch (Exception e)
+    {
+    }
+
     return result;
   }
 
