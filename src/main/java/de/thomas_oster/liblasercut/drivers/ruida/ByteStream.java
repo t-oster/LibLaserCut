@@ -19,7 +19,8 @@
 
 package de.thomas_oster.liblasercut.drivers.ruida;
 
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -63,12 +64,12 @@ class ByteStream
     (byte)0xe6, 0x78, (byte)0xf8, 0x7a, (byte)0xfa, 0x7c, (byte)0xfc, 0x7e, (byte)0xfe, 0x70, (byte)0xf0, 0x72, (byte)0xf2, 0x74, (byte)0xf4, 0x76
   };
 
-  private Stream<Byte> stream;
+  private List<Byte> stream;
   private boolean empty;
   private String name;
 
   private void _init() {
-    this.stream = Stream.of();
+    this.stream = new ArrayList<Byte>();
     this.empty = true;
   }
   public ByteStream(String name) {
@@ -86,18 +87,19 @@ class ByteStream
       throw new IOException("No output configured");
     }
     System.out.println(String.format("ByteStream(%s).writeTo()", this.name));
-    stream.forEach(v -> {
+    for(Byte v : stream) {
       int i = v & 0xff;
       if (i < 0) {
         i = 256 + i;
       }
+/*      System.out.println(String.format("ByteStream(%s).writeTo(%02x)", this.name, i)); */
       try {
         out.write(encode_table[i]);
       }
       catch (IOException e) {
         System.out.println("ByteStream.writeTo() failed");
       };
-    });
+    }
     _init();
   }
 
@@ -124,7 +126,7 @@ class ByteStream
     for (int i = 0; i < len; i += 2) {
       byte value = (byte)((Character.digit(s.charAt(i), 16) << 4)
                            + Character.digit(s.charAt(i+1), 16));
-      stream = Stream.concat(stream, Stream.of(value));
+      stream.add(value);
     }
     this.empty = false;
     return this;
@@ -134,7 +136,7 @@ class ByteStream
    * append integer value
    */
   public ByteStream integer(int i) {
-    stream = Stream.concat(stream, Stream.of((byte)(i & 0xff)));
+    stream.add((byte)(i & 0xff));
     this.empty = false;
     return this;
   }
