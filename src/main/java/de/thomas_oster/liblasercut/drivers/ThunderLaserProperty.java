@@ -34,7 +34,7 @@ import java.util.LinkedList;
 public class ThunderLaserProperty extends FloatPowerSpeedFocusFrequencyProperty {
 
   private int min_power = 10;
-  private static final String MIN_POWER = "Min Power(%)";
+  private static final String MIN_POWER = "min power";
 
   public ThunderLaserProperty()
   {
