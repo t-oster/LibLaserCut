@@ -16,10 +16,10 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
+
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.AbstractLaserProperty;
-import de.thomas_oster.liblasercut.BlackWhiteRaster;
 import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.JobPart;
 import de.thomas_oster.liblasercut.LaserCutter;
@@ -54,8 +54,9 @@ import org.usb4java.LibUsbException;
 
 public class K40NanoDriver extends LaserCutter
 {
+
   private static final String VAR_MM_PER_SECOND = "mm per second";
-  private static final String VAR_D_RATIO = "mm per second";
+  private static final String VAR_D_RATIO = "diagonal ratio";
   private static final String SETTING_BEDWIDTH = "Laserbed Width";
   private static final String SETTING_BEDHEIGHT = "Laserbed Height";
   private static final String SETTING_BOARD = "M2, M1, M, B2, B1, B, A, board selection";
@@ -77,8 +78,7 @@ public class K40NanoDriver extends LaserCutter
 
   /**
    * This is the core method of the driver. It is called, whenever LibLaseCut
-   * wants
-   * your driver to send a job to the lasercutter.
+   * wants your driver to send a job to the lasercutter.
    *
    * @param job This is an LaserJob object, containing all information on the
    * job, which is to be sent
@@ -147,7 +147,7 @@ public class K40NanoDriver extends LaserCutter
         device.move_absolute(sx, sy);
         int step_size = (int) (1000.0 / p.getDPI());
         device.setRaster_step(step_size);
-        RasterElement element = ((RasterElement.Provider)rp.getImage()).getRaster();
+        RasterElement element = ((RasterElement.Provider) rp.getImage()).getRaster();
         RasterBuilder rasterbuild = new RasterBuilder(element, new RasterBuilder.PropertiesUpdate()
         {
           @Override
@@ -157,9 +157,9 @@ public class K40NanoDriver extends LaserCutter
           }
         }, 0, 0, 0);
         rasterbuild.setOffsetPosition(rp.getMinX(), rp.getMinY());
-        
+
         int pixel = 0;
-        device.raster_start();  
+        device.raster_start();
         for (VectorCommand cmd : rasterbuild)
         {
           if ((cmd.getType() == VectorCommand.CmdType.MOVETO) || ((cmd.getType() == VectorCommand.CmdType.LINETO) && (pixel == 0))) //treat moveto with pixel 0 as a lineto.
@@ -168,8 +168,9 @@ public class K40NanoDriver extends LaserCutter
             int y = (int) (cmd.getY() * (1000 / p.getDPI()));
             int dx = x - device.x;
             int dy = y - device.y;
-            if (dy > device.raster_step) {
-              device.move_absolute(x, y-device.raster_step);
+            if (dy > device.raster_step)
+            {
+              device.move_absolute(x, y - device.raster_step);
               //if we're moving in the y direction, but more than the raster step,
               //we still need to h_switch to change the directionality. But, that will
               //step, so we go down to where the raster-step will put us on the correct line.
@@ -179,7 +180,7 @@ public class K40NanoDriver extends LaserCutter
               device.h_switch();
               device.y += device.raster_step;
             }
-            
+
             device.move_absolute(x, y);
             device.execute();
           }
@@ -213,7 +214,7 @@ public class K40NanoDriver extends LaserCutter
         int total = vp.getCommandList().length;
         for (VectorCommand cmd : vp.getCommandList())
         {
-          this.progress.taskChanged(this, "Vector Part");  
+          this.progress.taskChanged(this, "Vector Part");
           this.progress.progressChanged(this, (100 * i++) / total);
           switch (cmd.getType())
           {
@@ -290,6 +291,7 @@ public class K40NanoDriver extends LaserCutter
   {
     AbstractLaserProperty property = new AbstractLaserProperty();
     property.addPropertyRanged("mm per second", 30f, 0.4f, 240f);
+    property.addPropertyRanged("power", 1000, 0, 1000);
     property.addPropertyRanged("diagonal speed adjustment", 0.2612f, 0f, 1f);
     return property;
   }
@@ -299,9 +301,9 @@ public class K40NanoDriver extends LaserCutter
   {
     AbstractLaserProperty property = new AbstractLaserProperty();
     property.addPropertyRanged("mm per second", 60f, 5f, 500f);
+    property.addPropertyRanged("power", 1000, 0, 1000);
     return property;
   }
-
 
   /**
    * This method returns a list of all supported resolutions (in DPI)
@@ -453,8 +455,10 @@ public class K40NanoDriver extends LaserCutter
     private String board = "M2";
     private double speed = 30;
     private int raster_step = 1;
+    private int power = 1000;
     double d_ratio = 0.2612;
 
+    private int power_remainder = 0;
     private int x = 0;
     private int y = 0;
 
@@ -497,6 +501,11 @@ public class K40NanoDriver extends LaserCutter
         exit_compact_mode();
       }
       speed = mm_per_second;
+    }
+
+    void setPower(int ppi)
+    {
+      power = ppi;
     }
 
     public int getRaster_step()
@@ -587,6 +596,7 @@ public class K40NanoDriver extends LaserCutter
 
     void cut_absolute(int x, int y)
     {
+
       int dx = x - this.x;
       int dy = y - this.y;
       cut_relative(dx, dy);
@@ -629,90 +639,6 @@ public class K40NanoDriver extends LaserCutter
     void raster_end()
     {
       exit_compact_mode();
-    }
-
-    void scanline_raster(List<Byte> bytes, boolean reversed)
-    {
-      if (!reversed)
-      {
-        int count = 0;
-        for (Byte b : bytes)
-        {
-          for (int i = 0; i < 8; i++)
-          {
-            if (((b >> i) & 1) == 1)
-            {
-              if (is_on)
-              {
-                count++;
-              }
-              else
-              {
-                move_x(count);
-                laser_on();
-                count = 1;
-              }
-            }
-            else
-            {
-              if (!is_on)
-              {
-                count++;
-              }
-              else
-              {
-                move_x(count);
-                laser_off();
-                count = 1;
-              }
-            }
-          }
-        }
-        builder.append(LEFT);
-        is_on = false;
-        y += raster_step;
-      }
-      else
-      {
-        int count = 0;
-        Collections.reverse(bytes);
-        for (Byte b : bytes)
-        {
-          for (int i = 7; i >= 0; i--)
-          {
-            if (((b >> i) & 1) == 1)
-            {
-              if (is_on)
-              {
-                count++;
-              }
-              else
-              {
-                move_x(-count);
-                laser_on();
-                count = 1;
-              }
-            }
-            else
-            {
-              if (!is_on)
-              {
-                count++;
-              }
-              else
-              {
-                move_x(-count);
-                laser_off();
-                count = 1;
-              }
-            }
-          }
-        }
-        builder.append(RIGHT);
-        is_on = false;
-        y += raster_step;
-      }
-      send();
     }
 
     void check_init()
@@ -934,111 +860,124 @@ public class K40NanoDriver extends LaserCutter
       is_on = false;
     }
 
+    public void h_switch()
+    {
+      if (is_left)
+      {
+        this.set_right();
+      }
+      else
+      {
+        this.set_left();
+      }
+    }
+
+    public void v_switch()
+    {
+      if (is_top)
+      {
+        this.set_bottom();
+      }
+      else
+      {
+        this.set_top();
+      }
+    }
+
+    /*
+      * Zingl-Bresenham line draw algorithm
+      * With Tatarize's PPI carryforward power modulation.
+      * 
+      * The general goal of this is to trigger a state sync, if the laser is to
+      * change state or if the next movement is not exactly diagonal or orthogonal
+      * all other states can be combined into the same movement.
+     */
     void makeLine(int x0, int y0, int x1, int y1)
     {
-      int dy = y1 - y0; //BRESENHAM LINE DRAW ALGORITHM
-      int dx = x1 - x0;
+      int dx = Math.abs(x1 - x0);
+      int dy = -Math.abs(y1 - y0);
+      int sx = (x0 < x1) ? 1 : -1;
+      int sy = (y0 < y1) ? 1 : -1;
 
-      int stepx = 0, stepy = 0;
+      int err = dx + dy;  //error value e_xy
+      int cud_x = 0; //Current unapplied delta x
+      int cud_y = 0; //Current unapplied delta y
+      int pud_x = 0; //Previous unapplied delta x
+      int pud_y = 0; //Previous unapplied delta y
+      boolean laser_cutting = this.is_on;
+      boolean pulse_on = this.is_on;
 
-      if (dy < 0)
+      while (true)
       {
-        dy = -dy;
-        stepy = -1;
-      }
-      else
-      {
-        stepy = 1;
-      }
+        /* loop */
 
-      if (dx < 0)
-      {
-        dx = -dx;
-        stepx = -1;
-      }
-      else
-      {
-        stepx = 1;
-      }
-      int straight = 0;
-      int diagonal = 0;
-
-      if (dx > dy)
-      {
-        dy <<= 1;// dy is now 2*dy
-        dx <<= 1;
-        int fraction = dy - (dx >> 1);// same as 2*dx - dy
-        while (x0 != x1)
+        if (laser_cutting)
         {
-          if (fraction >= 0)
+          power_remainder += power;
+          if (power_remainder >= 1000)
           {
-            y0 += stepy;
-            fraction -= dx;// same as fraction -= 2*dx
-            if (straight != 0)
-            {
-              move_x(straight);
-              straight = 0;
-            }
-            diagonal++;
+            power_remainder -= 1000;
+            pulse_on = true;
           }
           else
           {
-            if (diagonal != 0)
-            {
-              move_angle(diagonal * stepx, diagonal * stepy);
-              diagonal = 0;
-            }
-            straight += stepx;
+            pulse_on = false;
           }
-          x0 += stepx;
-          fraction += dy;// same as fraction += 2*dy
         }
-        if (straight != 0)
-        {
-          move_x(straight);
-        }
-        if (diagonal != 0)
-        {
-          move_angle(diagonal * stepx, diagonal * stepy);
-        }
-      }
-      else
-      {
-        dy <<= 1;
-        dx <<= 1;
-        int fraction = dx - (dy >> 1);
-        while (y0 != y1)
-        {
-          if (fraction >= 0)
+        int abs_cud_x = Math.abs(cud_x);
+        int abs_cud_y = Math.abs(cud_y);
+
+        if (((x0 == x1) && (y0 == y1)) //line is over.
+          || (this.is_on != pulse_on) // fire pulse changed.
+          || ((abs_cud_x != abs_cud_y) // not diagonal
+          && (abs_cud_x != 0) // not x-direction
+          && (abs_cud_y != 0)))
+        { // not y-direction
+          // The current settings do not combine. Actualize previous values.
+          if (pud_x != 0 && Math.abs(pud_x) == Math.abs(pud_y))
           {
-            x0 += stepx;
-            fraction -= dy;
-            if (straight != 0)
-            {
-              move_y(straight);
-              straight = 0;
-            }
-            diagonal++;
+            move_angle(pud_x, pud_y);
+          }
+          else if ((pud_y == 0) && (pud_x != 0))
+          {
+            move_x(pud_x);
+          }
+          else if ((pud_y != 0) && (pud_x == 0))
+          {
+            move_y(pud_y);
+          }
+          cud_x -= pud_x; //The difference of the values *is* combinable.
+          cud_y -= pud_y;
+          if (pulse_on)
+          {
+            laser_on(); //set laser to the correct state.
           }
           else
           {
-            if (diagonal != 0)
-            {
-              move_angle(diagonal * stepx, diagonal * stepy);
-              diagonal = 0;
-            }
-            straight += stepy;
+            laser_off();
           }
-          y0 += stepy;
-          fraction += dx;
         }
-        if (straight != 0)
+        //yield x0, y0
+        if ((x0 == x1) && (y0 == y1))
         {
-          move_y(straight);
+          //update final values.
+          break;
         }
-        if (diagonal != 0)
-        {
-          move_angle(diagonal * stepx, diagonal * stepy);
+        int e2 = 2 * err;
+        if (e2 >= dy)
+        {//  # e_xy+e_y < 0
+          err += dy;
+          pud_x = cud_x;
+          x0 += sx;
+          cud_x += sx;
+
+        }
+        if (e2 <= dx)
+        {//  # e_xy+e_y < 0
+          err += dx;
+          pud_y = cud_y;
+          y0 += sy;
+          cud_y += sy;
         }
       }
     }
@@ -1115,7 +1054,7 @@ public class K40NanoDriver extends LaserCutter
 
     public String getSpeed(double mm_per_second, boolean raster)
     {
-      int gear = 1;
+      int gear;
       if (raster)
       {
         if (mm_per_second > 500)
@@ -1292,17 +1231,6 @@ public class K40NanoDriver extends LaserCutter
         (diag_add >> 8) & 0xFF, (diag_add & 0xFF));
     }
 
-    private void h_switch()
-    {
-      if (is_left)
-      {
-        this.set_right();
-      }
-      else
-      {
-        this.set_left();
-      }
-    }
   }
 
   public class K40Queue
@@ -1579,7 +1507,7 @@ public class K40NanoDriver extends LaserCutter
               catch (InterruptedException ex)
               {
               }
-              ((Buffer)transfered).clear(); // Explicit cast for cross compatibility with JDK9
+              ((Buffer) transfered).clear(); // Explicit cast for cross compatibility with JDK9
               request_status.put(0, (byte) 160);
               if (handle == null)
               {
@@ -1651,7 +1579,7 @@ public class K40NanoDriver extends LaserCutter
     {
       int results;
 
-      ((Buffer)transfered).clear(); // Explicit cast for cross compatibility with JDK9
+      ((Buffer) transfered).clear(); // Explicit cast for cross compatibility with JDK9
       request_status.put(0, (byte) 160);
       results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_WRITE, request_status, transfered, 5000L);
       //While the device is fast moving this packet will not be accepted.
@@ -1664,7 +1592,10 @@ public class K40NanoDriver extends LaserCutter
           throw new LibUsbException("Status Request Failed.", results);
         }
       }
-      if (handle == null) throw new LibUsbException("Status Request Failed.", results);
+      if (handle == null)
+      {
+        throw new LibUsbException("Status Request Failed.", results);
+      }
       ByteBuffer read_buffer = ByteBuffer.allocateDirect(6);
       results = LibUsb.bulkTransfer(handle, K40_ENDPOINT_READ, read_buffer, transfered, 5000L);
       if (results < LibUsb.SUCCESS)
@@ -1762,7 +1693,7 @@ public class K40NanoDriver extends LaserCutter
       {
         LibUsb.freeDeviceList(list, true);
       }
-      throw new LibUsbException("Device was not found.", 0);
+      throw new LibUsbException("Device was not found.", LibUsb.ERROR_NO_DEVICE);
     }
 
     private void openContext() throws LibUsbException
@@ -1900,7 +1831,7 @@ public class K40NanoDriver extends LaserCutter
     public void send_packet(CharSequence subSequence)
     {
       sleep(100);
-      System.out.println("Mock Packst Sent:" + subSequence);
+      System.out.println("Mock Packet Sent:" + subSequence);
     }
 
     @Override
