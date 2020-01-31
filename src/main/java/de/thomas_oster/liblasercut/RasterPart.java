@@ -38,7 +38,7 @@ public class RasterPart extends RasterizableJobPart
     this.resolution = resolution;
     this.blackPixelProperty = laserProperty;
     this.whitePixelProperty = blackPixelProperty.clone();
-    whitePixelProperty.setProperty("power", 0);
+    whitePixelProperty.setProperty("power", 0f);
   }
 
 
