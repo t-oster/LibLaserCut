@@ -162,7 +162,7 @@ public class Layer
 //    System.out.println("\tLayer.vector("+vectors.size()+")To(" + x + ", " + y + ")" + " as " + ((as_move)?"move":"line"));
     double dx = x - xsim;
     double dy = y - ysim;
-    System.out.println("  dx " + dx + ", dy " + dy);
+//    System.out.println("  dx " + dx + ", dy " + dy);
     if ((dx == 0) && (dy == 0)) {
 //      System.out.println("\tno move - skip");
       return;
