@@ -338,37 +338,9 @@ public class ThunderLaser extends LaserCutter
     {
       float focus;
 
-      if (p instanceof Raster3dPart) {
-        throw new IllegalJobException("ThunderLaser does not support Raster3dPart");
-      }
-      if (p instanceof RasterPart)
+      if ((p instanceof RasterPart) || (p instanceof Raster3dPart))
       {
-        RasterPart rp = (RasterPart)p;
-        double dpi = rp.getDPI();
-        Point sp = rp.getRasterStart();
-        int width = rp.getRasterWidth();
-        int height = rp.getRasterHeight();
-        System.out.println(String.format("RasterPart(%d x %d pixels) @ %.1f dpi", width, height, dpi));
-        double rwidth = Util.px2mm(width, dpi);
-        double rheight = Util.px2mm(height, dpi);
-
-        // ruida x,y in mm
-        double rx = Util.px2mm(sp.x, dpi);
-        double ry = Util.px2mm(sp.y, dpi);
-        System.out.println(String.format("RasterPart(%.4fm, %.4f mm) - (%.4f, %.4f mm): %sdirectional", rx, ry, rwidth, rheight, (this.useBidirectionalRastering)?"bi":"uni"));
-        ruida.startPart(rx, ry, rwidth, rheight);
-
-        prop = rp.getLaserProperty();
-        if (prop instanceof ThunderLaserProperty)
-        {
-          ThunderLaserProperty tlprop = (ThunderLaserProperty)prop;
-          ruida.setMinPower((int)tlprop.getMinPower());
-          ruida.setMaxPower((int)tlprop.getPower());
-          ruida.setSpeed((int)tlprop.getSpeed());
-          ruida.setFocus((int)tlprop.getFocus());
-          ruida.setFrequency((int)tlprop.getFrequency());
-        }
-        p = convertRasterizableToVectorPart(rp, dpi, this.useBidirectionalRastering);
+        p = convertRasterizableToVectorPart((RasterizableJobPart)p, p.getDPI(), this.useBidirectionalRastering);
       }
       /* FALLTHRU */
       if (p instanceof VectorPart)
