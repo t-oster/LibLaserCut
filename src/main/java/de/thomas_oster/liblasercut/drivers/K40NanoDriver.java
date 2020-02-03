@@ -37,9 +37,9 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import javax.swing.SwingUtilities;
 
 import org.usb4java.Context;
 import org.usb4java.Device;
@@ -57,6 +57,7 @@ public class K40NanoDriver extends LaserCutter
 
   private static final String VAR_MM_PER_SECOND = "mm per second";
   private static final String VAR_D_RATIO = "diagonal ratio";
+  private static final String VAR_POWER = "power";
   private static final String SETTING_BEDWIDTH = "Laserbed Width";
   private static final String SETTING_BEDHEIGHT = "Laserbed Height";
   private static final String SETTING_BOARD = "M2, M1, M, B2, B1, B, A, board selection";
@@ -214,8 +215,7 @@ public class K40NanoDriver extends LaserCutter
         int total = vp.getCommandList().length;
         for (VectorCommand cmd : vp.getCommandList())
         {
-          this.progress.taskChanged(this, "Vector Part");
-          this.progress.progressChanged(this, (100 * i++) / total);
+          this.updateVectorPartProgress(pl, this, i++, total);
           switch (cmd.getType())
           {
             case LINETO:
@@ -261,9 +261,9 @@ public class K40NanoDriver extends LaserCutter
                 {
                   device.setD_ratio(Double.valueOf(value));
                 }
-                else if ("power".equals(key))
+                else if (VAR_POWER.equals(key))
                 {
-                  warnings.add("There is no board based power setting.");
+                  device.setPower(Integer.valueOf(value));
                 }
               }
               break;
@@ -277,6 +277,17 @@ public class K40NanoDriver extends LaserCutter
     device.close();
   }
 
+  public void updateVectorPartProgress(ProgressListener pl, K40NanoDriver d, int i, int total) {
+    SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run()
+            {
+              pl.taskChanged(d, "Vector Part");
+              pl.progressChanged(d, (100 * i) / total);
+            }
+          });
+  }
+  
   @Override
   public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
   {
@@ -934,6 +945,16 @@ public class K40NanoDriver extends LaserCutter
           && (abs_cud_y != 0)))
         { // not y-direction
           // The current settings do not combine. Actualize previous values.
+          if (pud_x != 0 || pud_y != 0) {
+            if (pulse_on)
+            {
+              laser_on(); //set laser to the correct state.
+            }
+            else
+            {
+              laser_off();
+            }
+          }
           if (pud_x != 0 && Math.abs(pud_x) == Math.abs(pud_y))
           {
             move_angle(pud_x, pud_y);
@@ -946,16 +967,14 @@ public class K40NanoDriver extends LaserCutter
           {
             move_y(pud_y);
           }
+          else if ((pud_x == 0) && (pud_y == 0)) {
+            System.out.println(pud_x + " " + pud_y);
+          }
+          else {
+            System.out.println("ERROR! " + pud_x + " " + pud_y);
+          }
           cud_x -= pud_x; //The difference of the values *is* combinable.
           cud_y -= pud_y;
-          if (pulse_on)
-          {
-            laser_on(); //set laser to the correct state.
-          }
-          else
-          {
-            laser_off();
-          }
         }
         //yield x0, y0
         if ((x0 == x1) && (y0 == y1))
