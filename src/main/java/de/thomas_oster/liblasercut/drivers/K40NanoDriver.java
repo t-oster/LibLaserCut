@@ -948,16 +948,6 @@ public class K40NanoDriver extends LaserCutter
           // The current settings do not combine. Actualize previous values.
           int pud_x = cud_x - dud_x;
           int pud_y = cud_y - dud_y;
-          if (pud_x != 0 || pud_y != 0) {
-            if (pulse_on)
-            {
-              laser_on(); //set laser to the correct state.
-            }
-            else
-            {
-              laser_off();
-            }
-          }
           if (Math.abs(pud_x) == Math.abs(pud_y))
           {
             if (pud_x != 0) {
@@ -978,10 +968,7 @@ public class K40NanoDriver extends LaserCutter
           }
           cud_x = dud_x;
           cud_y = dud_y;
-        }
-        if ((x0 == x1) && (y0 == y1)) 
-        { //line has ended
-            if (pulse_on)
+          if (pulse_on)
             {
               laser_on(); //set laser to the correct state.
             }
@@ -989,6 +976,9 @@ public class K40NanoDriver extends LaserCutter
             {
               laser_off();
             }
+        }
+        if ((x0 == x1) && (y0 == y1)) 
+        { //line has ended
           if (Math.abs(cud_x) == Math.abs(cud_y))
           {
             if (cud_x != 0) {
