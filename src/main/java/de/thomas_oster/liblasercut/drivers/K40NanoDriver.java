@@ -913,8 +913,8 @@ public class K40NanoDriver extends LaserCutter
       int err = dx + dy;  //error value e_xy
       int cud_x = 0; //Current unapplied delta x
       int cud_y = 0; //Current unapplied delta y
-      int pud_x = 0; //Previous unapplied delta x
-      int pud_y = 0; //Previous unapplied delta y
+      int dud_x = 0; //Previous unapplied delta x
+      int dud_y = 0; //Previous unapplied delta y
       boolean laser_cutting = this.is_on;
       boolean pulse_on = this.is_on;
 
@@ -938,13 +938,16 @@ public class K40NanoDriver extends LaserCutter
         int abs_cud_x = Math.abs(cud_x);
         int abs_cud_y = Math.abs(cud_y);
 
-        if (((x0 == x1) && (y0 == y1)) //line is over.
-          || (this.is_on != pulse_on) // fire pulse changed.
-          || ((abs_cud_x != abs_cud_y) // not diagonal
-          && (abs_cud_x != 0) // not x-direction
-          && (abs_cud_y != 0)))
-        { // not y-direction
+        if (
+          (this.is_on != pulse_on) // fire pulse changed.
+          || //Can't be combined into a command 
+          ((abs_cud_x != abs_cud_y) // not diagonal
+          && (abs_cud_x != 0) // not ortho y-direction
+          && (abs_cud_y != 0))) // not ortho x-direction
+        { 
           // The current settings do not combine. Actualize previous values.
+          int pud_x = cud_x - dud_x;
+          int pud_y = cud_y - dud_y;
           if (pud_x != 0 || pud_y != 0) {
             if (pulse_on)
             {
@@ -955,9 +958,11 @@ public class K40NanoDriver extends LaserCutter
               laser_off();
             }
           }
-          if (pud_x != 0 && Math.abs(pud_x) == Math.abs(pud_y))
+          if (Math.abs(pud_x) == Math.abs(pud_y))
           {
-            move_angle(pud_x, pud_y);
+            if (pud_x != 0) {
+            move_angle(pud_x, pud_y);  
+            }
           }
           else if ((pud_y == 0) && (pud_x != 0))
           {
@@ -968,35 +973,58 @@ public class K40NanoDriver extends LaserCutter
             move_y(pud_y);
           }
           else if ((pud_x == 0) && (pud_y == 0)) {
-            System.out.println(pud_x + " " + pud_y);
           }
           else {
-            System.out.println("ERROR! " + pud_x + " " + pud_y);
           }
-          cud_x -= pud_x; //The difference of the values *is* combinable.
-          cud_y -= pud_y;
+          cud_x = dud_x;
+          cud_y = dud_y;
         }
-        //yield x0, y0
-        if ((x0 == x1) && (y0 == y1))
-        {
-          //update final values.
+        if ((x0 == x1) && (y0 == y1)) 
+        { //line has ended
+            if (pulse_on)
+            {
+              laser_on(); //set laser to the correct state.
+            }
+            else
+            {
+              laser_off();
+            }
+          if (Math.abs(cud_x) == Math.abs(cud_y))
+          {
+            if (cud_x != 0) {
+            move_angle(cud_x, cud_y);  
+            }
+          }
+          else if ((cud_y == 0) && (cud_x != 0))
+          {
+            move_x(cud_x);
+          }
+          else if ((cud_y != 0) && (cud_x == 0))
+          {
+            move_y(cud_y);
+          }
           break;
         }
         int e2 = 2 * err;
         if (e2 >= dy)
         {//  # e_xy+e_y < 0
           err += dy;
-          pud_x = cud_x;
           x0 += sx;
-          cud_x += sx;
-
+          dud_x = sx;
+          cud_x += dud_x;
+        }
+        else {
+          dud_x = 0;
         }
         if (e2 <= dx)
         {//  # e_xy+e_y < 0
           err += dx;
-          pud_y = cud_y;
           y0 += sy;
-          cud_y += sy;
+          dud_y = sy;
+          cud_y += dud_y;
+        }
+        else {
+          dud_y = 0;
         }
       }
     }
