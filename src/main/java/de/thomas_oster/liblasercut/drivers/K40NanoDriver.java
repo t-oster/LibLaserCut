@@ -39,7 +39,6 @@ import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.swing.SwingUtilities;
 
 import org.usb4java.Context;
 import org.usb4java.Device;
@@ -215,7 +214,8 @@ public class K40NanoDriver extends LaserCutter
         int total = vp.getCommandList().length;
         for (VectorCommand cmd : vp.getCommandList())
         {
-          this.updateVectorPartProgress(pl, this, i++, total);
+          pl.taskChanged(this, "Vector Part");
+          pl.progressChanged(this, (100 * i++) / total);
           switch (cmd.getType())
           {
             case LINETO:
@@ -275,17 +275,6 @@ public class K40NanoDriver extends LaserCutter
     device.home(); //Home the device after the job.
     device.execute();
     device.close();
-  }
-
-  public void updateVectorPartProgress(ProgressListener pl, K40NanoDriver d, int i, int total) {
-    SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run()
-            {
-              pl.taskChanged(d, "Vector Part");
-              pl.progressChanged(d, (100 * i) / total);
-            }
-          });
   }
   
   @Override
@@ -1764,7 +1753,7 @@ public class K40NanoDriver extends LaserCutter
 
     private void openHandle()
     {
-      handle = new DeviceHandle();
+      handle = new DeviceHandle(); //TODO Dies here. Cannot find handle.
       int results = LibUsb.open(device, handle);
       if (results < LibUsb.SUCCESS)
       {
