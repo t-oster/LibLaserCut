@@ -236,13 +236,13 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
   @Override
   public int getGreyScale(int x, int y)
   {
-    return getPixel(x, y);
+    return getPixel(x, y) * 255;
   }
 
   @Override
   public void setGreyScale(int x, int y, int grey)
   {
-    setPixel(x, y, grey);
+    setPixel(x, y, grey > 127 ? 1 : 0);
   }
 
 }

@@ -35,8 +35,16 @@ public interface GreyscaleRaster
 
   public int getWidth();
 
+  /**
+   * get greyscale value of pixel
+   * @return greyscale value: 0 (black) ... 255 (white)
+   */
   public int getGreyScale(int x, int y);
 
+  /**
+   * set greyscale value of pixel
+   * @param grey greyscale value: 0 (black) ... 255 (white) 
+   */
   public void setGreyScale(int x, int y, int grey);
 
   public int getHeight();
