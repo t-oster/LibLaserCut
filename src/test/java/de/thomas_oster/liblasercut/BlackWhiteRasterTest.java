@@ -80,6 +80,10 @@ public class BlackWhiteRasterTest
         assertTrue(ras.isBlack(x,y));
       }
     }
+    // raw bytes: 1 = black, 0 = white, 8 pixels per byte
+    assertEquals((byte) 0xff, ras.getByte(17, 42));
+    ras.setBlack(8*17+1, 42, false);
+    assertEquals((byte) 0b1011_1111, ras.getByte(17, 42));
     for (int x = 0; x < ras.getWidth(); x++)
     {
       for (int y = 0; y < ras.getHeight(); y++)
@@ -101,6 +105,25 @@ public class BlackWhiteRasterTest
         boolean black = ((Math.random() * 10) % 2 == 1);
         ras.setBlack(x, y, black);
         assertEquals(black, ras.isBlack(x, y));
+        // setGreyScale is mapped to {0, 255}.
+        // almost black -> black
+        ras.setGreyScale(x, y, 42);
+        assertEquals(0, ras.getGreyScale(x, y));
+        assertEquals(true, ras.isBlack(x, y));
+        assertEquals(1, ras.getPixel(x, y)); // note: meaning of getPixel() is opposite of isBlack()
+        // black
+        ras.setGreyScale(x, y, 0);
+        assertEquals(0, ras.getGreyScale(x, y));
+        assertEquals(true, ras.isBlack(x, y));
+        // white
+        ras.setGreyScale(x, y, 255);
+        assertEquals(255, ras.getGreyScale(x, y));
+        assertEquals(false, ras.isBlack(x, y));
+        // almost white
+        ras.setGreyScale(x, y, 200);
+        assertEquals(255, ras.getGreyScale(x, y));
+        assertEquals(false, ras.isBlack(x, y));
+        assertEquals(0, ras.getPixel(x, y)); // note: meaning of getPixel() is opposite of isBlack()
       }
     }
   }
