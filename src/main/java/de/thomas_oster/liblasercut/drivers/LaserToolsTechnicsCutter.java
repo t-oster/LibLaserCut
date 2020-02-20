@@ -34,6 +34,7 @@ import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Circle;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -45,6 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class implements a driver for the LTT iLaser 4000
@@ -367,9 +369,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * toBytes("42 ff 3c") = new byte[] { (byte) 0x42, (byte) ...}
    *
    * all spaces are ignored, no matter where you place them.
-   *
-   * @param s
-   * @return
    */
   private byte[] toBytes(String s)
   {
@@ -459,10 +458,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
   /**
    * send as 4-byte signed integer
-   *
-   * @param out
-   * @param value
-   * @throws IOException
    */
   private void writeS32(OutputStream out, long value) throws IOException
   {
@@ -706,7 +701,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
  * @param out PrintStream for writing the commands
  * @param center Center point
  * @param resolution DPI for converting pixels to mm
- * @throws IOException
  * @throws UnsupportedCircleException if the circle is too large and it must be sent in a different way
  * @return cutting time
  */
@@ -1434,12 +1428,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * send a coordinate WITHOUT ANY PRECEDING COMMAND.
    * coordinate is converted from the given resolution to machine resolution.
    * This does not make sense if you don't prepend a command.
-   *
-   * @param out
-   * @param x
-   * @param y
-   * @param resolution
-   * @throws IOException
    */
   private void sendCoordinate(PrintStream out, int x, int y, double resolution, boolean isRelative) throws IOException
   {
@@ -1486,7 +1474,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * set speed
    * @param out stream for writing the commands
    * @param speed speed in percent
-   * @throws IOException 
    */
   private void setSpeed(PrintStream out, float speed) throws IOException
   {
@@ -1612,7 +1599,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   private double generateRasterCode(ByteArrayOutputStream outputstream, RasterizableJobPart rp, double resolution) throws UnsupportedEncodingException, IOException
   {
     double laserTime = 0;
-    PrintStream out = new PrintStream(outputstream, true, "US-ASCII");
+    PrintStream out = new PrintStream(outputstream, true, StandardCharsets.US_ASCII);
     // TODO: handle the special case if the engraving is near the left or right end of the coordinate system.
     // -> we may use slightly negative or too large coordinates (check original driver output!)
     // -> and if that's not enough, accept that the first 25mm or so are slower and apply a compensation table which reduces the intensity (or scales the pixels? whatever...) at the start
@@ -1971,14 +1958,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // the documentation says that Engrave must be before Vector, not mixed
     // TODO unnecessary???
     List<JobPart> parts = job.getParts();
-    Collections.sort(parts, new Comparator<JobPart>()
-    {
-      @Override
-      public int compare(JobPart p1, JobPart p2)
-      {
-        return Boolean.compare(p1 instanceof VectorPart, p2 instanceof VectorPart);
-      }
-    });
+    Collections.sort(parts, (p1, p2) ->
+            Boolean.compare(p1 instanceof VectorPart, p2 instanceof VectorPart));
 
     for (JobPart p : parts)
     {
@@ -2094,24 +2075,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     if (resolutions == null)
     {
       // TODO: 333 and 166 DPI -> test if they work precisely or are actually 333.33333 and 166.66666
-      resolutions = Arrays.asList(new Double[]
-      {
+      resolutions = Arrays.asList(
         // TODO: currently forced to 500dpi because of PITCH command 1B 44
 //        200d,
 //        250d,
         500d
 //        1000d
-      });
+      );
       // iterate over copy of list
-      for (Double resolution : resolutions.toArray(new Double[]
-      {
-      }))
-      {
-        if (resolution > maxEngraveDPI)
-        {
-          resolutions.remove(resolution);
-        }
-      }
+      resolutions.removeIf(resolution -> resolution > maxEngraveDPI);
     }
     return resolutions;
   }
@@ -2259,11 +2231,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     else if (SETTING_RASTER_WHITESPACE_MIN.equals(attribute))
     {
-      return (Double) this.addSpacePerRasterLineMinimum;
+      return this.addSpacePerRasterLineMinimum;
     }
     else if (SETTING_RASTER_WHITESPACE_MAX.equals(attribute))
     {
-      return (Double) this.addSpacePerRasterLineMaximum;
+      return this.addSpacePerRasterLineMaximum;
     }
     else if (SETTING_RASTER_SHIFTTABLE.equals(attribute))
     {
@@ -2278,19 +2250,19 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     else if (SETTING_SUPPORTS_FREQUENCY.equals(attribute))
     {
-      return (Boolean) this.supportsFrequency;
+      return this.supportsFrequency;
     }
     else if (SETTING_SUPPORTS_PURGE.equals(attribute))
     {
-      return (Boolean) this.supportsPurge;
+      return this.supportsPurge;
     }
     else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
     {
-      return (Boolean) this.supportsVentilation;
+      return this.supportsVentilation;
     }
     else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
     {
-      return (Boolean) this.supportsFocus;
+      return this.supportsFocus;
     }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
@@ -2298,47 +2270,47 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     else if (SETTING_FLIPX.equals(attribute))
     {
-      return (Boolean) this.isFlipXaxis();
+      return this.isFlipXaxis();
     }
     else if (SETTING_FLIPY.equals(attribute))
     {
-      return (Boolean) this.isFlipYaxis();
+      return this.isFlipYaxis();
     }
     else if (SETTING_PORT.equals(attribute))
     {
-      return (Integer) this.getPort();
+      return this.getPort();
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
-      return (Double) this.getBedWidth();
+      return this.getBedWidth();
     }
     else if (SETTING_BEDHEIGHT.equals(attribute))
     {
-      return (Double) this.getBedHeight();
+      return this.getBedHeight();
     }
     else if (SETTING_MAXDPI.equals(attribute))
     {
-      return (Double) this.getMaxDPI();
+      return this.getMaxDPI();
     }
     else if (SETTING_MAX_ENGRAVE_DPI.equals(attribute))
     {
-      return (Double) this.getMaxEngraveDPI();
+      return this.getMaxEngraveDPI();
     }
     else if (SETTING_ARCCOMP_ENABLE.equals(attribute))
     {
-      return (Boolean) this.isLaserArcCompensationEnabled();
+      return this.isLaserArcCompensationEnabled();
     }
     else if (SETTING_TANGENT_ENABLE.equals(attribute))
     {
-      return (Boolean) this.isUseTangentCurves();
+      return this.isUseTangentCurves();
     }
     else if (SETTING_TANGENT_ACCEL.equals(attribute))
     {
-      return (Double) this.getTangentCurveMaxAcceleration();
+      return this.getTangentCurveMaxAcceleration();
     }
     else if (SETTING_CUTTING_SPEED.equals(attribute))
     {
-      return (Double) this.getNominalCuttingSpeed();
+      return this.getNominalCuttingSpeed();
     }
     return null;
   }
