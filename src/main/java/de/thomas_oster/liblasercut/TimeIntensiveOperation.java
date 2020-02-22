@@ -38,7 +38,7 @@ public abstract class TimeIntensiveOperation
   {
     if (listeners == null)
     {
-      listeners = new LinkedList<ProgressListener>();
+      listeners = new LinkedList<>();
     }
     return listeners;
   }

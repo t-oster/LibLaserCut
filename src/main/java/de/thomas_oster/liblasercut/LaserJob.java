@@ -53,8 +53,6 @@ public class LaserJob
    * mm and measured from the top-left corner of the laserbed.
    * As a result, all coordinates cx,cy in the job will be corrected
    * to cx-x,cy-y
-   * @param x
-   * @param y
    */
   public void setStartPoint(double x, double y)
   {

@@ -18,9 +18,6 @@
  **/
 package de.thomas_oster.liblasercut;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 /**
  * The LaserProperty holds all the parameters for parts of the LaserJob.
  * The Frequency value is ignored for Engraving operations
@@ -48,7 +45,6 @@ public class PowerSpeedFocusProperty implements LaserProperty
   /**
    * Sets the Laserpower. Valid values are from 0 to 100.
    * In 3d-Raster mode, the intensity is scaled to this power setting
-   * @param power 
    */
   public void setPower(int power)
   {
@@ -137,15 +133,15 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Integer) this.getPower();
+      return this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Integer) this.getSpeed();
+      return this.getSpeed();
     }
     else if ("focus".equals(name))
     {
-      return (Float) this.getFocus();
+      return this.getFocus();
     }
     return null;
   }
@@ -176,11 +172,11 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
   if ("power".equals(name))
     {
-      return (Integer) 0;
+      return 0;
     }
     else if ("speed".equals(name))
     {
-      return (Integer) 0;
+      return 0;
     }
     else if ("focus".equals(name))
     {
@@ -197,11 +193,11 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Integer) 100;
+      return 100;
     }
     else if ("speed".equals(name))
     {
-      return (Integer) 100;
+      return 100;
     }
     else if ("focus".equals(name))
     {
@@ -251,9 +247,6 @@ public class PowerSpeedFocusProperty implements LaserProperty
         if (this.speed != other.speed) {
             return false;
         }
-        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
-            return false;
-        }
-        return true;
+        return Float.floatToIntBits(this.focus) == Float.floatToIntBits(other.focus);
     }
 }

@@ -40,10 +40,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * - job size is bigger than laser bed size
      * - job resolution is not supported
      * This method is supposed to be used (in addition of own sanity checks)
-     * as a sanity check inside the sendJob mehtod
-     * 
-     * @param job
-     * @throws IllegalJobException 
+     * as a sanity check inside the sendJob method
      */
     protected void checkJob(LaserJob job) throws IllegalJobException {
         for (JobPart p : job.getParts()) {

@@ -52,9 +52,6 @@ public class Raster3dPart extends RasterizableJobPart
    * raster power.
    * This method is preferred to the above method because it allows reuse of
    * an allocated List<Byte> instead of reallocating for every line.
-   *
-   * @param line
-   * @param result
    */
   @Override
   public void getRasterLine(int line, List<Byte> result)

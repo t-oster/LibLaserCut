@@ -34,16 +34,16 @@ public interface LaserProperty extends Cloneable, Customizable
    * @param name
    * @return 
    */
-  public abstract Object getMinimumValue(String name);
+  Object getMinimumValue(String name);
   
-  public abstract Object getMaximumValue(String name);
+  Object getMaximumValue(String name);
   
-  public abstract Object[] getPossibleValues(String name);
+  Object[] getPossibleValues(String name);
   
-  public abstract LaserProperty clone();
+  LaserProperty clone();
   
   // Please override equals so that it works well
   // Otherwise there is trouble in the GUI when it tries to compare laser settings
   @Override
-  public abstract boolean equals(Object obj);
+  boolean equals(Object obj);
 }

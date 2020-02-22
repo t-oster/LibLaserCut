@@ -218,10 +218,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
         if (Float.floatToIntBits(this.speed) != Float.floatToIntBits(other.speed)) {
             return false;
         }
-        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
-            return false;
-        }
-        return true;
+        return Float.floatToIntBits(this.focus) == Float.floatToIntBits(other.focus);
     }
 
     @Override

@@ -24,28 +24,27 @@ package de.thomas_oster.liblasercut;
  *
  * It has a subset of the routines of the java.awt.BufferedImage
  * so this could easy be used with an adapter.
- * It was chosen to use this Interface rather than the BufferdImage
- * because there are some plattfroms (ie Android) where BufferedImage
+ * It was chosen to use this Interface rather than the BufferedImage
+ * because there are some platforms (ie Android) where BufferedImage
  * is not available but other Image classes which can be used.
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public interface GreyscaleRaster
 {
-
-  public int getWidth();
+  int getWidth();
 
   /**
    * get greyscale value of pixel
    * @return greyscale value: 0 (black) ... 255 (white)
    */
-  public int getGreyScale(int x, int y);
+  int getGreyScale(int x, int y);
 
   /**
    * set greyscale value of pixel
    * @param grey greyscale value: 0 (black) ... 255 (white) 
    */
-  public void setGreyScale(int x, int y, int grey);
+  void setGreyScale(int x, int y, int grey);
 
-  public int getHeight();
+  int getHeight();
 }
