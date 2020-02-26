@@ -60,7 +60,7 @@ import de.thomas_oster.liblasercut.drivers.ruida.UdpStream;
 
 public class Ruida
 {
-  public static final int DEST_PORT = 50200; // fixed UDB port
+  public static final int DEST_PORT = 50200; // fixed UDP port
   public static final int NETWORK_TIMEOUT = 3000;
   public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
   private String name;
