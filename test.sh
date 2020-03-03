@@ -7,13 +7,17 @@ then
 	echo "File 'copyrightheader' is missing"
 	exit 1
 fi
-HEADERSIZE=$(wc -l < copyrightheader)
-# filter out the line that contains year, author name(s) and at least one email adress enclosed in <>
-IGNORE_AUTHOR_LINE_REGEXP='^ \* Copyright \(C\) 20[0-9]{2}.*<.*@.*>.*$'
+
+# filter out the lines that are not relevant for the license
+#  - author lines: that contain year, author name(s) and at least one email adress enclosed in <>
+#  - blank lines: just " *" or similar
+IGNORE_AUTHOR_LINE_REGEXP='^([ \*]*| \* Copyright \([cC]\) 20[0-9]{2}.*<.*@.*>.*)$'
+
+HEADERSIZE=$(cat copyrightheader | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP" | wc -l)
 ERRORS=0
 for f in $(find src -name '*.java')
 do
-	if ! diff <(cat $f | head -n $HEADERSIZE | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP") <(cat copyrightheader | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP")
+	if ! diff <(cat $f | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP" | head -n $HEADERSIZE) <(cat copyrightheader | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP")
 	then
 		echo "Copyright header mismatch on $f"
 		ERRORS=1
