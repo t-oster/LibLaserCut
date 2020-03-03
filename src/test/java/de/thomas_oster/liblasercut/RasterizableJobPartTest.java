@@ -93,8 +93,10 @@ public class RasterizableJobPartTest
   public void testGetRasterLine()
   {
     RasterElement element = getTest8bitRasterElement();
+    AbstractLaserProperty laserProperty = new AbstractLaserProperty();
+    laserProperty.addProperty("power", (Integer) 0); // laser property must have a "power" property to avoid warnings (engraving doesn't make sense if you can't change the power)
     RasterPart instance = new RasterPart(new GreyRaster(element),
-      new AbstractLaserProperty(), new Point(0,0), 500.0f);
+      laserProperty.clone(), new Point(0,0), 500.0f);
     List<Byte> line0 = instance.getRasterLine(0);
     assertEquals((byte)line0.get(0),(byte)-1);
     assertEquals((byte)line0.get(1),(byte)-1);
@@ -107,7 +109,7 @@ public class RasterizableJobPartTest
     assertEquals((byte)line0.get(8),(byte)-1);
     RasterElement element1bit = getTest1bitRasterElement();
     RasterPart instance1bit = new RasterPart(new GreyRaster(element1bit),
-      new AbstractLaserProperty(), new Point(0,0), 500.0f);
+      laserProperty.clone(), new Point(0,0), 500.0f);
     line0 = instance1bit.getRasterLine(0);
     assertEquals((byte)line0.get(0), (byte)0xc8); //0b11001000
     assertEquals((byte)line0.get(1), (byte)0x80); //0b10000000

@@ -282,7 +282,7 @@ abstract public class RasterizableJobPart extends JobPart
    * @param y y coordinate of pixel
    * @return laser property appropriate for the color at this pixel
    */
-  public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForPixel(int x, int y)
+  public LaserProperty getPowerSpeedFocusPropertyForPixel(int x, int y)
   {
     return getPowerSpeedFocusPropertyForColor(image.getGreyScale(x, y));
   }
@@ -294,5 +294,5 @@ abstract public class RasterizableJobPart extends JobPart
    * @param color 0-255 value representing the color. 0 = black and 255 = white.
    * @return laser property appropriate for this color
    */
-  public abstract FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color);
+  public abstract LaserProperty getPowerSpeedFocusPropertyForColor(int color);
 }

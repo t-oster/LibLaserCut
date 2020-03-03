@@ -105,9 +105,9 @@ public class Raster3dPart extends RasterizableJobPart
   }
 
   @Override
-  public FloatPowerSpeedFocusProperty getPowerSpeedFocusPropertyForColor(int color)
+  public LaserProperty getPowerSpeedFocusPropertyForColor(int color)
   {
-    FloatPowerSpeedFocusProperty power = (FloatPowerSpeedFocusProperty) getLaserProperty().clone();
+    LaserProperty power = getLaserProperty().clone();
     // convert 0-255 into <max power>-0. i.e....
     //   - 0 (black) -> 100%
     //   - 127 (mid) -> 50%

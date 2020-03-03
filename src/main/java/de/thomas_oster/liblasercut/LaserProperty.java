@@ -44,4 +44,13 @@ public interface LaserProperty extends Cloneable, Customizable
   // Otherwise there is trouble in the GUI when it tries to compare laser settings
   @Override
   boolean equals(Object obj);
+  
+  
+  // The following functions are optional - if your device does not support speed/power, just make them return 100 (or an arbitrary value).
+  
+  public float getPower();
+  
+  public void setPower(float p);
+  
+  public float getSpeed();
 }

@@ -487,9 +487,9 @@ abstract class EpilogCutter extends LaserCutter
       /* Raster Orientation: Printed in current direction */
       out.printf("\033*r0F");
       /* Raster power */
-      out.printf("\033&y%dP", prop.getPower());
+      out.printf("\033&y%dP", (int) prop.getPower());
       /* Raster speed */
-      out.printf("\033&z%dS", prop.getSpeed());
+      out.printf("\033&z%dS", (int) prop.getSpeed());
       /* Focus */
       out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
@@ -519,7 +519,7 @@ abstract class EpilogCutter extends LaserCutter
         {//Apperantly the other power settings are ignored, so we have to scale
           int x = line.get(n);
           x = x >= 0 ? x : 256 + x;
-          int scalex = x * prop.getPower() / 100;
+          int scalex = x * (int) prop.getPower() / 100;
           byte bx = (byte) (scalex < 128 ? scalex : scalex - 256);
           line.set(n, bx);
         }
@@ -584,9 +584,9 @@ abstract class EpilogCutter extends LaserCutter
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
-    out.printf("\033&y%dP", prop.getPower());
+    out.printf("\033&y%dP", (int) prop.getPower());
     /* Raster speed */
-    out.printf("\033&z%dS", prop.getSpeed());
+    out.printf("\033&z%dS", (int) prop.getSpeed());
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
@@ -620,9 +620,9 @@ abstract class EpilogCutter extends LaserCutter
     /* Raster Orientation: Printed in current direction */
     out.printf("\033*r0F");
     /* Raster power */
-    out.printf("\033&y%dP", prop.getPower());
+    out.printf("\033&y%dP", (int) prop.getPower());
     /* Raster speed */
-    out.printf("\033&z%dS", prop.getSpeed());
+    out.printf("\033&z%dS", (int) prop.getSpeed());
     /* Focus */
     out.printf("\033&y%dA", mm2focus(prop.getFocus()));
 
@@ -756,13 +756,13 @@ abstract class EpilogCutter extends LaserCutter
             }
             if (currentPower == null || !currentPower.equals(p.getPower()))
             {
-              out.printf("YP%03d;", p.getPower());
-              currentPower = p.getPower();
+              out.printf("YP%03d;", (int) p.getPower());
+              currentPower = (int) p.getPower();
             }
             if (currentSpeed == null || !currentSpeed.equals(p.getSpeed()))
             {
-              out.printf("ZS%03d;", p.getSpeed());
-              currentSpeed = p.getSpeed();
+              out.printf("ZS%03d;", (int) p.getSpeed());
+              currentSpeed = (int) p.getSpeed();
             }
             break;
           }

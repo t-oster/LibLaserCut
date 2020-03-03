@@ -28,7 +28,10 @@ public interface Customizable {
      * Sets the property with the given key
      * a property may only be of the classes
      * Integer, Boolean, Double, Float and String
-     * and never set to null
+     * and never set to null.
+     * The type of <code>value</code> must be the same type as returned by
+     * <code>getProperty(key)</code>. It may be different for every
+     * implementation and every key.
      */
     void setProperty(String key, Object value);
     /**

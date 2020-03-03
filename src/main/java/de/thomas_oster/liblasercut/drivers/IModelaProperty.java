@@ -199,6 +199,24 @@ public class IModelaProperty implements LaserProperty
     }
     return true;
   }
+
+  @Override
+  public float getPower()
+  {
+    return 100;
+  }
+
+  @Override
+  public void setPower(float p)
+  {
+    // ignore the given value; we don't have an equivalent of "power".
+  }
+
+  @Override
+  public float getSpeed()
+  {
+    return (float) feedRate;
+  }
   
   
 
