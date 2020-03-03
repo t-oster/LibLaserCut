@@ -1711,13 +1711,14 @@ public class K40NanoDriver extends LaserCutter
           if ((describe.idVendor() == K40VENDERID) && (describe.idProduct() == K40PRODUCTID))
           {
             device = d;
+            LibUsb.refDevice(device);
             return;
           }
         }
       }
       finally
       {
-        LibUsb.freeDeviceList(list, true);
+        LibUsb.freeDeviceList(list, false);
       }
       throw new LibUsbException("Device was not found.", LibUsb.ERROR_NO_DEVICE);
     }
