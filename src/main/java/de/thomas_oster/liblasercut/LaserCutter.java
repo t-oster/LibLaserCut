@@ -169,7 +169,115 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     public int estimateJobDuration(LaserJob job) {
         throw new RuntimeException("Method not implemented");
     }
-
+  
+    /**
+     * Returns an estimated time, how long the job would take
+     * in seconds.
+     * 
+     * This calculation neglects acceleration, it assumes
+     * <code>duration = length * speed</code> for vectors
+     * and <code>duration = number_of_lines * (width * speed + offset)</code> for engrave.
+     * All values are in millimeters, seconds or millimeters per second.
+     * @param job LaserJob
+     * @param moveSpeedX non-cutting (move) speed in mm/s in X direction 
+     * @param moveSpeedY non-cutting (move) speed in mm/s in Y direction 
+     * @param vectorLineSpeed cutting speed in mm/s if speed is set to 100
+     * @param rasterExtraTimePerLine additional time per engrave line in seconds
+     * @param rasterLineSpeed engrave speed in mm/s if speed is set to 100
+     * @param raster3dExtraTimePerLine additional time per engrave3d line in seconds
+     * @param raster3dLineSpeed engrave3d speed in mm/s if speed is set to 100
+     * @return 
+     */
+  protected int estimateJobDuration(LaserJob job, double moveSpeedX, double moveSpeedY, double vectorLineSpeed, double rasterExtraTimePerLine, double rasterLineSpeed, double raster3dExtraTimePerLine, double raster3dLineSpeed)
+  {
+    /**
+     * Helper object for computing the duration of lineto() / moveto() commands
+     */
+    class TimeComputation
+    {
+      // we must store the current point in mm, not in px, because DPI may be different in each job part.
+      private Point currentPointMm = new Point(0,0);
+      /**
+       * Move from last point to point p, return travel time.
+       * @param p Point in px
+       * @param px2mm conversion factor from px to mm
+       */
+      public double moveTime(Point p, double px2mm)
+      {
+        Point pMm = p.scale(px2mm);
+        Point deltaMm = pMm.subtract(currentPointMm);
+        currentPointMm = pMm;
+        return Math.max(Math.abs(deltaMm.x) / moveSpeedX,
+          Math.abs(deltaMm.y) / moveSpeedY);
+      }
+      
+      /**
+       * Cut/engrave line from last point to point p, return travel time.
+       * @param p Point in px
+       * @param px2mm conversion factor from px to mm
+       */
+      public double lineTime(Point p, double px2mm, double speed)
+      {
+        Point pMm = p.scale(px2mm);
+        double time = currentPointMm.hypothenuseTo(pMm) / speed;
+        currentPointMm = pMm;
+        return time;
+      }
+    }
+    
+    TimeComputation h = new TimeComputation();
+    double result = 0;
+    for (JobPart jp : job.getParts())
+    {
+      double px2mm = Util.px2mm(1, jp.getDPI());
+      if (jp instanceof RasterizableJobPart)
+      {
+        RasterizableJobPart rp = (RasterizableJobPart) jp;
+        double offset = rp instanceof RasterPart ? rasterExtraTimePerLine : raster3dExtraTimePerLine;
+        double linespeed = rp instanceof RasterPart ? rasterLineSpeed : raster3dLineSpeed;
+        Point sp = rp.getRasterStart();
+        result += h.moveTime(sp, px2mm);
+        linespeed = linespeed * rp.getLaserProperty().getSpeed() / 100;
+        int w = rp.getRasterWidth();
+        for (int y = 0; y < rp.getRasterHeight(); y++)
+        {
+          if (!rp.lineIsBlank(y))
+          {
+            result += offset + w * px2mm / linespeed;
+          }
+          else
+          {
+            // blank line
+            result += offset;
+            // this is highly simplified -- actually, large blank regions are skipped and therefore faster
+          }
+        }
+        // For simplicity, we neglect the move time from the end of engraving.
+      }
+      if (jp instanceof VectorPart)
+      {
+        double speed = vectorLineSpeed;
+        VectorPart vp = (VectorPart) jp;
+        for (VectorCommand cmd : vp.getCommandList())
+        {
+          switch (cmd.getType())
+          {
+            case SETPROPERTY:
+              speed = vectorLineSpeed * cmd.getProperty().getSpeed() / 100;
+              break;
+            case MOVETO:
+              result += h.moveTime(new Point(cmd.getX(), cmd.getY()), px2mm);
+              break;
+            case LINETO:
+              result += h.lineTime(new Point(cmd.getX(), cmd.getY()), px2mm, speed);
+              break;
+          }
+        }
+      }
+    }
+    return (int) result;
+  }
+  
     public LaserProperty getLaserPropertyForVectorPart() {
         return new PowerSpeedFocusFrequencyProperty();
     }
