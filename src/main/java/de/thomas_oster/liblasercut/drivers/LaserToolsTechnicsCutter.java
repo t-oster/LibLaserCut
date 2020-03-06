@@ -1219,7 +1219,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
             i = i - 2; // effectively i-1 because there is i++ at the start of the loop.
 
             // TODO: it would be more efficient to switch the iteration direction: do not go one point backwards now, but later go backwards through the whole list
-            continue;
           }
         }
       }
