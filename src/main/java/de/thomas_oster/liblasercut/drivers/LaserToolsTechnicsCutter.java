@@ -778,9 +778,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   /**
    * cut a smooth curve with given interpolation points and interpolation speeds
    *
-   * @param x coordinates, starting with currentX
-   * @param y coordinates, starting with currentY
-   * @param endSpeed end speed at given coordinate (in percent, relative to
    * maximum speed (nominalCuttingSpeed), MUST obey the acceleration limit)
    */
   private double curveWithKnownSpeed(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
