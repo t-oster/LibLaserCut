@@ -78,11 +78,11 @@ public class LaosEngraveProperty extends LaosCutterProperty
   {
     if (BOTTOM_UP.equals(name))
     {
-      return (Boolean) engraveBottomUp;
+      return engraveBottomUp;
     }
     else if (UNIDIRECTIONAL.equals(name))
     {
-      return (Boolean) engraveUnidirectional;
+      return engraveUnidirectional;
     }
     else
     {

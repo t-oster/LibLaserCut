@@ -241,7 +241,7 @@ public class Dummy extends LaserCutter {
                 {
                   throw new IllegalJobException("This driver expects Power,Speed,Frequency and Focus as settings");
                 }
-                System.out.println(((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).toString());
+                System.out.println(cmd.getProperty().toString());
               } else if (cmd.getType() == VectorCommand.CmdType.LINETO) {
                 System.out.println("LINETO \t" + cmd.getX() + ", \t" + cmd.getY());
                 svg.lineTo(cmd.getX(),cmd.getY());
@@ -261,7 +261,7 @@ public class Dummy extends LaserCutter {
             {
               throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
             }
-            System.out.println(((PowerSpeedFocusProperty) rp.getLaserProperty()).toString());
+            System.out.println(rp.getLaserProperty().toString());
 
           }
           if (p instanceof Raster3dPart)
@@ -272,7 +272,7 @@ public class Dummy extends LaserCutter {
             {
               throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
             }
-            System.out.println(((PowerSpeedFocusProperty) rp.getLaserProperty()).toString());
+            System.out.println(rp.getLaserProperty().toString());
           }
       }
       System.out.println("end of job.");

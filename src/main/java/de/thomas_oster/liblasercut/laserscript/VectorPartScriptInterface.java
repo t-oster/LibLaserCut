@@ -58,11 +58,11 @@ public class VectorPartScriptInterface implements ScriptInterface
     Object current = cp.getProperty(property);
     if (current instanceof Float)
     {
-      cp.setProperty(property, (Float) ((Double) value).floatValue());
+      cp.setProperty(property, ((Double) value).floatValue());
     }
     else if (current instanceof Integer)
     {
-      cp.setProperty(property, (Integer) ((Double) value).intValue());
+      cp.setProperty(property, ((Double) value).intValue());
     }
     else if (current instanceof String)
     {

@@ -2319,7 +2319,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       {
         try
         {
-          l.add((Integer) Integer.parseInt(s));
+          l.add(Integer.parseInt(s));
         }
         catch (NumberFormatException e)
         {

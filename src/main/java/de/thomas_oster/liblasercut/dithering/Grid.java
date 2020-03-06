@@ -58,11 +58,11 @@ public class Grid extends DitheringAlgorithm
   {
     if (properties[0].equals(key))
     {
-      return (Integer) this.blocksize;
+      return this.blocksize;
     }
     else if (properties[1].equals(key))
     {
-      return (Integer) this.blockdistance;
+      return this.blockdistance;
     }
     throw new IllegalArgumentException("No such key "+key);
   }

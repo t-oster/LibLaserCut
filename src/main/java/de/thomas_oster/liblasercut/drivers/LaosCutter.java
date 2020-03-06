@@ -851,23 +851,23 @@ public class LaosCutter extends LaserCutter
     }
     else if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
-      return (Double) this.getAddSpacePerRasterLine();
+      return this.getAddSpacePerRasterLine();
     }
     else if (SETTING_SUPPORTS_FREQUENCY.equals(attribute))
     {
-      return (Boolean) this.supportsFrequency;
+      return this.supportsFrequency;
     }
     else if (SETTING_SUPPORTS_PURGE.equals(attribute))
     {
-      return (Boolean) this.supportsPurge;
+      return this.supportsPurge;
     }
     else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
     {
-      return (Boolean) this.supportsVentilation;
+      return this.supportsVentilation;
     }
     else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
     {
-      return (Boolean) this.supportsFocus;
+      return this.supportsFocus;
     }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
@@ -875,31 +875,31 @@ public class LaosCutter extends LaserCutter
     }
     else if (SETTING_FLIPX.equals(attribute))
     {
-      return (Boolean) this.isFlipXaxis();
+      return this.isFlipXaxis();
     }
     else if (SETTING_FLIPY.equals(attribute))
     {
-      return (Boolean) this.isFlipYaxis();
+      return this.isFlipYaxis();
     }
     else if (SETTING_PORT.equals(attribute))
     {
-      return (Integer) this.getPort();
+      return this.getPort();
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
-      return (Double) this.getBedWidth();
+      return this.getBedWidth();
     }
     else if (SETTING_BEDHEIGHT.equals(attribute))
     {
-      return (Double) this.getBedHeight();
+      return this.getBedHeight();
     }
     else if (SETTING_MMPERSTEP.equals(attribute))
     {
-      return (Double) this.getMmPerStep();
+      return this.getMmPerStep();
     }
     else if (SETTING_TFTP.equals(attribute))
     {
-      return (Boolean) this.isUseTftp();
+      return this.isUseTftp();
     }
     return null;
   }

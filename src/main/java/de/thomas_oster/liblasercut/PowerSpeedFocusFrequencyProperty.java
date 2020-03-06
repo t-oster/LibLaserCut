@@ -95,7 +95,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   {
     if ("frequency".equals(name))
     {
-      return (Integer) 100;
+      return 100;
     }
     else
     {
@@ -108,7 +108,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   {
      if ("frequency".equals(name))
      {
-       return (Integer) 5000;
+       return 5000;
      }
      else
      {

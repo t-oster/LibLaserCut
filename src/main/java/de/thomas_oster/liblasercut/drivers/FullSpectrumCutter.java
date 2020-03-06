@@ -329,25 +329,25 @@ public class FullSpectrumCutter extends LaserCutter
     ByteBuffer bb = ByteBuffer.allocate(132);
     bb.order(ByteOrder.LITTLE_ENDIAN);
     
-    bb.putInt((int)f1(EngraveAcceleration[0]));
-    bb.putInt((int)f1(EngraveAcceleration[1]));
-    bb.putInt((int)f1(EngraveAcceleration[2]));
+    bb.putInt(f1(EngraveAcceleration[0]));
+    bb.putInt(f1(EngraveAcceleration[1]));
+    bb.putInt(f1(EngraveAcceleration[2]));
     
     bb.putInt((int)EngraveMaxVelocity[0]);
     bb.putInt((int)EngraveMaxVelocity[1]);
     bb.putInt((int)EngraveMaxVelocity[2]);
     
-    bb.putInt((int)f1(VectorAcceleration[0]));
-    bb.putInt((int)f1(VectorAcceleration[1]));
-    bb.putInt((int)f1(VectorAcceleration[2]));
+    bb.putInt(f1(VectorAcceleration[0]));
+    bb.putInt(f1(VectorAcceleration[1]));
+    bb.putInt(f1(VectorAcceleration[2]));
     
     bb.putInt((int)VectorMaxVelocity[0]);
     bb.putInt((int)VectorMaxVelocity[1]);
     bb.putInt((int)VectorMaxVelocity[2]);
     
-    bb.putInt((int)f1(JogAcceleration[0]));
-    bb.putInt((int)f1(JogAcceleration[1]));
-    bb.putInt((int)f1(JogAcceleration[2]));
+    bb.putInt(f1(JogAcceleration[0]));
+    bb.putInt(f1(JogAcceleration[1]));
+    bb.putInt(f1(JogAcceleration[2]));
     
     bb.putInt((int)JogMaxVelocity[0]);
     bb.putInt((int)JogMaxVelocity[1]);
@@ -405,7 +405,7 @@ public class FullSpectrumCutter extends LaserCutter
     ByteArrayOutputStream jobload = new ByteArrayOutputStream();
 
     numberSubpackets=(byte)((rawCmds.length+8)/0x40000);
-    remainder=(((int)rawCmds.length%0x40000)/4);
+    remainder=((rawCmds.length %0x40000)/4);
 
     /* 
     The first step is to add a little header(raw_header) to the raw machine commands
@@ -653,7 +653,7 @@ public class FullSpectrumCutter extends LaserCutter
   @Override
   public double getBedWidth()
   {
-    return (double)BedWidth;
+    return BedWidth;
   }
 
   /**
@@ -673,7 +673,7 @@ public class FullSpectrumCutter extends LaserCutter
   @Override
   public double getBedHeight()
   {
-    return (double)BedHeight;
+    return BedHeight;
   }
 
   /**

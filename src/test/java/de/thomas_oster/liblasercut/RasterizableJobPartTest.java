@@ -123,10 +123,10 @@ public class RasterizableJobPartTest
     RasterizableJobPartImpl instance = new RasterizableJobPartImpl();
     
     instance.setRasteringCutDirectionLeftToRight();
-    assertEquals("left to right", ((RasterizableJobPartImpl) instance).getRasteringCutDirection());
+    assertEquals("left to right", instance.getRasteringCutDirection());
     
     instance.toggleRasteringCutDirection();
-    assertEquals("right to left", ((RasterizableJobPartImpl) instance).getRasteringCutDirection());
+    assertEquals("right to left", instance.getRasteringCutDirection());
   }
 
   /**
@@ -528,7 +528,7 @@ public class RasterizableJobPartTest
     
     public Raster3dPart toRaster3dPart()
     {
-      return new Raster3dPart((GreyscaleRaster) this.image, this.getLaserProperty(), this.start, this.getDPI());
+      return new Raster3dPart(this.image, this.getLaserProperty(), this.start, this.getDPI());
     }
     
     public String getRasteringCutDirection()

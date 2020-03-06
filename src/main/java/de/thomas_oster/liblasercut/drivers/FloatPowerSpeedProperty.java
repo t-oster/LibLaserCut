@@ -86,11 +86,11 @@ public class FloatPowerSpeedProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) this.getPower();
+      return this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Float) this.getSpeed();
+      return this.getSpeed();
     }
     return null;
   }
@@ -117,11 +117,11 @@ public class FloatPowerSpeedProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) 0f;
+      return 0f;
     }
     else if ("speed".equals(name))
     {
-      return (Float) 0f;
+      return 0f;
     }
     else
     {
@@ -134,11 +134,11 @@ public class FloatPowerSpeedProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) 100f;
+      return 100f;
     }
     else if ("speed".equals(name))
     {
-      return (Float) 100f;
+      return 100f;
     }
     else
     {

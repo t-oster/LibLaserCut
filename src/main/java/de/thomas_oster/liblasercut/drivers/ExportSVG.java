@@ -216,7 +216,7 @@ public class ExportSVG extends LaserCutter
                 {
                   throw new IllegalJobException("This driver expects Power,Speed,Frequency and Focus as settings");
                 }
-                System.out.println(((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).toString());
+                System.out.println(cmd.getProperty().toString());
               } else if (cmd.getType() == VectorCommand.CmdType.LINETO) {
                 System.out.println("LINETO \t" + cmd.getX() + ", \t" + cmd.getY());
                 svg.lineTo(cmd.getX(),cmd.getY());

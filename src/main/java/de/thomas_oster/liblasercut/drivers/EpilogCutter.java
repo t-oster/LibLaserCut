@@ -453,7 +453,7 @@ abstract class EpilogCutter extends LaserCutter
       {
         // run length
         result.add((byte) (1 - (p - idx)));
-        result.add((byte) line.get(idx));
+        result.add(line.get(idx));
         idx = p;
       }
       else
@@ -468,7 +468,7 @@ abstract class EpilogCutter extends LaserCutter
         result.add((byte) (p - idx - 1));
         while (idx < p)
         {
-          result.add((byte) (line.get(idx++)));
+          result.add(line.get(idx++));
         }
       }
     }
@@ -851,23 +851,23 @@ abstract class EpilogCutter extends LaserCutter
     }
     else if ("AutoFocus".equals(attribute))
     {
-      return (Boolean) this.isAutoFocus();
+      return this.isAutoFocus();
     }
     else if ("Port".equals(attribute))
     {
-      return (Integer) this.getPort();
+      return this.getPort();
     }
     else if ("BedWidth".equals(attribute))
     {
-      return (Double) this.getBedWidth();
+      return this.getBedWidth();
     }
     else if ("BedHeight".equals(attribute))
     {
-      return (Double) this.getBedHeight();
+      return this.getBedHeight();
     }
     else if ("SoftwareFocusNotSupported".equals(attribute))
     {
-      return (Boolean) this.isHideSoftwareFocus();
+      return this.isHideSoftwareFocus();
     }
     return null;
   }
@@ -986,9 +986,9 @@ abstract class EpilogCutter extends LaserCutter
       {
         RasterPart rp = (RasterPart) jp;
         Point sp = rp.getRasterStart();
-        result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
-          (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
+        result += Math.max((p.x - sp.x) / VECTOR_MOVESPEED_X,
+          (p.y - sp.y) / VECTOR_MOVESPEED_Y);
+        double linespeed = (RASTER_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
         ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
         for (int y = 0; y < rp.getRasterHeight(); y++)
         {//Find any black point
@@ -1005,7 +1005,7 @@ abstract class EpilogCutter extends LaserCutter
           if (!lineEmpty)
           {
             int w = rp.getRasterWidth();
-            result += (double) RASTER_LINEOFFSET + (double) w / linespeed;
+            result += RASTER_LINEOFFSET + (double) w / linespeed;
             p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
             p.y = sp.y + y;
           }
@@ -1019,9 +1019,9 @@ abstract class EpilogCutter extends LaserCutter
       {
         Raster3dPart rp = (Raster3dPart) jp;
         Point sp = rp.getRasterStart();
-        result += Math.max((double) (p.x - sp.x) / VECTOR_MOVESPEED_X,
-          (double) (p.y - sp.y) / VECTOR_MOVESPEED_Y);
-        double linespeed = ((double) RASTER3D_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
+        result += Math.max((p.x - sp.x) / VECTOR_MOVESPEED_X,
+          (p.y - sp.y) / VECTOR_MOVESPEED_Y);
+        double linespeed = (RASTER3D_LINESPEED * ((PowerSpeedFocusProperty) rp.getLaserProperty()).getSpeed()) / 100;
 	ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
         for (int y = 0; y < rp.getRasterHeight(); y++)
         {//Check if
@@ -1038,7 +1038,7 @@ abstract class EpilogCutter extends LaserCutter
           if (!lineEmpty)
           {
             int w = rp.getRasterWidth();
-            result += (double) RASTER3D_LINEOFFSET + (double) w / linespeed;
+            result += RASTER3D_LINEOFFSET + (double) w / linespeed;
             p.x = sp.y % 2 == 0 ? sp.x + w : sp.x;
             p.y = sp.y + y;
           }
@@ -1058,8 +1058,8 @@ abstract class EpilogCutter extends LaserCutter
               break;
             }
             case MOVETO:
-              result += Math.max((double) (p.x - cmd.getX()) / VECTOR_MOVESPEED_X,
-                (double) (p.y - cmd.getY()) / VECTOR_MOVESPEED_Y);
+              result += Math.max((p.x - cmd.getX()) / VECTOR_MOVESPEED_X,
+                (p.y - cmd.getY()) / VECTOR_MOVESPEED_Y);
               p = new Point(cmd.getX(), cmd.getY());
               break;
             case LINETO:

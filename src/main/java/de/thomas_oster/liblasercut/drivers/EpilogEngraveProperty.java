@@ -54,7 +54,7 @@ public class EpilogEngraveProperty extends PowerSpeedFocusProperty
   {
     if (BOTTOM_UP.equals(name))
     {
-      return (Boolean) engraveBottomUp;
+      return engraveBottomUp;
     }
     else
     {

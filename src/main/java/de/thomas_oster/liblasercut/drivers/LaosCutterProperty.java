@@ -123,11 +123,11 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   {
     if ("ventilation".equals(name))
     {
-      return (Boolean) this.getVentilation();
+      return this.getVentilation();
     }
     else if ("purge".equals(name))
     {
-      return (Boolean) this.getPurge();
+      return this.getPurge();
     }
     else
     {

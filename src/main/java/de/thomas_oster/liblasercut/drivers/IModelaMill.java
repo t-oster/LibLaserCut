@@ -79,12 +79,12 @@ public class IModelaMill extends LaserCutter
   private Map<String, Object> properties = new LinkedHashMap<String, Object>();
   public IModelaMill()
   {
-    properties.put(BED_WIDTH, (Double) 85d);
-    properties.put(BED_HEIGHT, (Double) 55d);
+    properties.put(BED_WIDTH, 85d);
+    properties.put(BED_HEIGHT, 55d);
     properties.put(HOSTNAME, "file:///dev/usb/lp0");
-    properties.put(PORT, (Integer) 5000);
-    properties.put(HOME_ON_END, (Boolean) true);
-    properties.put(FLIP_YAXIS, (Boolean) false);
+    properties.put(PORT, 5000);
+    properties.put(HOME_ON_END, true);
+    properties.put(FLIP_YAXIS, false);
   }
   
   private boolean spindleOn = false;
@@ -389,7 +389,7 @@ public class IModelaMill extends LaserCutter
   {
     if (properties.get(BED_WIDTH) == null)
     {
-      properties.put(BED_WIDTH, (Double) 85d);
+      properties.put(BED_WIDTH, 85d);
     }
     return (Double) properties.get(BED_WIDTH);
   }
@@ -399,7 +399,7 @@ public class IModelaMill extends LaserCutter
   {
     if (properties.get(BED_HEIGHT) == null)
     {
-      properties.put(BED_HEIGHT, (Double) 55d);
+      properties.put(BED_HEIGHT, 55d);
     }
     return (Double) properties.get(BED_HEIGHT);
   }
