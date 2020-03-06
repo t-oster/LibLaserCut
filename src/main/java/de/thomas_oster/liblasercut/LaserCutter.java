@@ -145,7 +145,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      *
      * A larger value may be helpful for cutters with very limited CPU power,
      * which will slow down if a path has a high density of points per length.
-     * @see ShapeConverter.addShape() uses this value
+     * @see de.thomas_oster.liblasercut.utils.ShapeConverter#addShape(java.awt.Shape, VectorPart, LaserCutter) uses this value
      * @return tolerance in machine pixels
      */
     public double getRequiredCurvePrecision() {
