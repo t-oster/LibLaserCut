@@ -46,8 +46,7 @@ public class MakeBlockXYPlotterProperty extends PowerSpeedFocusFrequencyProperty
   @Override
   public String[] getPropertyKeys()
   {
-    LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+      LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
     result.remove("focus");
     result.remove("frequency");
     

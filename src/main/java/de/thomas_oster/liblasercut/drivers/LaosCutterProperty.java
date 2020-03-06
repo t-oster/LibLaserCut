@@ -96,8 +96,7 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   }
   
   protected String[] getPropertyKeys(boolean showHidden) {
-    LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
     if (!showHidden) {
       if (this.hideFocus)
       {

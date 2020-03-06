@@ -44,8 +44,7 @@ public class EpilogEngraveProperty extends PowerSpeedFocusProperty
   @Override
   public String[] getPropertyKeys()
   {
-    LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
     result.add(BOTTOM_UP);
     return result.toArray(new String[0]);
   }
