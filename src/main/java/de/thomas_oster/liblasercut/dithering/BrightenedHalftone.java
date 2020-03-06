@@ -21,31 +21,30 @@ package de.thomas_oster.liblasercut.dithering;
 
 final class BrightnessCalculations
 {
-
+  /**
+   * linear interpolation between (x1,y1) and (x2,y2)
+   *
+   * @param x1 x-value 1
+   * @param x2 x-value 1
+   * @param y1 x-value 1
+   * @param y2 y-value of coordinate 2
+   * @param x  input x-value
+   * @return interpolated value of y for x
+   */
   public static double linearMap(double x, double x1, double x2, double y1, double y2)
   {
-    /**
-     * linear interpolation between (x1,y1) and (x2,y2)
-     * 
-     * @param x1 x-value 1
-     * @param x2 x-value 1
-     * @param y1 x-value 1
-     * @param y2 y-value of coordinate 2
-     * @param x  input x-value
-     * @return interpolated value of y for x
-     */
     return (x - x1) / (x2 - x1) * (y2 - y1) + y1;
   }
 
+  /**
+   * piecewise linear interpolation between (x,y) coordinate pairs
+   *
+   * @param x x-values in ascending order
+   * @param y y-values y=f(x)
+   * @return interpolated value f(value); y[0] or y[last] if x out of bounds
+   */
   public static double piecewiseLinearMap(double value, double[] x, double[] y)
   {
-    /**
-     * piecewise linear interpolation between (x,y) coordinate pairs
-     * 
-     * @param x x-values in ascending order
-     * @param y y-values y=f(x)
-     * @return interpolated value f(value); y[0] or y[last] if x out of bounds
-     */
     // too small or too large input values: clamp to y[0] or y[last]
     if (value < x[0])
     {

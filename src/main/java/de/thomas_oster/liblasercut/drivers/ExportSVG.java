@@ -18,11 +18,11 @@
  **/
 
 
-/**
- * This class implements a dummy driver that accepts laserjobs and prints debug information about them.
- * You can use it to test the VisiCut GUI without having a real lasercutter.
- *
- * @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
+/*
+  This class implements a dummy driver that accepts laserjobs and prints debug information about them.
+  You can use it to test the VisiCut GUI without having a real lasercutter.
+
+  @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 package de.thomas_oster.liblasercut.drivers;
 

@@ -34,10 +34,10 @@ public class FloydSteinberg extends DitheringAlgorithm
     int pixelcount = 0;
     int width = src.getWidth();
     int height = src.getHeight();
-    /**
-     * We have to copy the input image, because we will
-     * alter the pixels during dither process and don't want
-     * to destroy the input image
+    /*
+      We have to copy the input image, because we will
+      alter the pixels during dither process and don't want
+      to destroy the input image
      */
     int[][] input = new int[width][2];
     for (int x = 0; x < width; x++)

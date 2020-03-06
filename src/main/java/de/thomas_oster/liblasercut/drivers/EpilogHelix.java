@@ -16,11 +16,11 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-/**
- * Known Limitations:
- * - If there is Raster and Raster3d Part in one job, the speed from 3d raster
- * is taken for both and eventually other side effects:
- * IT IS NOT RECOMMENDED TO USE 3D-Raster and Raster in the same Job
+/*
+  Known Limitations:
+  - If there is Raster and Raster3d Part in one job, the speed from 3d raster
+  is taken for both and eventually other side effects:
+  IT IS NOT RECOMMENDED TO USE 3D-Raster and Raster in the same Job
  */
 
 package de.thomas_oster.liblasercut.drivers;

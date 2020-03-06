@@ -17,8 +17,8 @@
  *
  **/
 
-/**
- * Author: Sven Jung <sven.jung@rwth-aachen.de>
+/*
+  Author: Sven Jung <sven.jung@rwth-aachen.de>
  */
 
 package de.thomas_oster.liblasercut.drivers;

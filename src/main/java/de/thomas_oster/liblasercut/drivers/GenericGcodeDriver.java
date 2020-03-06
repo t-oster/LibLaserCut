@@ -407,10 +407,10 @@ public class GenericGcodeDriver extends LaserCutter {
     this.spindleMax = spindleMax;
   }
 
-  @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
    */
+  @Override
   public LaserProperty getLaserPropertyForVectorPart() {
     return new FloatPowerSpeedFocusProperty();
   }

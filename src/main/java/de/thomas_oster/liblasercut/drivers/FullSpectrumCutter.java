@@ -36,7 +36,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -133,8 +132,8 @@ public class FullSpectrumCutter extends LaserCutter
           {
             case LINETO:
             {
-              /**
-               * Move the laserhead (laser on) from the current position to the x/y position of this command. 
+              /*
+                Move the laserhead (laser on) from the current position to the x/y position of this command.
                */
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
@@ -148,8 +147,8 @@ public class FullSpectrumCutter extends LaserCutter
             }
             case MOVETO:
             {
-              /**
-               * Move the laserhead (laser off) from the current position to the x/y position of this command.
+              /*
+                Move the laserhead (laser off) from the current position to the x/y position of this command.
                */
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
@@ -163,8 +162,8 @@ public class FullSpectrumCutter extends LaserCutter
             }
             case SETPROPERTY:
             {
-              /**
-               * Change speed or power.
+              /*
+                Change speed or power.
                */
               LaserProperty prop = cmd.getProperty();
               System.out.println("Changing Device Parameters:");

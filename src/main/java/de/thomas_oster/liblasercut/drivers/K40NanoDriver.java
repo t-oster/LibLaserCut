@@ -217,10 +217,10 @@ public class K40NanoDriver extends LaserCutter
           {
             case LINETO:
             {
-              /**
-               * Move the laserhead (laser on) from the current position to the
-               * x/y position of this command. All coordinates are in dots
-               * respecting to the job resolution
+              /*
+                Move the laserhead (laser on) from the current position to the
+                x/y position of this command. All coordinates are in dots
+                respecting to the job resolution
                */
               int x = (int) (cmd.getX() * (1000 / p.getDPI()));
               int y = (int) (cmd.getY() * (1000 / p.getDPI()));
@@ -232,9 +232,9 @@ public class K40NanoDriver extends LaserCutter
             }
             case MOVETO:
             {
-              /**
-               * Move the laserhead (laser off) from the current position to the
-               * x/y position of this command. All coordinates are in mm
+              /*
+                Move the laserhead (laser off) from the current position to the
+                x/y position of this command. All coordinates are in mm
                */
               int x = (int) (cmd.getX() * (1000 / p.getDPI()));
               int y = (int) (cmd.getY() * (1000 / p.getDPI()));

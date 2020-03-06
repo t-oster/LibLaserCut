@@ -84,9 +84,9 @@ public class SampleDriver extends LaserCutter
           {
             case LINETO:
             {
-              /**
-               * Move the laserhead (laser on) from the current position to the x/y position of this command. All coordinates are in dots respecting
-               * to the job resolution
+              /*
+                Move the laserhead (laser on) from the current position to the x/y position of this command. All coordinates are in dots respecting
+                to the job resolution
                */
               double x = Util.px2mm(cmd.getX(), p.getDPI());
               double y = Util.px2mm(cmd.getY(), p.getDPI());
@@ -95,8 +95,8 @@ public class SampleDriver extends LaserCutter
             }
             case MOVETO:
             {
-              /**
-               * Move the laserhead (laser off) from the current position to the x/y position of this command. All coordinates are in mm
+              /*
+                Move the laserhead (laser off) from the current position to the x/y position of this command. All coordinates are in mm
                */
               double x = Util.px2mm(cmd.getX(), p.getDPI());
               double y = Util.px2mm(cmd.getY(), p.getDPI());
@@ -105,8 +105,8 @@ public class SampleDriver extends LaserCutter
             }
             case SETPROPERTY:
             {
-              /**
-               * Change properties of current laser-actions (e.g. speed, frequency, power... whatever your driver supports)
+              /*
+                Change properties of current laser-actions (e.g. speed, frequency, power... whatever your driver supports)
                */
               LaserProperty prop = cmd.getProperty();
               System.out.println("Changing Device Parameters:");

@@ -16,7 +16,7 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-/**
+/*
  * Known Limitations:
  * - If there is Raster and Raster3d Part in one job, the speed from 3d raster
  * is taken for both and eventually other side effects:
@@ -683,11 +683,11 @@ abstract class EpilogCutter extends LaserCutter
           {
             pcks++;
           }
-          /**
-           * Number of Pixels in a row??
-           * or b2m%dW for TIFF encoding?
-           * Or number of Bytes in a row? who knows
-           * in ctrl-cut its number of packed bytes
+          /*
+            Number of Pixels in a row??
+            or b2m%dW for TIFF encoding?
+            Or number of Bytes in a row? who knows
+            in ctrl-cut its number of packed bytes
            */
           out.printf("\033*b%dW", pcks * 8);
           for (byte s : encoded)
