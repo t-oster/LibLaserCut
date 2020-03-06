@@ -109,20 +109,20 @@ public class BlackWhiteRasterTest
         // almost black -> black
         ras.setGreyScale(x, y, 42);
         assertEquals(0, ras.getGreyScale(x, y));
-        assertEquals(true, ras.isBlack(x, y));
+        assertTrue(ras.isBlack(x, y));
         assertEquals(1, ras.getPixel(x, y)); // note: meaning of getPixel() is opposite of isBlack()
         // black
         ras.setGreyScale(x, y, 0);
         assertEquals(0, ras.getGreyScale(x, y));
-        assertEquals(true, ras.isBlack(x, y));
+        assertTrue(ras.isBlack(x, y));
         // white
         ras.setGreyScale(x, y, 255);
         assertEquals(255, ras.getGreyScale(x, y));
-        assertEquals(false, ras.isBlack(x, y));
+        assertFalse(ras.isBlack(x, y));
         // almost white
         ras.setGreyScale(x, y, 200);
         assertEquals(255, ras.getGreyScale(x, y));
-        assertEquals(false, ras.isBlack(x, y));
+        assertFalse(ras.isBlack(x, y));
         assertEquals(0, ras.getPixel(x, y)); // note: meaning of getPixel() is opposite of isBlack()
       }
     }
