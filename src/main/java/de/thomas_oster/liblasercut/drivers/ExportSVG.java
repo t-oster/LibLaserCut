@@ -279,9 +279,7 @@ public class ExportSVG extends LaserCutter
   @Override
   public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Double[]{
-                500d
-              });
+      resolutions = Arrays.asList(500d);
     }
     return resolutions;
   }

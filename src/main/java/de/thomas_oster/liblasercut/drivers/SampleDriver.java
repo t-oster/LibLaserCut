@@ -142,7 +142,7 @@ public class SampleDriver extends LaserCutter
   @Override
   public List<Double> getResolutions()
   {
-    return Arrays.asList(new Double[]{100.0,200.0,500.0,1000.0});
+    return Arrays.asList(100.0,200.0,500.0,1000.0);
   }
 
   /**

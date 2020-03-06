@@ -762,16 +762,13 @@ public class LaosCutter extends LaserCutter
     {
       //TODO: Calculate possible resolutions
       //according to mm/step
-      resolutions = Arrays.asList(new Double[]
-        {
-          100d,
-          200d,
-          300d,
-          500d,
-          600d,
-          1000d,
-          1200d
-        });
+      resolutions = Arrays.asList(100d,
+              200d,
+              300d,
+              500d,
+              600d,
+              1000d,
+              1200d);
     }
     return resolutions;
   }

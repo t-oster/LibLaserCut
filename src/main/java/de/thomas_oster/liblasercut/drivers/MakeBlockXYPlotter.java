@@ -64,9 +64,8 @@ public class MakeBlockXYPlotter extends LaserCutter
   private int delayRate = 5000;
   private int powerRate = 255;
   private String usedTool = "PEN"; // PEN, Laser
-  private List<Double> resolutions = Arrays.asList(new Double[]{
-                64d // fine liner
-              });
+  private List<Double> resolutions = Arrays.asList(64d // fine liner
+  );
   
   private int chosenDelay;
   private int chosenPower;

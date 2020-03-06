@@ -381,7 +381,7 @@ public class IModelaMill extends LaserCutter
   {
     // software resolution in NC-Code mode: 0.001mm/step = 0.000036 inches/step
     // means 1000 steps per mm
-   return Arrays.asList(new Double[]{100d, 200d, 300d, 400d, 500d, 1000d, 1200d, Util.dpmm2dpi(1000d)});
+   return Arrays.asList(100d, 200d, 300d, 400d, 500d, 1000d, 1200d, Util.dpmm2dpi(1000d));
   }
 
   @Override

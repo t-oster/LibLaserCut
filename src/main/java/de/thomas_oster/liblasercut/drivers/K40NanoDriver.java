@@ -307,10 +307,7 @@ public class K40NanoDriver extends LaserCutter
   @Override
   public List<Double> getResolutions()
   {
-    return Arrays.asList(new Double[]
-    {
-      250.0, 500.0, 1000.0
-    });
+    return Arrays.asList(250.0, 500.0, 1000.0);
   }
 
   public String getBoard()
