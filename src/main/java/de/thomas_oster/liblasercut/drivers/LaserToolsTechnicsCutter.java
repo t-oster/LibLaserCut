@@ -480,7 +480,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
   private double generateVectorCode(ByteArrayOutputStream outputstream, VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException
   {
-    PrintStream out = new PrintStream(outputstream, true, "US-ASCII");
+    PrintStream out = new PrintStream(outputstream, true, StandardCharsets.US_ASCII);
 
     out.write(toBytes("1B 56")); // start vector mode
 
@@ -1885,7 +1885,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     currentVentilation = false;
     currentJobMode = -1;
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
 
     out.print("LTT");
 
@@ -1931,7 +1931,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   private byte[] generateShutdownCode() throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     this.setFocus(out, 0f);
     this.setVentilation(out, false);
     this.setPurge(out, false);

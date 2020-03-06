@@ -31,6 +31,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -160,7 +161,7 @@ abstract class EpilogCutter extends LaserCutter
   private byte[] generatePjlHeader(LaserJob job, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     /* Print the printer job language header. */
     out.printf("\033%%-12345X@PJL JOB NAME=%s\r\n", job.getTitle());
     out.printf("\033E@PJL ENTER LANGUAGE=PCL\r\n");
@@ -198,7 +199,7 @@ abstract class EpilogCutter extends LaserCutter
   private byte[] generatePjlFooter() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
 
     /* Footer for printer job language. */
     /* Reset */
@@ -221,11 +222,11 @@ abstract class EpilogCutter extends LaserCutter
     {
       localhost = "unknown";
     }
-    PrintStream out = new PrintStream(this.out, true, "US-ASCII");
+    PrintStream out = new PrintStream(this.out, true, StandardCharsets.US_ASCII);
     out.print("\002\n");
     waitForResponse(0);
     ByteArrayOutputStream tmp = new ByteArrayOutputStream();
-    PrintStream stmp = new PrintStream(tmp, true, "US-ASCII");
+    PrintStream stmp = new PrintStream(tmp, true, StandardCharsets.US_ASCII);
     stmp.printf("H%s\n", localhost);
     stmp.printf("P%s\n", job.getUser());
     stmp.printf("J%s\n", job.getTitle());
@@ -478,7 +479,7 @@ abstract class EpilogCutter extends LaserCutter
   private byte[] generateRaster3dPCL(Raster3dPart rp) throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     if (rp != null)
     {
       EpilogEngraveProperty prop = (EpilogEngraveProperty) rp.getLaserProperty();
@@ -579,7 +580,7 @@ abstract class EpilogCutter extends LaserCutter
     EpilogEngraveProperty prop = new EpilogEngraveProperty();
     boolean bu = prop.isEngraveBottomUp();
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) jp.getDPI());
     /* Raster Orientation: Printed in current direction */
@@ -615,7 +616,7 @@ abstract class EpilogCutter extends LaserCutter
     EpilogEngraveProperty prop = (EpilogEngraveProperty) rp.getLaserProperty();
     boolean bu = prop.isEngraveBottomUp();
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) rp.getDPI());
     /* Raster Orientation: Printed in current direction */
@@ -710,7 +711,7 @@ abstract class EpilogCutter extends LaserCutter
   private byte[] generateDummyVector(double dpi) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     out.printf("\033%%1B");// Start HPGL
     out.printf("IN;");
     //Reset Focus to 0
@@ -722,7 +723,7 @@ abstract class EpilogCutter extends LaserCutter
   {
     //TODO: Test if the resolution settings have an effect
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     /* Resolution of the print. Number of Units/Inch*/
     out.printf("\033%%1B");// Start HPGL
     out.printf("IN;");
@@ -797,7 +798,7 @@ abstract class EpilogCutter extends LaserCutter
   {
     /* Generate complete PJL Job */
     ByteArrayOutputStream pjlJob = new ByteArrayOutputStream();
-    PrintStream wrt = new PrintStream(pjlJob, true, "US-ASCII");
+    PrintStream wrt = new PrintStream(pjlJob, true, StandardCharsets.US_ASCII);
 
     wrt.write(generatePjlHeader(job, job.getParts().get(0).getDPI()));
     if (! (job.getParts().get(0) instanceof RasterPart))

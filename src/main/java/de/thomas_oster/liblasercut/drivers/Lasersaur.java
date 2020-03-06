@@ -25,6 +25,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
@@ -148,7 +149,7 @@ public class Lasersaur extends LaserCutter {
 
   private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
@@ -198,7 +199,7 @@ public class Lasersaur extends LaserCutter {
 
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
@@ -265,7 +266,7 @@ public class Lasersaur extends LaserCutter {
 
   private byte[] generatePseudoRasterGCode(RasterPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
@@ -348,7 +349,7 @@ public class Lasersaur extends LaserCutter {
 
   private byte[] generateInitializationCode() throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     out.print("G54\n");//use table offset
     out.print("G21\n");//units to mm
     out.print("G90\n");//following coordinates are absolute
@@ -358,7 +359,7 @@ public class Lasersaur extends LaserCutter {
 
   private byte[] generateShutdownCode() throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     //back to origin and shutdown
     out.print("G0 X0 Y0\n");//move to 0 0
     return result.toByteArray();

@@ -37,6 +37,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -627,7 +628,7 @@ public class FullSpectrumCutter extends LaserCutter
   public void sendTextCmd(String textCmd, BufferedOutputStream out)throws IOException, InterruptedException
   {
     System.out.println("Sending command: "+textCmd);
-    out.write(textCmd.getBytes(Charset.forName("ASCII")));  
+    out.write(textCmd.getBytes(StandardCharsets.US_ASCII));
     out.flush();
   }
   

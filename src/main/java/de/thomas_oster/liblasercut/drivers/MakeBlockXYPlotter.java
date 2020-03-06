@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -372,7 +373,7 @@ public class MakeBlockXYPlotter extends LaserCutter
         
         // wake up firmware
         String command = "\r\n\r\n";
-        out.write(command.getBytes("US-ASCII"));
+        out.write(command.getBytes(StandardCharsets.US_ASCII));
         out.flush();
         Thread.sleep(2000);
         portReader.readLine(); // "ok"
@@ -447,7 +448,7 @@ public class MakeBlockXYPlotter extends LaserCutter
       if (this.hostname.startsWith("port://")) {
         // send
         String sendString = command + "\n";
-        out.write(sendString.getBytes("US-ASCII"));
+        out.write(sendString.getBytes(StandardCharsets.US_ASCII));
         out.flush();
       }
       else if (hostname.startsWith("file://")) {

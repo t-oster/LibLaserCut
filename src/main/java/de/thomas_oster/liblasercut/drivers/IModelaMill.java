@@ -40,6 +40,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -346,7 +347,7 @@ public class IModelaMill extends LaserCutter
     checkJob(job);
     pl.progressChanged(this, 20);
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     pl.taskChanged(this, "generating...");
     writeInitializationCode(out);
     double all = job.getParts().size();
