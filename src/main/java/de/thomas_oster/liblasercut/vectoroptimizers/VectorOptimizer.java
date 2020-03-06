@@ -135,12 +135,12 @@ public abstract class VectorOptimizer
     @Override
     public String toString()
     {
-      String partial = "Element {"
-        + ((start == null) ? "null" : "(" + start.x + ", " + start.y + ")");
+      StringBuilder partial = new StringBuilder("Element {"
+              + ((start == null) ? "null" : "(" + start.x + ", " + start.y + ")"));
 
       for (Point p : moves)
       {
-        partial += " -> (" + p.x + ", " + p.y + ")";
+        partial.append(" -> (").append(p.x).append(", ").append(p.y).append(")");
       }
 
       return partial + "}";

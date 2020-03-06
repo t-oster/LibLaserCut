@@ -291,7 +291,7 @@ public class InnerFirstVectorOptimizerTest
       + " -fill White -draw \"color -0,0 floodfill\" %s frame%05d.png\n";
     final int F = 3;
     int c = 0;
-    String drawCmd = "";
+    StringBuilder drawCmd = new StringBuilder();
     String compositeCommand = "";
     for (Element polyline : sorted)
     {
@@ -309,7 +309,7 @@ public class InnerFirstVectorOptimizerTest
             "frame%05d.png -compose Darken -composite", c);
           ++c;
         }
-        drawCmd += "line" + p2s(prev) + p2s(p) + " ";
+        drawCmd.append("line").append(p2s(prev)).append(p2s(p)).append(" ");
         prev = p;
       }
     }
