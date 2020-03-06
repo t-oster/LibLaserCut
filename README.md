@@ -1,4 +1,7 @@
-# LibLaserCut #
+# LibLaserCut
+
+[![Build Status](https://travis-ci.org/t-oster/LibLaserCut.svg?branch=master)](https://travis-ci.org/t-oster/LibLaserCut)
+
 This is a library intended to provide suppport
 for Lasercutters on any platform.
 
