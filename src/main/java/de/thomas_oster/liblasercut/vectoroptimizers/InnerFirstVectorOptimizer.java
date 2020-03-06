@@ -53,7 +53,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
     }
   }
 
-  private class XMinComparator extends ElementValueComparator
+  private static class XMinComparator extends ElementValueComparator
   {
     // compare by XMin a>b
     @Override
@@ -63,7 +63,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
     }
   }
 
-  private class YMinComparator extends ElementValueComparator
+  private static class YMinComparator extends ElementValueComparator
   {
     // compare by YMin a>b
     @Override
@@ -73,7 +73,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
     }
   }
 
-  private class XMaxComparator extends ElementValueComparator
+  private static class XMaxComparator extends ElementValueComparator
   {
     // compare by XMax a<b
     @Override
@@ -83,7 +83,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
     }
   }
 
-  private class YMaxComparator extends ElementValueComparator
+  private static class YMaxComparator extends ElementValueComparator
   {
     // compare by YMax a<b
     @Override
