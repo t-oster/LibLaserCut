@@ -58,9 +58,6 @@ public class Util {
     /**
      * Returns true iff the given objects are not equal
      * This method is used to avoid null checks
-     * @param a
-     * @param b
-     * @return
      */
     public static boolean differ(Object a, Object b) {
         if (a == null ^ b == null) {

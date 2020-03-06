@@ -96,7 +96,6 @@ public class FullSpectrumCutter extends LaserCutter
    * @param pl Use this object to inform VisiCut about the progress of your sending action. 
    * @param warnings If you there are warnings for the user, you can add them to this list, so they can be displayed by VisiCut
    * @throws IllegalJobException Throw this exception, when the job is not suitable for the current machine
-   * @throws Exception 
    */
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
@@ -257,7 +256,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Loops until the machine finish cutting
-   * @throws IOException 
    */
   private void waitjobend() throws IOException
   {
@@ -294,9 +292,7 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Generates the full packet to send, given a set of raw machine commands.
-   * @param rawCmds
    * @return the packet as a byte array
-   * @throws IOException 
    */
   private byte[] generatePacket(byte[] rawCmds)throws IOException
   {
@@ -316,8 +312,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Generates the header of the packet.
-   * @param header
-   * @return 
    */
   private byte[] generateHeader()
   {
@@ -392,8 +386,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Implements the function f(x) = sqrt(2/x) 10^8
-   * @param x
-   * @return 
    */
   public int f1(long x)
   {
@@ -403,9 +395,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Generates the load of the packet(packet=header+load) given a set of raw machine commands.
-   * @param rawCmds
-   * @return
-   * @throws IOException 
    */
   private byte[] jobContents(byte[] rawCmds)throws IOException
   {
@@ -485,7 +474,6 @@ public class FullSpectrumCutter extends LaserCutter
    * to a ByteArrayOutputStream
    * @param tmpsub Array to compress
    * @param jobload ByteArrayOutputStream where the result will be written
-   * @throws IOException 
    */
   
   private void compress_sub(byte [] tmpsub, ByteArrayOutputStream jobload) throws IOException
@@ -537,7 +525,6 @@ public class FullSpectrumCutter extends LaserCutter
    * @param power as a percentage
    * @param speed in steps/sec
    * @return array of bytes with the machine commands, each command consist of 4 bytes
-   * @throws IOException 
    */
   private byte[] line(double x_start,double x_dest,double y_start,double y_dest,double power, double speed)throws IOException
   { 
@@ -620,10 +607,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Sends text to a BufferedOutputStream, useful for sending text commands to machine card.
-   * @param textCmd
-   * @param out
-   * @throws IOException 
-   * @throws java.lang.InterruptedException 
    */
   public void sendTextCmd(String textCmd, BufferedOutputStream out)throws IOException, InterruptedException
   {
@@ -635,8 +618,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Waits for response from a BufferedInputStream and prints the response.
-   * @param in
-   * @throws IOException 
    */
   public void receiveResponse(BufferedInputStream in)throws IOException
   {
@@ -658,7 +639,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Returns a list of all supported resolutions (in DPI)
-   * @return 
    */
   @Override
   public List<Double> getResolutions()
@@ -669,7 +649,6 @@ public class FullSpectrumCutter extends LaserCutter
   protected Double BedWidth = 500d;
   /**
    * Returns the width of the laser-bed. 
-   * @return 
    */
   @Override
   public double getBedWidth()
@@ -690,7 +669,6 @@ public class FullSpectrumCutter extends LaserCutter
   protected Double BedHeight = 300d;
   /**
    * Returns the height of the laser-bed. 
-   * @return 
    */
   @Override
   public double getBedHeight()
@@ -810,7 +788,6 @@ public class FullSpectrumCutter extends LaserCutter
   /**
    * Copies the current instance with all config settings, because
    * it is used for save- and restoring
-   * @return 
    */
   @Override
   public FullSpectrumCutter clone() {

@@ -123,8 +123,6 @@ public class Grbl extends GenericGcodeDriver
    * Initializes Grbl, handling issuing of soft-reset and initial homing
    * (if desired & required).
    * @param pl Progress listener to update during connect/homing process
-   * @return
-   * @throws IOException
    */
   @Override
   protected String waitForIdentificationLine(ProgressListener pl) throws IOException
@@ -163,12 +161,6 @@ public class Grbl extends GenericGcodeDriver
   /**
    * Send a G0 rapid move to Grbl.
    * Doesn't include travel speed since grbl ignores that anyway.
-   * 
-   * @param out
-   * @param x
-   * @param y
-   * @param resolution
-   * @throws IOException 
    */
   @Override
   protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
@@ -188,9 +180,6 @@ public class Grbl extends GenericGcodeDriver
   
   /**
    * Send a line of gcode to the cutter, stripping out any whitespace in the process
-   * @param text
-   * @param parameters
-   * @throws IOException 
    */
   @Override
   protected void sendLine(String text, Object... parameters) throws IOException

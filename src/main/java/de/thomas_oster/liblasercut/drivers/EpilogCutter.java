@@ -278,9 +278,7 @@ abstract class EpilogCutter extends LaserCutter
 
   /**
    * Check the laser job for obvious errors, such as physical dimensions
-   * @param job
    * @param warnings list of warnings, which will be appended to if warnings are issued
-   * @throws IllegalJobException
    */
   protected void checkJobAndApplyStartPoint(LaserJob job, List<String> warnings) throws IllegalJobException
   {

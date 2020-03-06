@@ -29,16 +29,12 @@ public interface Customizable {
      * a property may only be of the classes
      * Integer, Boolean, Double, Float and String
      * and never set to null
-     * @param key
-     * @param value 
      */
     void setProperty(String key, Object value);
     /**
      * Returns the value of the property or null, if the key
      * does not name a valid property
      * A property may never return null!
-     * @param key
-     * @return 
      */
     Object getProperty(String key);
 }

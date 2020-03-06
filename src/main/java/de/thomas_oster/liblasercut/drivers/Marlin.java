@@ -86,8 +86,6 @@ public class Marlin extends GenericGcodeDriver {
   /**
    * Waits for the Identification line and returns null if it's alright
    * Otherwise it returns the wrong line
-   * @return
-   * @throws IOException 
    */
  @Override
   protected String waitForIdentificationLine(ProgressListener pl) throws IOException

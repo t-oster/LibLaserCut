@@ -39,7 +39,6 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   /**
    * Sets the Laserpower. Valid values are from 0 to 100.
    * In 3d-Raster mode, the intensity is scaled to this power setting
-   * @param power 
    */
   public void setPower(float power)
   {
@@ -55,7 +54,6 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
 
   /**
    * Sets the speed for the Laser. Valid values is from 0 to 100
-   * @param speed 
    */
   public void setSpeed(float speed)
   {

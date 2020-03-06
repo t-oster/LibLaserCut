@@ -57,7 +57,6 @@ public class SampleDriver extends LaserCutter
    * @param pl Use this object to inform VisiCut about the progress of your sending action. 
    * @param warnings If you there are warnings for the user, you can add them to this list, so they can be displayed by VisiCut
    * @throws IllegalJobException Throw this exception, when the job is not suitable for the current machine
-   * @throws Exception 
    */
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
@@ -130,7 +129,6 @@ public class SampleDriver extends LaserCutter
    * which are necessary for a certain job-type (e.g. a VectorPart).
    * See the different classes for examples. We will just use the default,
    * supporting power,speed focus and frequency.
-   * @return 
    */
   @Override
   public LaserProperty getLaserPropertyForVectorPart() {
@@ -140,7 +138,6 @@ public class SampleDriver extends LaserCutter
 
   /**
    * This method should return a list of all supported resolutions (in DPI)
-   * @return 
    */
   @Override
   public List<Double> getResolutions()
@@ -152,7 +149,6 @@ public class SampleDriver extends LaserCutter
    * This method should return the width of the laser-bed. You can have
    * a config-setting in order to have different sizes for each instance of 
    * your driver. For simplicity we just assume a width of 600mm
-   * @return 
    */
   @Override
   public double getBedWidth()
@@ -164,7 +160,6 @@ public class SampleDriver extends LaserCutter
    * This method should return the height of the laser-bed. You can have
    * a config-setting in order to have different sizes for each instance of 
    * your driver. For simplicity we just assume a height of 300mm
-   * @return 
    */
   @Override
   public double getBedHeight()
@@ -174,7 +169,6 @@ public class SampleDriver extends LaserCutter
 
   /**
    * This method should return a name for this driver.
-   * @return 
    */
   @Override
   public String getModelName()
@@ -185,7 +179,6 @@ public class SampleDriver extends LaserCutter
   /**
    * This method must copy the current instance with all config settings, because
    * it is used for save- and restoring
-   * @return 
    */
   @Override
   public LaserCutter clone()
@@ -199,7 +192,6 @@ public class SampleDriver extends LaserCutter
    * The next mehtod allow for a generic GUI with settings for an instance of this
    * driver to be created. For simplicity, this driver does not support any
    * properties. Look at the other implementations for reference.
-   * @return 
    */
   @Override
   public String[] getPropertyKeys()

@@ -569,7 +569,6 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
    * Finds the x coordinate for the left most pixel, since "start" depends on
    * what direction you are cutting in.
    *
-   * @param y
    * @param v, seek value
    * @return x coordinate of left most non-matching pixel
    */
@@ -587,7 +586,6 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
    * Finds the y coordinate for the top most pixel, since "start" depends on
    * what direction you are cutting in.
    *
-   * @param x
    * @param v, seek value
    * @return y coordinate of top most non-matching pixel
    */

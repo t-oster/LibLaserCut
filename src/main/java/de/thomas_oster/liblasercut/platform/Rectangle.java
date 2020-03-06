@@ -173,7 +173,6 @@ public class Rectangle {
 
   /**
    * check if this is inside of (or equal) another rectangle
-   * @param other
    * @return true if this rectangle is equal to or inside of the other one
    */
   public boolean isInsideOf(Rectangle other) {
@@ -183,7 +182,6 @@ public class Rectangle {
 
   /**
    * check if the intersection of this rectangle with another one is not empty
-   * @param other
    * @return true if rectangles have at least one point in common
    */
   public boolean intersects(Rectangle other) {

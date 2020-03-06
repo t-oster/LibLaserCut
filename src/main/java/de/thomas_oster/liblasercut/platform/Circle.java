@@ -35,7 +35,6 @@ public class Circle
    *
    * @param p Point to test
    * @param tolerance absolute tolerance for distance to circle
-   * @return
    */
   public boolean containsPoint(Point p, double tolerance)
   {

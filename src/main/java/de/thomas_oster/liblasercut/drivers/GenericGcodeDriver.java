@@ -597,8 +597,6 @@ public class GenericGcodeDriver extends LaserCutter {
    * Waits for the Identification line and returns null if it's allright
    * Otherwise it returns the wrong line
    * @param pl Progress listener to update during connect process
-   * @return
-   * @throws IOException
    */
   protected String waitForIdentificationLine(ProgressListener pl) throws IOException
   {

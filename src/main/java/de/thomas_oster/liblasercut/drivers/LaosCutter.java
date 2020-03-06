@@ -537,9 +537,6 @@ public class LaosCutter extends LaserCutter
    * the Output is padded with zeroes on the right side, if leftToRight is true,
    * on the left-side otherwise
    * rightmost bit
-   * @param line
-   * @param outputLeftToRight
-   * @return
    */
   public List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
   {
@@ -992,9 +989,6 @@ public class LaosCutter extends LaserCutter
   /**
    * Calculates the smallest bounding box of all job-parts
    * and generates the laos bounding-box commands
-   * @param job
-   * @return
-   * @throws UnsupportedEncodingException 
    */
   private byte[] generateBoundingBoxCode(LaserJob job) throws UnsupportedEncodingException
   {

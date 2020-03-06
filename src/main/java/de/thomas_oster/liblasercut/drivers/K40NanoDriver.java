@@ -87,7 +87,6 @@ public class K40NanoDriver extends LaserCutter
    * this list, so they can be displayed by VisiCut
    * @throws IllegalJobException Throw this exception, when the job is not
    * suitable for the current machine
-   * @throws Exception
    */
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
@@ -304,8 +303,6 @@ public class K40NanoDriver extends LaserCutter
 
   /**
    * This method returns a list of all supported resolutions (in DPI)
-   *
-   * @return
    */
   @Override
   public List<Double> getResolutions()

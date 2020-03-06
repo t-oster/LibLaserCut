@@ -36,7 +36,6 @@ public class FloatPowerSpeedProperty implements LaserProperty
 
   /**
    * Sets the Laserpower. Valid values are from 0 to 100.
-   * @param power 
    */
   public void setPower(float power)
   {
@@ -52,7 +51,6 @@ public class FloatPowerSpeedProperty implements LaserProperty
 
   /**
    * Sets the speed for the Laser. Valid values are from 0 to 100
-   * @param speed 
    */
   public void setSpeed(float speed)
   {

@@ -215,8 +215,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
   /**
    * Nominal cutting speed in mm/s at 100% speed
-   *
-   * @return
    */
   public double getNominalCuttingSpeed()
   {
@@ -780,14 +778,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   /**
    * cut a smooth curve with given interpolation points and interpolation speeds
    *
-   * @param out
    * @param x coordinates, starting with currentX
    * @param y coordinates, starting with currentY
    * @param endSpeed end speed at given coordinate (in percent, relative to
    * maximum speed (nominalCuttingSpeed), MUST obey the acceleration limit)
-   * @param resolution
-   * @throws IOException
-   * @returns cutting time
    */
   private double curveWithKnownSpeed(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
   {
@@ -907,8 +901,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    *
    * @param points Input points, which must not be more than 1e6*maxDistance
    * apart (which should be no problem, as for example 1e6 * 0,1mm = 100 meters)
-   * @param maxDistance
-   * @return
    */
   ArrayList<PointWithSpeed> reinterpolateWithMaximumDistance(ArrayList<PointWithSpeed> points, double maxDistance)
   {
@@ -978,8 +970,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * - all points can be cut in one smooth curve (curvature is small enough).
    * The first point is ignored and must be the current coordinate.
    *
-   * @param out
-   * @param points
    * @return cutting time
    */
   private double curve(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
@@ -1306,7 +1296,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @param x list of x coordinates in pixels
    * @param y list of y coordinates in pixels
    * @param resolution DPI for converting pixels to mm
-   * @throws IOException
    */
   private double curveOrLine(PrintStream out, Double[] x, Double[] y, double resolution) throws IOException
   {
@@ -1403,7 +1392,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @param y y coordinate in pixels
    * @param resolution DPI for converting pixels to mm
    * @param sendAsRelative True: send a relative move command, False: send an absolute move command
-   * @throws IOException
    */
   private void goToCoordinate(PrintStream out, double x, double y, double resolution, boolean sendAsRelative) throws IOException
   {
@@ -2154,7 +2142,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    *
    * @param speedPercent engrave speed
    * @param resolution engrave DPI
-   * @return
    */
   private double getEngraveShiftPixels(double speedPercent, double resolution)
   {

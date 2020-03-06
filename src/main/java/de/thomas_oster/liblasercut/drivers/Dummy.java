@@ -62,7 +62,6 @@ public class Dummy extends LaserCutter {
     /**
      * start a new JobPart
      * @param title some string that will be included in the group ID
-     * @param dpi 
      */
     public void startPart(String title, double dpi) {
       endPart();
@@ -96,8 +95,6 @@ public class Dummy extends LaserCutter {
     
     /**
      * move to somewhere with laser off
-     * @param x
-     * @param y 
      */
     void moveTo(double x, double y) {
       setLocation(x,y);
@@ -110,8 +107,6 @@ public class Dummy extends LaserCutter {
 
     /**
      * move to somewhere with laser on
-     * @param x
-     * @param y 
      */
     void lineTo(double x, double y) {
       setLocation(x,y);
@@ -130,7 +125,6 @@ public class Dummy extends LaserCutter {
 
     /**
      * generate SVG output string and reset everything (delete all path data)
-     * @return 
      */
     private String getSVG() {
       endPart();
@@ -167,8 +161,6 @@ public class Dummy extends LaserCutter {
     
     /**
      * store XHTML viewer to file
-     * @param path
-     * @param svgString 
      */
     void storeXHTML(String path, String svgString) {
       BufferedReader br = null;
