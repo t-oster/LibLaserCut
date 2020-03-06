@@ -20,6 +20,9 @@ package de.thomas_oster.liblasercut;
 
 import de.thomas_oster.liblasercut.drivers.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * This class contains Version information
  * etc from the Library
@@ -34,9 +37,9 @@ public class LibInfo
     return VERSION;
   }
   
-  public static Class[] getSupportedDrivers()
+  public static List<Class<? extends LaserCutter>> getSupportedDrivers()
   {
-    return new Class[]{
+    return Arrays.asList(
       EpilogZing.class,
       EpilogHelix.class,
       LaosCutter.class,
@@ -54,6 +57,6 @@ public class LibInfo
       FullSpectrumCutter.class,
       LaserToolsTechnicsCutter.class,
       K40NanoDriver.class
-    };
+    );
   }
 }
