@@ -682,7 +682,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   }
   
   
-  class UnsupportedCircleException extends Exception
+  static class UnsupportedCircleException extends Exception
   {
 
         public UnsupportedCircleException(String s) {
@@ -765,7 +765,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
 
 
-  class PointWithSpeed extends Point
+  static class PointWithSpeed extends Point
   {
 
     public double speed = Double.NaN;

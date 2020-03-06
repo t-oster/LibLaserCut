@@ -34,7 +34,7 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
    * cut smaller parts first, bigger parts later
    * Heuristic is explained below...
    */
-  class SmallerComparator implements Comparator<Element>
+  static class SmallerComparator implements Comparator<Element>
   {
     // compare by XMin a>b
     @Override

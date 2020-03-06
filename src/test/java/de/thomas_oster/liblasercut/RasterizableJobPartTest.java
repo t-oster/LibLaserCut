@@ -447,7 +447,7 @@ public class RasterizableJobPartTest
   
 
   
-  public class RasterizableJobPartImpl extends RasterizableJobPart
+  public static class RasterizableJobPartImpl extends RasterizableJobPart
   {
     public RasterizableJobPartImpl()
     {

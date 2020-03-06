@@ -65,7 +65,7 @@ public class ScriptInterpreter
     }
   }
   
-  public class SandboxContextFactory extends ContextFactory {
+  public static class SandboxContextFactory extends ContextFactory {
     @Override
     protected Context makeContext() {
       Context cx = super.makeContext();

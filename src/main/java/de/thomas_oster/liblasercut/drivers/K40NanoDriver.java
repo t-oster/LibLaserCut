@@ -1860,7 +1860,7 @@ public class K40NanoDriver extends LaserCutter
 
   }
 
-  public class MockUsb implements BaseUsb
+  public static class MockUsb implements BaseUsb
   {
 
     private void sleep(int time)

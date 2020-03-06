@@ -31,7 +31,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
 {
 
   // helper classes:
-  private abstract class ElementValueComparator implements Comparator<Element>
+  private abstract static class ElementValueComparator implements Comparator<Element>
   {
 
     /**

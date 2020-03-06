@@ -35,7 +35,7 @@ public class Rectangle {
    * 
    * min must be < max
    */
-  private class Interval
+  private static class Interval
   {
 
     private double min,max;
@@ -150,14 +150,14 @@ public class Rectangle {
    * X interval from left to right
    */
   private Interval getXInterval() {
-    return new Interval(x1,x2);
+    return new Interval(x1, x2);
   }
 
   /**
    * Y interval from top to bottom
    */
   private Interval getYInterval() {
-    return new Interval(y1,y2);
+    return new Interval(y1, y2);
   }
 
   @Override

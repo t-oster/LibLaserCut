@@ -43,7 +43,7 @@ public class Dummy extends LaserCutter {
   /**
    * SVG output creator, mostly for testing vector-sorting
    */
-  class SVGWriter  {
+  static class SVGWriter  {
     private double xPrev,xNow,yPrev,yNow;
     private StringBuilder svg = new StringBuilder();
     private boolean vectorPathActive=false;
