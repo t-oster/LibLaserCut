@@ -735,7 +735,7 @@ abstract class EpilogCutter extends LaserCutter
       VectorCommand.CmdType lastType = null;
       for (VectorCommand cmd : vp.getCommandList())
       {
-        if (lastType != null && lastType == VectorCommand.CmdType.LINETO && cmd.getType() != VectorCommand.CmdType.LINETO)
+        if (lastType == VectorCommand.CmdType.LINETO && cmd.getType() != VectorCommand.CmdType.LINETO)
         {
           out.print(";");
         }
@@ -773,7 +773,7 @@ abstract class EpilogCutter extends LaserCutter
           }
           case LINETO:
           {
-            if (lastType == null || lastType != VectorCommand.CmdType.LINETO)
+            if (lastType != VectorCommand.CmdType.LINETO)
             {
               out.printf("PD%d,%d", (int) cmd.getX(), (int) cmd.getY());
             }
