@@ -166,7 +166,7 @@ public class Dummy extends LaserCutter {
       BufferedReader br = null;
       StringBuilder xhtml = new StringBuilder();
       try {
-        InputStream stream = new Dummy().getClass().getResourceAsStream("resources/visicut-svg-output-viewer.xhtml");
+        InputStream stream = Dummy.class.getResourceAsStream("resources/visicut-svg-output-viewer.xhtml");
         StringBuilder s = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String line="";
