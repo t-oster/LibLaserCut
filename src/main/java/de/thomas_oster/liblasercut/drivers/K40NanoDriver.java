@@ -19,7 +19,6 @@
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.AbstractLaserProperty;
-import de.thomas_oster.liblasercut.BlackWhiteRaster;
 import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.JobPart;
 import de.thomas_oster.liblasercut.LaserCutter;

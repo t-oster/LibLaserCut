@@ -23,10 +23,7 @@
 
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.*;
-import de.thomas_oster.liblasercut.LaserJob;
-import de.thomas_oster.liblasercut.ProgressListener;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.io.BufferedOutputStream;
