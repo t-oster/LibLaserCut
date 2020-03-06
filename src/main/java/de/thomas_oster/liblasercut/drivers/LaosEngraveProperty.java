@@ -36,8 +36,8 @@ public class LaosEngraveProperty extends LaosCutterProperty
   }
   
   public LaosEngraveProperty()
-  {};
-  
+  {}
+
   public LaosEngraveProperty(LaserProperty o)
   {
     for (String k : o.getPropertyKeys())

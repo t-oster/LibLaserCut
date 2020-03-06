@@ -33,8 +33,8 @@ public class EpilogEngraveProperty extends PowerSpeedFocusProperty
     super(hideSoftwareFocus);
   }
   public EpilogEngraveProperty()
-  {};
-  
+  {}
+
   private static final String BOTTOM_UP = "bottom up";
   private boolean engraveBottomUp = false;
   public boolean isEngraveBottomUp()

@@ -573,9 +573,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     {
       this.value = value;
     }
-  ;
 
-  };
+  }
 
   /**
    * Set color for the preview on the lasercutter's display.

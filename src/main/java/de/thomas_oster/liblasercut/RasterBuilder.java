@@ -740,6 +740,6 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   
   public interface PropertiesUpdate
   {
-    public void update(AbstractLaserProperty properties, int pixel);
+    void update(AbstractLaserProperty properties, int pixel);
   }
 }

@@ -23,7 +23,7 @@ package de.thomas_oster.liblasercut;
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public interface Customizable {
-    public String[] getPropertyKeys();
+    String[] getPropertyKeys();
     /**
      * Sets the property with the given key
      * a property may only be of the classes
@@ -32,7 +32,7 @@ public interface Customizable {
      * @param key
      * @param value 
      */
-    public void setProperty(String key, Object value);
+    void setProperty(String key, Object value);
     /**
      * Returns the value of the property or null, if the key
      * does not name a valid property
@@ -40,5 +40,5 @@ public interface Customizable {
      * @param key
      * @return 
      */
-    public Object getProperty(String key);
+    Object getProperty(String key);
 }

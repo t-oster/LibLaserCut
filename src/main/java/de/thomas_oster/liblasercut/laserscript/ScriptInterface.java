@@ -25,15 +25,15 @@ package de.thomas_oster.liblasercut.laserscript;
 public interface ScriptInterface
 {
    
-  public void move(double x, double y);
+  void move(double x, double y);
   
-  public void line(double x, double y);
+  void line(double x, double y);
   
-  public void set(String property, Object value);
+  void set(String property, Object value);
   
-  public Object get(String property);
+  Object get(String property);
   
-  public void echo(String text);
+  void echo(String text);
 
-  public String prompt(String title, String defaultValue);
+  String prompt(String title, String defaultValue);
 }

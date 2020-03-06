@@ -68,7 +68,7 @@ final class BrightnessCalculations
     }
     return linearMap(value, x[i - 1], x[i], y[i - 1], y[i]);
   }
-};
+}
 
 /**
  * Halftone algorithm with increased brightness
