@@ -605,7 +605,7 @@ public class RasterizableJobPartTest
     }
   }
   
-  public RasterElement getTest8bitRasterElement() {
+  public static RasterElement getTest8bitRasterElement() {
     RasterElement image = new RasterElement(9,6,8);
       
       // key...
@@ -675,7 +675,7 @@ public class RasterizableJobPartTest
       return image;
   }
   
-  public RasterElement getTest1bitRasterElement() {
+  public static RasterElement getTest1bitRasterElement() {
     RasterElement image = new RasterElement(9,6,1);
       
       

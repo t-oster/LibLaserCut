@@ -6,5 +6,5 @@
 # SPDX-License-Identifier: MIT OR LGPL-3.0+
 
 set -e
-cd "$(dirname "$0")"
-diff <(./dump-epilog-raw-print-file.py "$1") <(./dump-epilog-raw-print-file.py "$2")
+dumptool="$(dirname "$0")/dump-epilog-raw-print-file.py"
+diff <($dumptool "$1") <($dumptool "$2")

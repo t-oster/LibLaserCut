@@ -1,0 +1,2 @@
+These files are generated automatically from AllDriversTest. The *.out files are version-controlled and used to check if something accidentally changed. The *.new files are generated on every test run.
+For some drivers with binary formats, specialized diff or decoding utilities can be found in util/.

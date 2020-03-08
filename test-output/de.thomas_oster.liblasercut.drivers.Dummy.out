@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?> 
+<!-- Created by VisiCut Debug output -->
+<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="250.0mm" height="280.0mm" viewBox="0 0 250.0 280.0" version="1.1" id="svg"> 
+<g style="fill:none;stroke:#000000;stroke-width:0.1mm;" id="visicut-part1-VectorPart">
+<path id="visicut-0" d="M 0.508,0.508 25.4,50.8 50.8,0.0 "/>
+<path id="visicut-1" d="M 101.6,0.0 76.2,5.08 76.1492,20.32 76.170536,22.866791959999997 76.0984,25.4 76.1492,30.48 76.2,45.72 101.6,50.8 "/>
+</g>
+<g style="fill:none;stroke:#000000;stroke-width:0.1mm;" id="visicut-part2-RasterPart">
+</g>
+<g style="fill:none;stroke:#000000;stroke-width:0.1mm;" id="visicut-part3-Raster3dPart">
+</g>
+</svg>
