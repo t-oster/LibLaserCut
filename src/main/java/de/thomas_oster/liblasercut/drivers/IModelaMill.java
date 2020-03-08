@@ -346,6 +346,31 @@ public class IModelaMill extends LaserCutter
     pl.taskChanged(this, "checking...");
     checkJob(job);
     pl.progressChanged(this, 20);
+    byte[] gcode = generateGCode(job, pl);
+    pl.progressChanged(this, 50);
+    pl.taskChanged(this, "sending...");
+    sendGCode(gcode, pl, warnings);
+    pl.progressChanged(this, 100);
+    pl.taskChanged(this, "done");
+  }
+  
+  private byte[] generateGCode(LaserJob job, ProgressListener pl)
+  {
+    if (pl == null)
+    {
+      pl = new ProgressListener()
+      {
+        @Override
+        public void progressChanged(Object source, int percent)
+        {
+        }
+
+        @Override
+        public void taskChanged(Object source, String taskName)
+        {
+        }
+      };
+    }
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     pl.taskChanged(this, "generating...");
@@ -369,11 +394,13 @@ public class IModelaMill extends LaserCutter
       pl.progressChanged(this, (int) (20+30*i++/all));
     }
     writeFinalizationCode(out);
-    pl.progressChanged(this, 50);
-    pl.taskChanged(this, "sending...");
-    sendGCode(result.toByteArray(), pl, warnings);
-    pl.progressChanged(this, 100);
-    pl.taskChanged(this, "done");
+    return result.toByteArray();
+  }
+  
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IOException
+  {
+    fileOutputStream.write(generateGCode(job, null));
   }
 
   @Override
