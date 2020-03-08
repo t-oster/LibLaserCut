@@ -92,7 +92,6 @@ public class Point
     /**
    * compute euclidean distance to another point
    * @param p other point
-   * @return
    */
   public double hypothenuseTo(Point p) {
     return this.subtract(p).hypot();
@@ -124,7 +123,6 @@ public class Point
 
   /**
    * return a vector with same direction, but length 1
-   * @return
    */
   public Point unityVector() {
     double l = hypot();
@@ -141,7 +139,6 @@ public class Point
 
   /**
    * multiply with scalar
-   * @param factor
    * @return scaled vector
    */
   public Point scale(double factor) {

@@ -27,6 +27,6 @@ package de.thomas_oster.liblasercut;
  */
 public interface ProgressListener
 {
-  public void progressChanged(Object source, int percent);
-  public void taskChanged(Object source, String taskName);
+  void progressChanged(Object source, int percent);
+  void taskChanged(Object source, String taskName);
 }

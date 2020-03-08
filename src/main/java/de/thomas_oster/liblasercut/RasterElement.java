@@ -159,7 +159,7 @@ public class RasterElement
   }
   
   public interface Provider {
-    public RasterElement getRaster();
+    RasterElement getRaster();
   }
   
 }

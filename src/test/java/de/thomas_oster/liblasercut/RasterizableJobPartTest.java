@@ -77,12 +77,12 @@ public class RasterizableJobPartTest
   public void testLineIsBlank()
   {
     RasterizableJobPart instance = new RasterizableJobPartImpl();
-    
-    assertEquals(false, instance.lineIsBlank(0));
-    assertEquals(false, instance.lineIsBlank(1));
-    assertEquals(false, instance.lineIsBlank(2));
-    assertEquals(false, instance.lineIsBlank(3));
-    assertEquals(true, instance.lineIsBlank(4));
+
+    assertFalse(instance.lineIsBlank(0));
+    assertFalse(instance.lineIsBlank(1));
+    assertFalse(instance.lineIsBlank(2));
+    assertFalse(instance.lineIsBlank(3));
+    assertTrue(instance.lineIsBlank(4));
   }
 
    /**
@@ -123,10 +123,10 @@ public class RasterizableJobPartTest
     RasterizableJobPartImpl instance = new RasterizableJobPartImpl();
     
     instance.setRasteringCutDirectionLeftToRight();
-    assertEquals("left to right", ((RasterizableJobPartImpl) instance).getRasteringCutDirection());
+    assertEquals("left to right", instance.getRasteringCutDirection());
     
     instance.toggleRasteringCutDirection();
-    assertEquals("right to left", ((RasterizableJobPartImpl) instance).getRasteringCutDirection());
+    assertEquals("right to left", instance.getRasteringCutDirection());
   }
 
   /**
@@ -155,16 +155,16 @@ public class RasterizableJobPartTest
     // cut -> --XX-XXX-
     instance.setRasteringCutDirectionLeftToRight();
     // pixels 0-7 are part of the job
-    for (int i=0; i<=7; i++) assertEquals(false, instance.hasFinishedCuttingLine(i, 0));
+    for (int i=0; i<=7; i++) assertFalse(instance.hasFinishedCuttingLine(i, 0));
     // once you get to pixel 8, the line is cut
-    assertEquals(true, instance.hasFinishedCuttingLine(8, 0));
+    assertTrue(instance.hasFinishedCuttingLine(8, 0));
     
     // cut <- ---X--XX-
     instance.toggleRasteringCutDirection();
     // coords 8-3 are part of the job
-    for (int i=8; i>=3; i--) assertEquals(false, instance.hasFinishedCuttingLine(i, 1));
+    for (int i=8; i>=3; i--) assertFalse(instance.hasFinishedCuttingLine(i, 1));
     // once you get to pixels 2-0 (heading left), the line is cut
-    for (int i=2; i>=0; i--) assertEquals(true, instance.hasFinishedCuttingLine(i, 1));
+    for (int i=2; i>=0; i--) assertTrue(instance.hasFinishedCuttingLine(i, 1));
   }
 
   /**
@@ -423,7 +423,7 @@ public class RasterizableJobPartTest
     assertEquals(9, x);
     
     boolean done = instance.hasFinishedCuttingLine(x, y);
-    assertEquals(true, done);
+    assertTrue(done);
   }
   
   /**
@@ -442,12 +442,12 @@ public class RasterizableJobPartTest
     assertEquals(-1, x);
     
     boolean done = instance.hasFinishedCuttingLine(x, y);
-    assertEquals(true, done);
+    assertTrue(done);
   }
   
 
   
-  public class RasterizableJobPartImpl extends RasterizableJobPart
+  public static class RasterizableJobPartImpl extends RasterizableJobPart
   {
     public RasterizableJobPartImpl()
     {
@@ -528,7 +528,7 @@ public class RasterizableJobPartTest
     
     public Raster3dPart toRaster3dPart()
     {
-      return new Raster3dPart((GreyscaleRaster) this.image, this.getLaserProperty(), this.start, this.getDPI());
+      return new Raster3dPart(this.image, this.getLaserProperty(), this.start, this.getDPI());
     }
     
     public String getRasteringCutDirection()

@@ -35,7 +35,7 @@ public class Rectangle {
    * 
    * min must be < max
    */
-  private class Interval
+  private static class Interval
   {
 
     private double min,max;
@@ -150,14 +150,14 @@ public class Rectangle {
    * X interval from left to right
    */
   private Interval getXInterval() {
-    return new Interval(x1,x2);
+    return new Interval(x1, x2);
   }
 
   /**
    * Y interval from top to bottom
    */
   private Interval getYInterval() {
-    return new Interval(y1,y2);
+    return new Interval(y1, y2);
   }
 
   @Override
@@ -173,7 +173,6 @@ public class Rectangle {
 
   /**
    * check if this is inside of (or equal) another rectangle
-   * @param other
    * @return true if this rectangle is equal to or inside of the other one
    */
   public boolean isInsideOf(Rectangle other) {
@@ -183,7 +182,6 @@ public class Rectangle {
 
   /**
    * check if the intersection of this rectangle with another one is not empty
-   * @param other
    * @return true if rectangles have at least one point in common
    */
   public boolean intersects(Rectangle other) {

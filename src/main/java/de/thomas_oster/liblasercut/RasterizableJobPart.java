@@ -56,8 +56,6 @@ abstract public class RasterizableJobPart extends JobPart
    * Returns one line of the given rasterpart
    * every byte represents 8/getBitsPerRasterPixel() pixels and the value
    * corresponds to (2^getBitsPerRasterPixel() - 1) when black or 0 when white
-   * @param line
-   * @return
    */
   public List<Byte> getRasterLine(int line)
   {
@@ -68,8 +66,6 @@ abstract public class RasterizableJobPart extends JobPart
 
   /**
    * write output of getRasterLine(line) into the given result list
-   * @param line
-   * @param result
    */
   abstract public void getRasterLine(int line, List<Byte> result);
 
@@ -89,7 +85,6 @@ abstract public class RasterizableJobPart extends JobPart
   
   /**
    * Determines whether an entire line in an image is blank; i.e. can it be skipped?
-   * @param y
    * @return true if the line is blank
    */
   public boolean lineIsBlank(int y)
@@ -140,7 +135,6 @@ abstract public class RasterizableJobPart extends JobPart
   
   /**
    * Finds the x coordinate of the first pixel that needs lasering
-   * @param y
    * @return x coordinate to start lasering from
    */
   public int firstNonWhitePixel(int y)
@@ -153,7 +147,6 @@ abstract public class RasterizableJobPart extends JobPart
   /**
    * Finds the x coordinate for the left most pixel, since "start" depends on
    * what direction you are cutting in.
-   * @param y
    * @return x coordinate of left most non-white pixel
    */
   protected int leftMostNonWhitePixel(int y)
@@ -166,7 +159,6 @@ abstract public class RasterizableJobPart extends JobPart
   
   /**
    * Finds the end of the line; points after this pixel are all blank
-   * @param y
    * @return x coordinate to end lasering at
    */
   public int lastNonWhitePixel(int y)
@@ -179,7 +171,6 @@ abstract public class RasterizableJobPart extends JobPart
   /**
    * Finds the x coordinate for the right most pixel, since "end" depends on
    * what direction you are cutting in.
-   * @param y
    * @return x coordinate of right most non-white pixel
    */
   protected int rightMostNonWhitePixel(int y)
@@ -238,7 +229,6 @@ abstract public class RasterizableJobPart extends JobPart
   
   /**
    * Returns the upper left point of the given raster
-   * @return
    */
   public Point getRasterStart()
   {

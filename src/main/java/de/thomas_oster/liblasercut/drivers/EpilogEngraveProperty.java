@@ -33,8 +33,8 @@ public class EpilogEngraveProperty extends PowerSpeedFocusProperty
     super(hideSoftwareFocus);
   }
   public EpilogEngraveProperty()
-  {};
-  
+  {}
+
   private static final String BOTTOM_UP = "bottom up";
   private boolean engraveBottomUp = false;
   public boolean isEngraveBottomUp()
@@ -44,8 +44,7 @@ public class EpilogEngraveProperty extends PowerSpeedFocusProperty
   @Override
   public String[] getPropertyKeys()
   {
-    LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
     result.add(BOTTOM_UP);
     return result.toArray(new String[0]);
   }
@@ -55,7 +54,7 @@ public class EpilogEngraveProperty extends PowerSpeedFocusProperty
   {
     if (BOTTOM_UP.equals(name))
     {
-      return (Boolean) engraveBottomUp;
+      return engraveBottomUp;
     }
     else
     {

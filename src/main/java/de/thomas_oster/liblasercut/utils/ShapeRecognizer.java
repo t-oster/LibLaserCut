@@ -59,7 +59,6 @@ public class ShapeRecognizer extends TimeIntensiveOperation
    * of all ProgressListeners with values from 0
    * to 100 indicating the progress
    * 
-   * @param bwr
    * @return  a List of Points marking a line around the
    * recognized Shape
    */
@@ -114,9 +113,7 @@ public class ShapeRecognizer extends TimeIntensiveOperation
    * only the before is an option This method has to be called
    * iteratively
    * 
-   * @param bwr
    * @param c The cuttent point whose follower is to determine
-   * @return 
    */
   private Point getFollower(BlackWhiteRaster bwr, Point c, Point p)
   {

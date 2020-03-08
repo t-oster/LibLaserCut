@@ -19,7 +19,6 @@
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.AbstractLaserProperty;
-import de.thomas_oster.liblasercut.BlackWhiteRaster;
 import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.JobPart;
 import de.thomas_oster.liblasercut.LaserCutter;
@@ -88,7 +87,6 @@ public class K40NanoDriver extends LaserCutter
    * this list, so they can be displayed by VisiCut
    * @throws IllegalJobException Throw this exception, when the job is not
    * suitable for the current machine
-   * @throws Exception
    */
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
@@ -219,10 +217,10 @@ public class K40NanoDriver extends LaserCutter
           {
             case LINETO:
             {
-              /**
-               * Move the laserhead (laser on) from the current position to the
-               * x/y position of this command. All coordinates are in dots
-               * respecting to the job resolution
+              /*
+                Move the laserhead (laser on) from the current position to the
+                x/y position of this command. All coordinates are in dots
+                respecting to the job resolution
                */
               int x = (int) (cmd.getX() * (1000 / p.getDPI()));
               int y = (int) (cmd.getY() * (1000 / p.getDPI()));
@@ -234,9 +232,9 @@ public class K40NanoDriver extends LaserCutter
             }
             case MOVETO:
             {
-              /**
-               * Move the laserhead (laser off) from the current position to the
-               * x/y position of this command. All coordinates are in mm
+              /*
+                Move the laserhead (laser off) from the current position to the
+                x/y position of this command. All coordinates are in mm
                */
               int x = (int) (cmd.getX() * (1000 / p.getDPI()));
               int y = (int) (cmd.getY() * (1000 / p.getDPI()));
@@ -305,16 +303,11 @@ public class K40NanoDriver extends LaserCutter
 
   /**
    * This method returns a list of all supported resolutions (in DPI)
-   *
-   * @return
    */
   @Override
   public List<Double> getResolutions()
   {
-    return Arrays.asList(new Double[]
-    {
-      250.0, 500.0, 1000.0
-    });
+    return Arrays.asList(250.0, 500.0, 1000.0);
   }
 
   public String getBoard()
@@ -1861,7 +1854,7 @@ public class K40NanoDriver extends LaserCutter
 
   }
 
-  public class MockUsb implements BaseUsb
+  public static class MockUsb implements BaseUsb
   {
 
     private void sleep(int time)

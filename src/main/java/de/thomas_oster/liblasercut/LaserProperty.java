@@ -31,8 +31,6 @@ public interface LaserProperty extends Cloneable, Customizable
    * returns the minimum value of this property if it is
    * of type Double, Integer or Float and a minimum value
    * exists. Otherwise it returns null;
-   * @param name
-   * @return 
    */
   Object getMinimumValue(String name);
   

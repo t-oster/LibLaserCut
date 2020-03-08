@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -43,7 +44,7 @@ public class Dummy extends LaserCutter {
   /**
    * SVG output creator, mostly for testing vector-sorting
    */
-  class SVGWriter  {
+  static class SVGWriter  {
     private double xPrev,xNow,yPrev,yNow;
     private StringBuilder svg = new StringBuilder();
     private boolean vectorPathActive=false;
@@ -61,7 +62,6 @@ public class Dummy extends LaserCutter {
     /**
      * start a new JobPart
      * @param title some string that will be included in the group ID
-     * @param dpi 
      */
     public void startPart(String title, double dpi) {
       endPart();
@@ -95,8 +95,6 @@ public class Dummy extends LaserCutter {
     
     /**
      * move to somewhere with laser off
-     * @param x
-     * @param y 
      */
     void moveTo(double x, double y) {
       setLocation(x,y);
@@ -109,8 +107,6 @@ public class Dummy extends LaserCutter {
 
     /**
      * move to somewhere with laser on
-     * @param x
-     * @param y 
      */
     void lineTo(double x, double y) {
       setLocation(x,y);
@@ -129,7 +125,6 @@ public class Dummy extends LaserCutter {
 
     /**
      * generate SVG output string and reset everything (delete all path data)
-     * @return 
      */
     private String getSVG() {
       endPart();
@@ -166,16 +161,14 @@ public class Dummy extends LaserCutter {
     
     /**
      * store XHTML viewer to file
-     * @param path
-     * @param svgString 
      */
     void storeXHTML(String path, String svgString) {
       BufferedReader br = null;
       StringBuilder xhtml = new StringBuilder();
       try {
-        InputStream stream = new Dummy().getClass().getResourceAsStream("resources/visicut-svg-output-viewer.xhtml");
+        InputStream stream = Dummy.class.getResourceAsStream("resources/visicut-svg-output-viewer.xhtml");
         StringBuilder s = new StringBuilder();
-        br = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String line="";
         while ((line=br.readLine()) != null) {
           if (line.contains("<!-- REPLACE THIS WITH SVG -->")) {
@@ -248,7 +241,7 @@ public class Dummy extends LaserCutter {
                 {
                   throw new IllegalJobException("This driver expects Power,Speed,Frequency and Focus as settings");
                 }
-                System.out.println(((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).toString());
+                System.out.println(cmd.getProperty().toString());
               } else if (cmd.getType() == VectorCommand.CmdType.LINETO) {
                 System.out.println("LINETO \t" + cmd.getX() + ", \t" + cmd.getY());
                 svg.lineTo(cmd.getX(),cmd.getY());
@@ -268,7 +261,7 @@ public class Dummy extends LaserCutter {
             {
               throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
             }
-            System.out.println(((PowerSpeedFocusProperty) rp.getLaserProperty()).toString());
+            System.out.println(rp.getLaserProperty().toString());
 
           }
           if (p instanceof Raster3dPart)
@@ -279,7 +272,7 @@ public class Dummy extends LaserCutter {
             {
               throw new IllegalJobException("This driver expects Power,Speed and Focus as settings");
             }
-            System.out.println(((PowerSpeedFocusProperty) rp.getLaserProperty()).toString());
+            System.out.println(rp.getLaserProperty().toString());
           }
       }
       System.out.println("end of job.");
@@ -310,9 +303,7 @@ public class Dummy extends LaserCutter {
   @Override
   public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Double[]{
-                500d
-              });
+      resolutions = Arrays.asList(500d);
     }
     return resolutions;
   }

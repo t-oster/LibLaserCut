@@ -32,7 +32,7 @@ public class BlackWhiteRaster extends TimeIntensiveOperation implements Greyscal
 
   protected RasterElement raster;
 
-  public static enum DitherAlgorithm
+  public enum DitherAlgorithm
   {
     FLOYD_STEINBERG,
     AVERAGE,

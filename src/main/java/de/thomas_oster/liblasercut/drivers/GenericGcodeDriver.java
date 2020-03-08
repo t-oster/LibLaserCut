@@ -33,6 +33,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import purejavacomm.*;
+
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import net.sf.corn.httpclient.HttpClient;
 import net.sf.corn.httpclient.HttpResponse;
@@ -405,10 +407,10 @@ public class GenericGcodeDriver extends LaserCutter {
     this.spindleMax = spindleMax;
   }
 
-  @Override
   /**
    * We do not support Frequency atm, so we return power,speed and focus
    */
+  @Override
   public LaserProperty getLaserPropertyForVectorPart() {
     return new FloatPowerSpeedFocusProperty();
   }
@@ -595,8 +597,6 @@ public class GenericGcodeDriver extends LaserCutter {
    * Waits for the Identification line and returns null if it's allright
    * Otherwise it returns the wrong line
    * @param pl Progress listener to update during connect process
-   * @return
-   * @throws IOException
    */
   protected String waitForIdentificationLine(ProgressListener pl) throws IOException
   {
@@ -638,7 +638,7 @@ public class GenericGcodeDriver extends LaserCutter {
           sp.setSerialPortParams(getBaudRate(), 8, 1, 0);
           sp.setDTR(true);
         }
-        out = new PrintStream(port.getOutputStream(), true, "US-ASCII");
+        out = new PrintStream(port.getOutputStream(), true, StandardCharsets.US_ASCII);
         in = new BufferedReader(new InputStreamReader(port.getInputStream()));
         // Wait 5 seconds since GRBL is long to wake up..
         for (int rest = getInitDelay(); rest > 0; rest--) {
@@ -701,7 +701,7 @@ public class GenericGcodeDriver extends LaserCutter {
       socket = new Socket();
       socket.connect(new InetSocketAddress(getHost(), 23), 1000);
       in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-      out = new PrintStream(socket.getOutputStream(), true, "US-ASCII");
+      out = new PrintStream(socket.getOutputStream(), true, StandardCharsets.US_ASCII);
       String line = waitForIdentificationLine(pl);
       if (line != null)
       {
@@ -781,7 +781,7 @@ public class GenericGcodeDriver extends LaserCutter {
     if (outputBuffer != null)
     {
       out.close();
-      http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString("UTF-8"), jobname);
+      http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString(StandardCharsets.UTF_8), jobname);
       if (this.getPostHttpUploadGcode() != null && !this.getPostHttpUploadGcode().equals(""))
       {
         http_commands(this.getPostHttpUploadGcode(), jobname);

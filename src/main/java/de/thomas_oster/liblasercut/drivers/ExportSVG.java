@@ -18,21 +18,23 @@
  **/
 
 
-/**
- * This class implements a dummy driver that accepts laserjobs and prints debug information about them.
- * You can use it to test the VisiCut GUI without having a real lasercutter.
- *
- * @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
+/*
+  This class implements a dummy driver that accepts laserjobs and prints debug information about them.
+  You can use it to test the VisiCut GUI without having a real lasercutter.
+
+  @author Max Gaukler <development@maxgaukler.de>, based on the LAOS driver by Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 package de.thomas_oster.liblasercut.drivers;
 
 
 import de.thomas_oster.liblasercut.*;
+
+import javax.swing.JFileChooser;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.*;
-import javax.swing.JFileChooser;
+import java.util.Arrays;
+import java.util.List;
 /**
  *
  * @author Icetea
@@ -69,7 +71,6 @@ public class ExportSVG extends LaserCutter
     /**
      * start a new JobPart
      * @param title some string that will be included in the group ID
-     * @param dpi 
      */
     public void startPart(String title, double dpi) {
       endPart();
@@ -103,8 +104,6 @@ public class ExportSVG extends LaserCutter
     
     /**
      * move to somewhere with laser off
-     * @param x
-     * @param y 
      */
     void moveTo(double x, double y) {
       setLocation(x,y);
@@ -117,8 +116,6 @@ public class ExportSVG extends LaserCutter
 
     /**
      * move to somewhere with laser on
-     * @param x
-     * @param y 
      */
     void lineTo(double x, double y) {
       setLocation(x,y);
@@ -137,7 +134,6 @@ public class ExportSVG extends LaserCutter
 
     /**
      * generate SVG output string and reset everything (delete all path data)
-     * @return 
      */
     private String getSVG() {
       endPart();
@@ -220,7 +216,7 @@ public class ExportSVG extends LaserCutter
                 {
                   throw new IllegalJobException("This driver expects Power,Speed,Frequency and Focus as settings");
                 }
-                System.out.println(((PowerSpeedFocusFrequencyProperty) cmd.getProperty()).toString());
+                System.out.println(cmd.getProperty().toString());
               } else if (cmd.getType() == VectorCommand.CmdType.LINETO) {
                 System.out.println("LINETO \t" + cmd.getX() + ", \t" + cmd.getY());
                 svg.lineTo(cmd.getX(),cmd.getY());
@@ -283,9 +279,7 @@ public class ExportSVG extends LaserCutter
   @Override
   public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Double[]{
-                500d
-              });
+      resolutions = Arrays.asList(500d);
     }
     return resolutions;
   }

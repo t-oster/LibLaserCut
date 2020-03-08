@@ -72,7 +72,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     
     /**
      * Performs sanity checks on the LaserJob and sends it to the Cutter
-     * @param job
      * @param pl A ProgressListener to give feedback about the progress
      * @throws IllegalJobException if the Job didn't pass the SanityCheck
      * @throws Exception  if there is a Problem with the Communication or Queue
@@ -87,7 +86,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     /**
      * If you lasercutter supports autofocus, override this method,
      * to let programs like VisiCut know, that they don't need to focus.
-     * @return 
      */
     public boolean isAutoFocus() {
         return false;
@@ -96,9 +94,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     /**
      * This calls sendJob(job, pl) with a default progress listener, which
      * just dumps everythong on the command line
-     * @param job
-     * @throws IllegalJobException
-     * @throws Exception 
      */
     public void sendJob(LaserJob job, List<String> warnings) throws IllegalJobException, Exception {
         this.sendJob(job, new ProgressListener() {
@@ -127,19 +122,16 @@ public abstract class LaserCutter implements Cloneable, Customizable {
 
     /**
      * Returns the available Resolutions in DPI
-     * @return 
      */
     public abstract List<Double> getResolutions();
 
     /**
      * Returns the Maximum width of a LaserJob in mm
-     * @return 
      */
     public abstract double getBedWidth();
 
     /**
      * Returns the Maximum height of a LaserJob in mm
-     * @return 
      */
     public abstract double getBedHeight();
 
@@ -153,7 +145,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      *
      * A larger value may be helpful for cutters with very limited CPU power,
      * which will slow down if a path has a high density of points per length.
-     * @see ShapeConverter.addShape() uses this value
+     * @see de.thomas_oster.liblasercut.utils.ShapeConverter#addShape(java.awt.Shape, VectorPart, LaserCutter) uses this value
      * @return tolerance in machine pixels
      */
     public double getRequiredCurvePrecision() {
@@ -165,7 +157,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * estimateJobDuration-method to allow Programs to use
      * your driver to estimate the duration of a job before
      * executing
-     * @return 
      */
     public boolean canEstimateJobDuration() {
         return false;
@@ -174,8 +165,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     /**
      * Returns an estimated time, how long the job would take
      * in seconds
-     * @param job
-     * @return 
      */
     public int estimateJobDuration(LaserJob job) {
         throw new RuntimeException("Method not implemented");
@@ -247,7 +236,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     /**
      * Intented for use in the clone mehtod. Copies all properties
      * of that to this
-     * @param that 
      */
     protected void copyProperties(LaserCutter that)
     {

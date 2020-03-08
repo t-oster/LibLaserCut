@@ -27,7 +27,6 @@ import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.AccessControlException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.script.ScriptException;

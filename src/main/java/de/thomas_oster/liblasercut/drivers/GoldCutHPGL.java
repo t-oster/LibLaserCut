@@ -30,6 +30,7 @@ import java.io.PrintStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
@@ -80,99 +81,49 @@ public class GoldCutHPGL extends LaserCutter {
   }
 
   protected boolean flipYaxis = false;
-  /**
-   * Get the value of flipYaxis
-   *
-   * @return the value of flipYaxis
-   */
   public boolean isFlipYaxis() {
     return flipYaxis;
   }
-  /**
-   * Set the value of flipYaxis
-   *
-   * @param flipXaxis new value of flipYaxis
-   */
   public void setFlipYaxis(boolean flipYaxis) {
     // System.err.printf("setFlipYaxis %d -> %d\n", this.flipYaxis?1:0, flipYaxis?1:0);
     this.flipYaxis = flipYaxis;
   }
 
   protected boolean flipXaxis = false;
-  /**
-   * Get the value of flipXaxis
-   *
-   * @return the value of flipXaxis
-   */
   public boolean isFlipXaxis() {
     return flipXaxis;
   }
-  /**
-   * Set the value of flipXaxis
-   *
-   * @param flipXaxis new value of flipXaxis
-   */
   public void setFlipXaxis(boolean flipXaxis) {
     this.flipXaxis = flipXaxis;
   }
 
   protected String finiString = "!PG;;";
-  /**
-   * Get the value of finiString
-   *
-   * @return the value of finiString
-   */
   public String getFiniString() {
     return finiString;
   }
-  /**
-   * Set the value of finiString
-   *
-   * @param comPort new value of finiString
-   */
   public void setFiniString(String finiString) {
     this.finiString = finiString;
   }
 
   protected String initString = "IN;PA;";
-  /**
-   * Get the value of initString
-   *
-   * @return the value of initString
-   */
   public String getInitString() {
     return initString;
   }
-  /**
-   * Set the value of initString
-   *
-   * @param comPort new value of initString
-   */
   public void setInitString(String initString) {
     this.initString = initString;
   }
 
   protected String comPort = "/dev/ttyUSB0";
-  /**
-   * Get the value of port
-   *
-   * @return the value of port
-   */
   public String getComPort() {
     return comPort;
   }
-  /**
-   * Set the value of port
-   *
-   * @param comPort new value of port
-   */
   public void setComPort(String comPort) {
     this.comPort = comPort;
   }
 
   private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
@@ -238,7 +189,7 @@ public class GoldCutHPGL extends LaserCutter {
 
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
@@ -305,7 +256,7 @@ public class GoldCutHPGL extends LaserCutter {
 
   private byte[] generatePseudoRasterGCode(RasterPart rp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
@@ -388,14 +339,14 @@ public class GoldCutHPGL extends LaserCutter {
 
   private byte[] generateInitializationCode() throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     out.print(this.initString);
     return result.toByteArray();
   }
 
   private byte[] generateShutdownCode() throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     out.printf(Locale.US, "PU%d,%d;", this.hw_y, this.hw_x);
     //back to origin and shutdown
     out.print(this.finiString);
@@ -499,9 +450,7 @@ public class GoldCutHPGL extends LaserCutter {
   @Override
   public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = Arrays.asList(new Double[]{
-                500d
-              });
+      resolutions = Arrays.asList(500d);
     }
     return resolutions;
   }

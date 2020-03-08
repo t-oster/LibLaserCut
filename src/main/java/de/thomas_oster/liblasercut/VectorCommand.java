@@ -53,7 +53,7 @@ public class VectorCommand
     }
   }
 
-  public static enum CmdType
+  public enum CmdType
   {
 
     SETPROPERTY,

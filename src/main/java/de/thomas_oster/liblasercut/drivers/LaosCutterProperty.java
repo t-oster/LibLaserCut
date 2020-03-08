@@ -96,8 +96,7 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   }
   
   protected String[] getPropertyKeys(boolean showHidden) {
-    LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
     if (!showHidden) {
       if (this.hideFocus)
       {
@@ -124,11 +123,11 @@ public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   {
     if ("ventilation".equals(name))
     {
-      return (Boolean) this.getVentilation();
+      return this.getVentilation();
     }
     else if ("purge".equals(name))
     {
-      return (Boolean) this.getPurge();
+      return this.getPurge();
     }
     else
     {

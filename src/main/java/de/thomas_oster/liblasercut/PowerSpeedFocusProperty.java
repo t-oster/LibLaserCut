@@ -60,7 +60,6 @@ public class PowerSpeedFocusProperty implements LaserProperty
 
   /**
    * Sets the speed for the Laser. Valid values is from 0 to 100
-   * @param speed 
    */
   public void setSpeed(int speed)
   {

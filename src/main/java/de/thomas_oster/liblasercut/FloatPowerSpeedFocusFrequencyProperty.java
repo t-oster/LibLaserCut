@@ -39,7 +39,6 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   /**
    * Sets the Laserpower. Valid values are from 0 to 100.
    * In 3d-Raster mode, the intensity is scaled to this power setting
-   * @param power 
    */
   public void setPower(float power)
   {
@@ -55,7 +54,6 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
 
   /**
    * Sets the speed for the Laser. Valid values is from 0 to 100
-   * @param speed 
    */
   public void setSpeed(float speed)
   {
@@ -125,19 +123,19 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) this.getPower();
+      return this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Float) this.getSpeed();
+      return this.getSpeed();
     }
     else if ("focus".equals(name))
     {
-      return (Float) this.getFocus();
+      return this.getFocus();
     }
     else if ("frequency".equals(name))
     {
-      return (Integer) this.getFrequency();
+      return this.getFrequency();
     }
     return null;
   }
@@ -172,11 +170,11 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   {
   if ("power".equals(name))
     {
-      return (Float) 0f;
+      return 0f;
     }
     else if ("speed".equals(name))
     {
-      return (Float) 0f;
+      return 0f;
     }
     else if ("focus".equals(name))
     {
@@ -197,11 +195,11 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) 100f;
+      return 100f;
     }
     else if ("speed".equals(name))
     {
-      return (Float) 100f;
+      return 100f;
     }
     else if ("focus".equals(name))
     {

@@ -71,15 +71,15 @@ public class IModelaProperty implements LaserProperty
   {
     if (TOOL.equals(name))
     {
-      return (Integer) 1;
+      return 1;
     }
     else if (SPINDLE_SPEED.equals(name))
     {
-      return (Integer) 100;
+      return 100;
     }
     else
     {
-      return (Double) 0d;
+      return 0d;
     }
   }
 

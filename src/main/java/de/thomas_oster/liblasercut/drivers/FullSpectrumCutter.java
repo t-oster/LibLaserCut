@@ -36,7 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -95,7 +95,6 @@ public class FullSpectrumCutter extends LaserCutter
    * @param pl Use this object to inform VisiCut about the progress of your sending action. 
    * @param warnings If you there are warnings for the user, you can add them to this list, so they can be displayed by VisiCut
    * @throws IllegalJobException Throw this exception, when the job is not suitable for the current machine
-   * @throws Exception 
    */
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
@@ -133,8 +132,8 @@ public class FullSpectrumCutter extends LaserCutter
           {
             case LINETO:
             {
-              /**
-               * Move the laserhead (laser on) from the current position to the x/y position of this command. 
+              /*
+                Move the laserhead (laser on) from the current position to the x/y position of this command.
                */
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
@@ -148,8 +147,8 @@ public class FullSpectrumCutter extends LaserCutter
             }
             case MOVETO:
             {
-              /**
-               * Move the laserhead (laser off) from the current position to the x/y position of this command.
+              /*
+                Move the laserhead (laser off) from the current position to the x/y position of this command.
                */
               // x/y in inches
               double x = Util.px2mm(cmd.getX(), p.getDPI())*0.0393701;
@@ -163,8 +162,8 @@ public class FullSpectrumCutter extends LaserCutter
             }
             case SETPROPERTY:
             {
-              /**
-               * Change speed or power.
+              /*
+                Change speed or power.
                */
               LaserProperty prop = cmd.getProperty();
               System.out.println("Changing Device Parameters:");
@@ -256,7 +255,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Loops until the machine finish cutting
-   * @throws IOException 
    */
   private void waitjobend() throws IOException
   {
@@ -293,9 +291,7 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Generates the full packet to send, given a set of raw machine commands.
-   * @param rawCmds
    * @return the packet as a byte array
-   * @throws IOException 
    */
   private byte[] generatePacket(byte[] rawCmds)throws IOException
   {
@@ -315,8 +311,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Generates the header of the packet.
-   * @param header
-   * @return 
    */
   private byte[] generateHeader()
   {
@@ -334,25 +328,25 @@ public class FullSpectrumCutter extends LaserCutter
     ByteBuffer bb = ByteBuffer.allocate(132);
     bb.order(ByteOrder.LITTLE_ENDIAN);
     
-    bb.putInt((int)f1(EngraveAcceleration[0]));
-    bb.putInt((int)f1(EngraveAcceleration[1]));
-    bb.putInt((int)f1(EngraveAcceleration[2]));
+    bb.putInt(f1(EngraveAcceleration[0]));
+    bb.putInt(f1(EngraveAcceleration[1]));
+    bb.putInt(f1(EngraveAcceleration[2]));
     
     bb.putInt((int)EngraveMaxVelocity[0]);
     bb.putInt((int)EngraveMaxVelocity[1]);
     bb.putInt((int)EngraveMaxVelocity[2]);
     
-    bb.putInt((int)f1(VectorAcceleration[0]));
-    bb.putInt((int)f1(VectorAcceleration[1]));
-    bb.putInt((int)f1(VectorAcceleration[2]));
+    bb.putInt(f1(VectorAcceleration[0]));
+    bb.putInt(f1(VectorAcceleration[1]));
+    bb.putInt(f1(VectorAcceleration[2]));
     
     bb.putInt((int)VectorMaxVelocity[0]);
     bb.putInt((int)VectorMaxVelocity[1]);
     bb.putInt((int)VectorMaxVelocity[2]);
     
-    bb.putInt((int)f1(JogAcceleration[0]));
-    bb.putInt((int)f1(JogAcceleration[1]));
-    bb.putInt((int)f1(JogAcceleration[2]));
+    bb.putInt(f1(JogAcceleration[0]));
+    bb.putInt(f1(JogAcceleration[1]));
+    bb.putInt(f1(JogAcceleration[2]));
     
     bb.putInt((int)JogMaxVelocity[0]);
     bb.putInt((int)JogMaxVelocity[1]);
@@ -391,8 +385,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Implements the function f(x) = sqrt(2/x) 10^8
-   * @param x
-   * @return 
    */
   public int f1(long x)
   {
@@ -402,9 +394,6 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Generates the load of the packet(packet=header+load) given a set of raw machine commands.
-   * @param rawCmds
-   * @return
-   * @throws IOException 
    */
   private byte[] jobContents(byte[] rawCmds)throws IOException
   {
@@ -415,7 +404,7 @@ public class FullSpectrumCutter extends LaserCutter
     ByteArrayOutputStream jobload = new ByteArrayOutputStream();
 
     numberSubpackets=(byte)((rawCmds.length+8)/0x40000);
-    remainder=(((int)rawCmds.length%0x40000)/4);
+    remainder=((rawCmds.length %0x40000)/4);
 
     /* 
     The first step is to add a little header(raw_header) to the raw machine commands
@@ -484,7 +473,6 @@ public class FullSpectrumCutter extends LaserCutter
    * to a ByteArrayOutputStream
    * @param tmpsub Array to compress
    * @param jobload ByteArrayOutputStream where the result will be written
-   * @throws IOException 
    */
   
   private void compress_sub(byte [] tmpsub, ByteArrayOutputStream jobload) throws IOException
@@ -536,7 +524,6 @@ public class FullSpectrumCutter extends LaserCutter
    * @param power as a percentage
    * @param speed in steps/sec
    * @return array of bytes with the machine commands, each command consist of 4 bytes
-   * @throws IOException 
    */
   private byte[] line(double x_start,double x_dest,double y_start,double y_dest,double power, double speed)throws IOException
   { 
@@ -619,23 +606,17 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Sends text to a BufferedOutputStream, useful for sending text commands to machine card.
-   * @param textCmd
-   * @param out
-   * @throws IOException 
-   * @throws java.lang.InterruptedException 
    */
   public void sendTextCmd(String textCmd, BufferedOutputStream out)throws IOException, InterruptedException
   {
     System.out.println("Sending command: "+textCmd);
-    out.write(textCmd.getBytes(Charset.forName("ASCII")));  
+    out.write(textCmd.getBytes(StandardCharsets.US_ASCII));
     out.flush();
   }
   
   
   /**
    * Waits for response from a BufferedInputStream and prints the response.
-   * @param in
-   * @throws IOException 
    */
   public void receiveResponse(BufferedInputStream in)throws IOException
   {
@@ -657,23 +638,21 @@ public class FullSpectrumCutter extends LaserCutter
   
   /**
    * Returns a list of all supported resolutions (in DPI)
-   * @return 
    */
   @Override
   public List<Double> getResolutions()
   {
-    return Arrays.asList(new Double[]{100.0,200.0,500.0,1000.0});
+    return Arrays.asList(100.0,200.0,500.0,1000.0);
   }
 
   protected Double BedWidth = 500d;
   /**
    * Returns the width of the laser-bed. 
-   * @return 
    */
   @Override
   public double getBedWidth()
   {
-    return (double)BedWidth;
+    return BedWidth;
   }
 
   /**
@@ -689,12 +668,11 @@ public class FullSpectrumCutter extends LaserCutter
   protected Double BedHeight = 300d;
   /**
    * Returns the height of the laser-bed. 
-   * @return 
    */
   @Override
   public double getBedHeight()
   {
-    return (double)BedHeight;
+    return BedHeight;
   }
 
   /**
@@ -809,7 +787,6 @@ public class FullSpectrumCutter extends LaserCutter
   /**
    * Copies the current instance with all config settings, because
    * it is used for save- and restoring
-   * @return 
    */
   @Override
   public FullSpectrumCutter clone() {

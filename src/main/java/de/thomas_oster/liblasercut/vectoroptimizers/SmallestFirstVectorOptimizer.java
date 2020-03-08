@@ -34,7 +34,7 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
    * cut smaller parts first, bigger parts later
    * Heuristic is explained below...
    */
-  class SmallerComparator implements Comparator<Element>
+  static class SmallerComparator implements Comparator<Element>
   {
     // compare by XMin a>b
     @Override
@@ -61,27 +61,27 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
     }
 
     result.addAll(e);
-    /**
-     * HEURISTIC:
-     * this algorithm is based on the following observation:
-     * let S and B be rectangles, S smaller than B
-     * for explanations, assume that:
-     * - the X-axis goes from left to right
-     * - the Y-axis goes from bottom to top
-     *
-     * ---------------- B: bigger rectangle
-     * | |
-     * | ---- |
-     * y axis | | S| |
-     * ^ | ---- |
-     * | | |
-     * | ----------------
-     * |
-     * ------> x axis
-     *
-     * we get the rectangles sorted by size
-     * 1. S
-     * 2. B
+    /*
+      HEURISTIC:
+      this algorithm is based on the following observation:
+      let S and B be rectangles, S smaller than B
+      for explanations, assume that:
+      - the X-axis goes from left to right
+      - the Y-axis goes from bottom to top
+
+      ---------------- B: bigger rectangle
+      | |
+      | ---- |
+      y axis | | S| |
+      ^ | ---- |
+      | | |
+      | ----------------
+      |
+      ------> x axis
+
+      we get the rectangles sorted by size
+      1. S
+      2. B
      */
     // do the work:
     Collections.sort(result, new SmallerComparator());

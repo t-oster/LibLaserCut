@@ -36,8 +36,8 @@ public class LaosEngraveProperty extends LaosCutterProperty
   }
   
   public LaosEngraveProperty()
-  {};
-  
+  {}
+
   public LaosEngraveProperty(LaserProperty o)
   {
     for (String k : o.getPropertyKeys())
@@ -67,8 +67,7 @@ public class LaosEngraveProperty extends LaosCutterProperty
   
   @Override
   protected String[] getPropertyKeys(boolean showHidden) {
-    LinkedList<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys(showHidden)));
+    LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys(showHidden)));
     result.add(BOTTOM_UP);
     result.add(UNIDIRECTIONAL);
     return result.toArray(new String[0]);
@@ -79,11 +78,11 @@ public class LaosEngraveProperty extends LaosCutterProperty
   {
     if (BOTTOM_UP.equals(name))
     {
-      return (Boolean) engraveBottomUp;
+      return engraveBottomUp;
     }
     else if (UNIDIRECTIONAL.equals(name))
     {
-      return (Boolean) engraveUnidirectional;
+      return engraveUnidirectional;
     }
     else
     {

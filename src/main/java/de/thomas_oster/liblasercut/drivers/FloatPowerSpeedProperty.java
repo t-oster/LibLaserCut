@@ -36,7 +36,6 @@ public class FloatPowerSpeedProperty implements LaserProperty
 
   /**
    * Sets the Laserpower. Valid values are from 0 to 100.
-   * @param power 
    */
   public void setPower(float power)
   {
@@ -52,7 +51,6 @@ public class FloatPowerSpeedProperty implements LaserProperty
 
   /**
    * Sets the speed for the Laser. Valid values are from 0 to 100
-   * @param speed 
    */
   public void setSpeed(float speed)
   {
@@ -88,11 +86,11 @@ public class FloatPowerSpeedProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) this.getPower();
+      return this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Float) this.getSpeed();
+      return this.getSpeed();
     }
     return null;
   }
@@ -119,11 +117,11 @@ public class FloatPowerSpeedProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) 0f;
+      return 0f;
     }
     else if ("speed".equals(name))
     {
-      return (Float) 0f;
+      return 0f;
     }
     else
     {
@@ -136,11 +134,11 @@ public class FloatPowerSpeedProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Float) 100f;
+      return 100f;
     }
     else if ("speed".equals(name))
     {
-      return (Float) 100f;
+      return 100f;
     }
     else
     {

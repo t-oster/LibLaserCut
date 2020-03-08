@@ -92,8 +92,6 @@ public class ShapeConverter
   /**
    * Fallback method for compatibility with old VisiCut code.
    * Remove this as soon as VisiCut uses the new interface of addShape.
-   * @param shape
-   * @param vectorpart
    * @deprecated
    */
   @Deprecated

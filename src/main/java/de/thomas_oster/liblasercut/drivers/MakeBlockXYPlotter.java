@@ -17,16 +17,13 @@
  *
  **/
 
-/**
- * Author: Sven Jung <sven.jung@rwth-aachen.de>
+/*
+  Author: Sven Jung <sven.jung@rwth-aachen.de>
  */
 
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.*;
-import de.thomas_oster.liblasercut.LaserJob;
-import de.thomas_oster.liblasercut.ProgressListener;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.io.BufferedOutputStream;
@@ -35,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,9 +64,8 @@ public class MakeBlockXYPlotter extends LaserCutter
   private int delayRate = 5000;
   private int powerRate = 255;
   private String usedTool = "PEN"; // PEN, Laser
-  private List<Double> resolutions = Arrays.asList(new Double[]{
-                64d // fine liner
-              });
+  private List<Double> resolutions = Arrays.asList(64d // fine liner
+  );
   
   private int chosenDelay;
   private int chosenPower;
@@ -375,7 +372,7 @@ public class MakeBlockXYPlotter extends LaserCutter
         
         // wake up firmware
         String command = "\r\n\r\n";
-        out.write(command.getBytes("US-ASCII"));
+        out.write(command.getBytes(StandardCharsets.US_ASCII));
         out.flush();
         Thread.sleep(2000);
         portReader.readLine(); // "ok"
@@ -450,7 +447,7 @@ public class MakeBlockXYPlotter extends LaserCutter
       if (this.hostname.startsWith("port://")) {
         // send
         String sendString = command + "\n";
-        out.write(sendString.getBytes("US-ASCII"));
+        out.write(sendString.getBytes(StandardCharsets.US_ASCII));
         out.flush();
       }
       else if (hostname.startsWith("file://")) {

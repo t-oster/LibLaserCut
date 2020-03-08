@@ -34,6 +34,7 @@ import de.thomas_oster.liblasercut.platform.Util;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -304,7 +305,7 @@ public class LaosCutter extends LaserCutter
   private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     for (VectorCommand cmd : vp.getCommandList())
     {
       switch (cmd.getType())
@@ -438,7 +439,7 @@ public class LaosCutter extends LaserCutter
   private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     LaosEngraveProperty prop = rp.getLaserProperty() instanceof LaosEngraveProperty ? (LaosEngraveProperty) rp.getLaserProperty() : new LaosEngraveProperty(rp.getLaserProperty());
@@ -536,9 +537,6 @@ public class LaosCutter extends LaserCutter
    * the Output is padded with zeroes on the right side, if leftToRight is true,
    * on the left-side otherwise
    * rightmost bit
-   * @param line
-   * @param outputLeftToRight
-   * @return
    */
   public List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
   {
@@ -571,7 +569,7 @@ public class LaosCutter extends LaserCutter
   private byte[] generateLaosRasterCode(RasterPart rp, double resolution) throws UnsupportedEncodingException, IOException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     boolean dirRight = true;
     Point rasterStart = rp.getRasterStart();
     LaosEngraveProperty prop = rp.getLaserProperty() instanceof LaosEngraveProperty ? (LaosEngraveProperty) rp.getLaserProperty() : new LaosEngraveProperty(rp.getLaserProperty());
@@ -640,14 +638,14 @@ public class LaosCutter extends LaserCutter
   private byte[] generateInitializationCode() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     return result.toByteArray();
   }
 
   private byte[] generateShutdownCode() throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     this.setFocus(out, 0f);
     this.setVentilation(out, false);
     this.setPurge(out, false);
@@ -764,16 +762,13 @@ public class LaosCutter extends LaserCutter
     {
       //TODO: Calculate possible resolutions
       //according to mm/step
-      resolutions = Arrays.asList(new Double[]
-        {
-          100d,
-          200d,
-          300d,
-          500d,
-          600d,
-          1000d,
-          1200d
-        });
+      resolutions = Arrays.asList(100d,
+              200d,
+              300d,
+              500d,
+              600d,
+              1000d,
+              1200d);
     }
     return resolutions;
   }
@@ -853,23 +848,23 @@ public class LaosCutter extends LaserCutter
     }
     else if (SETTING_RASTER_WHITESPACE.equals(attribute))
     {
-      return (Double) this.getAddSpacePerRasterLine();
+      return this.getAddSpacePerRasterLine();
     }
     else if (SETTING_SUPPORTS_FREQUENCY.equals(attribute))
     {
-      return (Boolean) this.supportsFrequency;
+      return this.supportsFrequency;
     }
     else if (SETTING_SUPPORTS_PURGE.equals(attribute))
     {
-      return (Boolean) this.supportsPurge;
+      return this.supportsPurge;
     }
     else if (SETTING_SUPPORTS_VENTILATION.equals(attribute))
     {
-      return (Boolean) this.supportsVentilation;
+      return this.supportsVentilation;
     }
     else if (SETTING_SUPPORTS_FOCUS.equals(attribute))
     {
-      return (Boolean) this.supportsFocus;
+      return this.supportsFocus;
     }
     else if (SETTING_HOSTNAME.equals(attribute))
     {
@@ -877,31 +872,31 @@ public class LaosCutter extends LaserCutter
     }
     else if (SETTING_FLIPX.equals(attribute))
     {
-      return (Boolean) this.isFlipXaxis();
+      return this.isFlipXaxis();
     }
     else if (SETTING_FLIPY.equals(attribute))
     {
-      return (Boolean) this.isFlipYaxis();
+      return this.isFlipYaxis();
     }
     else if (SETTING_PORT.equals(attribute))
     {
-      return (Integer) this.getPort();
+      return this.getPort();
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
-      return (Double) this.getBedWidth();
+      return this.getBedWidth();
     }
     else if (SETTING_BEDHEIGHT.equals(attribute))
     {
-      return (Double) this.getBedHeight();
+      return this.getBedHeight();
     }
     else if (SETTING_MMPERSTEP.equals(attribute))
     {
-      return (Double) this.getMmPerStep();
+      return this.getMmPerStep();
     }
     else if (SETTING_TFTP.equals(attribute))
     {
-      return (Boolean) this.isUseTftp();
+      return this.isUseTftp();
     }
     return null;
   }
@@ -991,14 +986,11 @@ public class LaosCutter extends LaserCutter
   /**
    * Calculates the smallest bounding box of all job-parts
    * and generates the laos bounding-box commands
-   * @param job
-   * @return
-   * @throws UnsupportedEncodingException 
    */
   private byte[] generateBoundingBoxCode(LaserJob job) throws UnsupportedEncodingException
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     if (job.getParts().size() > 0)
     {
       JobPart p = job.getParts().get(0);

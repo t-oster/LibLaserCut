@@ -71,8 +71,7 @@ public class Marlin extends GenericGcodeDriver {
   @Override
   public String[] getPropertyKeys()
   {
-    List<String> result = new LinkedList<String>();
-    result.addAll(Arrays.asList(super.getPropertyKeys()));
+    List<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
     result.remove(GenericGcodeDriver.SETTING_IDENTIFICATION_STRING);
     result.remove(GenericGcodeDriver.SETTING_WAIT_FOR_OK);
     result.remove(GenericGcodeDriver.SETTING_LINEEND);
@@ -87,8 +86,6 @@ public class Marlin extends GenericGcodeDriver {
   /**
    * Waits for the Identification line and returns null if it's alright
    * Otherwise it returns the wrong line
-   * @return
-   * @throws IOException 
    */
  @Override
   protected String waitForIdentificationLine(ProgressListener pl) throws IOException

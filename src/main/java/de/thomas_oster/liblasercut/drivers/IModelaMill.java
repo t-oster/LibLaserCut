@@ -40,6 +40,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,12 +79,12 @@ public class IModelaMill extends LaserCutter
   private Map<String, Object> properties = new LinkedHashMap<String, Object>();
   public IModelaMill()
   {
-    properties.put(BED_WIDTH, (Double) 85d);
-    properties.put(BED_HEIGHT, (Double) 55d);
+    properties.put(BED_WIDTH, 85d);
+    properties.put(BED_HEIGHT, 55d);
     properties.put(HOSTNAME, "file:///dev/usb/lp0");
-    properties.put(PORT, (Integer) 5000);
-    properties.put(HOME_ON_END, (Boolean) true);
-    properties.put(FLIP_YAXIS, (Boolean) false);
+    properties.put(PORT, 5000);
+    properties.put(HOME_ON_END, true);
+    properties.put(FLIP_YAXIS, false);
   }
   
   private boolean spindleOn = false;
@@ -346,7 +347,7 @@ public class IModelaMill extends LaserCutter
     checkJob(job);
     pl.progressChanged(this, 20);
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, "US-ASCII");
+    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     pl.taskChanged(this, "generating...");
     writeInitializationCode(out);
     double all = job.getParts().size();
@@ -380,7 +381,7 @@ public class IModelaMill extends LaserCutter
   {
     // software resolution in NC-Code mode: 0.001mm/step = 0.000036 inches/step
     // means 1000 steps per mm
-   return Arrays.asList(new Double[]{100d, 200d, 300d, 400d, 500d, 1000d, 1200d, Util.dpmm2dpi(1000d)});
+   return Arrays.asList(100d, 200d, 300d, 400d, 500d, 1000d, 1200d, Util.dpmm2dpi(1000d));
   }
 
   @Override
@@ -388,7 +389,7 @@ public class IModelaMill extends LaserCutter
   {
     if (properties.get(BED_WIDTH) == null)
     {
-      properties.put(BED_WIDTH, (Double) 85d);
+      properties.put(BED_WIDTH, 85d);
     }
     return (Double) properties.get(BED_WIDTH);
   }
@@ -398,7 +399,7 @@ public class IModelaMill extends LaserCutter
   {
     if (properties.get(BED_HEIGHT) == null)
     {
-      properties.put(BED_HEIGHT, (Double) 55d);
+      properties.put(BED_HEIGHT, 55d);
     }
     return (Double) properties.get(BED_HEIGHT);
   }

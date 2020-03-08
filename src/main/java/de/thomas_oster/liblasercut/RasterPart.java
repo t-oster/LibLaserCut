@@ -58,8 +58,6 @@ public class RasterPart extends RasterizableJobPart
    * 1 when black or 0 when white
    * This method is preferred to the above method because it allows reuse of
    * an allocated List<Byte> instead of reallocating for every line.
-   * @param line
-   * @param result
    */
   @Override
   public void getRasterLine(int line, List<Byte> result)
