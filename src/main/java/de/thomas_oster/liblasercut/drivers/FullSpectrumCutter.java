@@ -32,11 +32,13 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -89,27 +91,23 @@ public class FullSpectrumCutter extends LaserCutter
   {
     
   }
+  
   /**
-   * It is called, whenever VisiCut wants the driver to send a job to the lasercutter.
-   * @param job This is an LaserJob object, containing all information on the job, which is to be sent
-   * @param pl Use this object to inform VisiCut about the progress of your sending action. 
-   * @param warnings If you there are warnings for the user, you can add them to this list, so they can be displayed by VisiCut
-   * @throws IllegalJobException Throw this exception, when the job is not suitable for the current machine
+   * convert LaserJob to "Full Spectrum" network packet
    */
-  @Override
-  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
+  private ByteArrayOutputStream jobToFullPacket(LaserJob job, List<String> warnings) throws IllegalJobException, IOException
   {
+    if (warnings == null)
+    {
+      warnings = new ArrayList<>();
+    }
+    ByteArrayOutputStream bosRawCmds = new ByteArrayOutputStream();
     float power = 0;
     float speed = 100;
     float moving_speed = getMaxVectorMoveSpeed();
     float xsim = 0;
     float ysim = 0;
     
-    ByteArrayOutputStream bosRawCmds = new ByteArrayOutputStream();
-    ByteArrayOutputStream bosFullPacket = new ByteArrayOutputStream();
-
-    pl.progressChanged(this, 0);
-    pl.taskChanged(this, "checking job");
     checkJob(job);
     job.applyStartPoint();
     
@@ -185,9 +183,26 @@ public class FullSpectrumCutter extends LaserCutter
         }
       }
     }
-    
+        
     // feeds the commands into packet generator
+    ByteArrayOutputStream bosFullPacket = new ByteArrayOutputStream();
     bosFullPacket.write(generatePacket(bosRawCmds.toByteArray()));
+    return bosFullPacket;
+  }
+  
+  /**
+   * It is called, whenever VisiCut wants the driver to send a job to the lasercutter.
+   * @param job This is an LaserJob object, containing all information on the job, which is to be sent
+   * @param pl Use this object to inform VisiCut about the progress of your sending action. 
+   * @param warnings If you there are warnings for the user, you can add them to this list, so they can be displayed by VisiCut
+   * @throws IllegalJobException Throw this exception, when the job is not suitable for the current machine
+   */
+  @Override
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
+  {
+    pl.progressChanged(this, 0);
+    pl.taskChanged(this, "processing job");
+    ByteArrayOutputStream bosFullPacket = jobToFullPacket(job, warnings);
     
     BufferedOutputStream italkout;
     BufferedOutputStream jobout;
@@ -252,6 +267,14 @@ public class FullSpectrumCutter extends LaserCutter
     
     pl.progressChanged(this, 100);
   }
+  
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IOException, IllegalJobException
+  {
+    fileOutputStream.print(jobToFullPacket(job, null).toString(StandardCharsets.US_ASCII));
+  }
+  
+  
   
   /**
    * Loops until the machine finish cutting
