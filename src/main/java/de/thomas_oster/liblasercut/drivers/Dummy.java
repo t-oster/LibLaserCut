@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.io.PrintStream;
 import java.util.*;
 
 /**
@@ -126,7 +127,7 @@ public class Dummy extends LaserCutter {
     /**
      * generate SVG output string and reset everything (delete all path data)
      */
-    private String getSVG() {
+    public String getSVG() {
       endPart();
       svg.insert(0,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?> \n"
               + "<!-- Created by VisiCut Debug output -->\n"
@@ -211,17 +212,8 @@ public class Dummy extends LaserCutter {
   }
   
 
-
-  @Override
-  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
-    pl.progressChanged(this, 0);
-    
-    BufferedOutputStream out;
-    pl.taskChanged(this, "checking job");
-    checkJob(job);
-    job.applyStartPoint();
-    pl.taskChanged(this, "sending");
-    pl.taskChanged(this, "sent.");
+  private SVGWriter jobToSVG(LaserJob job) throws IllegalJobException
+  {
     SVGWriter svg = new SVGWriter(this); // SVG debug output
     System.out.println("dummy-driver got LaserJob: ");
     // TODO don't just print the parts and settins, but also the commands
@@ -275,9 +267,31 @@ public class Dummy extends LaserCutter {
             System.out.println(rp.getLaserProperty().toString());
           }
       }
-      System.out.println("end of job.");
-      svg.store(svgOutdir);
-      pl.progressChanged(this, 100);
+     return svg;
+  }
+
+  @Override
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException {
+    pl.progressChanged(this, 0);
+    pl.taskChanged(this, "checking job");
+    checkJob(job);
+    job.applyStartPoint();
+    pl.taskChanged(this, "sending");
+    pl.taskChanged(this, "sent.");
+    SVGWriter svg = jobToSVG(job);
+    System.out.println("end of job.");
+    svg.store(svgOutdir);
+    pl.progressChanged(this, 100);
+  }
+  
+  /**
+   * save job as SVG to file
+   */
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IllegalJobException
+  {
+    SVGWriter svg = jobToSVG(job);
+    fileOutputStream.print(svg.getSVG());
   }
 
   @Override
