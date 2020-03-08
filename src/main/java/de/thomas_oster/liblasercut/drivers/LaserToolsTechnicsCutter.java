@@ -168,7 +168,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   {
     return "LTT iLaser 4000 (and probably other models)";
   }
-  protected boolean useTangentCurves = false;
+  protected boolean useTangentCurves = true;
 
   /**
    * Get the value of useTangentCurves
