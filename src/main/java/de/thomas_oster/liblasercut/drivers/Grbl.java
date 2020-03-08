@@ -185,8 +185,7 @@ public class Grbl extends GenericGcodeDriver
   protected void sendLine(String text, Object... parameters) throws IOException
   {
     out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
-    //TODO: Remove
-    System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
+    // System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
     out.flush();
     if (isWaitForOKafterEachLine())
     {

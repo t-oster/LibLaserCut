@@ -43,7 +43,7 @@ import java.util.List;
  * #1: Create a new JavaClass, which extends the de.thomas_oster.liblasercut.drivers.LaserCutter class
  * #2: Implement all abstract methods. Each of them is explained in this example.
  * #3: In Order to see your driver in VisiCut, add your class to the getSupportedDrivers() method
- * in the de.thomas_oster.liblasercut.LibInfo class (src/com/t_oster/liblasercut/LibInfo.java)
+ * in the de.thomas_oster.liblasercut.LibInfo class (src/de/thomas_oster/liblasercut/LibInfo.java)
  * 
  * @author Thomas Oster
  */
