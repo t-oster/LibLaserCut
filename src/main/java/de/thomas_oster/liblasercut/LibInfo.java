@@ -48,7 +48,6 @@ public class LibInfo
       Dummy.class,
       IModelaMill.class,
       SampleDriver.class,
-      ExportSVG.class,
       MakeBlockXYPlotter.class,
       GenericGcodeDriver.class,
       Grbl.class,
