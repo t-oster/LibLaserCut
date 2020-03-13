@@ -887,6 +887,18 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 	setWaitForOKafterEachLine(wasSetWaitingForOk);
 }
 
+  @Override
+  public boolean canEstimateJobDuration() {
+    return true;
+  }
+  
+  @Override
+  public int estimateJobDuration(LaserJob job) {
+    // getTravel_speed() and getMax_speed() are in mm/min, estimateJobDuration(...) uses mm/s.
+    return estimateJobDuration(job, getTravel_speed() / 60, getTravel_speed() / 60, getMax_speed() / 60, 0, getMax_speed() / 60, 0, getMax_speed() / 60);
+  }
+    
+
   private List<Double> resolutions;
 
   @Override
