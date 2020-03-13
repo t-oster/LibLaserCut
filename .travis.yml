@@ -7,3 +7,7 @@ jdk:
 script:
   - "./test.sh"
   - "mvn test"
+  # If codacy is configured, upload code coverage statistics, otherwise do nothing.
+  # Note: Due to a design defect, this cannot test code coverage of new pull requests!
+  # Codacy require a private API key that is passed as Travis-CI environment variable. For security reasons, this variable is unavailable on external pull requests.
+  - 'if [ -n "$CODACY_PROJECT_TOKEN" ]; then echo "Uploading coverage to codacy"; bash <(curl -Ls https://coverage.codacy.com/get.sh); fi'
