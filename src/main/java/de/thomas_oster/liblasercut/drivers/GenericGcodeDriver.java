@@ -729,10 +729,10 @@ public class GenericGcodeDriver extends LaserCutter {
       }
       else
       {
-        Enumeration e = CommPortIdentifier.getPortIdentifiers();
+        Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers();
         while (e.hasMoreElements())
         {
-          CommPortIdentifier i = (CommPortIdentifier) e.nextElement();
+          CommPortIdentifier i = e.nextElement();
           if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
           {
             error = connect_serial(i, pl);
@@ -962,7 +962,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
     this.rasterPadding = rasterPadding;
   }
 
-  private static String[] settingAttributes = new String[]{
+  private static final String[] SETTINGS_LIST = new String[]{
     SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
     SETTING_BEDWIDTH,
@@ -993,7 +993,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 
   @Override
   public String[] getPropertyKeys() {
-    return settingAttributes;
+    return SETTINGS_LIST;
   }
 
   @Override
@@ -1012,8 +1012,6 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       return this.isFlipXaxis();
     } else if (SETTING_FLIP_Y.equals(attribute)) {
       return this.isFlipYaxis();
-    } else if (SETTING_HOST.equals(attribute)) {
-      return this.getHost();
     } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
       return this.getHttpUploadUrl();
     } else if (SETTING_AUTOPLAY.equals(attribute)) {
@@ -1073,8 +1071,6 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
       this.setFlipXaxis((Boolean) value);
     } else if (SETTING_FLIP_Y.equals(attribute)) {
       this.setFlipYaxis((Boolean) value);
-    } else if (SETTING_HOST.equals(attribute)) {
-      this.setHost((String) value);
     } else if (SETTING_HTTP_UPLOAD_URL.equals(attribute)) {
       this.setHttpUploadUrl((String) value);
     } else if (SETTING_AUTOPLAY.equals(attribute)) {
