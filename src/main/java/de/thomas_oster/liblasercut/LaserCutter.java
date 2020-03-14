@@ -295,48 +295,81 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     }
 
     public abstract String getModelName();
+    
 
     /**
      * Converts a raster image (B&W or greyscale) into a series of vector
      * instructions suitable for printing. Lets non-raster-native cutters
      * emulate this functionality using gcode.
      * @param rp the raster job to convert
-     * @param resolution resolution to output job at
+     * @param job the laser job (as context; will not be modified)
      * @param bidirectional cut in both directions
+     * @param useMoveToForWhitePixels Handling of white (non-engraved) pixels:
+     *    False: Recommended. Use lineto() with 0% power. Many lasercutters have
+     *           smoother movement with lineto() instead of moveto.
+     *    True:  Use moveto() commands. This is a necessary workaround for
+     *           lasercutters that don't properly support scaling down power to
+     *           0%, for example if lineto() always uses full power. 
+     *           Results in the Engrave3D mode may be suboptimal.
+     * @param useMoveToForPadding Handling of padding area left and right 
+     *    of the actual engraving:
+     *    see preferMoveTo. (Width of the overscan area is set by getRasterPadding()).
+     * 
      * @return a VectorPart job of VectorCommands
      */
-    protected VectorPart convertRasterizableToVectorPart(RasterizableJobPart rp, double resolution, boolean bidirectional)
+    protected VectorPart convertRasterizableToVectorPart(RasterizableJobPart rp, LaserJob job, boolean bidirectional, boolean useMoveToForWhitePixels, boolean useMoveToForPadding)
     {
+      double resolution = rp.getDPI();
+      // NOTE: The resolution of rp is also the resolution of the returned VectorPart.
       VectorPart result = new VectorPart(rp.getLaserProperty(), resolution);
+      int leftLimitPx = (int) Util.mm2px(job.getTransformedOriginX(), resolution);
+      int rightLimitPx = (int) Util.mm2px(job.getTransformedOriginX() + getBedWidth(), resolution);
       for (int y = 0; y < rp.getRasterHeight(); y++)
       {
-        if (rp.lineIsBlank(y) == false)
-        {
-          Point lineStart = rp.getStartPosition(y);
-
-          //move to prestart
-          int x = rp.firstNonWhitePixel(y);
-          int overscan = Math.round((float)Util.mm2px(this.getRasterPadding() * (rp.cutDirectionleftToRight ? 1 : -1), resolution));
-
-          result.moveto(lineStart.x + x + rp.cutCompensation() - overscan, lineStart.y);
-
-          //move to the first point of the scanline
-          result.setProperty(rp.getPowerSpeedFocusPropertyForColor(255));
-          result.lineto(lineStart.x + x + rp.cutCompensation(), lineStart.y);
-
-          while(!rp.hasFinishedCuttingLine(x, y))
-          {
-            result.setProperty(rp.getPowerSpeedFocusPropertyForPixel(x, y));
-            x = rp.nextColorChange(x, y);
-            result.lineto(lineStart.x + x + rp.cutCompensation(), lineStart.y);
-          }
-
-          // move to post-end
-          result.setProperty(rp.getPowerSpeedFocusPropertyForColor(255));
-          result.lineto(lineStart.x + x + rp.cutCompensation() + overscan, lineStart.y);
-
-          if (bidirectional) rp.toggleRasteringCutDirection();
+        if (rp.lineIsBlank(y)){
+          continue;
         }
+        Point lineStart = rp.getStartPosition(y);
+
+        //move to prestart
+        int x = rp.firstNonWhitePixel(y);
+        int overscan = Math.round((float)Util.mm2px(this.getRasterPadding() * (rp.cutDirectionleftToRight ? 1 : -1), resolution));
+        double preStartX = lineStart.x + x + rp.cutCompensation() - overscan;
+        preStartX = Math.min(rightLimitPx, Math.max(leftLimitPx, preStartX));
+
+        result.moveto(preStartX, lineStart.y);
+
+        //move to the first point of the scanline
+        if (!useMoveToForPadding)
+        {
+          result.setProperty(rp.getPowerSpeedFocusPropertyForColor(255)); 
+        }
+        result.linetoOrMoveto(lineStart.x + x + rp.cutCompensation(), lineStart.y, !useMoveToForPadding);
+
+
+        while(!rp.hasFinishedCuttingLine(x, y))
+        {
+          int color = rp.getImage().getGreyScale(x, y);
+          // for non-white pixels, we always need to use lineto(). For white pixels, respect useMoveToForWhitePixels.
+          boolean useLineto = color < 255 || !useMoveToForWhitePixels;
+          if (useLineto) 
+          {
+            result.setProperty(rp.getPowerSpeedFocusPropertyForColor(color));
+          }
+          x = rp.nextColorChange(x, y);
+          result.linetoOrMoveto(lineStart.x + x + rp.cutCompensation(), lineStart.y, useLineto);
+        }
+
+        // move to post-end
+        double postEndX = lineStart.x + x + rp.cutCompensation() + overscan;
+        postEndX = Math.min(rightLimitPx, Math.max(leftLimitPx, postEndX));
+        if (!useMoveToForPadding)
+        {
+          result.setProperty(rp.getPowerSpeedFocusPropertyForColor(255));
+        }
+        result.linetoOrMoveto(postEndX, lineStart.y, !useMoveToForPadding);
+
+        if (bidirectional) rp.toggleRasteringCutDirection();
       }
       return result;
     }

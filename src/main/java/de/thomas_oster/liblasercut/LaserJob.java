@@ -38,6 +38,9 @@ public class LaserJob
   private String user;
   private double startX = 0;
   private double startY = 0;
+  // position of origin after applying start point - see applyStartPoint()
+  private double transformedOriginX = 0;
+  private double transformedOriginY = 0;
   private List<JobPart> parts = new LinkedList<JobPart>();
   private boolean autoFocusEnabled = true;
 
@@ -68,6 +71,30 @@ public class LaserJob
   public double getStartY()
   {
     return startY;
+  }
+  
+  /**
+   * Get the X-coordinate of the origin (top-left corner of laser bed) in mm.
+   * Initially 0, but changes if applyStartPoint() is used.
+   * Use this as an offset for checking if a path is outside the laser bed.
+   * 
+   * The allowed range of X coordinates is:
+   * {@code
+   * getTransformedOriginX()  <= x <= getTransformedOriginX() + LaserCutter.getBedWidth()
+   * }
+   */
+  public double getTransformedOriginX()
+  {
+    return transformedOriginX;
+  }
+  
+  /**
+   * Get the Y-coordinate of the origin in mm.
+   * See getTransformedOriginX().
+   */
+  public double  getTransformedOriginY()
+  {
+    return transformedOriginY;
   }
 
   public String getTitle()
@@ -101,10 +128,12 @@ public class LaserJob
   }
 
   /**
-   * This mehtod will substract the start-point coordinates
+   * This method will subtract the start-point coordinates
    * from all parts of the job (in the corresponding resolution)
    * and then set the start-point to 0,0. This way multiple calls
    * to this method won't result in corrupted jobs.
+   * 
+   * The applied offset is saved in getTransformedOriginX(), getTransformedOriginY().
    */
   public void applyStartPoint()
   {
@@ -136,6 +165,8 @@ public class LaserJob
           rp.start.y -= (int) (Util.mm2inch(startY)*p.getDPI());
         }
       }
+      transformedOriginX = -startX;
+      transformedOriginY = -startY;
       startX = 0;
       startY = 0;
     }

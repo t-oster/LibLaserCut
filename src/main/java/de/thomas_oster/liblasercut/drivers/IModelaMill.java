@@ -25,6 +25,7 @@ import de.thomas_oster.liblasercut.LaserCutter;
 import de.thomas_oster.liblasercut.LaserJob;
 import de.thomas_oster.liblasercut.LaserProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
 import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.VectorCommand;
@@ -356,21 +357,6 @@ public class IModelaMill extends LaserCutter
   
   private byte[] generateGCode(LaserJob job, ProgressListener pl)
   {
-    if (pl == null)
-    {
-      pl = new ProgressListener()
-      {
-        @Override
-        public void progressChanged(Object source, int percent)
-        {
-        }
-
-        @Override
-        public void taskChanged(Object source, String taskName)
-        {
-        }
-      };
-    }
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     pl.taskChanged(this, "generating...");
@@ -400,7 +386,7 @@ public class IModelaMill extends LaserCutter
   @Override
   public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IOException
   {
-    fileOutputStream.write(generateGCode(job, null));
+    fileOutputStream.write(generateGCode(job, new ProgressListenerDummy()));
   }
 
   @Override

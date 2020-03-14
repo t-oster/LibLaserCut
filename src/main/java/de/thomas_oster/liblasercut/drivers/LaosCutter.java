@@ -27,6 +27,7 @@ import de.thomas_oster.liblasercut.LaserProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
 import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.RasterPart;
+import de.thomas_oster.liblasercut.RasterizableJobPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
@@ -436,96 +437,6 @@ public class LaosCutter extends LaserCutter
     out.printf("1 %d %d\n", px2steps(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), px2steps(isFlipYaxis() ? Util.mm2px(bedHeight, resolution) - y : y, resolution));
   }
 
-  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException
-  {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
-    boolean dirRight = true;
-    Point rasterStart = rp.getRasterStart();
-    LaosEngraveProperty prop = rp.getLaserProperty() instanceof LaosEngraveProperty ? (LaosEngraveProperty) rp.getLaserProperty() : new LaosEngraveProperty(rp.getLaserProperty());
-    this.setCurrentProperty(out, prop);
-    float maxPower = this.currentPower;
-    boolean bu = prop.isEngraveBottomUp();
-    ByteArrayList bytes = new ByteArrayList(rp.getRasterWidth());
-    for (int line = bu ? rp.getRasterHeight()-1 : 0; bu ? line >= 0 : line < rp.getRasterHeight(); line += bu ? -1 : 1 )
-    {
-      Point lineStart = rasterStart.clone();
-      lineStart.y += line;
-      rp.getRasterLine(line, bytes);
-      //remove heading zeroes
-      while (bytes.size() > 0 && bytes.get(0) == 0)
-      {
-        bytes.remove(0);
-        lineStart.x += 1;
-      }
-      //remove trailing zeroes
-      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0)
-      {
-        bytes.remove(bytes.size() - 1);
-      }
-      if (bytes.size() > 0)
-      {
-        if (dirRight)
-        {
-          //move to the first nonempyt point of the line
-          move(out, lineStart.x, lineStart.y, resolution);
-          byte old = bytes.get(0);
-          for (int pix = 0; pix < bytes.size(); pix++)
-          {
-            if (bytes.get(pix) != old)
-            {
-              if (old == 0)
-              {
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              else
-              {
-                setPower(out, maxPower * (0xFF & old) / 255);
-                line(out, lineStart.x + pix - 1, lineStart.y, resolution);
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          setPower(out, maxPower * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-          line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-        }
-        else
-        {
-          //move to the last nonempty point of the line
-          move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          byte old = bytes.get(bytes.size() - 1);
-          for (int pix = bytes.size() - 1; pix >= 0; pix--)
-          {
-            if (bytes.get(pix) != old || pix == 0)
-            {
-              if (old == 0)
-              {
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              else
-              {
-                setPower(out, maxPower * (0xFF & old) / 255);
-                line(out, lineStart.x + pix + 1, lineStart.y, resolution);
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          setPower(out, maxPower * (0xFF & bytes.get(0)) / 255);
-          line(out, lineStart.x, lineStart.y, resolution);
-        }
-      }
-      if (!prop.isEngraveUnidirectional())
-      {
-        dirRight = !dirRight;
-      }
-    }
-    return result.toByteArray();
-  }
-
   /**
    * This Method takes a raster-line represented by a list of bytes,
    * where: byte0 ist the left-most byte, in one byte, the MSB is the
@@ -664,17 +575,17 @@ public class LaosCutter extends LaserCutter
     int max = job.getParts().size();
     for (JobPart p : job.getParts())
     {
-      if (p instanceof Raster3dPart)
+      if (p instanceof Raster3dPart || p instanceof VectorPart)
       {
-        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, p.getDPI()));
+        if (p instanceof Raster3dPart)
+        {
+          p = convertRasterizableToVectorPart((RasterizableJobPart) p, job, true, false, true);
+        }
+        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       }
       else if (p instanceof RasterPart)
       {
         out.write(this.generateLaosRasterCode((RasterPart) p, p.getDPI()));
-      }
-      else if (p instanceof VectorPart)
-      {
-        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       }
       i++;
       if (pl != null)
@@ -699,7 +610,7 @@ public class LaosCutter extends LaserCutter
     job.applyStartPoint();
     this.writeJobCode(job, fileOutputStream, null);
   }
-
+  
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {

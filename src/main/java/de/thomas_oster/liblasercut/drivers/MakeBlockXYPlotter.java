@@ -24,7 +24,6 @@
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.*;
-import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -36,7 +35,6 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import purejavacomm.CommPortIdentifier;
@@ -50,6 +48,7 @@ import purejavacomm.SerialPort;
  */
 public class MakeBlockXYPlotter extends LaserCutter
 {
+
   private enum ToolState {
     ON, OFF
   }
@@ -266,97 +265,6 @@ public class MakeBlockXYPlotter extends LaserCutter
     }
   }
   
-  private void generatePseudoRasterGCode(RasterPart rp, double resolution, ProgressListener pl, int startProgress, int maxProgress) throws UnsupportedEncodingException, Exception {
-    int i = 0;
-    int progress;
-    int max = rp.getRasterHeight();
-    
-    boolean dirRight = true;
-    Point rasterStart = rp.getRasterStart();
-    
-    // called once per part to set chosen properties
-    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    this.setDelay((int) prop.getSpeed());
-    this.setPower((int) prop.getPower());
-    
-    for (int line = 0; line < rp.getRasterHeight(); line++) {
-      Point lineStart = rasterStart.clone();
-      lineStart.y += line;
-      List<Byte> bytes = new LinkedList<Byte>();
-      boolean lookForStart = true;
-      for (int x = 0; x < rp.getRasterWidth(); x++) {
-        if (lookForStart) {
-          if (rp.isBlack(x, line)) {
-            lookForStart = false;
-            bytes.add((byte) 255);
-          } else {
-            lineStart.x += 1;
-          }
-        } else {
-          bytes.add(rp.isBlack(x, line) ? (byte) 255 : (byte) 0);
-        }
-      }
-      //remove trailing zeroes
-      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
-        bytes.remove(bytes.size() - 1);
-      }
-      if (bytes.size() > 0) {
-        if (dirRight) {
-          //add some space to the left
-          this.move(Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-          //move to the first nonempyt point of the line
-          this.move(lineStart.x, lineStart.y, resolution);
-          byte old = bytes.get(0);
-          for (int pix = 0; pix < bytes.size(); pix++) {
-            if (bytes.get(pix) != old) {
-              if (old == 0) {
-                this.move(lineStart.x + pix, lineStart.y, resolution);
-              } else {
-                this.setPower((int) prop.getPower() * (0xFF & old) / 255);
-                this.line(lineStart.x + pix - 1, lineStart.y, resolution);
-                this.move(lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          this.setPower((int) prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-          this.line(lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          //add some space to the right
-          this.move(Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-        } else {
-          //add some space to the right
-          this.move(Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-          //move to the last nonempty point of the line
-          this.move(lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          byte old = bytes.get(bytes.size() - 1);
-          for (int pix = bytes.size() - 1; pix >= 0; pix--) {
-            if (bytes.get(pix) != old || pix == 0) {
-              if (old == 0) {
-                this.move(lineStart.x + pix, lineStart.y, resolution);
-              } else {
-                this.setPower((int) prop.getPower() * (0xFF & old) / 255);
-                this.line(lineStart.x + pix + 1, lineStart.y, resolution);
-                this.move(lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          this.setPower((int) prop.getPower() * (0xFF & bytes.get(0)) / 255);
-          this.line(lineStart.x, lineStart.y, resolution);
-          //add some space to the left
-          this.move(Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-        }
-      }
-      dirRight = !dirRight;
-      
-      i = line + 1;
-      progress = (startProgress + (int) (i*(double) maxProgress/max));
-      pl.progressChanged(this, progress);
-    }
-  }
-  
   private void connect() throws NoSuchPortException, PortInUseException, Exception {
     if(!this.debug){
       if (this.hostname.startsWith("port://")) {
@@ -500,16 +408,11 @@ public class MakeBlockXYPlotter extends LaserCutter
     int max = job.getParts().size();
     for (JobPart p : job.getParts())
     {
-      if (p instanceof Raster3dPart)
+      if (p instanceof RasterizableJobPart)
       {
-        continue; // workaround to support automatic tests
-        // throw new Exception("Raster 3D parts are not implemented for " + this.getModelName());
+        p = convertRasterizableToVectorPart((RasterizableJobPart) p, job, true, true, true);
       }
-      else if (p instanceof RasterPart)
-      {
-        this.generatePseudoRasterGCode((RasterPart) p, p.getDPI(), pl, progress, ((int) ((i+1)*(double) 80/max)));
-      }
-      else if (p instanceof VectorPart)
+      if (p instanceof VectorPart)
       {
         this.generateVectorGCode((VectorPart) p, p.getDPI(), pl, progress, ((int) ((i+1)*(double) 80/max)));
       }

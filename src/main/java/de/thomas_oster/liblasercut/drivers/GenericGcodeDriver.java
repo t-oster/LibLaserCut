@@ -826,26 +826,7 @@ public class GenericGcodeDriver extends LaserCutter {
     connect(pl);
     pl.taskChanged(this, "sending");
     try {
-      writeInitializationCode();
-      pl.progressChanged(this, 20);
-      int i = 0;
-      int max = job.getParts().size();
-      for (JobPart p : job.getParts())
-      {
-        if (p instanceof Raster3dPart || p instanceof RasterPart)
-        {
-          p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI(), getUseBidirectionalRastering());
-        }
-        if (p instanceof VectorPart)
-        {
-          //TODO: in direct mode use progress listener to indicate progress
-          //of individual job
-          writeVectorGCode((VectorPart) p, p.getDPI());
-        }
-        i++;
-        pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
-      }
-      writeShutdownCode();
+      writeJobCode(job, pl);
       disconnect(job.getName()+".gcode");
     }
     catch (IOException e) {
@@ -855,6 +836,33 @@ public class GenericGcodeDriver extends LaserCutter {
     }
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
+  }
+  
+  public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    writeInitializationCode();
+    pl.progressChanged(this, 20);
+    int i = 0;
+    int max = job.getParts().size();
+    for (JobPart p : job.getParts())
+    {
+      if (p instanceof RasterizableJobPart)
+      {
+        // Note: It's difficult to choose "the right" setting for whether to use moveto() or lineto() for white engrave pixels.
+        // For smooth engraving and compatibility with previous LibLaserCut versions, we use lineto().
+        // This won't work with boards that ignore the laser power setting (S0 ... S1) and only consider G0/G1 (move/line).
+        // Therefore it should be made configurable.
+        p = convertRasterizableToVectorPart((RasterizableJobPart) p, job, getUseBidirectionalRastering(), false, false);
+      }
+      if (p instanceof VectorPart)
+      {
+        //TODO: in direct mode use progress listener to indicate progress
+        //of individual job
+        writeVectorGCode((VectorPart) p, p.getDPI());
+      }
+      i++;
+      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
+    }
+    writeShutdownCode();
   }
 
 @Override
@@ -869,19 +877,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
 	boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
 	setWaitForOKafterEachLine( false );
 
-	writeInitializationCode();
-	for (JobPart p : job.getParts())
-	{
-		if (p instanceof Raster3dPart || p instanceof RasterPart)
-		{
-			p = convertRasterizableToVectorPart((RasterizableJobPart) p, p.getDPI(), getUseBidirectionalRastering());
-		}
-    		if (p instanceof VectorPart)
-		{
-			writeVectorGCode((VectorPart) p, p.getDPI());
-		}
-	}
-	writeShutdownCode();
+	writeJobCode(job, new ProgressListenerDummy());
 	this.out.flush();
 
 	setWaitForOKafterEachLine(wasSetWaitingForOk);
