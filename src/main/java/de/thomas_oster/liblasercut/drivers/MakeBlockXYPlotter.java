@@ -195,6 +195,11 @@ public class MakeBlockXYPlotter extends LaserCutter
     if(usedTool.equals("LASER")) { // property option only supported if laser
       if (value != chosenDelay) {
         chosenDelay = value;
+        if (toolState == ToolState.ON)
+        {
+          toolOff();
+          toolOn();
+        }
       }
     }
   }
@@ -205,6 +210,11 @@ public class MakeBlockXYPlotter extends LaserCutter
     if(usedTool.equals("LASER")) { // property option only supported if laser
       if (value != chosenPower) {
         chosenPower = value;
+        if (toolState == ToolState.ON)
+        {
+          toolOff();
+          toolOn();
+        }
       }
     }
   }
