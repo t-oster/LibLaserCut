@@ -347,7 +347,7 @@ public class GoldCutHPGL extends LaserCutter {
   private byte[] generateShutdownCode() throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
-    out.printf(Locale.US, "PU%d,%d;", this.hw_y, this.hw_x);
+    out.printf(Locale.US, "PU%d,%d;", this.hw_x, this.hw_y);
     //back to origin and shutdown
     out.print(this.finiString);
     return result.toByteArray();
