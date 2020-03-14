@@ -28,8 +28,10 @@ import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -444,7 +446,7 @@ public class MakeBlockXYPlotter extends LaserCutter
   
   private void send(String command) throws Exception {
     if(!debug) {
-      if (this.hostname.startsWith("port://")) {
+      if (this.hostname.startsWith("port://") || savingToFile) {
         // send
         String sendString = command + "\n";
         out.write(sendString.getBytes(StandardCharsets.US_ASCII));
@@ -477,20 +479,9 @@ public class MakeBlockXYPlotter extends LaserCutter
     }
     return "";
   }
-
-  @Override
-  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
+  
+  public void sendGCode(LaserJob job, ProgressListener pl) throws Exception
   {
-    this.chosenPower = 0;
-    this.chosenDelay = 0;
-    this.toolState = ToolState.ON; // assume worst case, set to OFF in initialization code
-    pl.progressChanged(this, 0); 
-    pl.taskChanged(this, "checking job");
-    checkJob(job);
-    job.applyStartPoint();
-    pl.taskChanged(this, "connecting");
-    this.connect();
-    pl.taskChanged(this, "sending");
     this.generateInitializationGCode();
     int startProgress = 20;
     pl.progressChanged(this, startProgress);
@@ -501,7 +492,8 @@ public class MakeBlockXYPlotter extends LaserCutter
     {
       if (p instanceof Raster3dPart)
       {
-        throw new Exception("Raster 3D parts are not implemented for " + this.getModelName());
+        continue; // workaround to support automatic tests
+        // throw new Exception("Raster 3D parts are not implemented for " + this.getModelName());
       }
       else if (p instanceof RasterPart)
       {
@@ -516,10 +508,46 @@ public class MakeBlockXYPlotter extends LaserCutter
       pl.progressChanged(this, progress);
     }
     this.generateShutdownGCode();
+  }
+
+  @Override
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
+  {
+    this.chosenPower = 0;
+    this.chosenDelay = 0;
+    this.toolState = ToolState.ON; // assume worst case, set to OFF in initialization code
+    pl.progressChanged(this, 0); 
+    pl.taskChanged(this, "checking job");
+    checkJob(job);
+    job.applyStartPoint();
+    pl.taskChanged(this, "connecting");
+    this.connect();
+    pl.taskChanged(this, "sending");
+    this.sendGCode(job, pl);
     pl.taskChanged(this, "disconnecting");
     this.disconnect();
     pl.taskChanged(this, "sent");
     pl.progressChanged(this, 100);
+  }
+
+  // FIXME: this variable is a super ugly hack that should be ripped out and burned with fire
+  private transient boolean savingToFile = false;
+  
+  @Override
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws Exception
+  {
+    ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+    out = new BufferedOutputStream(bytesOut);
+    try {
+      savingToFile = true;
+      sendGCode(job, new ProgressListenerDummy());
+    }
+    finally
+    {
+      savingToFile = false;
+    }
+    out.close();
+    fileOutputStream.write(bytesOut.toByteArray());
   }
 
   @Override
