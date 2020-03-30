@@ -95,6 +95,14 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <!-- code coverage -->
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <version>0.8.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -113,6 +121,33 @@
         </repository>
     </distributionManagement>
     
+    
+    <build>
+        <plugins>
+            <!-- coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.5</version>
+            <executions>
+                <execution>
+                    <id>agent</id>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                </execution>
+            </executions>
+            </plugin>
+        </plugins>
+    </build>
+  
     <profiles>
         <profile>
             <!-- only do sourcode, javadoc and gpg when releasing -->
