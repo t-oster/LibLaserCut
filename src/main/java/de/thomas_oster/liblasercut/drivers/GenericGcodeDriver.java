@@ -900,7 +900,7 @@ public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws I
   @Override
   public List<Double> getResolutions() {
     if (resolutions == null) {
-      resolutions = new LinkedList<Double>();
+      resolutions = new LinkedList<>();
       for (String s : getSupportedResolutions().split(","))
       {
         resolutions.add(Double.parseDouble(s));

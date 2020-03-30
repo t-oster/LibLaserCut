@@ -41,7 +41,7 @@ public class LaserJob
   // position of origin after applying start point - see applyStartPoint()
   private double transformedOriginX = 0;
   private double transformedOriginY = 0;
-  private List<JobPart> parts = new LinkedList<JobPart>();
+  private List<JobPart> parts = new LinkedList<>();
   private boolean autoFocusEnabled = true;
 
   public LaserJob(String title, String name, String user)

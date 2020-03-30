@@ -117,12 +117,9 @@ public class PhotoPrint {
         imgIc.setImage(buf);
         final JLabel lab = new JLabel(imgIc);
         final JSlider filter = new JSlider(-255, 255, 0);
-        filter.addChangeListener(new ChangeListener() {
+        filter.addChangeListener(ce -> {
+            int diff = filter.getValue();
 
-            public void stateChanged(ChangeEvent ce) {
-                int diff = filter.getValue();
-
-            }
         });
         prev.add(lab);
         prev.add(cbDa);
@@ -130,45 +127,39 @@ public class PhotoPrint {
         prev.add(cbCut);
         prev.add(filter);
         prev.add(new JLabel("Width: "+outImg.getWidth()+" Height: "+outImg.getHeight()+ " ("+Util.px2mm(outImg.getWidth(), dpi)+"x"+Util.px2mm(outImg.getHeight(), dpi)+"mm)"));
-        final ActionListener list = new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                lab.setText("dithering...");
-                lab.repaint();
-                DitherAlgorithm da = (DitherAlgorithm) cbDa.getSelectedItem();
-                BufferedImageAdapter ad = new BufferedImageAdapter(scaledImg);
-                ad.setColorShift(filter.getValue());
-                BlackWhiteRaster bw;
-                try
-                {
-                  bw = new BlackWhiteRaster(ad, da);
-                }
-                catch (InterruptedException ex)
-                {
-                  throw new RuntimeException("this must not happen");
-                }
-                for (int y = 0; y < bw.getHeight(); y++) {
-                    for (int x = 0; x < bw.getWidth(); x++) {
-                        outImg.setRGB(x, y, bw.isBlack(x, y) ^ cbInvert.isSelected() ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
-                    }
-                }
-                Graphics2D g = buf.createGraphics();
-                AffineTransform at =
-                        AffineTransform.getScaleInstance((double) buf.getWidth() / bw.getWidth(),
-                        (double) buf.getWidth() / bw.getWidth());
-                g.setColor(Color.WHITE);
-                g.fillRect(0, 0, buf.getWidth(), buf.getHeight());
-                g.drawRenderedImage(outImg, at);
-                lab.setText("");
-                prev.repaint();
+        final ActionListener list = ae -> {
+            lab.setText("dithering...");
+            lab.repaint();
+            DitherAlgorithm da = (DitherAlgorithm) cbDa.getSelectedItem();
+            BufferedImageAdapter ad = new BufferedImageAdapter(scaledImg);
+            ad.setColorShift(filter.getValue());
+            BlackWhiteRaster bw;
+            try
+            {
+              bw = new BlackWhiteRaster(ad, da);
             }
-        };
-        filter.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                if (!filter.getValueIsAdjusting()) {
-                    list.actionPerformed(null);
+            catch (InterruptedException ex)
+            {
+              throw new RuntimeException("this must not happen");
+            }
+            for (int y = 0; y < bw.getHeight(); y++) {
+                for (int x = 0; x < bw.getWidth(); x++) {
+                    outImg.setRGB(x, y, bw.isBlack(x, y) ^ cbInvert.isSelected() ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
                 }
+            }
+            Graphics2D g1 = buf.createGraphics();
+            AffineTransform at1 =
+                    AffineTransform.getScaleInstance((double) buf.getWidth() / bw.getWidth(),
+                    (double) buf.getWidth() / bw.getWidth());
+            g1.setColor(Color.WHITE);
+            g1.fillRect(0, 0, buf.getWidth(), buf.getHeight());
+            g1.drawRenderedImage(outImg, at1);
+            lab.setText("");
+            prev.repaint();
+        };
+        filter.addChangeListener(ce -> {
+            if (!filter.getValueIsAdjusting()) {
+                list.actionPerformed(null);
             }
         });
         cbInvert.addActionListener(list);

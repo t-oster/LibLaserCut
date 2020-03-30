@@ -60,7 +60,7 @@ public class Grbl extends GenericGcodeDriver
   @Override
   public String[] getPropertyKeys()
   {
-    List<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
+    List<String> result = new LinkedList<>(Arrays.asList(super.getPropertyKeys()));
     result.remove(GenericGcodeDriver.SETTING_HOST);
     result.remove(GenericGcodeDriver.SETTING_HTTP_UPLOAD_URL);
     result.remove(GenericGcodeDriver.SETTING_AUTOPLAY);

@@ -101,11 +101,8 @@ public abstract class DitheringAlgorithm extends TimeIntensiveOperation implemen
     {
       return false;
     }
-    for (int i = 0; i < own.length; i++)
-    {
-      String key = own[i];
-      if (!Util.differ(getProperty(key),other.getProperty(key)))
-      {
+    for (String key : own) {
+      if (!Util.differ(getProperty(key), other.getProperty(key))) {
         return false;
       }
     }

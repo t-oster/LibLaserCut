@@ -147,14 +147,7 @@ public class K40NanoDriver extends LaserCutter
         int step_size = (int) (1000.0 / p.getDPI());
         device.setRaster_step(step_size);
         RasterElement element = ((RasterElement.Provider) rp.getImage()).getRaster();
-        RasterBuilder rasterbuild = new RasterBuilder(element, new RasterBuilder.PropertiesUpdate()
-        {
-          @Override
-          public void update(AbstractLaserProperty properties, int pixel)
-          {
-            properties.setProperty("pixel", pixel);
-          }
-        }, 0, 0, 0);
+        RasterBuilder rasterbuild = new RasterBuilder(element, (properties, pixel) -> properties.setProperty("pixel", pixel), 0, 0, 0);
         rasterbuild.setOffsetPosition(rp.getMinX(), rp.getMinY());
 
         int pixel = 0;
@@ -1008,10 +1001,7 @@ public class K40NanoDriver extends LaserCutter
       {
         int z_count = v / 255;
         v %= 255;
-        for (int i = 0; i < z_count; i++)
-        {
-          builder.append("z");
-        }
+        builder.append("z".repeat(z_count));
       }
       if (v > 51)
       {
@@ -1256,7 +1246,7 @@ public class K40NanoDriver extends LaserCutter
   public class K40Queue
   {
 
-    final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+    final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
     private final StringBuilder buffer = new StringBuilder();
     BaseUsb usb;
 

@@ -64,9 +64,8 @@ public class RasterPart extends RasterizableJobPart
     } else {
        result.clear();
     }
-    for (int x = 0; x < byte_array.length; x++)
-    {
-      result.add(byte_array[x]);
+    for (byte b : byte_array) {
+      result.add(b);
     }
   }
 

@@ -67,7 +67,7 @@ public class LaosEngraveProperty extends LaosCutterProperty
   
   @Override
   protected String[] getPropertyKeys(boolean showHidden) {
-    LinkedList<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys(showHidden)));
+    LinkedList<String> result = new LinkedList<>(Arrays.asList(super.getPropertyKeys(showHidden)));
     result.add(BOTTOM_UP);
     result.add(UNIDIRECTIONAL);
     return result.toArray(new String[0]);

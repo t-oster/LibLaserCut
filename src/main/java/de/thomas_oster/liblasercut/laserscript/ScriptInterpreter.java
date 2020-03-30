@@ -95,7 +95,7 @@ public class ScriptInterpreter
     {
       ContextFactory.initGlobal(new SandboxContextFactory());
     }
-    Context cx = ContextFactory.getGlobal().enter();
+    Context cx = ContextFactory.getGlobal().enterContext();
     try
     {
       cx.setClassShutter(ScriptingSecurity.getInstance());

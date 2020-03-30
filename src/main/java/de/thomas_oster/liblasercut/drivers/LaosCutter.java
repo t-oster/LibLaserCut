@@ -451,7 +451,7 @@ public class LaosCutter extends LaserCutter
    */
   public List<Long> byteLineToDwords(List<Byte> line, boolean outputLeftToRight)
   {
-    List<Long> result = new ArrayList<Long>();
+    List<Long> result = new ArrayList<>();
     int s = line.size();
     for (int i=0;i<s;i++)
     {

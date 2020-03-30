@@ -48,9 +48,9 @@ public interface LaserProperty extends Cloneable, Customizable
   
   // The following functions are optional - if your device does not support speed/power, just make them return 100 (or an arbitrary value).
   
-  public float getPower();
+  float getPower();
   
-  public void setPower(float p);
+  void setPower(float p);
   
-  public float getSpeed();
+  float getSpeed();
 }

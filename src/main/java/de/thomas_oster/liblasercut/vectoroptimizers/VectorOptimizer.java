@@ -48,7 +48,7 @@ public abstract class VectorOptimizer
 
     LaserProperty prop;
     Point start;
-    List<Point> moves = new ArrayList<Point>();
+    List<Point> moves = new ArrayList<>();
 
     @Override
     public boolean equals(Object o)
@@ -167,7 +167,7 @@ public abstract class VectorOptimizer
 
   protected List<Element> divide(VectorPart vp)
   {
-    List<Element> result = new ArrayList<Element>();
+    List<Element> result = new ArrayList<>();
     Element cur = null;
     Point lastMove = null;
     LaserProperty lastProp = null;

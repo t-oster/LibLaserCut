@@ -32,7 +32,7 @@ public class NearestVectorOptimizer extends VectorOptimizer
   @Override
   protected List<Element> sort(List<Element> e)
   {
-    List<Element> result = new LinkedList<Element>();
+    List<Element> result = new LinkedList<>();
     if (e.isEmpty())
     {
       return result;
