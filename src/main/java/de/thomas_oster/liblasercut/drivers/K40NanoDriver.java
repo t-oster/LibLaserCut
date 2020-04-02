@@ -54,7 +54,7 @@ import org.usb4java.LibUsbException;
 public class K40NanoDriver extends LaserCutter
 {
 
-  private static final String VAR_MM_PER_SECOND = "mm per second";
+  private static final String VAR_MM_PER_SECOND = "mm per second"; 
   private static final String VAR_D_RATIO = "diagonal ratio";
   private static final String VAR_POWER = "power";
   private static final String SETTING_BEDWIDTH = "Laserbed Width";
