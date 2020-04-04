@@ -94,7 +94,11 @@ public class VectorPart extends JobPart
       maxY = y;
     }
   }
-
+  /**
+   * move to (x,y) with laser off
+   * @param x coordinate in dots (according to getDPI())
+   * @param y coordinate in dots (according to getDPI()) 
+   */
   public void moveto(double x, double y)
   {
     commands.add(new VectorCommand(VectorCommand.CmdType.MOVETO, x, y));
@@ -102,11 +106,32 @@ public class VectorPart extends JobPart
     checkMax(x, y);
   }
 
+  /**
+   * cut a line to (x,y)
+   * @param x coordinate in dots (according to getDPI())
+   * @param y coordinate in dots (according to getDPI()) 
+   */
   public void lineto(double x, double y)
   {
     commands.add(new VectorCommand(VectorCommand.CmdType.LINETO, x, y));
     checkMin(x, y);
     checkMax(x, y);
+  }
+  
+  /**
+   * cut or move to (x,y)
+   * @param x coordinate in dots (according to getDPI())
+   * @param y coordinate in dots (according to getDPI()) 
+   * @param line true: cut (lineto), false: don't cut (moveto)
+   */
+  public void linetoOrMoveto(double x, double y, boolean line)
+  {
+    if (line)
+    {
+      lineto(x, y);
+    } else {
+      moveto(x, y);
+    }
   }
 
   @Override

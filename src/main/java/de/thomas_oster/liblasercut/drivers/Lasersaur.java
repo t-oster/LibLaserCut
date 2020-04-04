@@ -163,7 +163,7 @@ public class Lasersaur extends LaserCutter {
           line(out, x, y, resolution);
           break;
         case SETPROPERTY:
-          PowerSpeedFocusFrequencyProperty p = (PowerSpeedFocusFrequencyProperty) cmd.getProperty();
+          LaserProperty p = cmd.getProperty();
           setPower(out, (int) p.getPower());
           setSpeed(out, (int) p.getSpeed());
           break;
@@ -195,156 +195,6 @@ public class Lasersaur extends LaserCutter {
 
   private void line(PrintStream out, double x, double y, double resolution) {
     out.printf(Locale.US, "G1 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
-  }
-
-  private byte[] generatePseudoRaster3dGCode(Raster3dPart rp, double resolution) throws UnsupportedEncodingException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
-    boolean dirRight = true;
-    Point rasterStart = rp.getRasterStart();
-    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    setSpeed(out, (int) prop.getSpeed());
-    ByteArrayList bytes = new ByteArrayList(rp.getRasterWidth());
-    for (int line = 0; line < rp.getRasterHeight(); line++) {
-      Point lineStart = rasterStart.clone();
-      lineStart.y += line;
-      rp.getRasterLine(line, bytes);
-      //remove heading zeroes
-      while (bytes.size() > 0 && bytes.get(0) == 0) {
-        bytes.remove(0);
-        lineStart.x += 1;
-      }
-      //remove trailing zeroes
-      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
-        bytes.remove(bytes.size() - 1);
-      }
-      if (bytes.size() > 0) {
-        if (dirRight) {
-          //move to the first nonempyt point of the line
-          move(out, lineStart.x, lineStart.y, resolution);
-          byte old = bytes.get(0);
-          for (int pix = 0; pix < bytes.size(); pix++) {
-            if (bytes.get(pix) != old) {
-              if (old == 0) {
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              } else {
-                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
-                line(out, lineStart.x + pix - 1, lineStart.y, resolution);
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-          line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-        } else {
-          //move to the last nonempty point of the line
-          move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          byte old = bytes.get(bytes.size() - 1);
-          for (int pix = bytes.size() - 1; pix >= 0; pix--) {
-            if (bytes.get(pix) != old || pix == 0) {
-              if (old == 0) {
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              } else {
-                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
-                line(out, lineStart.x + pix + 1, lineStart.y, resolution);
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(0)) / 255);
-          line(out, lineStart.x, lineStart.y, resolution);
-        }
-      }
-      dirRight = !dirRight;
-    }
-    return result.toByteArray();
-  }
-
-  private byte[] generatePseudoRasterGCode(RasterPart rp, double resolution) throws UnsupportedEncodingException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
-    boolean dirRight = true;
-    Point rasterStart = rp.getRasterStart();
-    PowerSpeedFocusProperty prop = (PowerSpeedFocusProperty) rp.getLaserProperty();
-    setSpeed(out, (int) prop.getSpeed());
-    setPower(out, (int) prop.getPower());
-    for (int line = 0; line < rp.getRasterHeight(); line++) {
-      Point lineStart = rasterStart.clone();
-      lineStart.y += line;
-      List<Byte> bytes = new LinkedList<Byte>();
-      boolean lookForStart = true;
-      for (int x = 0; x < rp.getRasterWidth(); x++) {
-        if (lookForStart) {
-          if (rp.isBlack(x, line)) {
-            lookForStart = false;
-            bytes.add((byte) 255);
-          } else {
-            lineStart.x += 1;
-          }
-        } else {
-          bytes.add(rp.isBlack(x, line) ? (byte) 255 : (byte) 0);
-        }
-      }
-      //remove trailing zeroes
-      while (bytes.size() > 0 && bytes.get(bytes.size() - 1) == 0) {
-        bytes.remove(bytes.size() - 1);
-      }
-      if (bytes.size() > 0) {
-        if (dirRight) {
-          //add some space to the left
-          move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-          //move to the first nonempyt point of the line
-          move(out, lineStart.x, lineStart.y, resolution);
-          byte old = bytes.get(0);
-          for (int pix = 0; pix < bytes.size(); pix++) {
-            if (bytes.get(pix) != old) {
-              if (old == 0) {
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              } else {
-                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
-                line(out, lineStart.x + pix - 1, lineStart.y, resolution);
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(bytes.size() - 1)) / 255);
-          line(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          //add some space to the right
-          move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-        } else {
-          //add some space to the right
-          move(out, Math.min((int) Util.mm2px(bedWidth, resolution), (int) (lineStart.x + bytes.size() - 1 + Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-          //move to the last nonempty point of the line
-          move(out, lineStart.x + bytes.size() - 1, lineStart.y, resolution);
-          byte old = bytes.get(bytes.size() - 1);
-          for (int pix = bytes.size() - 1; pix >= 0; pix--) {
-            if (bytes.get(pix) != old || pix == 0) {
-              if (old == 0) {
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              } else {
-                setPower(out, (int) prop.getPower() * (0xFF & old) / 255);
-                line(out, lineStart.x + pix + 1, lineStart.y, resolution);
-                move(out, lineStart.x + pix, lineStart.y, resolution);
-              }
-              old = bytes.get(pix);
-            }
-          }
-          //last point is also not "white"
-          setPower(out, (int) prop.getPower() * (0xFF & bytes.get(0)) / 255);
-          line(out, lineStart.x, lineStart.y, resolution);
-          //add some space to the left
-          move(out, Math.max(0, (int) (lineStart.x - Util.mm2px(this.addSpacePerRasterLine, resolution))), lineStart.y, resolution);
-        }
-      }
-      dirRight = !dirRight;
-    }
-    return result.toByteArray();
   }
 
   private byte[] generateInitializationCode() throws UnsupportedEncodingException {
@@ -400,18 +250,12 @@ public class Lasersaur extends LaserCutter {
     int max = job.getParts().size();
     for (JobPart p : job.getParts())
     {
-      if (p instanceof Raster3dPart)
+      if (p instanceof RasterizableJobPart)
       {
-        out.write(this.generatePseudoRaster3dGCode((Raster3dPart) p, p.getDPI()));
+        p = convertRasterizableToVectorPart((RasterizableJobPart) p, job, true, true, true);
       }
-      else if (p instanceof RasterPart)
-      {
-        out.write(this.generatePseudoRasterGCode((RasterPart) p, p.getDPI()));
-      }
-      else if (p instanceof VectorPart)
-      {
-        out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
-      }
+      
+      out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       i++;
       if (pl!= null) pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
