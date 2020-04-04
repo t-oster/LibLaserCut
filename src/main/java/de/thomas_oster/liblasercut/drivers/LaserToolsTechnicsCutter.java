@@ -25,6 +25,7 @@ import de.thomas_oster.liblasercut.LaserCutter;
 import de.thomas_oster.liblasercut.LaserJob;
 import de.thomas_oster.liblasercut.LaserProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
 import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.RasterizableJobPart;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 
 /**
  * This class implements a driver for the LTT iLaser 4000
@@ -1851,8 +1853,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   @Override
   public int estimateJobDuration(LaserJob job) {
     try {
-        return (int) writeJobCode(job, OutputStream.nullOutputStream(), null);
-    } catch (IOException ex) {
+        return (int) writeJobCode(job, OutputStream.nullOutputStream(), null, null);
+    } catch (IOException | IllegalJobException ex) {
         Logger.getLogger(LaserToolsTechnicsCutter.class.getName()).log(Level.SEVERE, null, ex);
         return -1;
     }
@@ -1922,17 +1924,74 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     return result.toByteArray();
   }
 
-  protected double writeJobCode(LaserJob job, OutputStream os, ProgressListener pl) throws UnsupportedEncodingException, IOException
+  protected double writeJobCode(LaserJob job, OutputStream os, ProgressListener pl, List<String> warnings) throws UnsupportedEncodingException, IOException, IllegalJobException
   {
+    // fix null arguments
+    if (warnings == null) {
+      warnings = new LinkedList<>();
+    }
+    if (pl == null) {
+      pl = new ProgressListenerDummy();
+    }
+    
+    // check job
+    pl.progressChanged(this, 0);
+    pl.taskChanged(this, "checking job");
+    checkJob(job);
+    
+    if (job.getStartX() != 0 || job.getStartY() != 0) {
+      throw new UnsupportedOperationException("Manual start point is not yet supported.");
+      // FIXME: We throw this error because manual start points currently dont work.
+      // To do: - signal to the laser cutter that the start point is manual
+      //        - probably call job.applyStartPoint();
+      //        - fix all checks for coordinate limits, take the current offset into account (probably saved in applyStartPoint())
+      //        - test if it also works for negative coordinates (starting point at center of job),
+      //          especially for engrave (currently causes "negative array size" exception)
+    }
+    
+
+    if (!isLaserArcCompensationEnabled())
+    {
+      // "Arc compensation" = off is not properly tested. It also needs fixing:
+      // diagonal straight lines (non joint curve, just a single straight line)
+      // are not cut with the correct speed. This device configuration has no benefit,
+      // so we just tell the user to change it to something more helpful.
+      warnings.add("Your configuration states that 'Arc Compensation' is not enabled in the lasercutter's menu. This is not recommended and not well-tested. Please enable it both in the Lasercutter Firmware (Configuration menu) and in VisiCut's laser device settings.");
+    }
+    
+    for (JobPart p: job.getParts())
+    {
+      Object power = null;
+      if (p instanceof RasterizableJobPart) {
+        power = ((RasterizableJobPart) p).getLaserProperty().getProperty("power");
+      } else if (p instanceof VectorPart) {
+        power = ((VectorPart) p).getCurrentCuttingProperty().getProperty("power");
+      }
+      if (power instanceof Number && ((Number) power).floatValue() == 0) {
+        String powerZeroWarning = "Power is 0. Please check the laser settings for this material.";
+        if (!warnings.contains(powerZeroWarning)) {
+          warnings.add(powerZeroWarning);
+        }
+      }
+    }
+    
+    job.applyStartPoint();
+
     double duration = 0;
+    // reset internal state
     currentX = 0;
     currentY = 0;
+    currentFrequency = -1;
+    currentPower = -1;
+    currentSpeed = -1;
+    currentFocus = 0;
+    currentPurge = false;
+    currentVentilation = false;
+    
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     out.write(this.generateInitializationCode(job.getName()));
-    if (pl != null)
-    {
-      pl.progressChanged(this, 20);
-    }
+    pl.taskChanged(this, "processing");
+    pl.progressChanged(this, 20);
     int i = 0;
     int max = job.getParts().size();
 
@@ -1954,10 +2013,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         duration += this.generateVectorCode(out, (VectorPart) p, p.getDPI());
       }
       i++;
-      if (pl != null)
-      {
-        pl.progressChanged(this, 20 + (int) (i * (double) 60 / max));
-      }
+      pl.progressChanged(this, 20 + (int) (i * (double) 60 / max));
     }
     out.write(this.generateShutdownCode());
 
@@ -1974,79 +2030,29 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
     // total length
     writeU32(out, result.length + 6);
+    pl.taskChanged(this, "sending");
     os.write(out.toByteArray());
     return duration;
   }
 
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
+  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, IOException
   {
-    currentFrequency = -1;
-    currentPower = -1;
-    currentSpeed = -1;
-    currentFocus = 0;
-    currentPurge = false;
-    currentVentilation = false;
-    checkJob(job);
-    if (job.getStartX() != 0 || job.getStartY() != 0) {
-      throw new UnsupportedOperationException("Manual start point is not yet supported.");
-      // FIXME: We throw this error because manual start points currently dont work.
-      // To do: - signal to the laser cutter that the start point is manual
-      //        - fix all checks for coordinate limits
-      //        - test if it also works for negative coordinates (starting point at center of job)
-      //          especially for engrave (currently causes "negative array size" exception)
-    }
-    job.applyStartPoint();
-    this.writeJobCode(job, fileOutputStream, null);
+    this.writeJobCode(job, fileOutputStream, null, null);
   }
 
   @Override
-  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
+  public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, IOException
   {
-    if (!isLaserArcCompensationEnabled())
-    {
-      // "Arc compensation" = off is not properly tested. It also needs fixing
-      // diagonal straight lines (non joint curve, just a single straight line)
-      // are not cut with the correct speed. This device configuration has no benefit,
-      // so we just tell the user to change it to something more helpful.
-      warnings.add("Your configuration states that 'Arc Compensation' is not enabled in the lasercutter's menu. This is not recommended and not well-tested. Please enable it both in the Lasercutter Firmware (Configuration menu) and in VisiCut's laser device settings.");
-    }
-    currentFrequency = -1;
-    currentPower = -1;
-    currentSpeed = -1;
-    currentFocus = 0;
-    currentPurge = false;
-    currentVentilation = false;
-    pl.progressChanged(this, 0);
-    BufferedOutputStream out;
-    ByteArrayOutputStream buffer = null;
-    pl.taskChanged(this, "checking job");
-    for (JobPart p: job.getParts())
-    {
-      Object power = null;
-      if (p instanceof RasterizableJobPart) {
-        power = ((RasterizableJobPart) p).getLaserProperty().getProperty("power");
-      } else if (p instanceof VectorPart) {
-        power = ((VectorPart) p).getCurrentCuttingProperty().getProperty("power");
-      }
-      if (power instanceof Number && ((Number) power).floatValue() == 0) {
-        String powerZeroWarning = "Power is 0. Please check the laser settings for this material.";
-        if (!warnings.contains(powerZeroWarning)) {
-          warnings.add(powerZeroWarning);
-        }
-      }
-    }
-    checkJob(job);
-    job.applyStartPoint();
-
     pl.taskChanged(this, "connecting");
-    Socket connection = new Socket();
-    connection.connect(new InetSocketAddress(hostname, port), 3000);
-    out = new BufferedOutputStream(connection.getOutputStream());
-    pl.taskChanged(this, "sending");
-    this.writeJobCode(job, out, pl);
-    out.close();
-    connection.close();
+    try (Socket connection = new Socket())
+    {
+      connection.connect(new InetSocketAddress(hostname, port), 3000);
+      try (BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream()))
+      {
+        this.writeJobCode(job, out, pl, warnings);
+      }
+    }
     pl.progressChanged(this, 100);
   }
   private List<Double> resolutions;
