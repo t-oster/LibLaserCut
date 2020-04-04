@@ -26,6 +26,7 @@ import de.thomas_oster.liblasercut.platform.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -45,10 +46,18 @@ public abstract class VectorOptimizer
 
   protected static class Element
   {
-
     LaserProperty prop;
     Point start;
-    List<Point> moves = new ArrayList<>();
+    /**
+     * List of moves. CachedEnd must be updated if moves is modified!
+     */
+    private final ArrayList<Point> moves = new ArrayList<>();
+    private Point cachedEnd = null;
+    
+    // Temporary storage for use in sorting algorithms:
+    int index = -1;  /// Data attached to the path. Ignored in equals().
+    int startIndex = -1; /// Data attached to the start point. Ignored in equals(). Handled by invert().
+    int endIndex = -1; /// Data attached to the end point. Ignored in equals(). Handled by invert() and append().
 
     @Override
     public boolean equals(Object o)
@@ -77,8 +86,18 @@ public abstract class VectorOptimizer
       return true;
     }
 
+    /**
+     * Reverses the order of points.
+     * Also swaps startIndex and endIndex.
+     */
     void invert()
     {
+      // swap endIndex <-> startIndex
+      int tmp = endIndex;
+      endIndex = startIndex;
+      startIndex = tmp;
+
+      cachedEnd = start;
       if (!moves.isEmpty())
       {
         moves.add(0, start);
@@ -86,17 +105,47 @@ public abstract class VectorOptimizer
         Collections.reverse(moves);
       }
     }
+    
+    /**
+     * Get the list of points after the start point. Do not modify this list!
+     */
+    ArrayList<Point> getMoves()
+    {
+      return moves;
+    }
 
     Point getEnd()
     {
+      if (cachedEnd != null)
+      {
+        return cachedEnd;
+      }
       return moves.isEmpty() ? start : moves.get(moves.size() - 1);
     }
 
+    /**
+     * Append another path, discarding the other start point.
+     * 
+     * [a, b, c].append([d, e, f]) == [ a, b, c, e f ] (no "d"!)
+     * This operation only makes sense if the current end (c) is near the other start (d).
+     * 
+     * @param other path to append
+     */
     void append(Element other)
     {
-      assert (prop == null || prop.equals(other.prop));
-      assert (getEnd().equals(other.start));
+      if (!Objects.equals(prop, other.prop)) {
+        throw new IllegalArgumentException("Cannot join paths with different properties");
+      }
+      // the following should be approximately true: (getEnd().equals(other.start));
       moves.addAll(other.moves);
+      cachedEnd = other.getEnd();
+      endIndex = other.endIndex;
+    }
+    
+    void addPoint(Point p)
+    {
+      moves.add(p);
+      cachedEnd = p;
     }
 
     /**
@@ -195,7 +244,7 @@ public abstract class VectorOptimizer
             cur.start = lastMove;
             cur.prop = lastProp;
           }
-          cur.moves.add(new Point(cmd.getX(), cmd.getY()));
+          cur.addPoint(new Point(cmd.getX(), cmd.getY()));
           break;
         }
         case SETPROPERTY:
@@ -211,11 +260,6 @@ public abstract class VectorOptimizer
       result.add(cur);
     }
     return result;
-  }
-
-  protected double dist(Point a, Point b)
-  {
-    return Math.sqrt((a.y - b.y) * (a.y - b.y) + (a.x - b.x) * (a.x - b.x));
   }
 
   protected abstract List<Element> sort(List<Element> e);
