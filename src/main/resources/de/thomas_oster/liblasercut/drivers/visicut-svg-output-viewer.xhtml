@@ -50,8 +50,8 @@ function showUntil(n) {
 
 <h1>VisiCut debug output</h1>
 <div style="display:block; width:100%;">
-  Slide to see individual steps. Please use this with Chrome or another browser that supports &lt;input type=&quot;range&quot;&gt; (not Firefox).<br/>
-Start <input id="slider" type="range" value="0" min="0" max="0" onchange="showUntil(this.value)" style="width:60%"/> End
+  Slide to see individual steps.<br/>
+Start <input id="slider" type="range" value="0" min="0" max="0" oninput="showUntil(this.value)" style="width:60%"/> End
 </div>
 
 

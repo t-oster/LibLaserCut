@@ -164,13 +164,13 @@ public class Dummy extends LaserCutter {
      * store XHTML viewer to file
      */
     void storeXHTML(String path, String svgString) {
-      BufferedReader br = null;
       StringBuilder xhtml = new StringBuilder();
-      try {
-        InputStream stream = Dummy.class.getResourceAsStream("resources/visicut-svg-output-viewer.xhtml");
-        StringBuilder s = new StringBuilder();
-        br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-        String line="";
+      try (
+        InputStream stream = Dummy.class.getResourceAsStream("visicut-svg-output-viewer.xhtml");
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        )
+      {
+        String line;
         while ((line=br.readLine()) != null) {
           if (line.contains("<!-- REPLACE THIS WITH SVG -->")) {
             // insert svg, but skip first line with <?xml...
@@ -179,14 +179,9 @@ public class Dummy extends LaserCutter {
           xhtml.append(line).append("\n");
         }
         storeString(path, xhtml.toString());
-      } catch (Exception e) {
+      } catch (IOException e) {
+        e.printStackTrace();
         System.out.println("could not store debug XHTML: " + e);
-      } finally {
-        try {
-          br.close();
-        } catch (IOException ex) {
-          System.out.println("could not close bufferedWriter when storing debug XHTML");
-        }
       }
     }
     
