@@ -622,6 +622,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   private double cuttingTimeForPxDistance(double distancePx, double resolution, double speedPercent) {
     double speedMmPerSec = speedPercentToMmPerSec(speedPercent);
     double distanceMm = Util.px2mm(distancePx, resolution);
+    if (distanceMm == 0)
+    {
+      return 0;
+    }
     // for the value of the acceleration, we assume the same as configured for "joint tangential curve".
     if (!isUseTangentCurves())
     {
