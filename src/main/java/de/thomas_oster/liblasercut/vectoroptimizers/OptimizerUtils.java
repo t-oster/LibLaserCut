@@ -49,21 +49,16 @@ public class OptimizerUtils
     // two DirectedElements for each Element with the given prop. The two
     // DirectedElements represent the two possible directions in which the
     // Element could be executed (inverted or not).
-    HashMap<LaserProperty, ArrayList<DirectedElement>> propToElements = new HashMap();
+    HashMap<LaserProperty, ArrayList<DirectedElement>> propToElements = new HashMap<>();
     for (int i = 0; i < input.size(); i++)
     {
       VectorOptimizer.Element element = input.get(i);
-      ArrayList<DirectedElement> list = propToElements.get(element.prop);
-      if (list == null)
-      {
-        list = new ArrayList();
-        propToElements.put(element.prop, list);
-      }
+      ArrayList<DirectedElement> list = propToElements.computeIfAbsent(element.prop, k -> new ArrayList<>());
       list.add(new DirectedElement(i, element.start, element.getEnd(), false));
       list.add(new DirectedElement(i, element.getEnd(), element.start, true));
     }
 
-    ArrayList<VectorOptimizer.Element> result = new ArrayList();
+    ArrayList<VectorOptimizer.Element> result = new ArrayList<>();
     for (ArrayList<DirectedElement> directedElements : propToElements.values())
     {
       // Now we can disregard prop, as all directedElements reference Elements

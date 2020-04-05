@@ -38,7 +38,7 @@ public class AbstractLaserProperty implements LaserProperty
   static final String MAX_SUFFIX = "_maximum";
   static final String MIN_SUFFIX = "_minimum";
   static final String VALUES_SUFFIX = "_values";
-  Map<String, Object> properties = new HashMap<String, Object>();
+  Map<String, Object> properties = new HashMap<>();
 
   public AbstractLaserProperty()
   {
@@ -46,7 +46,7 @@ public class AbstractLaserProperty implements LaserProperty
 
   public AbstractLaserProperty(AbstractLaserProperty p)
   {
-    properties = new HashMap<String, Object>(p.properties);
+    properties = new HashMap<>(p.properties);
   }
 
   final public void addPropertyRanged(String name, Object value, Object min, Object max)
@@ -108,7 +108,7 @@ public class AbstractLaserProperty implements LaserProperty
   public String[] getPropertyKeys()
   {
     Set<String> keys = properties.keySet();
-    ArrayList<String> list = new ArrayList<String>();
+    ArrayList<String> list = new ArrayList<>();
     for (String key : keys)
     {
       if ((!key.endsWith(MIN_SUFFIX))

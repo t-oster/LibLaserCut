@@ -491,8 +491,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     out.write(toBytes("50 53")); // Vector Pause Flag (probably unused)
 
     setFrequency(out, 1000); // default frequency (will be overriden later by the profile, except if "enable frequency" is false in the config)
-    ArrayList<Double> x = new ArrayList<Double>();
-    ArrayList<Double> y = new ArrayList<Double>();
+    ArrayList<Double> x = new ArrayList<>();
+    ArrayList<Double> y = new ArrayList<>();
     double cuttingTime = 0;
     for (VectorCommand cmd : vp.getCommandList())
     {
@@ -504,8 +504,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       else
       {
         cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
-        x = new ArrayList<Double>();
-        y = new ArrayList<Double>();
+        x = new ArrayList<>();
+        y = new ArrayList<>();
         switch (cmd.getType())
         {
           case MOVETO:
@@ -903,14 +903,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   {
     if (points.isEmpty())
     {
-      return new ArrayList<PointWithSpeed>(0);
+      return new ArrayList<>(0);
     }
     double totalLength = 0;
     for (PointWithSpeed point : points.subList(1, points.size()))
     {
       totalLength += point.deltaToPrevious.hypot();
     }
-    ArrayList<PointWithSpeed> pointsNew = new ArrayList<PointWithSpeed>(points.size() + (int) (totalLength / maxDistance) + 1);
+    ArrayList<PointWithSpeed> pointsNew = new ArrayList<>(points.size() + (int) (totalLength / maxDistance) + 1);
     pointsNew.add(points.get(0));
     PointWithSpeed previousPoint = points.get(0);
     for (PointWithSpeed point : points.subList(1, points.size()))
@@ -1314,7 +1314,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // less than 1 pixel length tolerance doesn't make too much sense, because the conversion from spline to polyline in ShapeConverter causes up to 1px error anyway.
     double lengthTolerancePixels = Math.max(1.f, Util.mm2px(lengthTolerance, resolution));
 
-    ArrayList<PointWithSpeed> points = new ArrayList<PointWithSpeed>();
+    ArrayList<PointWithSpeed> points = new ArrayList<>();
     PointWithSpeed lastPoint = new PointWithSpeed(currentX, currentY);
     points.add(lastPoint);
     for (int i = 0; i < x.length; i++)
@@ -1339,7 +1339,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
           // Split the list of points at the corner = at lastPoint.
           // Note that newPoint has not yet been added to the list.
           cuttingTime += curve(out, points, resolution);
-          points = new ArrayList<PointWithSpeed>();
+          points = new ArrayList<>();
           // copy the last point, but discard angle and deltaToPrevious because that doesn't make sense at the start of the list
           lastPoint = new PointWithSpeed(lastPoint.x, lastPoint.y);
           points.add(lastPoint);
@@ -1940,7 +1940,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // the documentation says that Engrave must be before Vector, not mixed
     // TODO unnecessary???
     List<JobPart> parts = job.getParts();
-    Collections.sort(parts, (p1, p2) ->
+    parts.sort((p1, p2) ->
             Boolean.compare(p1 instanceof VectorPart, p2 instanceof VectorPart));
 
     for (JobPart p : parts)
@@ -2313,7 +2313,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     else if (SETTING_RASTER_SHIFTTABLE.equals(attribute))
     {
-      ArrayList<Integer> l = new ArrayList<Integer>();
+      ArrayList<Integer> l = new ArrayList<>();
       for (String s : ((String) value).trim().split("\\s+"))
       {
         try

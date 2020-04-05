@@ -72,7 +72,7 @@ public class SmoothieBoard extends GenericGcodeDriver {
   @Override
   public String[] getPropertyKeys()
   {
-    List<String> result = new LinkedList<String>(Arrays.asList(super.getPropertyKeys()));
+    List<String> result = new LinkedList<>(Arrays.asList(super.getPropertyKeys()));
     result.remove(GenericGcodeDriver.SETTING_IDENTIFICATION_STRING);
     result.remove(GenericGcodeDriver.SETTING_WAIT_FOR_OK);
     result.remove(GenericGcodeDriver.SETTING_BAUDRATE);

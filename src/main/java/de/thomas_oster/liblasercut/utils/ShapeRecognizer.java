@@ -66,7 +66,7 @@ public class ShapeRecognizer extends TimeIntensiveOperation
   {
     int w = bwr.getWidth();
     int h = bwr.getHeight();
-    List<Point> result = new LinkedList<Point>();
+    List<Point> result = new LinkedList<>();
     //if the upper left corner is black,
     //we assume a white shape on black background
     outerBlack = bwr.isBlack(0, 0);

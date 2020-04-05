@@ -67,7 +67,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
 
     public void sendJob(LaserJob job, ProgressListener pl) throws IllegalJobException, Exception
     {
-      this.sendJob(job, pl, new LinkedList<String>());
+      this.sendJob(job, pl, new LinkedList<>());
     }
     
     /**
@@ -112,7 +112,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     
     public void sendJob(LaserJob job) throws IllegalJobException, Exception
     {
-      List<String> warnings = new LinkedList<String>();
+      List<String> warnings = new LinkedList<>();
       this.sendJob(job, warnings);
       for(String w : warnings)
       {

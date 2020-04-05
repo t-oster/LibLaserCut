@@ -32,13 +32,13 @@ public class DeleteDuplicatePathsOptimizer extends VectorOptimizer
   @Override
   protected List<Element> sort(List<Element> e)
   {
-    List<Element> result = new LinkedList<Element>();
+    List<Element> result = new LinkedList<>();
     if (e.isEmpty())
     {
       return result;
     }
     
-    List<Element> doubleEntries = new LinkedList<Element>();
+    List<Element> doubleEntries = new LinkedList<>();
     
     for(int i=0;i<e.size();i++)
     {

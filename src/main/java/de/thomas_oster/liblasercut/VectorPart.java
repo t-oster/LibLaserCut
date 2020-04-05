@@ -43,7 +43,7 @@ public class VectorPart extends JobPart
       throw new IllegalArgumentException("Initial Property must not be null");
     }
     this.resolution = resolution;
-    commands = new LinkedList<VectorCommand>();
+    commands = new LinkedList<>();
     this.currentCuttingProperty = initialProperty;
     commands.add(new VectorCommand(VectorCommand.CmdType.SETPROPERTY, initialProperty));
 

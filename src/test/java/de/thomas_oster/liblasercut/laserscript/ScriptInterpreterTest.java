@@ -133,7 +133,7 @@ public class ScriptInterpreterTest
     script += "rectangle(0, 0, 20, 30);";
     script += "rectangle(0, 0, 20, 30);";
     ScriptInterpreter instance = new ScriptInterpreter();
-    final List<String> steps = new LinkedList<String>();
+    final List<String> steps = new LinkedList<>();
     instance.execute(script, new ScriptInterface(){
 
       public void move(double x, double y)

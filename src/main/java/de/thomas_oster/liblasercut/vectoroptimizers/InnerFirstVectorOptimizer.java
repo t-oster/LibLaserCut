@@ -47,9 +47,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
     @Override
     public int compare(Element a, Element b)
     {
-      Double av = new Double(getValue(a));
-      Double bv = new Double(getValue(b));
-      return av.compareTo(bv);
+      return Double.compare(getValue(a), getValue(b));
     }
   }
 
@@ -177,10 +175,10 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
      */
     // do the work:
     ArrayList<Element> result = OptimizerUtils.joinContiguousLoopElements(e);
-    Collections.sort(result, new XMinComparator());
-    Collections.sort(result, new YMinComparator());
-    Collections.sort(result, new XMaxComparator());
-    Collections.sort(result, new YMaxComparator());
+    result.sort(new XMinComparator());
+    result.sort(new YMinComparator());
+    result.sort(new XMaxComparator());
+    result.sort(new YMaxComparator());
     return result;
   }
 }

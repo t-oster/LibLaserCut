@@ -382,11 +382,11 @@ abstract class EpilogCutter extends LaserCutter
     checkJobAndApplyStartPoint(job, warnings);
 
     //split the job because epilog doesn't support many combinations
-    List<List<JobPart>> jobs = new LinkedList<List<JobPart>>();
+    List<List<JobPart>> jobs = new LinkedList<>();
     List<JobPart> toDo = job.getParts();
     while(!toDo.isEmpty())
     {
-      List<JobPart> currentSplit = new LinkedList<JobPart>();
+      List<JobPart> currentSplit = new LinkedList<>();
       if (toDo.get(0) instanceof Raster3dPart)
       {//raster3d part stands alone
         currentSplit.add(toDo.get(0));
@@ -985,7 +985,7 @@ abstract class EpilogCutter extends LaserCutter
   @Override
   public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
     // TODO: there is currently no way to report warnings with saveJob().
-    checkJobAndApplyStartPoint(job, new LinkedList<String>());
+    checkJobAndApplyStartPoint(job, new LinkedList<>());
     byte[] pjlData = generatePjlData(job);
     fileOutputStream.write(pjlData);
   }

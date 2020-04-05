@@ -40,9 +40,7 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
     @Override
     public int compare(Element a, Element b)
     {
-      Double av = new Double(getValue(a));
-      Double bv = new Double(getValue(b));
-      return av.compareTo(bv);
+      return Double.compare(getValue(a), getValue(b));
     }
 
     double getValue(Element e)
@@ -54,7 +52,7 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
   @Override
   protected List<Element> sort(List<Element> e)
   {
-    List<Element> result = new LinkedList<Element>();
+    List<Element> result = new LinkedList<>();
     if (e.isEmpty())
     {
       return result;
@@ -84,7 +82,7 @@ public class SmallestFirstVectorOptimizer extends VectorOptimizer
       2. B
      */
     // do the work:
-    Collections.sort(result, new SmallerComparator());
+    result.sort(new SmallerComparator());
 
     // the result is now mostly sorted
     return result;

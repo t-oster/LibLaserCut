@@ -77,7 +77,7 @@ public class IModelaMill extends LaserCutter
   private static String FLIP_YAXIS = "flip y axis";
   private static String HOME_ON_END = "move home after job";
 
-  private Map<String, Object> properties = new LinkedHashMap<String, Object>();
+  private Map<String, Object> properties = new LinkedHashMap<>();
   public IModelaMill()
   {
     properties.put(BED_WIDTH, 85d);
@@ -400,20 +400,14 @@ public class IModelaMill extends LaserCutter
   @Override
   public double getBedWidth()
   {
-    if (properties.get(BED_WIDTH) == null)
-    {
-      properties.put(BED_WIDTH, 85d);
-    }
+    properties.putIfAbsent(BED_WIDTH, 85d);
     return (Double) properties.get(BED_WIDTH);
   }
 
   @Override
   public double getBedHeight()
   {
-    if (properties.get(BED_HEIGHT) == null)
-    {
-      properties.put(BED_HEIGHT, 55d);
-    }
+    properties.putIfAbsent(BED_HEIGHT, 55d);
     return (Double) properties.get(BED_HEIGHT);
   }
 

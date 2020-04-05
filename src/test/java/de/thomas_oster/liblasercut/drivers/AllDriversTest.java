@@ -122,25 +122,14 @@ public class AllDriversTest {
       LaserJob job = generateDummyJob(lc);
       
       File newResult = new File(getOutputFilename(c, true));
-      PrintStream fs = new PrintStream(newResult);
-      try
-      {
+      try (PrintStream fs = new PrintStream(newResult)) {
         lc.saveJob(fs, job);
-      }
-      catch (UnsupportedOperationException e)
-      {
-        if ("Your driver does not implement saveJob(LaserJob job)".equals(e.getMessage()))
-        {
+      } catch (UnsupportedOperationException e) {
+        if ("Your driver does not implement saveJob(LaserJob job)".equals(e.getMessage())) {
           System.err.println("Warning: Cannot test driver " + c.getName() + " because it does not support saveJob()");
-        }
-        else
-        {
+        } else {
           throw e;
         }
-      }
-      finally
-      {
-        fs.close();
       }
     }
     // compare the results
