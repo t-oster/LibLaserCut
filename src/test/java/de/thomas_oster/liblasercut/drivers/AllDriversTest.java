@@ -1,21 +1,21 @@
-/**
- * This file is part of LibLaserCut.
- * Copyright (C) 2020 Max Gaukler (development@maxgaukler.de)
- *
- * LibLaserCut is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * LibLaserCut is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
- *
- **/
+/*
+  This file is part of LibLaserCut.
+  Copyright (C) 2020 Max Gaukler (development@maxgaukler.de)
+
+  LibLaserCut is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  LibLaserCut is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
+
+ */
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.GreyRaster;
@@ -64,8 +64,8 @@ public class AllDriversTest {
   
   /**
    * filename for storing the test output
-   * @param class Class of lasercutter driver
-   * @param new True: temporary file for storing the new results / False: "old" file with known-good result
+   * @param c Class of lasercutter driver
+   * @param isNew temporary file for storing the new results / False: "old" file with known-good result
   */
   private String getOutputFilename(Class c, boolean isNew)
   {
