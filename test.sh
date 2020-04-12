@@ -11,7 +11,7 @@ fi
 # filter out the lines that are not relevant for the license
 #  - author lines: that contain year, author name(s) and at least one email adress enclosed in <> or ()
 #  - blank lines: just " *" or similar
-IGNORE_AUTHOR_LINE_REGEXP='^([ \*]*| \* Copyright \([cC]\) 20[0-9]{2}.*[<\(].*@.*[>\)].*)$'
+IGNORE_AUTHOR_LINE_REGEXP='^(  Copyright \([cC]\) 20[0-9]{2}.*[<\(].*@.*[>\)].*)$'
 
 HEADERSIZE=$(cat copyrightheader | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP" | wc -l)
 ERRORS=0
