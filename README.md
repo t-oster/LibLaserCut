@@ -1,5 +1,6 @@
 # LibLaserCut
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/54ce385f7b624207b0611ccc7074f575)](https://app.codacy.com/manual/t-oster/LibLaserCut?utm_source=github.com&utm_medium=referral&utm_content=t-oster/LibLaserCut&utm_campaign=Badge_Grade_Settings)
 [![Build Status](https://travis-ci.org/t-oster/LibLaserCut.svg?branch=master)](https://travis-ci.org/t-oster/LibLaserCut)
 
 This is a library intended to provide suppport
