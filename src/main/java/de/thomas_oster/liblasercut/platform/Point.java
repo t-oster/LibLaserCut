@@ -80,21 +80,21 @@ public class Point
     return "Point(" + x + ", " + y + ")";
   }
 
-  public int compareTo(Point o)
-  {
-    if (y < o.y) return -1;
-    if (y > o.y) return 1;
-    if (x < o.x) return -1;
-    if (x > o.x) return 1;
-    return 0;
-  }
-
     /**
    * compute euclidean distance to another point
    * @param p other point
    */
-  public double hypothenuseTo(Point p) {
+  public double hypotTo(Point p) {
     return this.subtract(p).hypot();
+  }
+  
+  /**
+   * Compute Manhattan (1-norm) distance to another point.
+   * Fast approximation of euclidean distance.
+   * @return |self.x - p.x| + |self.y - p.y|
+   */
+  public double manhattanDistanceTo(Point p) {
+    return this.subtract(p).manhattanLength();
   }
 
   public Point add(Point p) {
@@ -135,6 +135,15 @@ public class Point
    */
   public double hypot() {
     return Math.sqrt(x*x + y*y);
+  }
+  
+  /**
+   * Get manhattan (1-norm) length.
+   * Useful as fast approximation of hypot()
+   * @return  |x| + |y|
+   */
+  public double manhattanLength() {
+    return Math.abs(x) + Math.abs(y);
   }
 
   /**

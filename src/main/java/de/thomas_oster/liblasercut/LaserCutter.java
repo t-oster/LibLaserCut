@@ -219,7 +219,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
       public double lineTime(Point p, double px2mm, double speed)
       {
         Point pMm = p.scale(px2mm);
-        double time = currentPointMm.hypothenuseTo(pMm) / speed;
+        double time = currentPointMm.hypotTo(pMm) / speed;
         currentPointMm = pMm;
         return time;
       }

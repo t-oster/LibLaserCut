@@ -46,12 +46,12 @@ public class NearestVectorOptimizer extends VectorOptimizer
       int next = 0;
       //invert element direction if endpoint is nearer
       boolean invert = false;
-      double dst = -1;
-      for (int i = 1; i < e.size(); i++)
+      double dst = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < e.size(); i++)
       {
-        //check distance to startpoint
-        double nd = dist(e.get(i).start, end);
-        if (nd < dst || dst == -1)
+        // check distance to next startpoint
+        double nd = e.get(i).start.hypotTo(end);
+        if (nd < dst)
         {
           next = i;
           dst = nd;
@@ -59,14 +59,18 @@ public class NearestVectorOptimizer extends VectorOptimizer
         }
         if (!e.get(i).start.equals(e.get(i).getEnd()))
         {
-          //check distance to endpoint
-          nd = dist(e.get(i).getEnd(), end);
-          if (nd < dst || dst == -1)
+          // check distance to next endpoint
+          nd = e.get(i).getEnd().hypotTo(end);
+          if (nd < dst)
           {
             next = i;
             dst = nd;
             invert = true;
           }
+        }
+        if (dst == 0)
+        {
+          break;
         }
       }
       //add next

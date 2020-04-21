@@ -34,10 +34,12 @@ import org.junit.Test;
 public class InnerFirstVectorOptimizerTest
 {
 
+  final int SCALE = 2; // this must be greater than 2*(tolerance of joinContigousLoops)
+  
   @Test
   public void joinsSeparateLineSegments()
   {
-    ArrayList<Element> elements = new ArrayList();
+    ArrayList<Element> elements = new ArrayList<>();
     /*
       0 1 2 3
     0 *-----*
@@ -52,28 +54,29 @@ public class InnerFirstVectorOptimizerTest
       |     |
     5 *-----*
 
+     Note: these coordinates are later multiplied by 10
      */
-    elements.add(newElem(50, 0, 0, 3, 0));
-    elements.add(newElem(50, 3, 5, 3, 0));
-    elements.add(newElem(50, 3, 5, 0, 5));
-    elements.add(newElem(50, 0, 0, 0, 5));
+    elements.add(newElem(50, SCALE, 0, 0, 3, 0));
+    elements.add(newElem(50, SCALE, 3, 5, 3, 0));
+    elements.add(newElem(50, SCALE, 3, 5, 0, 5));
+    elements.add(newElem(50, SCALE, 0, 0, 0, 5));
 
-    elements.add(newElem(50, 2, 1, 1, 1));
-    elements.add(newElem(50, 1, 2, 2, 2));
-    elements.add(newElem(50, 2, 1, 2, 2));
-    elements.add(newElem(50, 1, 2, 1, 1));
+    elements.add(newElem(50, SCALE, 2, 1, 1, 1));
+    elements.add(newElem(50, SCALE, 1, 2, 2, 2));
+    elements.add(newElem(50, SCALE, 2, 1, 2, 2));
+    elements.add(newElem(50, SCALE, 1, 2, 1, 1));
 
-    elements.add(newElem(50, 1, 3, 2, 3));
-    elements.add(newElem(50, 2, 4, 2, 3));
-    elements.add(newElem(50, 2, 4, 1, 4));
-    elements.add(newElem(50, 1, 3, 1, 4));
+    elements.add(newElem(50, SCALE, 1, 3, 2, 3));
+    elements.add(newElem(50, SCALE, 2, 4, 2, 3));
+    elements.add(newElem(50, SCALE, 2, 4, 1, 4));
+    elements.add(newElem(50, SCALE, 1, 3, 1, 4));
 
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
 
     assertEquals(3, sorted.size());
-    assertEquals(newElem(50, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2), sorted.get(0));
-    assertEquals(newElem(50, 2, 4, 2, 3, 1, 3, 1, 4, 2, 4), sorted.get(1));
-    assertEquals(newElem(50, 3, 5, 3, 0, 0, 0, 0, 5, 3, 5), sorted.get(2));
+    assertEquals(newElem(50, SCALE, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1), sorted.get(0));
+    assertEquals(newElem(50, SCALE, 1, 3, 2, 3, 2, 4, 1, 4, 1, 3), sorted.get(1));
+    assertEquals(newElem(50, SCALE, 0, 0, 3, 0, 3, 5, 0, 5, 0, 0), sorted.get(2));
   }
 
   @Test
@@ -95,28 +98,28 @@ public class InnerFirstVectorOptimizerTest
     5 *-----*
 
      */
-    elements.add(newElem(50, 0, 0, 3, 0));
-    elements.add(newElem(50, 3, 5, 3, 0));
-    elements.add(newElem(50, 3, 5, 0, 5));
-    elements.add(newElem(50, 0, 0, 0, 5));
+    elements.add(newElem(50, SCALE, 0, 0, 3, 0));
+    elements.add(newElem(50, SCALE, 3, 5, 3, 0));
+    elements.add(newElem(50, SCALE, 3, 5, 0, 5));
+    elements.add(newElem(50, SCALE, 0, 0, 0, 5));
 
-    elements.add(newElem(50, 2, 1, 1, 1));
-    elements.add(newElem(50, 1, 2, 1, 1));
-    elements.add(newElem(100, 2, 1, 2, 2));
-    elements.add(newElem(50, 2, 2, 1, 2));
+    elements.add(newElem(50, SCALE, 2, 1, 1, 1));
+    elements.add(newElem(50, SCALE, 1, 2, 1, 1));
+    elements.add(newElem(100, SCALE, 2, 1, 2, 2));
+    elements.add(newElem(50, SCALE, 2, 2, 1, 2));
 
-    elements.add(newElem(50, 1, 3, 2, 3));
-    elements.add(newElem(50, 2, 4, 2, 3));
-    elements.add(newElem(50, 2, 4, 1, 4));
-    elements.add(newElem(50, 1, 3, 1, 4));
+    elements.add(newElem(50, SCALE, 1, 3, 2, 3));
+    elements.add(newElem(50, SCALE, 2, 4, 2, 3));
+    elements.add(newElem(50, SCALE, 2, 4, 1, 4));
+    elements.add(newElem(50, SCALE, 1, 3, 1, 4));
 
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
 
     assertEquals(4, sorted.size());
-    assertEquals(newElem(100, 2, 2, 2, 1), sorted.get(0));
-    assertEquals(newElem(50, 2, 1, 1, 1, 1, 2, 2, 2), sorted.get(1));
-    assertEquals(newElem(50, 2, 4, 2, 3, 1, 3, 1, 4, 2, 4), sorted.get(2));
-    assertEquals(newElem(50, 3, 5, 3, 0, 0, 0, 0, 5, 3, 5), sorted.get(3));
+    assertEquals(newElem(100, SCALE, 2, 1, 2, 2), sorted.get(0));
+    assertEquals(newElem(50, SCALE, 2, 2, 1, 2, 1, 1, 2, 1), sorted.get(1));
+    assertEquals(newElem(50, SCALE, 1, 3, 2, 3, 2, 4, 1, 4, 1, 3), sorted.get(2));
+    assertEquals(newElem(50, SCALE, 0, 0, 3, 0, 3, 5, 0, 5, 0, 0), sorted.get(3));
   }
 
   @Test
@@ -141,15 +144,15 @@ public class InnerFirstVectorOptimizerTest
 
     // Both elements starting at 0, 0; without the invert step to check for
     // matches at the start instead of just at the end, this would fail to join.
-    elements.add(newElem(50, 0, 0, 3, 0));
-    elements.add(newElem(50, 0, 0, 0, 3, 0, 5, 3, 5));
+    elements.add(newElem(50, SCALE, 0, 0, 3, 0));
+    elements.add(newElem(50, SCALE, 0, 0, 0, 3, 0, 5, 3, 5));
 
     for (int i = 1; i <= 2; i++)
     {
       for (int j = 1; j <= 3; j++)
       {
-        elements.add(newElem(50, i, j, i + 1, j));
-        elements.add(newElem(50, j, i, j, i + 1));
+        elements.add(newElem(50, SCALE, i, j, i + 1, j));
+        elements.add(newElem(50, SCALE, j, i, j, i + 1));
       }
     }
 
@@ -157,30 +160,34 @@ public class InnerFirstVectorOptimizerTest
 
     // Grid partially combined.
     assertEquals(9, sorted.size());
-    assertEquals(newElem(50, 2, 2, 1, 2), sorted.get(0));
-    assertEquals(newElem(50, 2, 2, 2, 1), sorted.get(1));
-    assertEquals(newElem(50, 1, 2, 1, 1, 2, 1), sorted.get(2));
-    assertEquals(newElem(50, 3, 2, 2, 2), sorted.get(3));
-    assertEquals(newElem(50, 3, 2, 3, 1, 2, 1), sorted.get(4));
-    assertEquals(newElem(50, 2, 3, 2, 2), sorted.get(5));
-    assertEquals(newElem(50, 2, 3, 1, 3, 1, 2), sorted.get(6));
-    assertEquals(newElem(50, 3, 2, 3, 3, 2, 3), sorted.get(7));
+    assertEquals(newElem(50, SCALE, 1, 2, 2, 2), sorted.get(0));
+    assertEquals(newElem(50, SCALE, 2, 1, 2, 2), sorted.get(1));
+    assertEquals(newElem(50, SCALE, 2, 1, 1, 1, 1, 2), sorted.get(2));
+    assertEquals(newElem(50, SCALE, 2, 2, 3, 2), sorted.get(3));
+    assertEquals(newElem(50, SCALE, 2, 1, 3, 1, 3, 2), sorted.get(4));
+    assertEquals(newElem(50, SCALE, 2, 2, 2, 3), sorted.get(5));
+    assertEquals(newElem(50, SCALE, 1, 2, 1, 3, 2, 3), sorted.get(6));
+    assertEquals(newElem(50, SCALE, 2, 3, 3, 3, 3, 2), sorted.get(7));
 
     // Polyline combined.
-    assertEquals(newElem(50, 3, 5, 0, 5, 0, 3, 0, 0, 3, 0), sorted.get(8));
+    assertEquals(newElem(50, SCALE, 3, 0, 0, 0, 0, 3, 0, 5, 3, 5), sorted.get(8));
   }
 
-  private static Element newElem(int power, int x1, int y1, int... moves)
+  /**
+   * Construct a new path
+   * @param power laser power
+   * @param scale all coordinates are multiplied by this factor
+   */
+  private static Element newElem(int power, int scale, int x1, int y1, int... moves)
   {
     Element ret = new Element();
 
-    ret.start = new Point(x1, y1);
+    ret.start = new Point(scale * x1, scale * y1);
 
-    ret.moves = new ArrayList();
     assertEquals(0, moves.length % 2);
     for (int i = 0; i < moves.length; i += 2)
     {
-      ret.moves.add(new Point(moves[i], moves[i + 1]));
+      ret.addPoint(new Point(scale * moves[i], scale * moves[i + 1]));
     }
 
     PowerSpeedFocusProperty prop = new PowerSpeedFocusProperty();
@@ -210,8 +217,8 @@ public class InnerFirstVectorOptimizerTest
     {
       for (int j = 0; j <= 4; j++)
       {
-        elements.add(newElem(50, 50 * i, 50 * j, 50 * (i + 1), 50 * j));
-        elements.add(newElem(50, 50 * j, 50 * i, 50 * j, 50 * (i + 1)));
+        elements.add(newElem(50, SCALE, 50 * i, 50 * j, 50 * (i + 1), 50 * j));
+        elements.add(newElem(50, SCALE, 50 * j, 50 * i, 50 * j, 50 * (i + 1)));
       }
     }
 
@@ -229,38 +236,38 @@ public class InnerFirstVectorOptimizerTest
     final int OX = SX * 3;
     final int OY = 0;
     final int S = 3;
-    for (int i = 0; i <= 5; i++)
+    for (int i = 0; i <= 2000; i++)
     {
-      for (int j = 0; j <= 5; j++)
+      for (int j = 0; j <= 2000; j++)
       {
         if (Math.abs(i - j) < S)
         {
-          elements.add(newElem(
-            50, OX + SX * (2 * i - j), OY + SY * (3 * j),
+          elements.add(newElem(50, SCALE, OX + SX * (2 * i - j), OY + SY * (3 * j),
             OX + SX * (2 * i - j - 1), OY + SY * (3 * j + 1)));
         }
         if (Math.abs(i - j + 0.5) < S + 0.3 && i < 5)
         {
-          elements.add(newElem(
-            50, OX + SX * (2 * i - j), OY + SY * (3 * j),
+          elements.add(newElem(50, SCALE, OX + SX * (2 * i - j), OY + SY * (3 * j),
             OX + SX * (2 * i - j + 1), OY + SY * (3 * j + 1)));
         }
         if (Math.abs(i - j - 0.5) < S + 0.3 && j < 5)
         {
-          elements.add(newElem(
-            50, OX + SX * (2 * i - j - 1), OY + SY * (3 * j + 1),
+          elements.add(newElem(50, SCALE, OX + SX * (2 * i - j - 1), OY + SY * (3 * j + 1),
             OX + SX * (2 * i - j - 1), OY + SY * (3 * j + 3)));
         }
       }
     }
 
+    //drawAnimation("hexagon_unsorted", elements);
+    System.out.println("hey");
+    System.out.println(elements.size());
     List<Element> sorted = new InnerFirstVectorOptimizer().sort(elements);
-
-    drawAnimation("hexagon", sorted);
+    System.out.println("ho");
+    //drawAnimation("hexagon", sorted);
   }
 
   private static final int BORDER = 5;
-  private static final int ANTIALIAS = 3;
+  private static final int ANTIALIAS = 1;
 
   private static void drawAnimation(String name, List<Element> sorted)
     throws IOException
@@ -271,19 +278,20 @@ public class InnerFirstVectorOptimizerTest
     for (Element polyline : sorted)
     {
       bb.add(polyline.start);
-      for (Point p : polyline.moves)
+      for (Point p : polyline.getMoves())
       {
         bb.add(p);
       }
     }
-    String dimensions = ANTIALIAS * (bb.getXMax() + 2 * BORDER + 1) + "x"
-      + ANTIALIAS * (bb.getYMax() + 2 * BORDER + 1);
-    String finalDimensions = (bb.getXMax() + 2 * BORDER + 1) + "x"
-      + (bb.getYMax() + 2 * BORDER + 1);
+    String dimensions = ANTIALIAS * ((int) bb.getXMax() + 2 * BORDER + 1) + "x"
+      + ANTIALIAS * ((int) bb.getYMax() + 2 * BORDER + 1);
+    String finalDimensions = ((int) bb.getXMax() + 2 * BORDER + 1) + "x"
+      + ((int) bb.getYMax() + 2 * BORDER + 1);
 
     PrintWriter out = new PrintWriter(
       new BufferedWriter(new FileWriter(name + "_animation_gen.sh")));
 
+    out.printf("set -e\n");
     out.printf("rm -f frame*.png\n");
 
     final String CMD = "convert -size " + dimensions + " xc:Yellow +antialias "
@@ -296,7 +304,7 @@ public class InnerFirstVectorOptimizerTest
     for (Element polyline : sorted)
     {
       Point prev = polyline.start;
-      for (Point p : polyline.moves)
+      for (Point p : polyline.getMoves())
       {
         Point end = null;
         for (int f = 1; f <= F; f++)
@@ -325,8 +333,7 @@ public class InnerFirstVectorOptimizerTest
 
   private static String p2s(Point p)
   {
-    final int O = 5;
-    return " " + (ANTIALIAS * (p.x + BORDER) + ANTIALIAS / 2)
-      + "," + (ANTIALIAS * (p.y + BORDER) + ANTIALIAS / 2);
+    return " " + (int) (ANTIALIAS * (p.x + BORDER) + ANTIALIAS / 2)
+      + "," + (int) (ANTIALIAS * (p.y + BORDER) + ANTIALIAS / 2);
   }
 }

@@ -174,7 +174,7 @@ public class InnerFirstVectorOptimizer extends VectorOptimizer
       Element.isClosedPath()
      */
     // do the work:
-    ArrayList<Element> result = OptimizerUtils.joinContiguousLoopElements(e);
+    ArrayList<Element> result = OptimizerUtils.joinContiguousLoopElements(e, 0.9);
     result.sort(new XMinComparator());
     result.sort(new YMinComparator());
     result.sort(new XMaxComparator());

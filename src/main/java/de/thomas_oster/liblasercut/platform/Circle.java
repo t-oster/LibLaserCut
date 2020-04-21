@@ -38,7 +38,7 @@ public class Circle
    */
   public boolean containsPoint(Point p, double tolerance)
   {
-    return Math.abs(p.hypothenuseTo(center) - radius) < tolerance;
+    return Math.abs(p.hypotTo(center) - radius) < tolerance;
   }
 
   /**
@@ -74,7 +74,7 @@ public class Circle
     double maxSegmentLength = 0;
     Point pBefore = points.get(0);
     for (Point p: points) {
-      double segmentLength = p.hypothenuseTo(pBefore);
+      double segmentLength = p.hypotTo(pBefore);
       circle.center.x += (p.x + pBefore.x) / 2 * segmentLength;
       circle.center.y += (p.y + pBefore.y) / 2 * segmentLength;
       if (segmentLength > maxSegmentLength) {
