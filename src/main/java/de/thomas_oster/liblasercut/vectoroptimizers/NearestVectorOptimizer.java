@@ -50,7 +50,7 @@ public class NearestVectorOptimizer extends VectorOptimizer
       for (int i = 0; i < e.size(); i++)
       {
         // check distance to next startpoint
-        double nd = e.get(i).start.hypothenuseTo(end);
+        double nd = e.get(i).start.hypotTo(end);
         if (nd < dst)
         {
           next = i;
@@ -60,7 +60,7 @@ public class NearestVectorOptimizer extends VectorOptimizer
         if (!e.get(i).start.equals(e.get(i).getEnd()))
         {
           // check distance to next endpoint
-          nd = e.get(i).getEnd().hypothenuseTo(end);
+          nd = e.get(i).getEnd().hypotTo(end);
           if (nd < dst)
           {
             next = i;

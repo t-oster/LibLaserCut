@@ -84,7 +84,7 @@ public class Point
    * compute euclidean distance to another point
    * @param p other point
    */
-  public double hypothenuseTo(Point p) {
+  public double hypotTo(Point p) {
     return this.subtract(p).hypot();
   }
   

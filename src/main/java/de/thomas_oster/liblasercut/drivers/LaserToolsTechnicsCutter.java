@@ -713,7 +713,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     
     // the firmware works correctly up to this radius:
     final double CIRCLE_MAX_RADIUS_MM = 101.0;
-    final double radiusPx = center.hypothenuseTo(new Point(currentX, currentY));
+    final double radiusPx = center.hypotTo(new Point(currentX, currentY));
     final double radiusMm = Util.px2mm(radiusPx, resolution);
     if (radiusMm > CIRCLE_MAX_RADIUS_MM) {
         // CAUTION: The circle command is disabled for large radii as it seems broken in hardware: Large circles (radius > 105mm) cause so much acceleration (loud "BANG!" sound) that the mechanics may be damaged.
