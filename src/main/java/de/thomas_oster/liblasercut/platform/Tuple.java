@@ -75,7 +75,7 @@ public class Tuple<A, B>
     }
     else
     {
-      return super.equals(this);
+      return super.equals(o);
     }
   }
 
