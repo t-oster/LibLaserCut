@@ -224,11 +224,9 @@ public class FullSpectrumCutter extends LaserCutter
     receiveResponse(italkin);
     
     // send: "immediate <size packet>\n"
-    StringBuilder sb = new StringBuilder();
-    sb.append("immediate ");
-    sb.append(bosFullPacket.toByteArray().length);
-    sb.append("\n");
-    String msgSize = sb.toString();
+    String msgSize = "immediate " +
+            bosFullPacket.toByteArray().length +
+            "\n";
     sendTextCmd(msgSize,italkout);
     receiveResponse(italkin);
     
