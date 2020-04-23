@@ -22,14 +22,16 @@ import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Rectangle;
 import de.thomas_oster.liblasercut.vectoroptimizers.VectorOptimizer.Element;
-import java.io.PrintWriter;
-import java.io.FileWriter;
+import org.junit.Test;
+
 import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class InnerFirstVectorOptimizerTest
 {
@@ -82,7 +84,7 @@ public class InnerFirstVectorOptimizerTest
   @Test
   public void doesNotJoinSegmentsWithDifferentProps()
   {
-    ArrayList<Element> elements = new ArrayList();
+    var elements = new ArrayList<Element>();
     /*
       0 1 2 3
     0 *-----*
@@ -125,7 +127,7 @@ public class InnerFirstVectorOptimizerTest
   @Test
   public void doesNotManglePolylinesOrBranchingPaths()
   {
-    ArrayList<Element> elements = new ArrayList();
+    var elements = new ArrayList<Element>();
     /*
       0 1 2 3
     0 *-----*
@@ -230,7 +232,7 @@ public class InnerFirstVectorOptimizerTest
   // @Test
   public void hexagonGrid() throws IOException
   {
-    ArrayList<Element> elements = new ArrayList();
+    var elements = new ArrayList<Element>();
     final int SX = 24;
     final int SY = 15;
     final int OX = SX * 3;
