@@ -227,15 +227,15 @@ public class AbstractLaserProperty implements LaserProperty
   public void setNumeric(String key, double value)
   {
     if (getDouble(key) != null) {
-      this.setProperty(key, (Double) value);
+      this.setProperty(key, value);
       return;
     }
     if (getFloat(key) != null) {
-      this.setProperty(key, (Float) (float) value);
+      this.setProperty(key, (float) value);
       return;
     }
     if (getInteger(key) != null) {
-      this.setProperty(key, (Integer) (int) value);
+      this.setProperty(key, (int) value);
       return;
     }
     Logger.getLogger(this.getClass().getName()).warning("tried to set nonexistent property " + key);

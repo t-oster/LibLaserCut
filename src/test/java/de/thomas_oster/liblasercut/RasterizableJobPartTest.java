@@ -94,7 +94,7 @@ public class RasterizableJobPartTest
   {
     RasterElement element = getTest8bitRasterElement();
     AbstractLaserProperty laserProperty = new AbstractLaserProperty();
-    laserProperty.addProperty("power", (Integer) 0); // laser property must have a "power" property to avoid warnings (engraving doesn't make sense if you can't change the power)
+    laserProperty.addProperty("power", 0); // laser property must have a "power" property to avoid warnings (engraving doesn't make sense if you can't change the power)
     RasterPart instance = new RasterPart(new GreyRaster(element),
       laserProperty.clone(), new Point(0,0), 500.0f);
     List<Byte> line0 = instance.getRasterLine(0);
