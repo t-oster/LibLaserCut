@@ -47,7 +47,7 @@ public class OptimizerUtils
     Map<LaserProperty, ArrayList<Element>> propToElements = 
       input.stream().collect(
         Collectors.groupingBy(
-          el -> el.prop, Collectors.toCollection(ArrayList<Element>::new)
+          el -> el.prop, Collectors.toCollection(ArrayList::new)
         )
       );
 
