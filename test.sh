@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -e
+
 # Performs some sanity and code cleanness tests. Intended to be run before every commit
 
 echo "Checking for copryight header"
@@ -13,11 +15,11 @@ fi
 #  - blank lines: just " *" or similar
 IGNORE_AUTHOR_LINE_REGEXP='^(  Copyright \([cC]\) 20[0-9]{2}.*[<\(].*@.*[>\)].*)$'
 
-HEADERSIZE=$(cat copyrightheader | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP" | wc -l)
+HEADERSIZE=$(grep -E -v "$IGNORE_AUTHOR_LINE_REGEXP" copyrightheader | wc -l)
 ERRORS=0
 for f in $(find src -name '*.java')
 do
-	if ! diff <(cat $f | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP" | head -n $HEADERSIZE) <(cat copyrightheader | egrep -v "$IGNORE_AUTHOR_LINE_REGEXP")
+	if ! diff <(grep -E -v "$IGNORE_AUTHOR_LINE_REGEXP" "$f" | head -n "$HEADERSIZE") <(grep -E -v "$IGNORE_AUTHOR_LINE_REGEXP" copyrightheader)
 	then
 		echo "Copyright header mismatch on $f"
 		ERRORS=1
