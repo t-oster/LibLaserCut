@@ -446,7 +446,7 @@ abstract class EpilogCutter extends LaserCutter
     {
       int p;
       p = idx + 1;
-      while (p < r && p < idx + 128 && line.get(p) == line.get(idx))
+      while (p < r && p < idx + 128 && line.get(p).equals(line.get(idx)))
       {
         p++;
       }
@@ -461,8 +461,7 @@ abstract class EpilogCutter extends LaserCutter
       {
         p = idx;
         while (p < r && p < idx + 127
-          && (p + 1 == r || line.get(p)
-          != line.get(p + 1)))
+          && (p + 1 == r || !line.get(p).equals(line.get(p + 1))))
         {
           p++;
         }

@@ -104,7 +104,7 @@ public class PhotoPrint {
                 (double) oHeight / img.getHeight());
         g.drawRenderedImage(img, at);
         final BufferedImage outImg = new BufferedImage(scaledImg.getWidth(), scaledImg.getHeight(), BufferedImage.TYPE_INT_RGB);
-        final JComboBox cbDa = new JComboBox();
+        final var cbDa = new JComboBox<DitherAlgorithm>();
         for (DitherAlgorithm da : BlackWhiteRaster.DitherAlgorithm.values()) {
             cbDa.addItem(da);
         }

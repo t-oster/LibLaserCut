@@ -67,7 +67,7 @@ public class Tuple<A, B>
   {
     if (o instanceof Tuple)
     {
-      return !Util.differ(this.a, ((Tuple) o).a) && !Util.differ(this.b, ((Tuple) o).b);
+      return !Util.differ(this.a, ((Tuple<?, ?>) o).a) && !Util.differ(this.b, ((Tuple<?, ?>) o).b);
     }
     else if (o == null)
     {
@@ -75,7 +75,7 @@ public class Tuple<A, B>
     }
     else
     {
-      return super.equals(this);
+      return super.equals(o);
     }
   }
 

@@ -250,7 +250,7 @@ public class MakeBlockXYPlotter extends LaserCutter
           int pPercent = (int) p.getPower();
           pPercent = pPercent<0?0:pPercent;
           pPercent = pPercent>100?100:pPercent;
-          this.setPower((int) pPercent);
+          this.setPower(pPercent);
           // ensure percent speed
           int sPercent = (int) p.getSpeed();
           sPercent = sPercent<0?0:sPercent;

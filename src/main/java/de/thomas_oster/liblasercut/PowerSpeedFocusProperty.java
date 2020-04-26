@@ -135,11 +135,11 @@ public class PowerSpeedFocusProperty implements LaserProperty
   {
     if ("power".equals(name))
     {
-      return (Integer) (int) this.getPower();
+      return (int) this.getPower();
     }
     else if ("speed".equals(name))
     {
-      return (Integer) (int) this.getSpeed();
+      return (int) this.getSpeed();
     }
     else if ("focus".equals(name))
     {
