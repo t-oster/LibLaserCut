@@ -545,7 +545,7 @@ public class GenericGcodeDriver extends LaserCutter {
     bufferedSend += length;
     if (commandLengthQueue != null)
     {
-      commandLengthQueue.add(data.length());
+      commandLengthQueue.add(length);
     }
   }
   
