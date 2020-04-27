@@ -41,7 +41,7 @@ import net.sf.corn.httpclient.HttpResponse;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
- * It should contain all possible options and is inteded to be the superclass
+ * It should contain all possible options and is intended to be the superclass
  * for e.g. the SmoothieBoard and the Lasersaur driver.
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
@@ -531,17 +531,48 @@ public class GenericGcodeDriver extends LaserCutter {
   private CommPort port;
   private CommPortIdentifier portIdentifier;
 
+  protected Queue<Integer> commandLengthQueue = null;
+  protected int bufferedSend = 0;
+  
+  protected String formatLine(String text, Object... parameters) {
+    return String.format(FORMAT_LOCALE, text+LINEEND(), parameters);
+  }
+  
+  protected void sendData(String data) {
+    out.print(data);
+    out.flush();
+    Integer length = data.length();
+    bufferedSend += length;
+    if (commandLengthQueue != null)
+    {
+      commandLengthQueue.add(data.length());
+    }
+  }
+  
+  protected void waitForOK() throws IOException {
+    String line = waitForLine();
+    if (!"ok".equals(line))
+    {
+      throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
+    }
+    if (commandLengthQueue != null)
+    {
+      Integer length = commandLengthQueue.poll();
+      if (length == null)
+      {
+        length = 0;
+      }
+      bufferedSend -= length;
+    }
+  }
+  
   protected void sendLine(String text, Object... parameters) throws IOException
   {
-    out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
-    out.flush();
+    String line = formatLine(text, parameters);
+    sendData(line);
     if (isWaitForOKafterEachLine())
     {
-      String line = waitForLine();
-      if (!"ok".equals(line))
-      {
-        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
-      }
+      waitForOK();
     }
   }
 
