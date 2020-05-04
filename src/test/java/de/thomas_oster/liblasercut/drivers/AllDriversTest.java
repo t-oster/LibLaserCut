@@ -29,6 +29,8 @@ import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.RasterizableJobPartTest;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,7 +38,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
 
 /**
  *
@@ -115,10 +116,10 @@ public class AllDriversTest {
   @Test
   public void compareWithKnownOutput() throws FileNotFoundException, IllegalJobException, Exception
   {
-    for (Class c: LibInfo.getSupportedDrivers())
+    for (Class<? extends LaserCutter> c: LibInfo.getSupportedDrivers())
     {
       System.out.println("Generating test output for driver " + c.getSimpleName());
-      LaserCutter lc = (LaserCutter) c.getDeclaredConstructor().newInstance();
+      LaserCutter lc = c.getDeclaredConstructor().newInstance();
       LaserJob job = generateDummyJob(lc);
       
       File newResult = new File(getOutputFilename(c, true));

@@ -186,7 +186,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * @param rasterLineSpeed engrave speed in mm/s if speed is set to 100
      * @param raster3dExtraTimePerLine additional time per engrave3d line in seconds
      * @param raster3dLineSpeed engrave3d speed in mm/s if speed is set to 100
-     * @return 
      */
   protected int estimateJobDuration(LaserJob job, double moveSpeedX, double moveSpeedY, double vectorLineSpeed, double rasterExtraTimePerLine, double rasterLineSpeed, double raster3dExtraTimePerLine, double raster3dLineSpeed)
   {

@@ -106,7 +106,7 @@ public class ShapeRecognizer extends TimeIntensiveOperation
     return null;
   }
   
-  private Direction previous = Direction.west;
+  private final Direction previous = Direction.west;
 
   /**
    * Returns the best follower in the bwr or null if

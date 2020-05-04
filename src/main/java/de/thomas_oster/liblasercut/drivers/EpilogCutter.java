@@ -944,7 +944,7 @@ abstract class EpilogCutter extends LaserCutter
       this.setHideSoftwareFocus((Boolean) value);
     }
   }
-  private static String[] attributes = new String[]
+  private static final String[] attributes = new String[]
   {
     // The slightly awkward wording of SoftwareFocusNotSupported is to handle importing old settings
     // without disabling functionality.  Internally it is stored as hideSoftwareFocus, which removes

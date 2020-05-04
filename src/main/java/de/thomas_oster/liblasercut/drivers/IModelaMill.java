@@ -70,14 +70,14 @@ import java.util.Map;
 public class IModelaMill extends LaserCutter
 {
 
-  private static String HOSTNAME = "Hostname/IP";
-  private static String PORT = "port";
-  private static String BED_WIDTH = "bed width";
-  private static String BED_HEIGHT = "bed height";
-  private static String FLIP_YAXIS = "flip y axis";
-  private static String HOME_ON_END = "move home after job";
+  private static final String HOSTNAME = "Hostname/IP";
+  private static final String PORT = "port";
+  private static final String BED_WIDTH = "bed width";
+  private static final String BED_HEIGHT = "bed height";
+  private static final String FLIP_YAXIS = "flip y axis";
+  private static final String HOME_ON_END = "move home after job";
 
-  private Map<String, Object> properties = new LinkedHashMap<>();
+  private final Map<String, Object> properties = new LinkedHashMap<>();
   public IModelaMill()
   {
     properties.put(BED_WIDTH, 85d);
@@ -119,7 +119,7 @@ public class IModelaMill extends LaserCutter
   }
   
   //all depth values are positive, 0 is top
-  private double movedepth = 0;
+  private final double movedepth = 0;
   private double linedepth = 0;
   private double headdepth = 0;
   private double spindleSpeed = 0;

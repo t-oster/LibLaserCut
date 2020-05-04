@@ -51,8 +51,8 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
     return frequency;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
-  private static String[] propertyNamesNoFocus = new String[]{"power", "speed", "frequency"};
+  private static final String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
+  private static final String[] propertyNamesNoFocus = new String[]{"power", "speed", "frequency"};
 
   @Override
   public String[] getPropertyKeys()

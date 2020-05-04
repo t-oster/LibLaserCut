@@ -84,7 +84,7 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   int skip_pixel_value;
 
   private int y_position, x_position, dy, dx, begin, end, higher_bound, lower_bound, pixel;
-  private int overscan;
+  private final int overscan;
 
   ProgressListener progress;
   double offsetX, offsetY;

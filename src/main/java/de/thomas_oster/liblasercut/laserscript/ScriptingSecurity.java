@@ -27,7 +27,7 @@ import org.mozilla.javascript.ClassShutter;
 public class ScriptingSecurity implements ClassShutter
 {
   private static ScriptingSecurity instance;
-  private static String[] allowedClasses = new String[]{
+  private static final String[] allowedClasses = new String[]{
     "adapter",
     "de.thomas_oster",
     "java.lang.Double",

@@ -816,7 +816,7 @@ public class FullSpectrumCutter extends LaserCutter
     return clone;
   }
 
-  private static String[] settingAttributes = new String[]
+  private static final String[] settingAttributes = new String[]
   {
     SETTING_HOST,
     SETTING_MAX_VECTOR_CUT_SPEED,

@@ -431,7 +431,7 @@ public class K40NanoDriver extends LaserCutter
     static final char DIAGONAL = 'M';
 
     K40Queue queue;
-    private StringBuilder builder = new StringBuilder();
+    private final StringBuilder builder = new StringBuilder();
 
     private int mode = UNINIT;
 

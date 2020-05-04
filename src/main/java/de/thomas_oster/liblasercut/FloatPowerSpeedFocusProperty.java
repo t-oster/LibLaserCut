@@ -98,7 +98,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
     return p;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed", "focus"};
+  private static final String[] propertyNames = new String[]{"power", "speed", "focus"};
   
   @Override
   public String[] getPropertyKeys()

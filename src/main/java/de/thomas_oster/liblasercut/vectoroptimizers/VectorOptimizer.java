@@ -79,11 +79,7 @@ public abstract class VectorOptimizer
       {
         return false;//start point differs
       }
-      if(!this.moves.equals(e.moves))
-      {
-        return false;//move lists are different
-      }
-      return true;
+      return this.moves.equals(e.moves);//move lists are different
     }
 
     /**

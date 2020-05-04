@@ -33,7 +33,7 @@ import java.util.LinkedList;
  */
 public class MakeBlockXYPlotterProperty extends PowerSpeedFocusFrequencyProperty
 {
-  private boolean showPowerAndSpeed;
+  private final boolean showPowerAndSpeed;
   
   public MakeBlockXYPlotterProperty(boolean showPowerAndSpeed) {
     this.showPowerAndSpeed = showPowerAndSpeed;

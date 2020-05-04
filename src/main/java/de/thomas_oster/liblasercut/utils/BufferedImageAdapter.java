@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
 public class BufferedImageAdapter implements GreyscaleRaster
 {
 
-  private BufferedImage img;
+  private final BufferedImage img;
   private int colorShift = 0;
   private boolean invertColors = false;
 

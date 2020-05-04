@@ -28,12 +28,12 @@ import java.util.Arrays;
 public class RasterElement
 {
 
-  private byte[] imageData;
-  private int stride;
-  private int width;
-  private int height;
-  private int bitDepth;
-  private int samplesPerPixel;
+  private final byte[] imageData;
+  private final int stride;
+  private final int width;
+  private final int height;
+  private final int bitDepth;
+  private final int samplesPerPixel;
   
   
   public RasterElement(int width, int height)

@@ -38,7 +38,8 @@ public class Rectangle {
   private static class Interval
   {
 
-    private double min,max;
+    private final double min;
+    private final double max;
 
     private Interval(double min, double max)
     {

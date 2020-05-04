@@ -118,7 +118,7 @@ public class LaosCutter extends LaserCutter
   }
   
   //only kept for backwards compatibility. unused
-  private transient boolean unidir = false;
+  private final transient boolean unidir = false;
   private String debugFilename = "";
 
   @Override
@@ -727,7 +727,7 @@ public class LaosCutter extends LaserCutter
   {
     this.bedHeight = bedHeight;
   }
-  private static String[] settingAttributes = new String[]{
+  private static final String[] settingAttributes = new String[]{
     SETTING_HOSTNAME,
     SETTING_PORT,
     SETTING_BEDWIDTH,

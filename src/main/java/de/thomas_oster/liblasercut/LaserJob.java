@@ -33,15 +33,15 @@ import java.util.List;
 public class LaserJob
 {
 
-  private String title;
-  private String name;
-  private String user;
+  private final String title;
+  private final String name;
+  private final String user;
   private double startX = 0;
   private double startY = 0;
   // position of origin after applying start point - see applyStartPoint()
   private double transformedOriginX = 0;
   private double transformedOriginY = 0;
-  private List<JobPart> parts = new LinkedList<>();
+  private final List<JobPart> parts = new LinkedList<>();
   private boolean autoFocusEnabled = true;
 
   public LaserJob(String title, String name, String user)
