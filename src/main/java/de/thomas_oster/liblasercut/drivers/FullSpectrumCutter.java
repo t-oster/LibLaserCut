@@ -269,7 +269,7 @@ public class FullSpectrumCutter extends LaserCutter
   @Override
   public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IOException, IllegalJobException
   {
-    fileOutputStream.print(jobToFullPacket(job, null).toString(StandardCharsets.US_ASCII));
+    fileOutputStream.write(jobToFullPacket(job, null).toByteArray());
   }
   
   
