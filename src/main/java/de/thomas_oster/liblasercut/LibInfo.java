@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class LibInfo
 {
-  private static String VERSION = "visicut1.7";
+  private static final String VERSION = "visicut1.7";
   
   public static String getVersion()
   {

@@ -117,8 +117,8 @@ public class PowerSpeedFocusProperty implements LaserProperty
     return p;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed", "focus"};
-  private static String[] propertyNamesNoFocus = new String[]{"power", "speed"};
+  private static final String[] propertyNames = new String[]{"power", "speed", "focus"};
+  private static final String[] propertyNamesNoFocus = new String[]{"power", "speed"};
   
   @Override
   public String[] getPropertyKeys()

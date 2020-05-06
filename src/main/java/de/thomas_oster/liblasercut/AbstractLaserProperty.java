@@ -201,7 +201,6 @@ public class AbstractLaserProperty implements LaserProperty
   
   /**
    * get value in numeric datatype, if available
-   * @param key
    * @return numeric value converted to Double; 0 if not present or a non-numeric datatype
    */
   public double getNumeric(String key)
@@ -221,8 +220,6 @@ public class AbstractLaserProperty implements LaserProperty
   /**
    * set existing property to numeric value, automatically converting to the used datatype.
    * A warning is printed if the key does not exist.
-   * @param key
-   * @param value 
    */
   public void setNumeric(String key, double value)
   {
@@ -292,12 +289,8 @@ public class AbstractLaserProperty implements LaserProperty
     {
       return false;
     }
-    final AbstractLaserProperty other = (AbstractLaserProperty) obj;
-    if (!Objects.equals(this.properties, other.properties))
-    {
-      return false;
-    }
-    return true;
+    AbstractLaserProperty other = (AbstractLaserProperty) obj;
+    return Objects.equals(this.properties, other.properties);
   }
 
   @Override

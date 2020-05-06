@@ -29,11 +29,11 @@ import de.thomas_oster.liblasercut.platform.Util;
 public class IModelaProperty implements LaserProperty
 {
 
-  private static String DEPTH = "milling depth (mm)";
-  private static String FEED_RATE = "feed rate (mm/min)";
-  private static String SPINDLE_SPEED = "spindle speed (rpm)";
-  private static String TOOL = "tool";
-  private static String TOOL_DIAMETER = "tool diameter (mm)";
+  private static final String DEPTH = "milling depth (mm)";
+  private static final String FEED_RATE = "feed rate (mm/min)";
+  private static final String SPINDLE_SPEED = "spindle speed (rpm)";
+  private static final String TOOL = "tool";
+  private static final String TOOL_DIAMETER = "tool diameter (mm)";
   
   private double depth = 0;
   private double feedRate = 1;

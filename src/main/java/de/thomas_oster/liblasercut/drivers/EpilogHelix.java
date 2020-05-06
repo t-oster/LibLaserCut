@@ -58,7 +58,7 @@ public class EpilogHelix extends EpilogCutter
   @Override
   public List<Double> getResolutions()
   {
-    List<Double> result = new LinkedList();
+    List<Double> result = new LinkedList<>();
     for (double r : RESOLUTIONS)
     {
       result.add(r);

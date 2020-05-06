@@ -113,7 +113,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
     return p;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
+  private static final String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
   
   @Override
   public String[] getPropertyKeys()
@@ -242,10 +242,7 @@ public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
         if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
             return false;
         }
-        if (this.frequency != other.frequency) {
-            return false;
-        }
-        return true;
+        return this.frequency == other.frequency;
     }
 
     @Override

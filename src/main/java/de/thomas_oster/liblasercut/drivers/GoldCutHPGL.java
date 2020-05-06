@@ -21,20 +21,32 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.*;
+import de.thomas_oster.liblasercut.IllegalJobException;
+import de.thomas_oster.liblasercut.JobPart;
+import de.thomas_oster.liblasercut.LaserCutter;
+import de.thomas_oster.liblasercut.LaserJob;
+import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.RasterizableJobPart;
+import de.thomas_oster.liblasercut.VectorCommand;
+import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.SerialPort;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * This class implements a simple HPGL driver, suitable for the GoldCut ABH 721 Cutter.
@@ -347,7 +359,7 @@ public class GoldCutHPGL extends LaserCutter {
     this.hwDPI = hwDPI;
   }
 
-  private static String[] settingAttributes = new String[]{
+  private static final String[] settingAttributes = new String[]{
     SETTING_BEDWIDTH,
     SETTING_HARDWARE_DPI,
 //    SETTING_FLIPX,

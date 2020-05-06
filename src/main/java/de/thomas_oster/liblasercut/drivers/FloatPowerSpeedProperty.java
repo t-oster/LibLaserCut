@@ -73,7 +73,7 @@ public class FloatPowerSpeedProperty implements LaserProperty
     return p;
   }
 
-  private static String[] propertyNames = new String[]{"power", "speed"};
+  private static final String[] propertyNames = new String[]{"power", "speed"};
   
   @Override
   public String[] getPropertyKeys()
@@ -164,10 +164,7 @@ public class FloatPowerSpeedProperty implements LaserProperty
       if (Float.floatToIntBits(this.power) != Float.floatToIntBits(other.power)) {
           return false;
       }
-      if (Float.floatToIntBits(this.speed) != Float.floatToIntBits(other.speed)) {
-          return false;
-      }
-      return true;
+      return Float.floatToIntBits(this.speed) == Float.floatToIntBits(other.speed);
   }
 
   @Override

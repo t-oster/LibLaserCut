@@ -65,7 +65,7 @@ public class MakeBlockXYPlotter extends LaserCutter
   private int delayRate = 5000;
   private int powerRate = 255;
   private String usedTool = "PEN"; // PEN, Laser
-  private List<Double> resolutions = Arrays.asList(64d // fine liner
+  private final List<Double> resolutions = Arrays.asList(64d // fine liner
   );
   
   private int chosenDelay;
@@ -87,7 +87,7 @@ public class MakeBlockXYPlotter extends LaserCutter
   private static final String SETTING_DELAY_RATE = "Max. Delay Rate (abs. us)";
   private static final String SETTING_POWER_RATE = "Max. Power Rate (abs. pwm)";
   private static final String SETTING_TOOL = "Tool (PEN, LASER)";
-  private static String[] settingAttributes = new String[]{
+  private static final String[] settingAttributes = new String[]{
     SETTING_HOSTNAME,
     SETTING_RASTER_WHITESPACE,
     SETTING_BEDWIDTH,

@@ -18,7 +18,6 @@
  */
 package de.thomas_oster.liblasercut.vectoroptimizers;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;

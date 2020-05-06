@@ -28,7 +28,7 @@ import de.thomas_oster.liblasercut.GreyscaleRaster;
 public class Grid extends DitheringAlgorithm
 {
 
-  private static String[] properties = new String[]{"Blocksize", "Blockdistance"};
+  private static final String[] properties = new String[]{"Blocksize", "Blockdistance"};
 
   @Override
   public String[] getPropertyKeys()
@@ -95,16 +95,10 @@ public class Grid extends DitheringAlgorithm
     {
       for (int x = 0; x < width; x++)
       {
-        if (y % (blocksize + blockdistance) <= blocksize
+        boolean isBlack = (y % (blocksize + blockdistance) <= blocksize
           && x % (blocksize + blockdistance) <= blocksize
-          && src.getGreyScale(x, y) < thresh)
-        {
-          this.setBlack(src, target, x, y, true);
-        }
-        else
-        {
-          this.setBlack(src, target, x, y, false);
-        }
+          && src.getGreyScale(x, y) < thresh);
+          this.setBlack(src, target, x, y, isBlack);
       }
       if (Thread.interrupted()) {
         throw new InterruptedException();

@@ -29,8 +29,8 @@ import java.awt.geom.AffineTransform;
 public class VectorPartScriptInterface implements ScriptInterface
 {
   
-  private VectorPart vp;
-  private AffineTransform objectTrans;
+  private final VectorPart vp;
+  private final AffineTransform objectTrans;
   
   public VectorPartScriptInterface(VectorPart vp, AffineTransform objectTrans)
   {

@@ -214,7 +214,7 @@ public class InnerFirstVectorOptimizerTest
   // @Test
   public void squareGrid() throws IOException
   {
-    ArrayList<Element> elements = new ArrayList();
+    List<Element> elements = new ArrayList<>();
     for (int i = 0; i <= 3; i++)
     {
       for (int j = 0; j <= 4; j++)

@@ -18,17 +18,28 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.*;
-import java.io.BufferedOutputStream;
+import de.thomas_oster.liblasercut.IllegalJobException;
+import de.thomas_oster.liblasercut.JobPart;
+import de.thomas_oster.liblasercut.LaserCutter;
+import de.thomas_oster.liblasercut.LaserJob;
+import de.thomas_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.Raster3dPart;
+import de.thomas_oster.liblasercut.RasterPart;
+import de.thomas_oster.liblasercut.VectorCommand;
+import de.thomas_oster.liblasercut.VectorPart;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.io.PrintStream;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class implements a dummy driver that accepts laserjobs and prints debug information about them.
@@ -52,7 +63,7 @@ public class Dummy extends LaserCutter {
     private boolean partActive=false;
     private int idCounter=0;
     private int partCounter=0;
-    private LaserCutter cutter;
+    private final LaserCutter cutter;
     private double dpi;
 
 
@@ -167,7 +178,7 @@ public class Dummy extends LaserCutter {
       StringBuilder xhtml = new StringBuilder();
       try (
         InputStream stream = Dummy.class.getResourceAsStream("visicut-svg-output-viewer.xhtml");
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
         )
       {
         String line;
@@ -359,7 +370,7 @@ public class Dummy extends LaserCutter {
   
   public String svgOutdir="";
   
-  private static String[] settingAttributes = new String[]{
+  private static final String[] settingAttributes = new String[]{
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
     SETTING_RUNTIME,

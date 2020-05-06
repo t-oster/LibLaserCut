@@ -229,10 +229,9 @@ public class ByteArrayList extends AbstractList<Byte> {
   public String toString() {
     StringBuilder b = new StringBuilder("[");
     for (int i = start; i < start + size; i++) {
-      b.append(data[i]+", ");
+      b.append(data[i]).append(", ");
     }
-    b.append("(" + start +" free at head, " +
-	     (data.length - start - size) + " free at tail)]");
+    b.append("(").append(start).append(" free at head, ").append(data.length - start - size).append(" free at tail)]");
     return b.toString();
   }
 }

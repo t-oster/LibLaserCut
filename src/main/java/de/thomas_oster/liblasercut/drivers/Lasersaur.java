@@ -18,18 +18,28 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.*;
-import de.thomas_oster.liblasercut.platform.Point;
+import de.thomas_oster.liblasercut.IllegalJobException;
+import de.thomas_oster.liblasercut.JobPart;
+import de.thomas_oster.liblasercut.LaserCutter;
+import de.thomas_oster.liblasercut.LaserJob;
+import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.RasterizableJobPart;
+import de.thomas_oster.liblasercut.VectorCommand;
+import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
+import purejavacomm.CommPort;
+import purejavacomm.CommPortIdentifier;
+import purejavacomm.SerialPort;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import purejavacomm.CommPort;
-import purejavacomm.CommPortIdentifier;
-import purejavacomm.SerialPort;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * This class implements a driver for the LAOS Lasercutter board. Currently it
@@ -317,7 +327,7 @@ public class Lasersaur extends LaserCutter {
   public void setBedHeight(double bedHeight) {
     this.bedHeight = bedHeight;
   }
-  private static String[] settingAttributes = new String[]{
+  private static final String[] settingAttributes = new String[]{
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
     SETTING_FLIPX,
