@@ -68,7 +68,7 @@ public class AllDriversTest {
    * @param c Class of lasercutter driver
    * @param isNew temporary file for storing the new results / False: "old" file with known-good result
   */
-  private String getOutputFilename(Class c, boolean isNew)
+  private String getOutputFilename(Class<? extends LaserCutter> c, boolean isNew)
   {
     return "./test-output/" + c.getName() + ".out" + (isNew ? ".new": "");
   }
