@@ -1323,7 +1323,6 @@ public class K40NanoDriver extends LaserCutter
         if (wait)
         {
           usb.wait_for_finish();
-          wait = false;
         }
         if (queue.isEmpty())
         {

@@ -28,10 +28,10 @@ import java.util.LinkedList;
  */
 public class LaosCutterProperty extends FloatPowerSpeedFocusFrequencyProperty {
   
-  protected boolean hidePurge = false;
-  protected boolean hideVentilation = false;
-  protected boolean hideFocus = false;
-  protected boolean hideFrequency = false;
+  protected boolean hidePurge;
+  protected boolean hideVentilation;
+  protected boolean hideFocus;
+  protected boolean hideFrequency;
     
   private boolean ventilation = true;
 

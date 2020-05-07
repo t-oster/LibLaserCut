@@ -80,7 +80,7 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   int command_status = COMMAND_UNCALCULATED;
 
   RasterElement image;
-  int transversal = SERPENTINE_TRANVERSE_X_FROM_TOP_LEFT_SKIPPING_BLANK_LINES;
+  int transversal;
   int skip_pixel_value;
 
   private int y_position, x_position, dy, dx, begin, end, higher_bound, lower_bound, pixel;
