@@ -42,6 +42,7 @@ public class AbstractLaserProperty implements LaserProperty
 
   public AbstractLaserProperty()
   {
+    // NOP
   }
 
   public AbstractLaserProperty(AbstractLaserProperty p)
@@ -60,12 +61,12 @@ public class AbstractLaserProperty implements LaserProperty
   {
     properties.put(name, value);
   }
-  
+
   final public void addPropertySpecific(String name, Object... values) {
     properties.put(name, values[0]);
     properties.put(name + VALUES_SUFFIX, values);
   }
-  
+
   @Override
   public Object getMinimumValue(String name)
   {

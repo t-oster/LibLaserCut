@@ -34,7 +34,7 @@ import java.util.Collections;
 public class ByteArrayList extends AbstractList<Byte> {
 
   /** The underlying byte data.  */
-  private byte[] data = null;
+  private byte[] data;
 
   /**
    * The index into the underlying array for the first element of the list.

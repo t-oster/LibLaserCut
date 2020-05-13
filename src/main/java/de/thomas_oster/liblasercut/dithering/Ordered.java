@@ -56,8 +56,8 @@ public class Ordered extends DitheringAlgorithm
     int nPatWid = filter.length;
 
 
-    int x = 0;
-    int y = 0;
+    int x;
+    int y;
     int pixelcount = 0;
 
     for (y = 0; y < (height - nPatWid); y = y + nPatWid)

@@ -33,7 +33,7 @@ public class VectorPart extends JobPart
   private double maxY;
   private double minX;
   private double minY;
-  private double resolution = 500;
+  private double resolution;
   private final List<VectorCommand> commands;
 
   public VectorPart(LaserProperty initialProperty, double resolution)

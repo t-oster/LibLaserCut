@@ -308,7 +308,7 @@ public class InnerFirstVectorOptimizerTest
       Point prev = polyline.start;
       for (Point p : polyline.getMoves())
       {
-        Point end = null;
+        Point end;
         for (int f = 1; f <= F; f++)
         {
           end = new Point(

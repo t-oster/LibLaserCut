@@ -68,7 +68,7 @@ public class AllDriversTest {
    * @param c Class of lasercutter driver
    * @param isNew temporary file for storing the new results / False: "old" file with known-good result
   */
-  private String getOutputFilename(Class c, boolean isNew)
+  private String getOutputFilename(Class<? extends LaserCutter> c, boolean isNew)
   {
     return "./test-output/" + c.getName() + ".out" + (isNew ? ".new": "");
   }
@@ -146,7 +146,9 @@ public class AllDriversTest {
           comparisonResults.add("Output for " + c.getName() + " changed. For details, compare the files " + previousResult + " and " + newResult + " manually. If this change is okay, delete the old file " + previousResult +  " , rerun the tests twice and then don't forget to commit the changed file.");
         }
       } else {
-        newResult.renameTo(previousResult);
+        if (! newResult.renameTo(previousResult)) {
+          throw new RuntimeException("Renaming of file failed");
+        }
         comparisonResults.add("No previous known output found for " + c.getName() + ". Saving current output. Please re-run the tests and don't forget to commit the test output file to the repository.");
       }
     }

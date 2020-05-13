@@ -28,8 +28,8 @@ import java.util.List;
 public class RasterPart extends RasterizableJobPart
 {
 
-  LaserProperty blackPixelProperty = null;
-  LaserProperty whitePixelProperty = null;
+  LaserProperty blackPixelProperty;
+  LaserProperty whitePixelProperty;
 
   public RasterPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {

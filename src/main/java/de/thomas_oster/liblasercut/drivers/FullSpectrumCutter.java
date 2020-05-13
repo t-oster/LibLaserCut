@@ -316,7 +316,7 @@ public class FullSpectrumCutter extends LaserCutter
    */
   private byte[] generatePacket(byte[] rawCmds)throws IOException
   {
-    byte[] header = new byte[1024];
+    byte[] header;
     ByteArrayOutputStream packet = new ByteArrayOutputStream();
 
     // header
@@ -418,8 +418,8 @@ public class FullSpectrumCutter extends LaserCutter
    */
   private byte[] jobContents(byte[] rawCmds)throws IOException
   {
-    byte numberSubpackets = 0; // number of additional subpackets
-    int remainder = 0; // remainder of commands
+    byte numberSubpackets; // number of additional subpackets
+    int remainder; // remainder of commands
     
     ByteArrayOutputStream jobrawload = new ByteArrayOutputStream();
     ByteArrayOutputStream jobload = new ByteArrayOutputStream();
@@ -549,16 +549,16 @@ public class FullSpectrumCutter extends LaserCutter
   private byte[] line(double x_start,double x_dest,double y_start,double y_dest,double power, double speed)throws IOException
   { 
     ByteArrayOutputStream lineCmds = new ByteArrayOutputStream();
-    double d = 0d; // distance of movement
-    double speed_x = 0d; // average speed on x axis, signed
-    double speed_y = 0d; // average speed on y axis, signed
+    double d; // distance of movement
+    double speed_x; // average speed on x axis, signed
+    double speed_y; // average speed on y axis, signed
     double x_expected = 0; // expected position on x axis
     double y_expected = 0; // expected position on y axis
     int x = 0; // position on x axis
     int y = 0; // position on y axis
     double t_increment = 1d/2000d; // time increments, the machine card executes 2000 commands per sec
-    byte steps_x = 0; // steps to do on x axis, in one command, may be more than 1
-    byte steps_y = 0; // steps to do on y axis, in one command, may be more than 1
+    byte steps_x; // steps to do on x axis, in one command, may be more than 1
+    byte steps_y; // steps to do on y axis, in one command, may be more than 1
     byte[] tempCmd = new byte[4]; // temporal byte array to build commands
     
     power = power * 255d / 100d;  // from percentage to byte value
