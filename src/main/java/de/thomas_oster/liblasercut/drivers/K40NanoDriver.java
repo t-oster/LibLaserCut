@@ -264,7 +264,8 @@ public class K40NanoDriver extends LaserCutter
         }
       }
     }
-    device.home(); //Home the device after the job.
+    device.exit_compact_mode();
+    device.move_absolute(0, 0); //Return device to start position 0,0.
     device.execute();
     device.close();
   }
