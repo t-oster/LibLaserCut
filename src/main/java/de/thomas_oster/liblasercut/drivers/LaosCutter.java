@@ -32,7 +32,18 @@ import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
-import java.io.*;
+import org.apache.commons.net.tftp.TFTP;
+import org.apache.commons.net.tftp.TFTPClient;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -41,8 +52,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.net.tftp.TFTP;
-import org.apache.commons.net.tftp.TFTPClient;
 
 /**
  * This class implements a driver for the LAOS Lasercutter board.
@@ -337,9 +346,9 @@ public class LaosCutter extends LaserCutter
     out.printf("9 %s %s ", "1", ""+(dwords.size()*32));
     for(Long d:dwords)
     {
-      out.printf(" "+d);
+      out.print(" " + d);
     }
-    out.printf("\n");
+    out.print("\n");
   }
 
   private float currentPower = -1;

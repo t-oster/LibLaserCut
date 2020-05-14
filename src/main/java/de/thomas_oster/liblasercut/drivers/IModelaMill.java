@@ -179,7 +179,7 @@ public class IModelaMill extends LaserCutter
     {
       tool = pr.getTool();
       //TODO: Maybe stop spindle and move to some location?
-      out.print(String.format(Locale.ENGLISH, "M06T0\n"));//return current tool
+      out.print("M06T0\n");//return current tool
       out.print(String.format(Locale.ENGLISH, "M06T%d\n", tool));
     }
   }
