@@ -335,7 +335,7 @@ public class OptimizerUtils
   {
 
     int index; // "pointer" to the respective Element
-    Point start;
+    final Point start;
     boolean inverted;
     boolean valid = true;
 

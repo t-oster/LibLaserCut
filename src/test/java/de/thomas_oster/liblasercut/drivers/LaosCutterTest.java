@@ -34,7 +34,7 @@ import org.junit.Test;
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>
  */
 public class LaosCutterTest extends LaosCutter{
-  ProgressListener pl = new ProgressListener(){
+  final ProgressListener pl = new ProgressListener(){
 
       @Override
       public void progressChanged(Object source, int percent)

@@ -44,7 +44,7 @@ import java.util.List;
 abstract class EpilogCutter extends LaserCutter
 {
 
-  public static boolean SIMULATE_COMMUNICATION = false;
+  public static final boolean SIMULATE_COMMUNICATION = false;
   public static final int NETWORK_TIMEOUT = 10000; /// timeout in ms
   /* Resolutions in DPI */
 

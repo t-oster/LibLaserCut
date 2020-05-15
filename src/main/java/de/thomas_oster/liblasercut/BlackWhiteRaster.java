@@ -30,7 +30,7 @@ import de.thomas_oster.liblasercut.dithering.*;
 public class BlackWhiteRaster extends TimeIntensiveOperation implements GreyscaleRaster, RasterElement.Provider
 {
 
-  protected RasterElement raster;
+  protected final RasterElement raster;
 
   public enum DitherAlgorithm
   {
