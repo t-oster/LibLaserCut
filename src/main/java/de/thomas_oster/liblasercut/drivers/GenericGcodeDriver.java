@@ -18,8 +18,29 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.*;
+import de.thomas_oster.liblasercut.FloatPowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.IllegalJobException;
+import de.thomas_oster.liblasercut.JobPart;
+import de.thomas_oster.liblasercut.LaserCutter;
+import de.thomas_oster.liblasercut.LaserJob;
+import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.OptionSelector;
+import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
+import de.thomas_oster.liblasercut.RasterizableJobPart;
+import de.thomas_oster.liblasercut.VectorCommand;
+import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
+import net.sf.corn.httpclient.HttpClient;
+import net.sf.corn.httpclient.HttpResponse;
+import purejavacomm.CommPort;
+import purejavacomm.CommPortIdentifier;
+import purejavacomm.NoSuchPortException;
+import purejavacomm.PortInUseException;
+import purejavacomm.PureJavaIllegalStateException;
+import purejavacomm.SerialPort;
+import purejavacomm.UnsupportedCommOperationException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,12 +53,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import purejavacomm.*;
-
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import net.sf.corn.httpclient.HttpClient;
-import net.sf.corn.httpclient.HttpResponse;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -75,7 +95,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
 
-  protected static Locale FORMAT_LOCALE = Locale.US;
+  protected static final Locale FORMAT_LOCALE = Locale.US;
 
   protected static final String UPLOAD_METHOD_FILE = "File";
   protected static final String UPLOAD_METHOD_HTTP = "HTTP";
@@ -284,8 +304,7 @@ public class GenericGcodeDriver extends LaserCutter {
       }
     }
 
-    OptionSelector o = new OptionSelector(uploadMethodList, uploadMethod);
-    return o;
+    return new OptionSelector(uploadMethodList, uploadMethod);
   }
 
   /**

@@ -143,8 +143,7 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
 
     @Override
     public int hashCode() {
-        int hash = 7*frequency + super.hashCode();
-        return hash;
+      return 7*frequency + super.hashCode();
     }
 
     @Override

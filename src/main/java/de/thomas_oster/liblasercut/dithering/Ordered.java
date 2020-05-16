@@ -30,8 +30,7 @@ public class Ordered extends DitheringAlgorithm
 
   protected int[][] getThresholdMatrix()
   {
-    int[][] filter =
-    {
+    return new int[][]{
       {
         16, 144, 48, 176
       },
@@ -45,7 +44,6 @@ public class Ordered extends DitheringAlgorithm
         256, 128, 224, 96
       },
     };
-    return filter;
   }
   @Override
   protected void doDithering(GreyscaleRaster src, BlackWhiteRaster target) throws InterruptedException

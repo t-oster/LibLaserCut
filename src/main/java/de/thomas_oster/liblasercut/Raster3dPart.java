@@ -28,7 +28,7 @@ import java.util.List;
 public class Raster3dPart extends RasterizableJobPart
 {
 
-  private LaserProperty property;
+  private final LaserProperty property;
 
   public Raster3dPart(GreyscaleRaster image, LaserProperty laserProperty, Point offset, double resolution)
   {

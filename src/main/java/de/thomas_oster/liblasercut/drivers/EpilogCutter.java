@@ -44,7 +44,7 @@ import java.util.List;
 abstract class EpilogCutter extends LaserCutter
 {
 
-  public static boolean SIMULATE_COMMUNICATION = false;
+  public static final boolean SIMULATE_COMMUNICATION = false;
   public static final int NETWORK_TIMEOUT = 10000; /// timeout in ms
   /* Resolutions in DPI */
 
@@ -165,35 +165,35 @@ abstract class EpilogCutter extends LaserCutter
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     /* Print the printer job language header. */
     out.printf("\033%%-12345X@PJL JOB NAME=%s\r\n", job.getTitle());
-    out.printf("\033E@PJL ENTER LANGUAGE=PCL\r\n");
+    out.print("\033E@PJL ENTER LANGUAGE=PCL\r\n");
     if (this.isAutoFocus() && job.isAutoFocusEnabled())
     {
       /* Set autofocus on. */
-      out.printf("\033&y1A");
+      out.print("\033&y1A");
     }
     else
     {
       /* Set autofocus off. */
-      out.printf("\033&y0A");
+      out.print("\033&y0A");
     }
     /* Set focus to 0. */
-    out.printf("\033&y0C");
+    out.print("\033&y0C");
     /* UNKNOWN */
-    out.printf("\033&y0Z");
+    out.print("\033&y0Z");
     /* Left (long-edge) offset registration.  Adjusts the position of the
      * logical page across the width of the page.
      */
-    out.printf("\033&l0U");
+    out.print("\033&l0U");
     /* Top (short-edge) offset registration.  Adjusts the position of the
      * logical page across the length of the page.
      */
-    out.printf("\033&l0Z");
+    out.print("\033&l0Z");
     /* Resolution of the print. Number of Units/Inch*/
     out.printf("\033&u%dD", (int) resolution);
     /* X position = 0 */
-    out.printf("\033*p0X");
+    out.print("\033*p0X");
     /* Y position = 0 */
-    out.printf("\033*p0Y");
+    out.print("\033*p0Y");
     return result.toByteArray();
   }
 
@@ -204,11 +204,11 @@ abstract class EpilogCutter extends LaserCutter
 
     /* Footer for printer job language. */
     /* Reset */
-    out.printf("\033E");
+    out.print("\033E");
     /* Exit language. */
-    out.printf("\033%%-12345X");
+    out.print("\033%-12345X");
     /* End job. */
-    out.printf("@PJL EOJ \r\n");
+    out.print("@PJL EOJ \r\n");
     return result.toByteArray();
   }
 
@@ -485,7 +485,7 @@ abstract class EpilogCutter extends LaserCutter
       /* PCL/RasterGraphics resolution. */
       out.printf("\033*t%dR", (int) rp.getDPI());
       /* Raster Orientation: Printed in current direction */
-      out.printf("\033*r0F");
+      out.print("\033*r0F");
       /* Raster power */
       out.printf("\033&y%dP", (int) prop.getPower());
       /* Raster speed */
@@ -507,7 +507,7 @@ abstract class EpilogCutter extends LaserCutter
       /* Raster direction (1 = up, 0=down) */
       out.printf("\033&y%dO", bu?1:0);
       /* start at current position */
-      out.printf("\033*r1A");
+      out.print("\033*r1A");
       Point sp = rp.getRasterStart();
       boolean leftToRight = true;
       ByteArrayList line = new ByteArrayList(rp.getRasterWidth());
@@ -568,7 +568,7 @@ abstract class EpilogCutter extends LaserCutter
           leftToRight = !leftToRight;
         }
       }
-      out.printf("\033*rC");       // end raster
+      out.print("\033*rC");       // end raster
     }
     return result.toByteArray();
   }
@@ -582,7 +582,7 @@ abstract class EpilogCutter extends LaserCutter
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) jp.getDPI());
     /* Raster Orientation: Printed in current direction */
-    out.printf("\033*r0F");
+    out.print("\033*r0F");
     /* Raster power */
     out.printf("\033&y%dP", (int) prop.getPower());
     /* Raster speed */
@@ -600,12 +600,12 @@ abstract class EpilogCutter extends LaserCutter
      * 2M = Bitweise, also 1=dot 0=nodot (standard raster)
      * 7MLT = Byteweise 0= no power 100=full power (3d raster)
      */
-    out.printf("\033*b2M");
+    out.print("\033*b2M");
     /* Raster direction (1 = up, 0=down) */
     out.printf("\033&y%dO", bu?1:0);
     /* start at current position */
-    out.printf("\033*r1A");
-    out.printf("\033*rC");       // end raster
+    out.print("\033*r1A");
+    out.print("\033*rC");       // end raster
     return result.toByteArray();
   }
 
@@ -618,7 +618,7 @@ abstract class EpilogCutter extends LaserCutter
     /* PCL/RasterGraphics resolution. */
     out.printf("\033*t%dR", (int) rp.getDPI());
     /* Raster Orientation: Printed in current direction */
-    out.printf("\033*r0F");
+    out.print("\033*r0F");
     /* Raster power */
     out.printf("\033&y%dP", (int) prop.getPower());
     /* Raster speed */
@@ -636,11 +636,11 @@ abstract class EpilogCutter extends LaserCutter
      * 2M = Bitweise, also 1=dot 0=nodot (standard raster)
      * 7MLT = Byteweise 0= no power 100=full power (3d raster)
      */
-    out.printf("\033*b2M");
+    out.print("\033*b2M");
     /* Raster direction (1 = up, 0=down) */
     out.printf("\033&y%dO", bu?1:0);
     /* start at current position */
-    out.printf("\033*r1A");
+    out.print("\033*r1A");
 
     if (rp != null)
     {
@@ -702,7 +702,7 @@ abstract class EpilogCutter extends LaserCutter
         }
       }
     }
-    out.printf("\033*rC");       // end raster
+    out.print("\033*rC");       // end raster
     return result.toByteArray();
   }
 
@@ -710,8 +710,8 @@ abstract class EpilogCutter extends LaserCutter
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
-    out.printf("\033%%1B");// Start HPGL
-    out.printf("IN;");
+    out.print("\033%1B");// Start HPGL
+    out.print("IN;");
     //Reset Focus to 0
     out.printf("WF%d;", 0);
     return result.toByteArray();
@@ -723,8 +723,8 @@ abstract class EpilogCutter extends LaserCutter
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     /* Resolution of the print. Number of Units/Inch*/
-    out.printf("\033%%1B");// Start HPGL
-    out.printf("IN;");
+    out.print("\033%1B");// Start HPGL
+    out.print("IN;");
 
     if (vp != null)
     {

@@ -35,7 +35,7 @@ public class BufferedImageAdapter implements GreyscaleRaster
 
   private final BufferedImage img;
   private int colorShift = 0;
-  private boolean invertColors;
+  private final boolean invertColors;
 
   public BufferedImageAdapter(BufferedImage img)
   {

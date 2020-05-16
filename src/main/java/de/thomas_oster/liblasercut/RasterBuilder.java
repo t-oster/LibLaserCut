@@ -74,14 +74,14 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
 
   VectorCommand vector_command;
   AbstractLaserProperty property;
-  PropertiesUpdate provider;
+  final PropertiesUpdate provider;
 
   int state = STATE_NOT_INITIALIZED;
   int command_status = COMMAND_UNCALCULATED;
 
-  RasterElement image;
-  int transversal;
-  int skip_pixel_value;
+  final RasterElement image;
+  final int transversal;
+  final int skip_pixel_value;
 
   private int y_position, x_position, dy, dx, begin, end, higher_bound, lower_bound, pixel;
   private final int overscan;
