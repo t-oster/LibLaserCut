@@ -30,10 +30,6 @@ public class FloatPowerSpeedProperty implements LaserProperty
   private float power = 0;
   private float speed = 100;
 
-  public FloatPowerSpeedProperty()
-  {
-  }
-
   /**
    * Sets the Laserpower. Valid values are from 0 to 100.
    */

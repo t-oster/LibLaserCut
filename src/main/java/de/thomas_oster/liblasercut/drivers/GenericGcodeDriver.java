@@ -635,7 +635,7 @@ public class GenericGcodeDriver extends LaserCutter {
     return null;
   }
 
-  protected String connect_serial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
+  protected String connectSerial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
   {
     pl.taskChanged(this, "opening '"+i.getName()+"'");
     if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
@@ -744,7 +744,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
       if (portIdentifier != null)
       {//use port identifier we had last time
-        error = connect_serial(portIdentifier, pl);
+        error = connectSerial(portIdentifier, pl);
       }
       else
       {
@@ -754,7 +754,7 @@ public class GenericGcodeDriver extends LaserCutter {
           CommPortIdentifier i = e.nextElement();
           if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
           {
-            error = connect_serial(i, pl);
+            error = connectSerial(i, pl);
             if (error == null)
             {
               break;

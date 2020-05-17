@@ -66,12 +66,22 @@ public class GoldCutHPGL extends LaserCutter {
 
   protected int hw_x = 0;
   protected int hw_y = 0;
+  private double addSpacePerRasterLine = 0.5;
+  protected boolean flipYaxis = false;
+  protected boolean flipXaxis = false;
+  protected String finiString = "!PG;;";
+  protected String initString = "IN;PA;";
+  protected String comPort = "/dev/ttyUSB0";
+  private int currentPower = -1;
+  private int currentSpeed = -1;
+  private List<Double> resolutions;
+  protected double bedWidth = 630;
+  protected double hwDPI = 1016.; // see Wikipedia: one HPGL "pixel" is 25µm, i.e. 1016 per inch
 
   @Override
   public String getModelName() {
     return "GoldCutHPGL";
   }
-  private double addSpacePerRasterLine = 0.5;
 
   /**
    * Get the value of addSpacePerRasterLine
@@ -91,7 +101,6 @@ public class GoldCutHPGL extends LaserCutter {
     this.addSpacePerRasterLine = addSpacePerRasterLine;
   }
 
-  protected boolean flipYaxis = false;
   public boolean isFlipYaxis() {
     return flipYaxis;
   }
@@ -100,7 +109,6 @@ public class GoldCutHPGL extends LaserCutter {
     this.flipYaxis = flipYaxis;
   }
 
-  protected boolean flipXaxis = false;
   public boolean isFlipXaxis() {
     return flipXaxis;
   }
@@ -108,7 +116,6 @@ public class GoldCutHPGL extends LaserCutter {
     this.flipXaxis = flipXaxis;
   }
 
-  protected String finiString = "!PG;;";
   public String getFiniString() {
     return finiString;
   }
@@ -116,7 +123,6 @@ public class GoldCutHPGL extends LaserCutter {
     this.finiString = finiString;
   }
 
-  protected String initString = "IN;PA;";
   public String getInitString() {
     return initString;
   }
@@ -124,7 +130,6 @@ public class GoldCutHPGL extends LaserCutter {
     this.initString = initString;
   }
 
-  protected String comPort = "/dev/ttyUSB0";
   public String getComPort() {
     return comPort;
   }
@@ -156,8 +161,7 @@ public class GoldCutHPGL extends LaserCutter {
     }
     return result.toByteArray();
   }
-  private int currentPower = -1;
-  private int currentSpeed = -1;
+
 
   private void setSpeed(PrintStream out, int speedInPercent) {
     if (speedInPercent != currentSpeed) {
@@ -301,7 +305,6 @@ public class GoldCutHPGL extends LaserCutter {
       pl.progressChanged(this, 100);
     }
   }
-  private List<Double> resolutions;
 
   @Override
   public List<Double> getResolutions() {
@@ -311,7 +314,6 @@ public class GoldCutHPGL extends LaserCutter {
     return resolutions;
   }
 
-  protected double bedWidth = 630;
   /**
    * Get the value of bedWidth
    *
@@ -341,7 +343,6 @@ public class GoldCutHPGL extends LaserCutter {
     return 1000;	// dummy value, used for GUI!
   }
 
-  protected double hwDPI = 1016.; // see Wikipedia: one HPGL "pixel" is 25µm, i.e. 1016 per inch
   /**
    * Get the value of hwDPI
    *

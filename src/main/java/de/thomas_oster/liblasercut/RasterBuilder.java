@@ -52,11 +52,11 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
 
   public static final int SERPENTINE_TRANVERSE_X_FROM_TOP_LEFT_SKIPPING_BLANK_LINES = X_AXIS | TOP | LEFT | BIDIRECTIONAL | SKIPPING;
 
-  static final int COMMAND_UNCALCULATED = 0;
-  static final int COMMAND_PROPERTY = 1;
-  static final int COMMAND_CUT_TO = 2;
-  static final int COMMAND_MOVE_TO = 4;
-  static final int COMMAND_FINISHED = 8;
+  private static final int COMMAND_UNCALCULATED = 0;
+  private static final int COMMAND_PROPERTY = 1;
+  private static final int COMMAND_CUT_TO = 2;
+  private static final int COMMAND_MOVE_TO = 4;
+  private static final int COMMAND_FINISHED = 8;
 
   private static final int STATE_NOT_INITIALIZED = 0;
   private static final int STATE_MOVED_TO_START = 1;
@@ -72,22 +72,22 @@ public class RasterBuilder implements Iterable<VectorCommand>, Iterator<VectorCo
   private static final int STATE_LINESTEP_TOP = 22;
   private static final int STATE_LINESTEP_BOTTOM = 23;
 
-  VectorCommand vector_command;
-  AbstractLaserProperty property;
-  final PropertiesUpdate provider;
+  private VectorCommand vector_command;
+  private AbstractLaserProperty property;
+  private final PropertiesUpdate provider;
 
-  int state = STATE_NOT_INITIALIZED;
-  int command_status = COMMAND_UNCALCULATED;
+  private int state = STATE_NOT_INITIALIZED;
+  private int command_status = COMMAND_UNCALCULATED;
 
-  final RasterElement image;
-  final int transversal;
-  final int skip_pixel_value;
+  private final RasterElement image;
+  private final int transversal;
+  private final int skip_pixel_value;
 
   private int y_position, x_position, dy, dx, begin, end, higher_bound, lower_bound, pixel;
   private final int overscan;
 
-  ProgressListener progress;
-  double offsetX, offsetY;
+  private ProgressListener progress;
+  private double offsetX, offsetY;
 
   public RasterBuilder(RasterElement image, PropertiesUpdate provider, int transversal, int skipvalue, int overscan)
   {

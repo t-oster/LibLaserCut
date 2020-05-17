@@ -26,11 +26,13 @@ package de.thomas_oster.liblasercut;
  */
 public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
 {
-
+  private static final String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
+  private static final String[] propertyNamesNoFocus = new String[]{"power", "speed", "frequency"};
   private int frequency = 5000;
 
   public PowerSpeedFocusFrequencyProperty()
   {
+    // NOP
   }
 
   /** Make a new PowerSpeedFocusFrequencyProperty that optionally utilizes the focus setting */
@@ -41,8 +43,8 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
 
   public void setFrequency(int frequency)
   {
-    frequency = frequency < 10 ? 10 : frequency;
-    frequency = frequency > 5000 ? 5000 : frequency;
+    frequency = Math.max(frequency, 10);
+    frequency = Math.min(frequency, 5000);
     this.frequency = frequency;
   }
 
@@ -50,9 +52,6 @@ public class PowerSpeedFocusFrequencyProperty extends PowerSpeedFocusProperty
   {
     return frequency;
   }
-
-  private static final String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
-  private static final String[] propertyNamesNoFocus = new String[]{"power", "speed", "frequency"};
 
   @Override
   public String[] getPropertyKeys()
