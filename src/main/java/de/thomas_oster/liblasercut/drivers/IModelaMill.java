@@ -32,10 +32,12 @@ import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
+import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -358,7 +360,7 @@ public class IModelaMill extends LaserCutter
   private byte[] generateGCode(LaserJob job, ProgressListener pl)
   {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
+    PrintStream out = new LinefeedPrintStream(result, true, StandardCharsets.US_ASCII);
     pl.taskChanged(this, "generating...");
     writeInitializationCode(out);
     double all = job.getParts().size();
@@ -384,7 +386,7 @@ public class IModelaMill extends LaserCutter
   }
   
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IOException
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IOException
   {
     fileOutputStream.write(generateGCode(job, new ProgressListenerDummy()));
   }

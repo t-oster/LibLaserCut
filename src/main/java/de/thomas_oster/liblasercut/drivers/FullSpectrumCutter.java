@@ -32,7 +32,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -267,7 +267,7 @@ public class FullSpectrumCutter extends LaserCutter
   }
   
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IOException, IllegalJobException
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IOException, IllegalJobException
   {
     fileOutputStream.write(jobToFullPacket(job, null).toByteArray());
   }

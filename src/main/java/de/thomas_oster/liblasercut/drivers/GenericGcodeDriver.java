@@ -28,6 +28,7 @@ import de.thomas_oster.liblasercut.OptionSelector;
 import de.thomas_oster.liblasercut.ProgressListener;
 import de.thomas_oster.liblasercut.ProgressListenerDummy;
 import de.thomas_oster.liblasercut.RasterizableJobPart;
+import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
@@ -47,6 +48,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -885,21 +887,20 @@ public class GenericGcodeDriver extends LaserCutter {
   }
 
 @Override
-public void saveJob(java.io.PrintStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
+public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
   this.currentPower = -1;
   this.currentSpeed = -1;
 
 	checkJob(job);
-
-	this.out = fileOutputStream;
-
 	boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
-	setWaitForOKafterEachLine( false );
-
-	writeJobCode(job, new ProgressListenerDummy());
-	this.out.flush();
-
-	setWaitForOKafterEachLine(wasSetWaitingForOk);
+  try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
+  {
+    this.out = ps;
+    setWaitForOKafterEachLine( false );
+    writeJobCode(job, new ProgressListenerDummy());
+  } finally {
+    setWaitForOKafterEachLine(wasSetWaitingForOk);
+  }
 }
 
   @Override

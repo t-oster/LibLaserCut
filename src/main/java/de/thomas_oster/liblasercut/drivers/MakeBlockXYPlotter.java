@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -447,11 +448,11 @@ public class MakeBlockXYPlotter extends LaserCutter
   private transient boolean savingToFile = false;
   
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws Exception
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws Exception
   {
     ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-    out = new BufferedOutputStream(bytesOut);
-    try {
+    try (BufferedOutputStream bufferedStream = new BufferedOutputStream(bytesOut)) {
+      out = bufferedStream;
       savingToFile = true;
       sendGCode(job, new ProgressListenerDummy());
     }
@@ -459,7 +460,6 @@ public class MakeBlockXYPlotter extends LaserCutter
     {
       savingToFile = false;
     }
-    out.close();
     fileOutputStream.write(bytesOut.toByteArray());
   }
 

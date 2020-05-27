@@ -31,15 +31,17 @@ import de.thomas_oster.liblasercut.RasterizableJobPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
+import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.SerialPort;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -139,7 +141,7 @@ public class GoldCutHPGL extends LaserCutter {
 
   private byte[] generateVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
+    PrintStream out = new LinefeedPrintStream(result);
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         case MOVETO:
@@ -432,7 +434,7 @@ public class GoldCutHPGL extends LaserCutter {
   }
 
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
       writeJob(new BufferedOutputStream(fileOutputStream), job, null, null);
   }
 }

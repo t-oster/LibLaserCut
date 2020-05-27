@@ -603,11 +603,10 @@ public class LaosCutter extends LaserCutter
       }
     }
     out.write(this.generateShutdownCode());
-    out.close();
   }
 
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
   {
     currentFrequency = -1;
     currentPower = -1;

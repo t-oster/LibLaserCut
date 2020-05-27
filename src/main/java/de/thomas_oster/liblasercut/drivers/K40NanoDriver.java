@@ -31,6 +31,9 @@ import de.thomas_oster.liblasercut.RasterElement;
 import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
+import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import java.io.PrintStream;
 import java.nio.Buffer;
@@ -271,12 +274,17 @@ public class K40NanoDriver extends LaserCutter
   }
   
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
   {
-    saveJob = fileOutputStream;
-    this.sendJob(job);
-    fileOutputStream.close();
-    saveJob = null;
+    try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
+    {
+      saveJob = ps;
+      sendJob(job);
+    }
+    finally
+    {
+      saveJob = null;
+    }
   }
 
   @Override

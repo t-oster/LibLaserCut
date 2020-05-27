@@ -982,7 +982,7 @@ abstract class EpilogCutter extends LaserCutter
   }
 
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
     // TODO: there is currently no way to report warnings with saveJob().
     checkJobAndApplyStartPoint(job, new LinkedList<>());
     byte[] pjlData = generatePjlData(job);

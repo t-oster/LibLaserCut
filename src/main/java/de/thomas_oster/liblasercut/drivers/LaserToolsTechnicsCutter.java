@@ -2040,7 +2040,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   }
 
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, IOException
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, IOException
   {
     this.writeJobCode(job, fileOutputStream, null, null);
   }

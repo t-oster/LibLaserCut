@@ -27,6 +27,7 @@ import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
 import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.RasterPart;
+import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 
@@ -36,6 +37,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -294,10 +296,13 @@ public class Dummy extends LaserCutter {
    * save job as SVG to file
    */
   @Override
-  public void saveJob(PrintStream fileOutputStream, LaserJob job) throws IllegalJobException
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJobException
   {
     SVGWriter svg = jobToSVG(job);
-    fileOutputStream.print(svg.getSVG());
+    try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
+    {
+      ps.print(svg.getSVG());
+    }
   }
 
   @Override
