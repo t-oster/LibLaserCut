@@ -43,6 +43,8 @@ public class LaserJob
   private double transformedOriginY = 0;
   private final List<JobPart> parts = new LinkedList<>();
   private boolean autoFocusEnabled = true;
+  private boolean rotaryAxisEnabled = false;
+  private double rotaryAxisDiameterMm = Double.NaN;
 
   public LaserJob(String title, String name, String user)
   {
@@ -183,5 +185,39 @@ public class LaserJob
   /** Indicates whether autofocus is enabled for this job, assuming the cutter supports it. */
   public boolean isAutoFocusEnabled() {
     return autoFocusEnabled;
+  }
+
+  /**
+   * Returns if rotary engrave unit is enabled for this job.
+   */
+  public boolean isRotaryAxisEnabled()
+  {
+    return rotaryAxisEnabled;
+  }
+
+  /**
+   * Enable (disable) rotary engrave unit for this job.
+   * Enabling may only be used if the cutter supports it (LaserCutter.isRotaryAxisSupported())
+   */
+  public void setRotaryAxisEnabled(boolean rotaryAxisEnabled)
+  {
+    this.rotaryAxisEnabled = rotaryAxisEnabled;
+  }
+
+  /**
+   * Get rotary engrave diameter for this job.
+   */
+  public double getRotaryAxisDiameterMm()
+  {
+    return rotaryAxisDiameterMm;
+  }
+
+  /**
+   * Set rotary engrave diameter for this job.
+   * Value is ignored if rotary engrave is not enabled.
+   */
+  public void setRotaryAxisDiameterMm(double rotaryAxisDiameterMm)
+  {
+    this.rotaryAxisDiameterMm = rotaryAxisDiameterMm;
   }
 }

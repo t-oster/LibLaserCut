@@ -43,6 +43,17 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * as a sanity check inside the sendJob method
      */
     protected void checkJob(LaserJob job) throws IllegalJobException {
+        if (job.isRotaryAxisEnabled())
+        {
+          if (!this.isRotaryAxisSupported())
+          {
+             throw new IllegalJobException("Rotary axis is enabled, but not supported by this cutter.");
+          }
+          if (!(Double.isFinite(job.getRotaryAxisDiameterMm()) && job.getRotaryAxisDiameterMm() > 0))
+          {
+            throw new IllegalJobException("Rotary axis diameter must be >= 0.");
+          }
+        }
         for (JobPart p : job.getParts()) {
             boolean pass = false;
             for (double d : this.getResolutions()) {
@@ -90,6 +101,15 @@ public abstract class LaserCutter implements Cloneable, Customizable {
     public boolean isAutoFocus() {
         return false;
     }
+
+    /**
+     * Return if rotary engrave unit (rotary axis) is supported
+     */
+    public boolean isRotaryAxisSupported()
+    {
+      return false;
+    }
+
 
     /**
      * This calls sendJob(job, pl) with a default progress listener, which
