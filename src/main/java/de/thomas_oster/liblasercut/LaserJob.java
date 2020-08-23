@@ -22,6 +22,8 @@
  */
 package de.thomas_oster.liblasercut;
 
+import de.thomas_oster.liblasercut.VectorCommand.CmdType;
+import de.thomas_oster.liblasercut.platform.Rectangle;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.util.LinkedList;
 import java.util.List;
@@ -172,6 +174,42 @@ public class LaserJob
       startX = 0;
       startY = 0;
     }
+  }
+
+  /**
+   * Get bounding box in mm.
+   * All moves are considered, so empty engrave parts will count.
+   */
+  public Rectangle getBoundingBox() {
+
+    Rectangle boundingBox = null;
+    for (JobPart p : getParts())
+    {
+        double maxX = Util.px2mm(p.getMaxX(), p.getDPI());
+        double maxY = Util.px2mm(p.getMaxY(), p.getDPI());
+        double minX = Util.px2mm(p.getMinX(), p.getDPI());
+        double minY = Util.px2mm(p.getMinY(), p.getDPI());
+        Rectangle currentBoundingBox = new Rectangle(minX, minY, maxX, maxY);
+        if (p instanceof VectorPart &&
+          ((VectorPart) p).getCommandList().length == 1
+          && ((VectorPart) p).getCommandList()[0].getType() == CmdType.SETPROPERTY)
+        {
+          // special case: quasi-empty vector part. Ignore.
+          // TODO we should rather avoid that VisiCut/LibLaserCut generates these parts
+          continue;
+        }
+        if (boundingBox == null)
+        {
+          boundingBox = currentBoundingBox;
+        } else {
+          boundingBox.add(currentBoundingBox);
+        }
+    }
+    if (boundingBox == null)
+    {
+      return new Rectangle(0, 0, 0, 0);
+    }
+    return boundingBox;
   }
 
   /**

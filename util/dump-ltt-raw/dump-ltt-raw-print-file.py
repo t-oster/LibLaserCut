@@ -80,7 +80,15 @@ def dump(filename, graph=False, showEngrave=False):
         y=read(numChars)
         print(" hex: " + " ".join(["{:02X}".format(i) for i in y]))
         return y
+    def readPrintX():
+        """ decode X-coordinate """
+        readPrint(4)
+        rewind(4)
+        x = readSigned32();
+        #print(f"= decoded x: {x}")
+        return x
     def readPrintXY():
+        """ decode (X,Y) coordinate """
         readPrint(8)
         rewind(8)
         x = readSigned32();
@@ -130,6 +138,9 @@ def dump(filename, graph=False, showEngrave=False):
             0x54: "'rubber' (4bit raster engrave) power table",
             0x56: "Start of vector data -- once per file; rest of the file contains only vector; engrave must be before this command.",
             0x59: "do not use -- formerly: Y axis for rotary",
+            0x6C: "Bounding box",
+            0x61: "Temporary Reference Point",
+            0x6E: "X Limits for rotary axis",
             0x76:"version",
             0x5041: "Pos. absolute",
             0x5042: "Circle clockwise",
@@ -156,7 +167,7 @@ def dump(filename, graph=False, showEngrave=False):
         elif cmd in [0x41, 0x43, 0x44, 0x4D, 0x4E, 0x4F, 0x61]:
             # 1 byte data
             value = readU8()
-            print(value)
+            print(f"{hex(value)} = decimal {value}")
             if cmd == 0x44: # engrave DPI
                 pitch = value
         elif cmd in [0x4A, 0x50, 0x51, 0x52]:
@@ -232,12 +243,21 @@ def dump(filename, graph=False, showEngrave=False):
             print("relative center point")
             readPrintXY()
         elif cmd == 0x6E:
-            # 8 byte data
-            readPrint(8)
+            print("lower X limit of rotary axis:")
+            readPrintX()
+            print("upper X limit of rotary axis:")
+            readPrintX()
         elif cmd == 0x54:
             readPrint(16)
         elif cmd == 0x6C:
-            readPrint(32)
+            print("minimum X and Y excluding engrave overscan")
+            readPrintXY()
+            print("width and height excluding engrave overscan")
+            readPrintXY()
+            print("minimum X and Y including engrave overscan")
+            readPrintXY()
+            print("width and height including engrave overscan")
+            readPrintXY()
         # DYNAMIC LENGTH COMMANDS:
         elif cmd == 0x46:
             # 1 byte length, $length byte data
