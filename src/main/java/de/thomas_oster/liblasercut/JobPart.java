@@ -35,4 +35,9 @@ public abstract class JobPart {
   
   public abstract double getMaxY();
 
+  /**
+   * Test if the job part does not cut/engrave at all.
+   * @return True if the job will do nothing relevant and can be safely removed.
+   */
+  public abstract boolean isEmpty();
 }

@@ -126,6 +126,17 @@ public class LaserJob
     this.parts.remove(p);
   }
 
+  /**
+   * Remove all parts that don't engrave or cut anything.
+   * This is not done automatically to allow for special cases, such as
+   * "move to a position and stay there", or
+   * "move along the outline of the object without cutting anything".
+   */
+  public void removeEmptyParts()
+  {
+    this.parts.removeIf(part -> part.isEmpty());
+  }
+
   public List<JobPart> getParts()
   {
     return parts;
@@ -178,7 +189,7 @@ public class LaserJob
 
   /**
    * Get bounding box in mm.
-   * All moves are considered, so empty engrave parts will count.
+   * All moves are considered, so empty engrave parts will count because they contain an initial "moveto" command.
    */
   public Rectangle getBoundingBox() {
 
@@ -190,14 +201,6 @@ public class LaserJob
         double minX = Util.px2mm(p.getMinX(), p.getDPI());
         double minY = Util.px2mm(p.getMinY(), p.getDPI());
         Rectangle currentBoundingBox = new Rectangle(minX, minY, maxX, maxY);
-        if (p instanceof VectorPart &&
-          ((VectorPart) p).getCommandList().length == 1
-          && ((VectorPart) p).getCommandList()[0].getType() == CmdType.SETPROPERTY)
-        {
-          // special case: quasi-empty vector part. Ignore.
-          // TODO we should rather avoid that VisiCut/LibLaserCut generates these parts
-          continue;
-        }
         if (boundingBox == null)
         {
           boundingBox = currentBoundingBox;
