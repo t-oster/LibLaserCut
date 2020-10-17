@@ -53,6 +53,8 @@ public class Dummy extends LaserCutter {
   private static final String SETTING_BEDWIDTH = "Laserbed width";
   private static final String SETTING_BEDHEIGHT = "Laserbed height";
   private static final String SETTING_RUNTIME = "Fake estimated run-time in seconds (-1 to disable)";
+  private static final String SETTING_ROTARY_AXIS = "Rotary Axis supported";
+  private boolean rotaryAxis = false;
   private static final String SETTING_SVG_OUTDIR = "SVG Debug output directory (set empty to disable)";
   
   /**
@@ -225,7 +227,7 @@ public class Dummy extends LaserCutter {
     SVGWriter svg = new SVGWriter(this); // SVG debug output
     System.out.println("dummy-driver got LaserJob: ");
     // TODO don't just print the parts and settins, but also the commands
-    // TODO improve SVG-debug output: support bitmaps, add animation
+    // TODO improve SVG-debug output: support bitmaps
      for (JobPart p : job.getParts())
         {
           svg.startPart(p.getClass().getSimpleName(), p.getDPI());
@@ -283,6 +285,8 @@ public class Dummy extends LaserCutter {
     pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
     checkJob(job);
+    System.out.printf("Rotary engrave enabled: %s, Diameter: %f", Boolean.toString(job.isRotaryAxisEnabled()), job.getRotaryAxisDiameterMm());
+    System.out.println();
     job.applyStartPoint();
     pl.taskChanged(this, "sending");
     pl.taskChanged(this, "sent.");
@@ -379,7 +383,8 @@ public class Dummy extends LaserCutter {
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
     SETTING_RUNTIME,
-    SETTING_SVG_OUTDIR
+    SETTING_SVG_OUTDIR,
+    SETTING_ROTARY_AXIS,
   };
 
   @Override
@@ -397,6 +402,8 @@ public class Dummy extends LaserCutter {
       return this.fakeRunTime;
     } else if (SETTING_SVG_OUTDIR.equals(attribute)) {
       return this.svgOutdir;
+    } else if (SETTING_ROTARY_AXIS.equals(attribute)) {
+      return this.isRotaryAxisSupported();
     }
     return null;
   }
@@ -411,6 +418,8 @@ public class Dummy extends LaserCutter {
        this.fakeRunTime=Integer.parseInt(value.toString());
     } else if (SETTING_SVG_OUTDIR.equals(attribute)) {
       this.svgOutdir=value.toString();
+    } else if (SETTING_ROTARY_AXIS.equals(attribute)) {
+      rotaryAxis=(Boolean) value;
     }
 
   }
@@ -421,6 +430,12 @@ public class Dummy extends LaserCutter {
     clone.bedHeight = bedHeight;
     clone.bedWidth = bedWidth;
     clone.fakeRunTime = this.fakeRunTime;
+    clone.rotaryAxis = rotaryAxis;
     return clone;
+  }
+
+  @Override
+  public boolean isRotaryAxisSupported() {
+    return rotaryAxis;
   }
 }
