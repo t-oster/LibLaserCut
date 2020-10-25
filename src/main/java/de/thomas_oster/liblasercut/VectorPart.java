@@ -29,10 +29,10 @@ public class VectorPart extends JobPart
 {
 
   private LaserProperty currentCuttingProperty;
-  private double maxX;
-  private double maxY;
-  private double minX;
-  private double minY;
+  private double maxX = Double.NEGATIVE_INFINITY;
+  private double maxY = Double.NEGATIVE_INFINITY;
+  private double minX = Double.POSITIVE_INFINITY;
+  private double minY = Double.POSITIVE_INFINITY;
   private final double resolution;
   private final List<VectorCommand> commands;
 
@@ -113,6 +113,12 @@ public class VectorPart extends JobPart
    */
   public void lineto(double x, double y)
   {
+    // ensure that lineto() is only called after moveto(), so that the
+    // VectorPart does not depend on the previous state.
+    if (!commands.stream().anyMatch(cmd -> cmd.getType() == VectorCommand.CmdType.MOVETO))
+    {
+      throw new IllegalStateException("lineto() may only be called after moveto().");
+    }
     commands.add(new VectorCommand(VectorCommand.CmdType.LINETO, x, y));
     checkMin(x, y);
     checkMax(x, y);
@@ -137,24 +143,59 @@ public class VectorPart extends JobPart
   @Override
   public double getMinX()
   {
-    return minX;
+    if (minX == Double.POSITIVE_INFINITY)
+    {
+      return 0;
+    }
+    else
+    {
+      return minX;
+    }
   }
 
   @Override
   public double getMaxX()
   {
-    return maxX;
+    if (maxX == Double.NEGATIVE_INFINITY)
+    {
+      return 0;
+    }
+    else
+    {
+      return maxX;
+    }
   }
 
   @Override
   public double getMinY()
   {
-    return minY;
+    if (minY == Double.POSITIVE_INFINITY)
+    {
+      return 0;
+    }
+    else
+    {
+      return minY;
+    }
   }
 
   @Override
   public double getMaxY()
   {
-    return maxY;
+    if (maxY == Double.NEGATIVE_INFINITY)
+    {
+      return 0;
+    }
+    else
+    {
+      return maxY;
+    }
+  }
+
+  @Override
+  public boolean isEmpty()
+  {
+    // VectorPart is empty if it contains no LINETO commands
+    return !commands.stream().anyMatch(cmd -> cmd.getType() == VectorCommand.CmdType.LINETO);
   }
 }

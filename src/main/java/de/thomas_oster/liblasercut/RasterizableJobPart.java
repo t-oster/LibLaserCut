@@ -295,4 +295,17 @@ abstract public class RasterizableJobPart extends JobPart
    * @return laser property appropriate for this color
    */
   public abstract LaserProperty getPowerSpeedFocusPropertyForColor(int color);
+
+  @Override
+  public boolean isEmpty()
+  {
+    for (int y=0; y<getRasterHeight(); y++)
+    {
+      if (!lineIsBlank(y))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 }

@@ -49,9 +49,11 @@ public abstract class LaserCutter implements Cloneable, Customizable {
           {
              throw new IllegalJobException("Rotary axis is enabled, but not supported by this cutter.");
           }
-          if (!(Double.isFinite(job.getRotaryAxisDiameterMm()) && job.getRotaryAxisDiameterMm() > 0))
+          if (!(Double.isFinite(job.getRotaryAxisDiameterMm()) &&
+            job.getRotaryAxisDiameterMm() >= 1 &&
+            job.getRotaryAxisDiameterMm() <= 1000))
           {
-            throw new IllegalJobException("Rotary axis diameter must be >= 0.");
+            throw new IllegalJobException("Rotary axis diameter must be within 1 and 1000mm.");
           }
         }
         for (JobPart p : job.getParts()) {
@@ -186,7 +188,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
      * Returns an estimated time, how long the job would take
      * in seconds
      */
-    public int estimateJobDuration(LaserJob job) {
+    public int estimateJobDuration(LaserJob job) throws IllegalJobException {
         throw new RuntimeException("Method not implemented");
     }
   

@@ -22,6 +22,8 @@
  */
 package de.thomas_oster.liblasercut;
 
+import de.thomas_oster.liblasercut.VectorCommand.CmdType;
+import de.thomas_oster.liblasercut.platform.Rectangle;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.util.LinkedList;
 import java.util.List;
@@ -124,6 +126,17 @@ public class LaserJob
     this.parts.remove(p);
   }
 
+  /**
+   * Remove all parts that don't engrave or cut anything.
+   * This is not done automatically to allow for special cases, such as
+   * "move to a position and stay there", or
+   * "move along the outline of the object without cutting anything".
+   */
+  public void removeEmptyParts()
+  {
+    this.parts.removeIf(part -> part.isEmpty());
+  }
+
   public List<JobPart> getParts()
   {
     return parts;
@@ -172,6 +185,34 @@ public class LaserJob
       startX = 0;
       startY = 0;
     }
+  }
+
+  /**
+   * Get bounding box in mm.
+   * All moves are considered, so empty engrave parts will count because they contain an initial "moveto" command.
+   */
+  public Rectangle getBoundingBox() {
+
+    Rectangle boundingBox = null;
+    for (JobPart p : getParts())
+    {
+        double maxX = Util.px2mm(p.getMaxX(), p.getDPI());
+        double maxY = Util.px2mm(p.getMaxY(), p.getDPI());
+        double minX = Util.px2mm(p.getMinX(), p.getDPI());
+        double minY = Util.px2mm(p.getMinY(), p.getDPI());
+        Rectangle currentBoundingBox = new Rectangle(minX, minY, maxX, maxY);
+        if (boundingBox == null)
+        {
+          boundingBox = currentBoundingBox;
+        } else {
+          boundingBox.add(currentBoundingBox);
+        }
+    }
+    if (boundingBox == null)
+    {
+      return new Rectangle(0, 0, 0, 0);
+    }
+    return boundingBox;
   }
 
   /**

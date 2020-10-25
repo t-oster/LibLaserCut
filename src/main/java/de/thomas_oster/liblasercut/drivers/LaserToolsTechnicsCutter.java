@@ -34,6 +34,8 @@ import static de.thomas_oster.liblasercut.VectorCommand.CmdType;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Circle;
 import de.thomas_oster.liblasercut.platform.Point;
+import de.thomas_oster.liblasercut.platform.Rectangle;
+import de.thomas_oster.liblasercut.platform.Tuple;
 import de.thomas_oster.liblasercut.platform.Util;
 
 import java.io.*;
@@ -65,8 +67,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   private static final String SETTING_PORT = "Port";
   private static final String SETTING_BEDWIDTH = "Laserbed width (mm)";
   private static final String SETTING_BEDHEIGHT = "Laserbed height (mm)";
-  private static final String SETTING_FLIPX = "X axis goes right to left (yes/no)";
-  private static final String SETTING_FLIPY = "Y axis goes bottom to top (yes/no)";
   private static final String SETTING_MAXDPI = "machine DPI";
   private static final String SETTING_MAX_ENGRAVE_DPI = "maximum engrave DPI";
   private static final String SETTING_CUTTING_SPEED = "Cutting speed in mm/s at 100% speed";
@@ -81,6 +81,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   private static final String SETTING_SUPPORTS_VENTILATION = "Supports ventilation";
   private static final String SETTING_SUPPORTS_FREQUENCY = "Supports frequency";
   private static final String SETTING_SUPPORTS_FOCUS = "Supports focus (Z-axis movement)";
+  private static final String SETTING_ROTARY_AXIS = "Has rotary axis";
 
   private boolean supportsFrequency = false;
 
@@ -130,6 +131,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     this.supportsVentilation = supportsVentilation;
   }
 
+  private boolean rotaryAxisSupported = false;
+  @Override
+  public boolean isRotaryAxisSupported() {
+    return rotaryAxisSupported;
+  }
+
   private String debugFilename = "";
 
   @Override
@@ -154,7 +161,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   private double addSpacePerRasterLineMinimum = 3.5; // 0 would be theoretically okay, but practically it isn't.
 
   /**
-   * Get the number of overscan per raster line
+   * Get the raster overscan in mm
    *
    * @param speedPercent speed in percent of maximum
    */
@@ -228,49 +235,13 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     this.nominalCuttingSpeed = nominalCuttingSpeed;
   }
 
-  protected boolean flipXaxis = false;
-
-  /**
-   * Get the value of flipXaxis
-   *
-   * @return the value of flipXaxis
-   */
-  public boolean isFlipXaxis()
-  {
-    return flipXaxis;
-  }
-
-  /**
-   * Set the value of flipXaxis
-   *
-   * @param flipXaxis new value of flipXaxis
-   */
-  public void setFlipXaxis(boolean flipXaxis)
-  {
-    this.flipXaxis = flipXaxis;
-  }
-
-  protected boolean flipYaxis = true;
-
-  /**
-   * Get the value of flipYaxis
-   *
-   * @return the value of flipYaxis
-   */
-  public boolean isFlipYaxis()
-  {
-    return flipYaxis;
-  }
-
-  /**
-   * Set the value of flipYaxis
-   *
-   * @param flipYaxis new value of flipYaxis
-   */
-  public void setFlipYaxis(boolean flipYaxis)
-  {
-    this.flipYaxis = flipYaxis;
-  }
+  // This variable is ignored, must not be removed to ensure compatibility
+  // with imported old settings (before August 2020).
+  @Deprecated
+  transient protected boolean flipXaxis = false;
+  // This variable is only for compatibility with imported old settings:
+  @Deprecated
+  transient protected boolean flipYaxis = true;
 
   protected String hostname = "192.168.123.111";
 
@@ -478,7 +449,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     writeU32(out, value);
   }
 
-  private double generateVectorCode(ByteArrayOutputStream outputstream, VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException
+  private double generateVectorCode(ByteArrayOutputStream outputstream, VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException, IllegalJobException
   {
     PrintStream out = new PrintStream(outputstream, true, StandardCharsets.US_ASCII);
 
@@ -495,23 +466,33 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     setFrequency(out, 1000); // default frequency (will be overriden later by the profile, except if "enable frequency" is false in the config)
     ArrayList<Double> x = new ArrayList<>();
     ArrayList<Double> y = new ArrayList<>();
+    double prescalingY = 1;
+    if (currentJobIsRotary)
+    {
+      // If the rotary axis is used, the maximum Y acceleration depends on the engrave diameter and is not the same as the max. X acceleration.
+      // However, the algorithm only supports equal maximum acceleration for both axes.
+      // Therefore, the Y coordinates are first scaled, then the acceleration is computed, and then they are scaled back to actual size.
+      // Required factor is roughly the ratio between machine coordinates for rotary and normal engraving.
+      // Use 10 inch length for computing the ratio so that neither roundoff nor axis limits are a problem.
+      prescalingY = Math.abs((double) yPxToDeviceCoordinate(10, 1, 1, true, true, true) / yPxToDeviceCoordinate(10, 1, 1, true, true, false));
+    }
     double cuttingTime = 0;
     for (VectorCommand cmd : vp.getCommandList())
     {
       if (cmd.getType() == CmdType.LINETO)
       {
         x.add(cmd.getX());
-        y.add(cmd.getY());
+        y.add(cmd.getY() * prescalingY);
       }
       else
       {
-        cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
+        cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution, prescalingY);
         x = new ArrayList<>();
         y = new ArrayList<>();
         switch (cmd.getType())
         {
           case MOVETO:
-            cuttingTime += move(out, cmd.getX(), cmd.getY(), resolution);
+            cuttingTime += move(out, cmd.getX(), cmd.getY() * prescalingY, resolution, prescalingY);
             break;
           case SETPROPERTY:
           {
@@ -521,7 +502,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         }
       }
     }
-    cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution);
+    cuttingTime += curveOrLine(out, x.toArray(new Double[0]), y.toArray(new Double[0]), resolution, prescalingY);
     setLaserOn(out, false);
     return cuttingTime;
   }
@@ -663,12 +644,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * Switch off laser and move to coordinate
    * @return travel time
    */
-  private double move(PrintStream out, double x, double y, double resolution) throws IOException
+  private double move(PrintStream out, double x, double y, double resolution, double prescalingY) throws IOException
   {
     setLaserOn(out, false);
     // we assume that the travel speed is the maximum cutting speed.
     double time = cuttingTimeForPxDistance(Math.hypot(x - currentX, y - currentY), resolution, 100);
-    goToCoordinate(out, x, y, resolution, false);
+    goToCoordinate(out, x, y, resolution, prescalingY, false);
     return time;
   }
 
@@ -676,11 +657,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * Switch on laser and cut a line to the given coordinate
    * @return cutting time
    */
-  private double line(PrintStream out, double x, double y, double resolution) throws IOException
+  private double line(PrintStream out, double x, double y, double resolution, double prescalingY) throws IOException
   {
     setLaserOn(out, true);
     double time = cuttingTimeForPxDistance(Math.hypot(x - currentX, y - currentY), resolution);
-    goToCoordinate(out, x, y, resolution, true);
+    goToCoordinate(out, x, y, resolution, prescalingY, true);
     return time;
   }
   
@@ -708,9 +689,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
  */
           
   // Note for future development: The same command can also be used for arcs (e.g., quarter circles).
-  private double circle(PrintStream out, Point center, double resolution) throws IOException, UnsupportedCircleException
+  private double circle(PrintStream out, Point center, double resolution, double prescalingY) throws IOException, UnsupportedCircleException
   {
-    
+    if (prescalingY != 1)
+    {
+      throw new UnsupportedCircleException("Y prescaling is unsupported. This is only useful for cutting circles on rotary engrave, a rare edge case that isn't worth the development time");
+    }
     // the firmware works correctly up to this radius:
     final double CIRCLE_MAX_RADIUS_MM = 101.0;
     final double radiusPx = center.hypotTo(new Point(currentX, currentY));
@@ -758,7 +742,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     writeS32(out, 0);
     writeS32(out, 0);
     // center point relative to start point
-    sendCoordinate(out, (int) center.x - (int) currentX, (int) center.y - (int) currentY, resolution, true);
+    sendCoordinate(out, (int) center.x - (int) currentX, (int) center.y - (int) currentY, resolution, prescalingY, true);
     out.print("PF");
     // restore previous speed and power setting
     setSpeed(out, oldSpeedPercent);
@@ -786,7 +770,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    *
    * maximum speed (nominalCuttingSpeed), MUST obey the acceleration limit)
    */
-  private double curveWithKnownSpeed(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
+  private double curveWithKnownSpeed(PrintStream out, ArrayList<PointWithSpeed> points, double resolution, double prescalingY) throws IOException
   {
     setLaserOn(out, true);
     out.print("PJ"); // start join
@@ -888,7 +872,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         myAssert(speedPercent > 0);
       }
       writeU16(out, limit((int) Math.round(sentSpeed * 10), 1, 1000));
-      line(out, x, y, resolution); // not actually a line, will be interpreted as smooth curve segment
+      line(out, x, y, resolution, prescalingY); // not actually a line, will be interpreted as smooth curve segment
       // currentX and currentY are set by this call to line()
     }
     avgXYAccelerationSeen = avgXYAccelerationSeen / points.size();
@@ -956,14 +940,18 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     return pointsNew;
   }
 
+  // NOTE: the following constants constants are empirically determined.
+  // The values are probably not optimal, but are good enough that nobody complains.
+  // There is always a trade-off between mathematically strict adherence to the
+  // acceleration limits and a usable result that smoothly rides through curves.
+
   // maximum position inaccuracy in mm
-  // TODO!
-  private static final double lengthTolerance = 1e-1; // TODO try out different values
+  private static final double lengthTolerance = 1e-1;
   // maximal angle which may be smoothed, as long as position accuracy is satisfied
   // must be < 90° because otherwise the interpolation code breaks (180° may also be okay, but careful review would be required)
   private static final double angleToleranceShort = Math.toRadians(40);
   // finer restriction on maximal angle for line segments which have a significant length
-  // TODO has no effect, except if made really small for certain length???
+  // The current value maybe has no effect, except if made really small for certain length???
   private static final double angleToleranceLong = Math.toRadians(10);
 
   /**
@@ -975,7 +963,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    *
    * @return cutting time
    */
-  private double curve(PrintStream out, ArrayList<PointWithSpeed> points, double resolution) throws IOException
+  private double curve(PrintStream out, ArrayList<PointWithSpeed> points, double resolution, double prescalingY) throws IOException
   {
     if (points.size() <= 1)
     {
@@ -983,10 +971,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     if (points.size() == 2)
     {
-      var currentPoint = points.get(0);
       var nextPoint = points.get(1);
       // only two points: cut a line segment
-      return line(out, nextPoint.x, nextPoint.y, resolution);
+      return line(out, nextPoint.x, nextPoint.y, resolution, prescalingY);
     }
 
     // more than two points: cut a smooth curve. For this, compute the interpolated speed.
@@ -1040,12 +1027,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // from the exact boundaries which may cause trouble with numerical comparisons.
     final double safetyFactor = 0.99;
 
-    // reinterpolate the points
+    // Reinterpolate the points to a small intermediate distance.
     // (The windows driver has a table for maximum change of speed between points.
     //  For very low speeds, it effectively uses roughly 0.3mm maximum distance,
     //  but a lot more for higher speeds. However, it seems that sending so many
     // intermediate points isn't actually required.)
-    // TODO do this better, or at least do some postprocessing so that we don't send all these points to the cutter.
+    // In the end, most of the interpolated points are filtered out again.
     points = reinterpolateWithMaximumDistance(points, Util.mm2px(0.9, resolution));
 
     // set speed to maximum, and in the following only reduce it.
@@ -1136,9 +1123,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
           }
           // reducing minTime is possible without breaking the assumptions of the following algorithm,
           // because minTime is only used as an underapproximation (guaranteed lower bound).
-          // TODO: Instead of just artificially slowing down, we should rather
-          //       reinterpolate the path, i.e., insert intermediate points so that
-          //       the final output points are less than MAX_ACCEL_TIME apart in time
+          // NOTE: The reinterpolation at the beginning of this function should
+          // have inserted enough intermediate points so that this case does not
+          // happen too often.
         }
 
         // vectorial: newSpeed = oldSpeed + acceleration * time
@@ -1150,7 +1137,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         // see LaserToolsTechnicsCutter_speedInterpolation.svg, section A, case 1 and 1b.
         // Is it possible to reach any speed pointing in the fixed direction of newSpeed?
         // speed * sin(angle) < acceleration * time ?
-        // TODO: switch from math.sin() to something faster, overapproximative.
         double alpha = pBefore.absAngleAtCorner;
         if (pBefore.speed * Math.sin(alpha) > tangentCurveMaxAcceleration * optimismFactor * minTime)
         {
@@ -1237,7 +1223,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // Note that because this part of the problem is mathematically convex,
     // points in the middle of a straight line can be omitted without violating the maximum acceleration.
     // This makes transmission faster, but can also be omitted.
-    boolean[] deletePoint = new boolean[points.size()];
+    ArrayList<PointWithSpeed> filteredPoints = new ArrayList<>();
+    filteredPoints.add(points.get(0)); // keep first point
     double speedNow = points.get(0).speed;
     double distanceSinceLastPointMm = 0;
     for (int i=1; i < points.size() - 1; i++) {
@@ -1247,37 +1234,27 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         // inbetween: linearly interpolated.
         final double speedChangeThreshold = 0.2 + Math.max(0, 0.1 * speedNow * (1.0 - distanceSinceLastPointMm/5.0));
         if ((points.get(i).absAngleAtCorner == 0)
-               // && (points.get(i + 1).absAngleAtCorner == 0)
                 && (Math.abs(points.get(i).speed - speedNow) < speedChangeThreshold)
                 )
         {
             // drop point i
-            deletePoint[i] = true;
             distanceSinceLastPointMm += points.get(i).deltaToPrevious.hypot() * pxToMm;
         } else {
             // keep point i
             speedNow = points.get(i).speed;
             distanceSinceLastPointMm = 0;
+            filteredPoints.add(points.get(i));
         }
     }
-    int i=0;
-    // TODO this is slower than necessary
-    Iterator<PointWithSpeed> iterator = points.iterator();
-    while (iterator.hasNext()) {
-        iterator.next();
-        if (deletePoint[i]) {
-            iterator.remove();
-            System.out.println("removed point");
-        }
-        i++;
-    }
+    filteredPoints.add(points.get(points.size() - 1)); // keep last point
+
     // convert back to manufacturer units
-    for (PointWithSpeed point : points)
+    for (PointWithSpeed point : filteredPoints)
     {
       point.speed *= relativeSpeedToMmPerSec;
     }
 
-    return curveWithKnownSpeed(out, points, resolution);
+    return curveWithKnownSpeed(out, filteredPoints, resolution, prescalingY);
   }
 
   /**
@@ -1299,7 +1276,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @param y list of y coordinates in pixels
    * @param resolution DPI for converting pixels to mm
    */
-  private double curveOrLine(PrintStream out, Double[] x, Double[] y, double resolution) throws IOException
+  private double curveOrLine(PrintStream out, Double[] x, Double[] y, double resolution, double prescalingY) throws IOException
   {
     double cuttingTime = 0;
     if (!this.useTangentCurves)
@@ -1307,7 +1284,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       // smooth curves are disabled, fall back to line segments
       for (int i = 0; i < x.length; i++)
       {
-        cuttingTime += line(out, x[i], y[i], resolution);
+        cuttingTime += line(out, x[i], y[i], resolution, prescalingY);
       }
       return cuttingTime;
     }
@@ -1344,7 +1321,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
           // The curvature is too large: We are at a corner.
           // Split the list of points at the corner = at lastPoint.
           // Note that newPoint has not yet been added to the list.
-          cuttingTime += curve(out, points, resolution);
+          cuttingTime += curve(out, points, resolution, prescalingY);
           points = new ArrayList<>();
           // copy the last point, but discard angle and deltaToPrevious because that doesn't make sense at the start of the list
           lastPoint = new PointWithSpeed(lastPoint.x, lastPoint.y);
@@ -1368,7 +1345,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       System.out.println("We found a circle:" + detectedCircle);
       // The circle implicitly starts at the current point,
       try {
-        cuttingTime += circle(out, detectedCircle.center, resolution);
+        cuttingTime += circle(out, detectedCircle.center, resolution, prescalingY);
       } catch (UnsupportedCircleException exception) {
         System.out.println("unsupported circle, sending as normal curve: " + exception.getMessage());
         detectedCircle = null;
@@ -1378,7 +1355,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     {
       // It's a normal curve, or sending as circle was unsupported.
       // -> just send it as normal curve
-      cuttingTime += curve(out, points, resolution);
+      cuttingTime += curve(out, points, resolution, prescalingY);
     }
     return cuttingTime;
   }
@@ -1386,6 +1363,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   // for convenience, we support double coordinates, but the lasercutter only knows integers.
   private transient double currentX = -1;
   private transient double currentY = -1;
+  private transient boolean currentJobIsRotary = false;
+  private transient double rotaryRadius = Double.NaN;
 
   /**
    * go to the specified coordinate
@@ -1393,52 +1372,183 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @param x x coordinate in pixels
    * @param y y coordinate in pixels
    * @param resolution DPI for converting pixels to mm
+   * @param prescalingY extra factor for Y DPI, normally 1 except for rotary engrave, machine Y will be divided by this factor
    * @param sendAsRelative True: send a relative move command, False: send an absolute move command
    */
-  private void goToCoordinate(PrintStream out, double x, double y, double resolution, boolean sendAsRelative) throws IOException
+  private void goToCoordinate(PrintStream out, double x, double y, double resolution, double prescalingY, boolean sendAsRelative) throws IOException
   {
     if (sendAsRelative)
     {
       out.print("PR"); // relative position
       // note: we convert to int *before* subtracting, so that always: sum(relative increments that we send) == (int) currentX.
-      sendCoordinate(out, (int) x - (int) currentX, (int) y - (int) currentY, resolution, true);
+      sendCoordinate(out, (int) x - (int) currentX, (int) y - (int) currentY, resolution, prescalingY, true);
     }
     else
     {
       out.print("PA"); // 50 41: absolute position
-      sendCoordinate(out, (int) x, (int) y, resolution, false);
+      sendCoordinate(out, (int) x, (int) y, resolution, prescalingY, false);
     }
     currentX = x;
     currentY = y;
   }
 
   /**
-   * send a coordinate WITHOUT ANY PRECEDING COMMAND.
-   * coordinate is converted from the given resolution to machine resolution.
-   * This does not make sense if you don't prepend a command.
+   * send bounding box, given in mm, WITHOUT ANY PRECEEDING COMMAND.
+   * @throws IOException
    */
-  private void sendCoordinate(PrintStream out, int x, int y, double resolution, boolean isRelative) throws IOException
+  private void sendBoundingBoxMm(PrintStream out, Rectangle bbMm) throws IOException
   {
-    // convert to maxDPI, which is the actual machine resolution
-    x = (int) Math.round(x * maxDPI / resolution);
-    y = (int) Math.round(y * maxDPI / resolution);
-    int xMax = (int) Util.mm2px(bedWidth, maxDPI);
-    int yMax = (int) Util.mm2px(bedHeight, maxDPI);
-    myAssert(x < xMax);
-    myAssert(y < yMax);
-    if (!isRelative)
+    // Note: device Y axis is flipped compared to our code's Y axis.
+    // This flipping is applied in sendCoordinate().
+    // minimum X and Y (usually bottom left, except for rotary engrave)
+    Rectangle bb = boundingBoxMmToDeviceCoordinates(bbMm);
+    sendCoordinate(out, (int) bb.getXMin(), (int) bb.getYMin(), COORDINATE_IS_RAW, 1, false);
+    // width and height
+    sendWidthHeight(out, (int) (bb.getXMax() - bb.getXMin()), (int) (bb.getYMax() - bb.getYMin()), COORDINATE_IS_RAW, 1);
+  }
+
+
+  private int yPxToDeviceCoordinate(double y, double resolution, double prescalingY, boolean isRelative, boolean isLength)
+  {
+    return yPxToDeviceCoordinate(y, resolution, prescalingY, isRelative, isLength, currentJobIsRotary);
+  }
+
+  /**
+   * convert Y from LibLaserCut coordinates to raw device coordinates (see sendCoordinate)
+   * @param y coordinate in pixels
+   * @param isLength True: input is a positive length, output must also be positive.
+   * @param isRelative True: input is a relative coordinate. False: absolute coordinate. Ignored if isLength==True.
+   * @param resolution pixels per inch, or COORDINATE_IS_RAW to specify raw machine coordinates
+   * @param yIsRotary is Y used as rotary axis? normally False
+   */
+  private int yPxToDeviceCoordinate(double y, double resolution, double prescalingY, boolean isRelative, boolean isLength, boolean yIsRotaryAxis)
+  {
+    myAssert(Double.isFinite(prescalingY));
+    myAssert(prescalingY > 0);
+    if (resolution == COORDINATE_IS_RAW)
     {
-      myAssert(x >= 0);
+      myAssert(prescalingY == 1);
+      return (int) y;
+    }
+    if (isLength || !isRelative) {
       myAssert(y >= 0);
-      writeU32(out, (isFlipXaxis() ? xMax - x : x));
-      writeU32(out, (isFlipYaxis() ? yMax - y : y));
+    }
+    int yRaw;
+    int yMax;
+    if (yIsRotaryAxis) {
+      // rotary engrave: Y-axis is the rotation angle
+      final int ROTARY_AXIS_PX_PER_REVOLUTION = 6400; // device pixels for full rotation (approximate guess)
+      // there is no real coordinate limit for the rotary axis, but 100 revolutions should be enough for all cases
+      yMax = 100 * ROTARY_AXIS_PX_PER_REVOLUTION;
+      yRaw = (int) Math.round(Util.px2mm(y / prescalingY, resolution) / (rotaryRadius * 2 * Math.PI) * ROTARY_AXIS_PX_PER_REVOLUTION);
     }
     else
     {
-      // relative
-      writeS32(out, (isFlipXaxis() ? -x : x));
-      writeS32(out, (isFlipYaxis() ? -y : y));
+      yMax = (int) Util.mm2px(bedHeight, maxDPI);
+      yRaw = (int) Math.round(y / prescalingY * maxDPI / resolution);
     }
+    myAssert(yRaw <= yMax);
+    if (yIsRotaryAxis)
+    {
+      return yRaw;
+    } else {
+      if (isLength) {
+        return yRaw;
+      } else if (isRelative) {
+        return -yRaw;
+      } else {
+        // absolute position
+        return yMax - yRaw;
+      }
+    }
+  }
+
+
+  /**
+   * convert X from LibLaserCut coordinates to raw device coordinates (see sendCoordinate)
+   * @param isLength True: input is a positive length, output must also be positive.
+   * @param isRelative True: input is a relative coordinate. False: absolute coordinate. Ignored if isLength==True.
+   * @param resolution dots per inch, or COORDINATE_IS_RAW to specify raw machine coordinates
+   */
+  private int xPxToDeviceCoordinate(double x, double resolution, boolean isRelative, boolean isLength)
+  {
+    if (resolution == COORDINATE_IS_RAW)
+    {
+      return (int) x;
+    }
+    // x-axis is positive, only scaling needed.
+    int xRaw = (int) Math.round(x * maxDPI / resolution);
+    final int xMax = (int) Util.mm2px(bedWidth, maxDPI);
+    if (isLength || !isRelative) {
+      myAssert(x >= 0);
+    }
+    myAssert(xRaw <= xMax);
+    return xRaw;
+  }
+
+  private Rectangle boundingBoxMmToDeviceCoordinates(Rectangle bb)
+  {
+    final double MM_TO_DPI = Util.dpmm2dpi(1);
+    int rawXMin = xPxToDeviceCoordinate(bb.getXMin(), MM_TO_DPI, false, true);
+    int rawXMax = xPxToDeviceCoordinate(bb.getXMax(), MM_TO_DPI, false, true);
+    int rawY1 = yPxToDeviceCoordinate(bb.getYMin(), MM_TO_DPI, 1, false, true);
+    int rawY2 = yPxToDeviceCoordinate(bb.getYMax(), MM_TO_DPI, 1, false, true);
+    int rawYMin = Math.min(rawY1, rawY2);
+    int rawYMax = Math.max(rawY1, rawY2);
+    return new Rectangle(rawXMin, rawYMin, rawXMax, rawYMax);
+  }
+
+  final private double COORDINATE_IS_RAW = Double.NEGATIVE_INFINITY;
+  /**
+   * send a coordinate WITHOUT ANY PRECEDING COMMAND.
+   * This does not make sense if you don't prepend a command.
+   *
+   * Coordinate is converted from the given resolution to machine resolution.
+   * Input coordinates have (0,0) at top left, +x is right, +y is down. This is
+   * the convention in LibLaserCut.
+   *
+   * Output coordinates are transformed to machine coordinates with:
+   * - normally: (0,0) at bottom left, +y up, x unchanged
+   * - rotary engrave: (0,0) at top left, +x right, +y down
+   *
+   * @param x x-coordinate in given resolution
+   * @param y x-coordinate in given resolution
+   * @param resolution dots per inch, or COORDINATE_IS_RAW to specify raw machine coordinates
+   * @param isRelative True: relative coordinates, False: absolute coordinates,
+   * ignored if isWidthHeight==true
+   * @param isWidthHeight False: regular coordinates (relative or absolute),
+   * True: dimension values (width and height)
+   */
+  private void sendCoordinate(PrintStream out, int x, int y, double resolution, double prescalingY, boolean isRelative, boolean isWidthHeight) throws IOException
+  {
+    // convert to machine resolution (which is maxDPI with some exceptions)
+    int yRaw = yPxToDeviceCoordinate(y, resolution, prescalingY, isRelative, isWidthHeight);
+    int xRaw = xPxToDeviceCoordinate(x, resolution, isRelative, isWidthHeight);
+    if (isWidthHeight || !isRelative)
+    {
+      // absolute coordinates and dimensions must be positive
+      myAssert(xRaw >= 0);
+      myAssert(yRaw >= 0);
+      writeU32(out, xRaw);
+      writeU32(out, yRaw);
+    }
+    else {
+      // relative coordinates may be negative
+      writeS32(out, xRaw);
+      writeS32(out, yRaw);
+    }
+  }
+
+  private void sendCoordinate(PrintStream out, int x, int y, double resolution, double prescalingY, boolean isRelative) throws IOException {
+    sendCoordinate(out, x, y, resolution, prescalingY, isRelative, false);
+  }
+
+  /**
+   * send width and height WITHOUT ANY PRECEEDING COMMAND.
+   * See sendCoordinate()
+   */
+  private void sendWidthHeight(PrintStream out, int w, int h, double resolution, double prescalingY) throws IOException {
+    sendCoordinate(out, w, h, resolution, prescalingY, false, true);
   }
 
   private transient float currentPower = -1;
@@ -1530,6 +1640,62 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     writeU16(out, (int) (radiusMm / 0.01));
   }
 
+
+  /**
+   * Send bounding box information.
+   *
+   * @return Tuple(wLeft, wRight) of the lengths from the center to the overscan borders:
+   *     |---overscan left---|---actual job content----|---overscan right-----|
+   *     |-------wLeft-------------------|-------------------wRight-----------|
+   */
+  private Tuple<Double,Double> setBoundingBox(PrintStream out, LaserJob job) throws IOException
+  {
+    // To simplify the code, we compute the bounding box info directly from the
+    // laser job. With this, we don't need to seek back on the output stream,
+    // and don't need to consider special cases (circle commands etc.)
+
+    // This is the bounding box of the actual job content without overscan.
+    // Note that useless quasi-empty parts (only MOVETO but no cut/engrave)
+    // must not be ignored, because the MOVETO also contributes to the bounding
+    // box!
+    Rectangle bbMm = job.getBoundingBox();
+
+    // Compute maximum engrave overscan
+    double maxOverscanMm = 0;
+    for (JobPart p: job.getParts())
+    {
+      if (p instanceof RasterizableJobPart)
+      {
+        double overscanMm = getAddSpacePerRasterLine(((RasterizableJobPart) p).getPowerSpeedFocusPropertyForColor(0).getSpeed());
+        maxOverscanMm = Math.max(overscanMm, maxOverscanMm);
+      }
+    }
+    // Bounding box with engrave overscan
+    // If, in the future, we use negative coordinates for engrave overscan, this will need to be considered here.
+    double xMinOverscan = Math.max(0, bbMm.getXMin() - maxOverscanMm);
+    double xMaxOverscan = Math.min(getBedWidth(), bbMm.getXMax() + maxOverscanMm);
+    Rectangle bbOverscanMm = new Rectangle(xMinOverscan, bbMm.getYMin(), xMaxOverscan, bbMm.getYMax());
+
+    setBoundingBox(out, bbMm, bbOverscanMm);
+
+    double center = (bbMm.getXMin() + bbMm.getXMax())/2;
+    double centerToLeft = center - bbOverscanMm.getXMin();
+    double centerToRight = bbOverscanMm.getXMax() - center;
+    return new Tuple<>(centerToLeft, centerToRight);
+  }
+
+  /**
+   * Send bounding box information. Coordinates are in mm.
+   * @param bb bounding box for user content
+   * @param bbOverscan bounding box including engrave overscan
+   */
+  private void setBoundingBox(PrintStream out, Rectangle bb, Rectangle bbOverscan) throws IOException
+  {
+    out.write(toBytes("1B 6C"));
+    sendBoundingBoxMm(out, bb);
+    sendBoundingBoxMm(out, bbOverscan);
+  }
+
   private Boolean currentVentilation = null;
 
   private void setVentilation(PrintStream out, boolean ventilation)
@@ -1590,6 +1756,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     PrintStream out = new PrintStream(outputstream, true, StandardCharsets.US_ASCII);
     // TODO: handle the special case if the engraving is near the left or right end of the coordinate system.
     // -> we may use slightly negative or too large coordinates (check original driver output!)
+    //    Note that then, setBoundingBox() must be changed accordingly.
     // -> and if that's not enough, accept that the first 25mm or so are slower and apply a compensation table which reduces the intensity (or scales the pixels? whatever...) at the start
     // TODO: test if we can really switch the jobmode here or if this needs to be at the start of the file (then we could not do engrave and engrave3d in one file)
     if (rp.getBitsPerRasterPixel() == 1)
@@ -1835,7 +2002,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // length
     writeU32(out, compressed.size() + 8);
     // X, Y
-    sendCoordinate(out, (int) (lineStart.x + (dirLeftToRight ? 0 : (bytes.size() * pixelsPerByte))), (int) lineStart.y, resolution, false);
+    sendCoordinate(out, (int) (lineStart.x + (dirLeftToRight ? 0 : (bytes.size() * pixelsPerByte))), (int) lineStart.y, resolution, 1, false);
     // data (length-8 bytes)
     for (byte b : compressed)
     {
@@ -1855,16 +2022,17 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
 
   @Override
-  public int estimateJobDuration(LaserJob job) {
+  public int estimateJobDuration(LaserJob job) throws IllegalJobException {
     try {
+        checkJob(job);
         return (int) writeJobCode(job, OutputStream.nullOutputStream(), null, null);
-    } catch (IOException | IllegalJobException ex) {
+    } catch (IOException ex) {
         Logger.getLogger(LaserToolsTechnicsCutter.class.getName()).log(Level.SEVERE, null, ex);
         return -1;
     }
   }
 
-  private byte[] generateInitializationCode(String jobName) throws UnsupportedEncodingException, IOException
+  private byte[] generateInitializationCode(LaserJob job, List<String> warnings) throws UnsupportedEncodingException, IOException, IllegalJobException
   {
     currentFrequency = -1;
     currentPower = -1;
@@ -1873,15 +2041,30 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     currentPurge = false;
     currentVentilation = false;
     currentJobMode = -1;
+    currentJobIsRotary = job.isRotaryAxisEnabled();
+    rotaryRadius = job.isRotaryAxisEnabled() ? job.getRotaryAxisDiameterMm() / 2 : 42;
+    myAssert(!job.isRotaryAxisEnabled() || rotaryAxisSupported);
+    if (rotaryRadius < 2.5)
+    {
+      // Check min. rotary diameter. This cannot be moved t setMaterialRadius()
+      // to avoid other exceptions that would happen earlier.
+      // The Windows driver uses 5mm as minimum diameter.
+      throw new IllegalJobException("engrave diameter must be at least 5.0mm");
+    }
+
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
 
     out.print("LTT");
 
-    out.write(toBytes("1B 76 01 01 01")); // Format Version 1.1.1
+    // job.applyStartPoint() is not supported
+    myAssert(job.getTransformedOriginX() == 0 && job.getTransformedOriginY() == 0);
+
+    out.write(toBytes("1B 76 01 01 02")); // Format Version 1.1.1
 
     out.write(toBytes("1B 46")); // File name:
     final int maximumJobNameLength = 15;
+    String jobName = job.getName();
     if (jobName.length() > maximumJobNameLength)
     {
       jobName = jobName.substring(0, maximumJobNameLength);
@@ -1889,7 +2072,37 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     out.write(jobName.length());
     out.print(jobName);
 
-    out.write(toBytes("1B 4F 00")); // operation mode (TODO)
+    // Temporary Reference Point Mode:
+    if (job.isRotaryAxisEnabled()) {
+      // Rotary engrave must use temporary reference point, at least the documentation says so.
+      // We use a reference point at the center.
+      out.write(toBytes("1B 61 15")); // temp.ref.point center, stay at ref. point
+    } else {
+      // currently, temp. ref. is not yet supported except for rotary engraving.
+      // The difficulty is that the driver does not support a generic ref. point
+      // like LibLaserCut but only nine special positions like "center left".
+      out.write(toBytes("1B 61 00")); // temp.ref.point off
+    }
+
+    // Job Mode
+    setJobMode(out, (job.isRotaryAxisEnabled() ? JOB_MODE_ROTARY_AXIS : JOB_MODE_XY));
+
+    // Box Boundary (used for temp. ref. point function)
+    Tuple<Double,Double> widthFromCenter = setBoundingBox(out, job);
+    if (job.isRotaryAxisEnabled())
+    {
+      warnings.add(
+        String.format("Rotary engrave active. Please use 'Adjust rotary temp' "
+          + "on the machine to set the center position of the engraving. "
+          + "Make sure the laser head can move %.0f mm to the left and %.0f mm to the right without crashing! "
+          + "This measurement includes some braking distance.",
+          widthFromCenter.getA(), widthFromCenter.getB())
+      );
+    }
+
+    out.write(toBytes("1B 6E 00 00 5D CF 00 00 69 56")); // X-Limits of rotary axis (fixed values for LTT i4000)
+
+    out.write(toBytes("1B 4F 00")); // operation mode (no autorun)
 
     out.write(toBytes("1B 51 00 00")); // disable "Copy and Quantity"
 
@@ -1899,12 +2112,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     out.write(toBytes("1B 44"));
     out.write(dpiPrescaling); // engrave (?) DPI = maximum dpi / dpiPrescaling
 
-    // Y axis location for rotary engraving: unused as per documentation.
-    out.write(toBytes("1B 59 00 00 00 00"));
-
-    setJobMode(out, JOB_MODE_XY | JOB_MODE_1BIT_PER_PIXEL);
-
-    setMaterialRadius(out, 42); // TODO what's the default value?
+    setMaterialRadius(out, rotaryRadius);
 
     // set magic compression constant to C0 (see compressData())
     out.write(toBytes("1B 43"));
@@ -1912,6 +2120,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
     // set grayscale palette for 4bit mode ("rubber power")
     // 11..EE are the intermediate values
+    // Not used, but we keep it so that our output is similar to the original driver.
     out.write(toBytes("1B 54 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF"));
 
     return result.toByteArray();
@@ -1945,8 +2154,13 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     
     if (job.getStartX() != 0 || job.getStartY() != 0) {
       throw new UnsupportedOperationException("Manual start point is not yet supported.");
-      // FIXME: We throw this error because manual start points currently dont work.
-      // To do: - signal to the laser cutter that the start point is manual
+      // We throw this error because manual start points currently dont work.
+      // The machine support for start points seems quite limited, as it only
+      // allows for nine fixed combinations such as top-left, top-center, ...,
+      // bottom-right.
+      // To do: - find out how we can hack the commands for general start points
+      //          (May be impossible.)
+      //        - signal to the laser cutter that the start point is manual
       //        - probably call job.applyStartPoint();
       //        - fix all checks for coordinate limits, take the current offset into account (probably saved in applyStartPoint())
       //        - test if it also works for negative coordinates (starting point at center of job),
@@ -1971,7 +2185,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       } else if (p instanceof VectorPart) {
         power = ((VectorPart) p).getCurrentCuttingProperty().getProperty("power");
       }
-      if (power instanceof Number && ((Number) power).floatValue() == 0) {
+      // Warn if power==0 and job part is not empty
+      if (power instanceof Number && ((Number) power).floatValue() == 0 &&
+          (p.getMaxX() != p.getMinX() || p.getMaxY() != p.getMinY()))
+      {
         String powerZeroWarning = "Power is 0. Please check the laser settings for this material.";
         if (!warnings.contains(powerZeroWarning)) {
           warnings.add(powerZeroWarning);
@@ -1979,7 +2196,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       }
     }
     
-    job.applyStartPoint();
 
     double duration = 0;
     // reset internal state
@@ -1993,15 +2209,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     currentVentilation = false;
     
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    out.write(this.generateInitializationCode(job.getName()));
+    out.write(this.generateInitializationCode(job, warnings));
     pl.taskChanged(this, "processing");
     pl.progressChanged(this, 20);
     int i = 0;
     int max = job.getParts().size();
 
     // sort job parts so that vector parts are at the end
-    // the documentation says that Engrave must be before Vector, not mixed
-    // TODO unnecessary???
+    // The documentation says that Engrave must be before Vector, not mixed,
+    // though it's not entirely clear if that is necessary.
     List<JobPart> parts = job.getParts();
     parts.sort((p1, p2) ->
             Boolean.compare(p1 instanceof VectorPart, p2 instanceof VectorPart));
@@ -2157,7 +2373,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     }
     // We assume that the values of engraveShiftList are for 10%, 20%, ..., 100% speed
     // and do linear interpolation inbetween (plus some offset).
-    // TODO change this code so that VisiCut's pixel offset exactly matches the windows driver's interpretation of engraveShiftList.
+    // NOTE: the values are slightly different from the windows driver's interpretation of engraveShiftList,
+    // but good enough that nobody notices.
     // Currently it works correctly for 100% speed (the main use case), but is slightly off for lower speeds.
     double shiftValue;
     if (speedPercent < 10)
@@ -2189,8 +2406,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     SETTING_PORT,
     SETTING_BEDWIDTH,
     SETTING_BEDHEIGHT,
-    SETTING_FLIPX,
-    SETTING_FLIPY,
     SETTING_MAXDPI,
     SETTING_MAX_ENGRAVE_DPI,
     SETTING_CUTTING_SPEED,
@@ -2201,6 +2416,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     //    SETTING_SUPPORTS_PURGE,
     //    SETTING_SUPPORTS_FOCUS,
     //    SETTING_SUPPORTS_FREQUENCY,
+    SETTING_ROTARY_AXIS,
     SETTING_RASTER_WHITESPACE_MIN,
     SETTING_RASTER_WHITESPACE_MAX,
     SETTING_RASTER_SHIFTTABLE,
@@ -2239,6 +2455,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       }
       return b.toString().trim();
     }
+    else if (SETTING_ROTARY_AXIS.equals(attribute))
+    {
+      return rotaryAxisSupported;
+    }
     else if (SETTING_SUPPORTS_FREQUENCY.equals(attribute))
     {
       return this.supportsFrequency;
@@ -2258,14 +2478,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     else if (SETTING_HOSTNAME.equals(attribute))
     {
       return this.getHostname();
-    }
-    else if (SETTING_FLIPX.equals(attribute))
-    {
-      return this.isFlipXaxis();
-    }
-    else if (SETTING_FLIPY.equals(attribute))
-    {
-      return this.isFlipYaxis();
     }
     else if (SETTING_PORT.equals(attribute))
     {
@@ -2345,6 +2557,10 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         this.engraveShiftList = l.toArray(new Integer[0]);
       }
     }
+    else if (SETTING_ROTARY_AXIS.equals(attribute))
+    {
+      rotaryAxisSupported = (Boolean) value;
+    }
     else if (SETTING_SUPPORTS_FREQUENCY.equals(attribute))
     {
       this.setSupportsFrequency((Boolean) value);
@@ -2368,14 +2584,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     else if (SETTING_PORT.equals(attribute))
     {
       this.setPort((Integer) value);
-    }
-    else if (SETTING_FLIPX.equals(attribute))
-    {
-      this.setFlipXaxis((Boolean) value);
-    }
-    else if (SETTING_FLIPY.equals(attribute))
-    {
-      this.setFlipYaxis((Boolean) value);
     }
     else if (SETTING_BEDWIDTH.equals(attribute))
     {
@@ -2415,12 +2623,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
   public LaserCutter clone()
   {
     LaserToolsTechnicsCutter clone = new LaserToolsTechnicsCutter();
-    // just copy over all the properties, this avoids extra code here.
-    // TODO: apply this simplification also to other lasercutters
-    for (String setting : settingAttributes)
-    {
-      clone.setProperty(setting, getProperty(setting));
-    }
+    clone.copyProperties(this);
     return clone;
   }
 

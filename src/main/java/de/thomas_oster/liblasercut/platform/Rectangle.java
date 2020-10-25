@@ -30,8 +30,8 @@ public class Rectangle {
   private double x1, x2, y1, y2;
 
   /**
-   * integer interval helper class
-   * represents the set { min, min+1, ..., max }
+   * Interval helper class
+   * represents the closed interval {@code min <= x <= max}
    * 
    * min must be < max
    */
@@ -118,6 +118,13 @@ public class Rectangle {
     }
   }
 
+  public void add(Rectangle r) {
+    if (r != null) {
+      add(r.x1, r.y1);
+      add(r.x2, r.y2);
+    }
+  }
+
   /**
    * smallest X coordinate
    * @return int
@@ -170,6 +177,11 @@ public class Rectangle {
   public Rectangle clone()
   {
     return new Rectangle(x1,y1,x2,y2);
+  }
+
+  public Rectangle scale(double c)
+  {
+    return new Rectangle(x1 * c, y1 * c, x2 * c, y2 * c);
   }
 
   /**
