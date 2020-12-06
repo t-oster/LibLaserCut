@@ -1402,9 +1402,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     // This flipping is applied in sendCoordinate().
     // minimum X and Y (usually bottom left, except for rotary engrave)
     Rectangle bb = boundingBoxMmToDeviceCoordinates(bbMm);
-    sendCoordinate(out, (int) bb.getXMin(), (int) bb.getYMin(), COORDINATE_IS_RAW, 1, false);
+    sendCoordinate(out, (int) bb.getXMin(), (int) bb.getYMin(), COORDINATE_IS_RAW_VALUE, 1, false);
     // width and height
-    sendWidthHeight(out, (int) (bb.getXMax() - bb.getXMin()), (int) (bb.getYMax() - bb.getYMin()), COORDINATE_IS_RAW, 1);
+    sendWidthHeight(out, (int) (bb.getXMax() - bb.getXMin()), (int) (bb.getYMax() - bb.getYMin()), COORDINATE_IS_RAW_VALUE, 1);
   }
 
 
@@ -1418,14 +1418,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * @param y coordinate in pixels
    * @param isLength True: input is a positive length, output must also be positive.
    * @param isRelative True: input is a relative coordinate. False: absolute coordinate. Ignored if isLength==True.
-   * @param resolution pixels per inch, or COORDINATE_IS_RAW to specify raw machine coordinates
+   * @param resolution pixels per inch, or COORDINATE_IS_RAW_VALUE to specify raw machine coordinates
    * @param yIsRotary is Y used as rotary axis? normally False
    */
   private int yPxToDeviceCoordinate(double y, double resolution, double prescalingY, boolean isRelative, boolean isLength, boolean yIsRotaryAxis)
   {
     myAssert(Double.isFinite(prescalingY));
     myAssert(prescalingY > 0);
-    if (resolution == COORDINATE_IS_RAW)
+    if (resolution == COORDINATE_IS_RAW_VALUE)
     {
       myAssert(prescalingY == 1);
       return (int) y;
@@ -1468,11 +1468,11 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    * convert X from LibLaserCut coordinates to raw device coordinates (see sendCoordinate)
    * @param isLength True: input is a positive length, output must also be positive.
    * @param isRelative True: input is a relative coordinate. False: absolute coordinate. Ignored if isLength==True.
-   * @param resolution dots per inch, or COORDINATE_IS_RAW to specify raw machine coordinates
+   * @param resolution dots per inch, or COORDINATE_IS_RAW_VALUE to specify raw machine coordinates
    */
   private int xPxToDeviceCoordinate(double x, double resolution, boolean isRelative, boolean isLength)
   {
-    if (resolution == COORDINATE_IS_RAW)
+    if (resolution == COORDINATE_IS_RAW_VALUE)
     {
       return (int) x;
     }
@@ -1498,7 +1498,12 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     return new Rectangle(rawXMin, rawYMin, rawXMax, rawYMax);
   }
 
-  final private double COORDINATE_IS_RAW = Double.NEGATIVE_INFINITY;
+  /// Pseudo-value for resolution argument of sendCoordinate() and similar functions.
+  /// Used to signal that a coordinate is in raw machine coordinates and must not be transformed.
+  private static final double COORDINATE_IS_RAW_VALUE = Double.NEGATIVE_INFINITY;
+  /// Workaround to support incorrectly serialized settings (before 2020-12) in which this field is present but useless.
+  /// Do not use. Do not remove before 2023.
+  @Deprecated private transient double COORDINATE_IS_RAW;
   /**
    * send a coordinate WITHOUT ANY PRECEDING COMMAND.
    * This does not make sense if you don't prepend a command.
@@ -1513,7 +1518,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    *
    * @param x x-coordinate in given resolution
    * @param y x-coordinate in given resolution
-   * @param resolution dots per inch, or COORDINATE_IS_RAW to specify raw machine coordinates
+   * @param resolution dots per inch, or COORDINATE_IS_RAW_VALUE to specify raw machine coordinates
    * @param isRelative True: relative coordinates, False: absolute coordinates,
    * ignored if isWidthHeight==true
    * @param isWidthHeight False: regular coordinates (relative or absolute),
