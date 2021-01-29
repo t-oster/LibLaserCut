@@ -55,8 +55,7 @@ public class LibInfo
       Marlin.class,
       FullSpectrumCutter.class,
       LaserToolsTechnicsCutter.class,
-      K40NanoDriver.class,
-      K3EngraverDriver.class
+      K40NanoDriver.class
     );
   }
 }
