@@ -1,4 +1,9 @@
 /*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+ /*
   This file is part of LibLaserCut.
   Copyright (C) 2011 - 2014 Thomas Oster <mail@thomas-oster.de>
 
@@ -16,9 +21,6 @@
   along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
 
  */
-
-
-
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.ByteArrayList;
@@ -67,14 +69,12 @@ import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.UPLOAD_METH
 import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.UPLOAD_METHOD_SERIAL;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
-import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -95,8 +95,7 @@ import purejavacomm.UnsupportedCommOperationException;
 import java.nio.ByteBuffer;
 
 /**
- * This driver implements the K3/K5/K6 Laser Protocol
- * found here: https://github.com/RBEGamer/K3_LASER_ENGRAVER_PROTOCOL
+ *
  * @author mariolukas
  */
 public class K3EngraverDriver extends LaserCutter
@@ -156,7 +155,6 @@ public class K3EngraverDriver extends LaserCutter
 
   protected int head_abs_pos_x = 0;
   protected int head_abs_pos_y = 0;
-
 
   @Override
   public String getModelName()
