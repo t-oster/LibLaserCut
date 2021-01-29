@@ -18,7 +18,6 @@
  */
 
 
-
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.ByteArrayList;
@@ -34,57 +33,18 @@ import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.RasterPart;
 
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.FORMAT_LOCALE;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_AUTOPLAY;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_BAUDRATE;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_BEDHEIGHT;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_BEDWIDTH;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_BLANK_LASER_DURING_RAPIDS;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_COMPORT;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_FILE_EXPORT_PATH;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_FLIP_X;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_FLIP_Y;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_HOST;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_HTTP_UPLOAD_URL;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_IDENTIFICATION_STRING;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_INIT_DELAY;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_LINEEND;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_MAX_SPEED;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_POST_HTTP_UPLOAD_GCODE;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_POST_JOB_GCODE;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_PRE_JOB_GCODE;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_RASTER_PADDING;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_RESOLUTIONS;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_SERIAL_TIMEOUT;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_SPINDLE_MAX;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_TRAVEL_SPEED;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_UPLOAD_METHOD;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_USE_BIDIRECTIONAL_RASTERING;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.SETTING_WAIT_FOR_OK;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.UPLOAD_METHOD_FILE;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.UPLOAD_METHOD_HTTP;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.UPLOAD_METHOD_IP;
-import static de.thomas_oster.liblasercut.drivers.GenericGcodeDriver.UPLOAD_METHOD_SERIAL;
-import de.thomas_oster.liblasercut.platform.Point;
-import de.thomas_oster.liblasercut.platform.Util;
-import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.NoSuchPortException;
@@ -92,7 +52,7 @@ import purejavacomm.PortInUseException;
 import purejavacomm.PureJavaIllegalStateException;
 import purejavacomm.SerialPort;
 import purejavacomm.UnsupportedCommOperationException;
-import java.nio.ByteBuffer;
+
 
 /**
  * This driver implements the K3/K5/K6 Laser Protocol
@@ -232,7 +192,6 @@ public class K3EngraverDriver extends LaserCutter
   private CommPort port;
   private CommPortIdentifier portIdentifier;
   private ByteArrayOutputStream outputBuffer;
-  private String jobName;
 
   protected String connectSerial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
   {
@@ -332,11 +291,9 @@ public class K3EngraverDriver extends LaserCutter
       Thread.sleep(WAIT_FOR_ACK_TIME);
       trys++;
 
-      //System.out.println("ACK OK");
       rec = inStream.read(inBuf);
       if (inBuf[0] == (byte) 0x09)
       {
-        //System.out.println("ACK OK after '"+trys+"' Tries.");
         return rec;
       }
     }
@@ -407,24 +364,6 @@ public class K3EngraverDriver extends LaserCutter
   protected int moveHeadRelative(long x, long y) throws IOException, Exception
   {
 
-    /*
-    if (CHECK_OUT_OF_BOUNDING_BOX_MOVE){
-        if ((head_abs_pos_x + x) > BOUNDING_BOX_MAX_X) {
-            x = x + (head_abs_pos_x + x) - BOUNDING_BOX_MAX_X;
-        }
-
-        if ((head_abs_pos_y + y) > BOUNDING_BOX_MAX_Y) {
-            y = y + (head_abs_pos_y + y) - BOUNDING_BOX_MAX_Y;
-        }
-
-        if ((head_abs_pos_x + x) < 0) {
-            x = -head_abs_pos_x;
-        }
-
-        if ((head_abs_pos_x + y) < 0) {
-            y = -head_abs_pos_y;
-        }
-    }*/
     byte sendBuffer[] =
     {
       1, 0, 7, (byte) (x >> 8), (byte) (x), (byte) (y >> 8), (byte) (y)
@@ -671,9 +610,6 @@ public class K3EngraverDriver extends LaserCutter
           reset();
 
           switchFanOn(true);
-          // Thread.sleep(500);
-          int partWidth = rp.getRasterWidth();
-          int partHeight = rp.getRasterHeight();
 
           int posX = (int) rp.getRasterStart().x;
           int posY = (int) rp.getRasterStart().y;
@@ -885,7 +821,6 @@ public class K3EngraverDriver extends LaserCutter
   public LaserCutter clone()
   {
     K3EngraverDriver clone = new K3EngraverDriver();
-    //TODO: copy all settings to the clone if present.
     clone.copyProperties(this);
     return clone;
   }
