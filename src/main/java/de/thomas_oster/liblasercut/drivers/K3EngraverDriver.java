@@ -186,12 +186,12 @@ public class K3EngraverDriver extends LaserCutter
     this.serialTimeout = serialTimeout;
   }
 
-  protected BufferedReader in;
-  protected PrintStream out;
-  protected InputStreamReader inStream;
-  private CommPort port;
-  private CommPortIdentifier portIdentifier;
-  private ByteArrayOutputStream outputBuffer;
+  protected transient BufferedReader in;
+  protected transient PrintStream out;
+  protected transient InputStreamReader inStream;
+  private transient CommPort port;
+  private transient CommPortIdentifier portIdentifier;
+  private transient ByteArrayOutputStream outputBuffer;
 
   protected String connectSerial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
   {

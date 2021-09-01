@@ -321,7 +321,7 @@ public class Dummy extends LaserCutter {
       return fakeRunTime;
   }
 
-  private List<Double> resolutions;
+  private transient List<Double> resolutions;
 
   protected int fakeRunTime = -1;
   @Override

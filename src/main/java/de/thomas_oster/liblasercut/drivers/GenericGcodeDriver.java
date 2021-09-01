@@ -546,11 +546,11 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
-  protected BufferedReader in;
-  protected PrintStream out;
-  private Socket socket;
-  private CommPort port;
-  private CommPortIdentifier portIdentifier;
+  protected transient BufferedReader in;
+  protected transient PrintStream out;
+  private transient Socket socket;
+  private transient CommPort port;
+  private transient CommPortIdentifier portIdentifier;
 
   protected void sendLine(String text, Object... parameters) throws IOException
   {
@@ -708,8 +708,8 @@ public class GenericGcodeDriver extends LaserCutter {
   /**
    * Used to buffer the file before uploading via http
    */
-  private ByteArrayOutputStream outputBuffer;
-  private String jobName;
+  private transient ByteArrayOutputStream outputBuffer;
+  private transient String jobName;
   protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
   {
     outputBuffer = null;
@@ -915,7 +915,7 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
   }
     
 
-  private List<Double> resolutions;
+  private transient List<Double> resolutions;
 
   @Override
   public List<Double> getResolutions() {

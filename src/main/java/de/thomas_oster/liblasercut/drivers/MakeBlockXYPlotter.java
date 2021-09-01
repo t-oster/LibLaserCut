@@ -69,14 +69,14 @@ public class MakeBlockXYPlotter extends LaserCutter
   private final List<Double> resolutions = Arrays.asList(64d // fine liner
   );
   
-  private int chosenDelay;
-  private int chosenPower;
-  private ToolState toolState;
+  private transient int chosenDelay;
+  private transient int chosenPower;
+  private transient ToolState toolState;
   
-  private PrintWriter w = null;
-  BufferedReader portReader = null;
-  private BufferedOutputStream out = null;
-  private SerialPort port = null;
+  private transient PrintWriter w = null;
+  private transient BufferedReader portReader = null;
+  private transient BufferedOutputStream out = null;
+  private transient SerialPort port = null;
     
   /*
    * Global Settings
