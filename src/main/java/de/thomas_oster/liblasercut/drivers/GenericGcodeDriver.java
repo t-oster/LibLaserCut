@@ -60,6 +60,14 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -96,6 +104,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_SPINDLE_MAX = "S value for 100% laser power";
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
+  protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
 
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
@@ -103,8 +112,9 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String UPLOAD_METHOD_HTTP = "HTTP";
   protected static final String UPLOAD_METHOD_IP = "IP";
   protected static final String UPLOAD_METHOD_SERIAL = "Serial";
+  protected static final String UPLOAD_METHOD_OCTOPRINT = "Octoprint";
 
-  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
+  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL, UPLOAD_METHOD_OCTOPRINT};
 
   private String lineend = "LF";
 
@@ -603,6 +613,34 @@ public class GenericGcodeDriver extends LaserCutter {
       throw new IOException("Error during POST Request");
     }
   }
+  
+  protected void octoprint_upload(String host, String apikey, byte[] data, String filename, boolean startPrinting) throws IOException
+  {
+    //TODO: implement https://docs.octoprint.org/en/master/api/files.html#upload-file-or-create-folder
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    HttpPost uploadFile = new HttpPost("http://"+host+"/api/files/local");
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+    if (startPrinting) {
+      builder.addTextBody("print", "true", ContentType.TEXT_PLAIN);
+    }
+    
+    builder.addBinaryBody(
+        "file",
+        data,
+        ContentType.APPLICATION_OCTET_STREAM,
+        filename
+    );
+
+    HttpEntity multipart = builder.build();
+    uploadFile.setEntity(multipart);
+    uploadFile.addHeader("X-Api-Key", apikey);
+    try (CloseableHttpResponse response = httpClient.execute(uploadFile))
+    {
+      if (response.getStatusLine().getStatusCode() != 201) {
+        throw new IOException("Error: Octoprint returned "+response.getStatusLine().getReasonPhrase());
+      }
+    }
+  }
 
   protected String waitForLine() throws IOException
   {
@@ -791,6 +829,19 @@ public class GenericGcodeDriver extends LaserCutter {
       setWaitForOKafterEachLine(false);
       in = null;
     }
+    else if (UPLOAD_METHOD_OCTOPRINT.equals(uploadMethod))
+    {
+      if (StringUtils.isAllBlank(getApiKey())) {
+        throw new IOException("API-Key must be set to upload via Octoprint method.");
+      }
+      if (StringUtils.isAllBlank(getHost())) {
+        throw new IOException("HOST/IP must be set to upload via Octoprint method.");
+      }
+      outputBuffer = new ByteArrayOutputStream();
+      out = new PrintStream(outputBuffer);
+      setWaitForOKafterEachLine(false);
+      in = null;
+    }
     else
     {
       throw new IOException("Upload Method must be set");
@@ -799,7 +850,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
   protected void disconnect(String jobname) throws IOException, URISyntaxException
   {
-    if (outputBuffer != null)
+    if (UPLOAD_METHOD_HTTP.equals(uploadMethod))
     {
       out.close();
       http_upload(new URI(getHttpUploadUrl()), outputBuffer.toString(StandardCharsets.UTF_8), jobname);
@@ -811,6 +862,10 @@ public class GenericGcodeDriver extends LaserCutter {
       {
         http_play(jobname);
       }
+    }
+    else if (UPLOAD_METHOD_OCTOPRINT.equals(uploadMethod)) {
+      out.close();
+      octoprint_upload(getHost(), getApiKey(), outputBuffer.toByteArray(), jobname, this.isAutoPlay());
     }
     else
     {
@@ -989,7 +1044,19 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
   public void setRasterPadding(double rasterPadding) {
     this.rasterPadding = rasterPadding;
   }
+  
+  private String apiKey;
 
+  public String getApiKey()
+  {
+    return apiKey;
+  }
+
+  public void setApiKey(String apiKey)
+  {
+    this.apiKey = apiKey;
+  }
+  
   private static final String[] SETTINGS_LIST = new String[]{
     SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
@@ -1017,6 +1084,7 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     SETTING_FILE_EXPORT_PATH,
     SETTING_USE_BIDIRECTIONAL_RASTERING,
     SETTING_RASTER_PADDING,
+    SETTING_API_KEY
   };
 
   @Override
@@ -1078,6 +1146,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       return this.getUploadMethod();
     } else if (SETTING_RASTER_PADDING.equals(attribute)) {
       return this.getRasterPadding();
+    } else if (SETTING_API_KEY.equals(attribute)) {
+      return this.getApiKey();
     }
 
     return null;
@@ -1137,6 +1207,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       this.setUploadMethod(value);
     } else if (SETTING_RASTER_PADDING.equals(attribute)) {
       this.setRasterPadding(Math.abs((Double)value));
+    } else if (SETTING_API_KEY.equals(attribute)) {
+      this.setApiKey((String) value);
     }
   }
 
