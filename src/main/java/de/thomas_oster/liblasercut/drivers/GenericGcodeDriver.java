@@ -499,14 +499,6 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void setPower(double powerInPercent) {
     nextPower = powerInPercent/100.0*spindleMax;
   }
-
-//  protected void setFocus(PrintStream out, double focus) throws IOException {
-//    if (currentFocus != focus)
-//    {
-//      sendLine("G0 Z%f", focus);
-//      currentFocus = focus;
-//    }
-//  }
   
   protected void setFocus(PrintStream out, double focus) throws IOException {
     DecimalFormat df = new DecimalFormat();
@@ -534,16 +526,15 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
+    DecimalFormat df = new DecimalFormat();
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      DecimalFormat df = new DecimalFormat();
       df.setMaximumFractionDigits(getGCodeDigits());
       sendLine("G0 X%s Y%s F%d S0", df.format(x), df.format(y), (int) (travel_speed));
     }
     else
     {
-      DecimalFormat df = new DecimalFormat();
       df.setMaximumFractionDigits(getGCodeDigits());
       sendLine("G0 X%s Y%s F%d", df.format(x), df.format(y), (int) (travel_speed));
     }
