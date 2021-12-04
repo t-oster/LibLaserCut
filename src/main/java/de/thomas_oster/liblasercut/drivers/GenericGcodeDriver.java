@@ -69,6 +69,9 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import java.text.DecimalFormat;
+
+
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
  * It should contain all possible options and is inteded to be the superclass
@@ -105,6 +108,8 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
+  protected static final String SETTING_GCODE_DIGITS = "Number of digits used for G0 and G1 moves";
+  protected static final String SETTING_SCODE_DIGITS = "Number of digits used for S-Settings";
 
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
@@ -494,12 +499,17 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void setPower(double powerInPercent) {
     nextPower = powerInPercent/100.0*spindleMax;
   }
-
+  
   protected void setFocus(PrintStream out, double focus) throws IOException {
-    if (currentFocus != focus)
-    {
-      sendLine("G0 Z%f", focus);
-      currentFocus = focus;
+    DecimalFormat df = new DecimalFormat();
+    df.setMaximumFractionDigits(getGCodeDigits());
+    if (currentFocus != focus) {
+       String append = "";
+       if (blankLaserDuringRapids) {
+          append = " S0";
+          currentPower = 0.0;
+       }
+       sendLine("G0 Z%s" + append, df.format(focus));
     }
   }
 
@@ -507,14 +517,17 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
+    DecimalFormat df = new DecimalFormat();
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      sendLine("G0 X%f Y%f F%d S0", x, y, (int) (travel_speed));
+      df.setMaximumFractionDigits(getGCodeDigits());
+      sendLine("G0 X%s Y%s F%d S0", df.format(x), df.format(y), (int) (travel_speed));
     }
     else
     {
-      sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
+      df.setMaximumFractionDigits(getGCodeDigits());
+      sendLine("G0 X%s Y%s F%d", df.format(x), df.format(y), (int) (travel_speed));
     }
   }
 
@@ -522,9 +535,11 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
+    DecimalFormat df = new DecimalFormat();
     if (nextPower != currentPower)
     {
-      append += String.format(FORMAT_LOCALE, " S%f", nextPower);
+      df.setMaximumFractionDigits(getSCodeDigits());
+      append += String.format(FORMAT_LOCALE, " S%s", df.format(nextPower));
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
@@ -532,7 +547,8 @@ public class GenericGcodeDriver extends LaserCutter {
       append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    sendLine("G1 X%f Y%f"+append, x, y);
+    df.setMaximumFractionDigits(getGCodeDigits());
+    sendLine("G1 X%s Y%s" + append, df.format(x), df.format(y));
   }
 
   private void writeInitializationCode() throws IOException {
@@ -1057,6 +1073,28 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     this.apiKey = apiKey;
   }
   
+  private int gCodeDigits;
+
+  public int getGCodeDigits()
+  {
+    return gCodeDigits;
+  }
+  public void setGCodeDigits(int gCodeDigits)
+  {
+    this.gCodeDigits = gCodeDigits;
+  }
+  
+  private int sCodeDigits;
+
+  public int getSCodeDigits()
+  {
+    return sCodeDigits;
+  }
+  public void setSCodeDigits(int sCodeDigits)
+  {
+    this.sCodeDigits = sCodeDigits;
+  }
+  
   private static final String[] SETTINGS_LIST = new String[]{
     SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
@@ -1084,7 +1122,9 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     SETTING_FILE_EXPORT_PATH,
     SETTING_USE_BIDIRECTIONAL_RASTERING,
     SETTING_RASTER_PADDING,
-    SETTING_API_KEY
+    SETTING_API_KEY,
+    SETTING_GCODE_DIGITS,
+    SETTING_SCODE_DIGITS
   };
 
   @Override
@@ -1148,6 +1188,10 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       return this.getRasterPadding();
     } else if (SETTING_API_KEY.equals(attribute)) {
       return this.getApiKey();
+    } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
+      return this.getGCodeDigits();
+    } else if (SETTING_SCODE_DIGITS.equals(attribute)) {
+      return this.getSCodeDigits();
     }
 
     return null;
@@ -1209,6 +1253,10 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       this.setRasterPadding(Math.abs((Double)value));
     } else if (SETTING_API_KEY.equals(attribute)) {
       this.setApiKey((String) value);
+    } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
+      this.setGCodeDigits((Integer) value);
+    } else if (SETTING_SCODE_DIGITS.equals(attribute)) {
+      this.setSCodeDigits((Integer) value);
     }
   }
 
