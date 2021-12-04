@@ -503,22 +503,13 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void setFocus(PrintStream out, double focus) throws IOException {
     DecimalFormat df = new DecimalFormat();
     df.setMaximumFractionDigits(getGCodeDigits());
-    if (blankLaserDuringRapids)
-    {
-      currentPower = 0.0;
-      if (currentFocus != focus)
-      {
-        sendLine("G0 Z%s S0", df.format(focus));
-        currentFocus = focus;
-      }
-    }
-    else
-    {
-      if (currentFocus != focus)
-      {
-        sendLine("G0 Z%s", df.format(focus));
-        currentFocus = focus;
-      }
+    if (currentFocus != focus) {
+       String append = "";
+       if (blankLaserDuringRapids) {
+          append = " S0";
+          currentPower = 0.0;
+       }
+       sendLine("G0 Z%s" + append, df.format(focus));
     }
   }
 
