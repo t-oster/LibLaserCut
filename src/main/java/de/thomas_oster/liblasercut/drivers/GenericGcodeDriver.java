@@ -1073,7 +1073,7 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     this.apiKey = apiKey;
   }
   
-  private int gCodeDigits;
+  private int gCodeDigits = 6;
 
   public int getGCodeDigits()
   {
@@ -1084,7 +1084,7 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     this.gCodeDigits = gCodeDigits;
   }
   
-  private int sCodeDigits;
+  private int sCodeDigits = 0;
 
   public int getSCodeDigits()
   {
