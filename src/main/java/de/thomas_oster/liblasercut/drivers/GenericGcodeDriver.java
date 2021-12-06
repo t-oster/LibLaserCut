@@ -108,7 +108,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
-  protected static final String SETTING_GCODE_DIGITS = "Number of digits used for G0 and G1 moves";
+  protected static final String SETTING_GCODE_DIGITS = "Decimal places used for XY coordinates";
   protected static final String SETTING_SCODE_DIGITS = "Number of digits used for S-Settings";
 
   protected static final Locale FORMAT_LOCALE = Locale.US;
