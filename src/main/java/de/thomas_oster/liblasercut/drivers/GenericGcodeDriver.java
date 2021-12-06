@@ -70,7 +70,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.text.DecimalFormat;
-
+import java.text.NumberFormat;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -517,17 +517,21 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
-    DecimalFormat df = new DecimalFormat();
+
+    Locale locale  = new Locale("en", "US");
+    String formatPattern = "###.##";
+    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
+    coordinateFormat.applyPattern(formatPattern);
+    coordinateFormat.setMaximumFractionDigits(getGCodeDigits());
+
     if (blankLaserDuringRapids)
     {
       currentPower = 0.0;
-      df.setMaximumFractionDigits(getGCodeDigits());
-      sendLine("G0 X%s Y%s F%d S0", df.format(x), df.format(y), (int) (travel_speed));
+      sendLine("G0 X%s Y%s F%d S0", coordinateFormat.format(x), coordinateFormat.format(y), (int) (travel_speed));
     }
     else
     {
-      df.setMaximumFractionDigits(getGCodeDigits());
-      sendLine("G0 X%s Y%s F%d", df.format(x), df.format(y), (int) (travel_speed));
+      sendLine("G0 X%s Y%s F%d", coordinateFormat.format(x), coordinateFormat.format(y), (int) (travel_speed));
     }
   }
 
@@ -535,11 +539,21 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
-    DecimalFormat df = new DecimalFormat();
+
+    Locale locale  = new Locale("en", "US");
+    String formatPattern = "###.##";
+
+    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
+    coordinateFormat.applyPattern(formatPattern);
+    coordinateFormat.setMaximumFractionDigits(getGCodeDigits());
+
+    DecimalFormat sValueFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
+    sValueFormat.applyPattern(formatPattern);
+    sValueFormat.setMaximumFractionDigits(getSCodeDigits());
+
     if (nextPower != currentPower)
     {
-      df.setMaximumFractionDigits(getSCodeDigits());
-      append += String.format(FORMAT_LOCALE, " S%s", df.format(nextPower));
+      append += String.format(FORMAT_LOCALE, " S%s", sValueFormat.format(nextPower));
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
@@ -547,8 +561,7 @@ public class GenericGcodeDriver extends LaserCutter {
       append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    df.setMaximumFractionDigits(getGCodeDigits());
-    sendLine("G1 X%s Y%s" + append, df.format(x), df.format(y));
+    sendLine("G1 X%s Y%s" + append, coordinateFormat.format(x), coordinateFormat.format(y));
   }
 
   private void writeInitializationCode() throws IOException {
