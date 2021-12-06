@@ -108,8 +108,8 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
-  protected static final String SETTING_GCODE_DIGITS = "Number of digits used for G0 and G1 moves";
-  protected static final String SETTING_SCODE_DIGITS = "Number of digits used for S-Settings";
+  protected static final String SETTING_GCODE_DIGITS = "Decimal places used for XY coordinates";
+  protected static final String SETTING_SCODE_DIGITS = "Decimal places used for power (S) value";
 
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
@@ -501,15 +501,19 @@ public class GenericGcodeDriver extends LaserCutter {
   }
   
   protected void setFocus(PrintStream out, double focus) throws IOException {
-    DecimalFormat df = new DecimalFormat();
-    df.setMaximumFractionDigits(getGCodeDigits());
+    Locale locale  = new Locale("en", "US");
+    String formatPattern = "###.##";
+    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
+    coordinateFormat.applyPattern(formatPattern);
+    coordinateFormat.setMaximumFractionDigits(getGCodeDigits());
+
     if (currentFocus != focus) {
        String append = "";
        if (blankLaserDuringRapids) {
           append = " S0";
-          currentPower = 0.0;
+          currentPower = -1; // set to invalid value to force new S-value at next G1
        }
-       sendLine("G0 Z%s" + append, df.format(focus));
+       sendLine("G0 Z%s" + append, coordinateFormat.format(focus));
     }
   }
 
@@ -526,7 +530,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
     if (blankLaserDuringRapids)
     {
-      currentPower = 0.0;
+      currentPower = -1;
       sendLine("G0 X%s Y%s F%d S0", coordinateFormat.format(x), coordinateFormat.format(y), (int) (travel_speed));
     }
     else
