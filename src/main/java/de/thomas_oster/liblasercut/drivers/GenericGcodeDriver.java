@@ -520,7 +520,7 @@ public class GenericGcodeDriver extends LaserCutter {
     DecimalFormat df = new DecimalFormat();
     if (blankLaserDuringRapids)
     {
-      currentPower = 0.0;
+      currentPower = -1; // set to invalid value to force new S-value at next G1
       df.setMaximumFractionDigits(getGCodeDigits());
       sendLine("G0 X%s Y%s F%d S0", df.format(x), df.format(y), (int) (travel_speed));
     }
