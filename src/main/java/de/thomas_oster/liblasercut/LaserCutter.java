@@ -358,7 +358,6 @@ public abstract class LaserCutter implements Cloneable, Customizable {
         leftLimitPx = (int) Util.mm2px(job.getTransformedOriginX(), resolution);
       }
 
-      System.out.println("leftLimitPx: " + leftLimitPx);
       int rightLimitPx = (int) Util.mm2px(job.getTransformedOriginX() + getBedWidth(), resolution);
       for (int y = 0; y < rp.getRasterHeight(); y++)
       {
