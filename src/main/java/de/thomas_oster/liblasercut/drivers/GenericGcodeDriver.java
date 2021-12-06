@@ -507,7 +507,7 @@ public class GenericGcodeDriver extends LaserCutter {
        String append = "";
        if (blankLaserDuringRapids) {
           append = " S0";
-          currentPower = 0.0;
+          currentPower = -1; // set to invalid value to force new S-value at next G1
        }
        sendLine("G0 Z%s" + append, df.format(focus));
     }
