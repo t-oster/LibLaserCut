@@ -107,7 +107,6 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_SPINDLE_MAX = "S value for 100% laser power";
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
-  protected static final String SETTING_RASTER_PADDING_ALLOW_NEGATIVE_SPACE = "Raster padding into negative coordinates";
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
   protected static final String SETTING_GCODE_DIGITS = "Decimal places used for XY coordinates";
   protected static final String SETTING_SCODE_DIGITS = "Decimal places used for power (S) value";
@@ -464,6 +463,15 @@ public class GenericGcodeDriver extends LaserCutter {
     return new FloatPowerSpeedFocusProperty();
   }
 
+  protected String formatDouble(double value, int decimalPlaces)
+  {
+    Locale locale  = new Locale("en", "US");
+    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
+    coordinateFormat.applyPattern("###.##");
+    coordinateFormat.setMaximumFractionDigits(decimalPlaces);
+    return coordinateFormat.format(value); 
+  }
+
   protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
@@ -502,11 +510,6 @@ public class GenericGcodeDriver extends LaserCutter {
   }
   
   protected void setFocus(PrintStream out, double focus) throws IOException {
-    Locale locale  = new Locale("en", "US");
-    String formatPattern = "###.##";
-    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
-    coordinateFormat.applyPattern(formatPattern);
-    coordinateFormat.setMaximumFractionDigits(getGCodeDigits());
 
     if (currentFocus != focus) {
        String append = "";
@@ -514,7 +517,7 @@ public class GenericGcodeDriver extends LaserCutter {
           append = " S0";
           currentPower = -1; // set to invalid value to force new S-value at next G1
        }
-       sendLine("G0 Z%s" + append, coordinateFormat.format(focus));
+       sendLine("G0 Z%s" + append, formatDouble(focus, getGCodeDigits()));
     }
   }
 
@@ -523,20 +526,14 @@ public class GenericGcodeDriver extends LaserCutter {
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
 
-    Locale locale  = new Locale("en", "US");
-    String formatPattern = "###.##";
-    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
-    coordinateFormat.applyPattern(formatPattern);
-    coordinateFormat.setMaximumFractionDigits(getGCodeDigits());
-
     if (blankLaserDuringRapids)
     {
-      currentPower = -1;
-      sendLine("G0 X%s Y%s F%d S0", coordinateFormat.format(x), coordinateFormat.format(y), (int) (travel_speed));
+      currentPower = -1; // set to invalid value to force new S-value at next G1
+      sendLine("G0 X%s Y%s F%d S0", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
     }
     else
     {
-      sendLine("G0 X%s Y%s F%d", coordinateFormat.format(x), coordinateFormat.format(y), (int) (travel_speed));
+      sendLine("G0 X%s Y%s F%d", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
     }
   }
 
@@ -545,20 +542,9 @@ public class GenericGcodeDriver extends LaserCutter {
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
 
-    Locale locale  = new Locale("en", "US");
-    String formatPattern = "###.##";
-
-    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
-    coordinateFormat.applyPattern(formatPattern);
-    coordinateFormat.setMaximumFractionDigits(getGCodeDigits());
-
-    DecimalFormat sValueFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
-    sValueFormat.applyPattern(formatPattern);
-    sValueFormat.setMaximumFractionDigits(getSCodeDigits());
-
     if (nextPower != currentPower)
     {
-      append += String.format(FORMAT_LOCALE, " S%s", sValueFormat.format(nextPower));
+      append += String.format(FORMAT_LOCALE, " S%s", formatDouble(nextPower, getSCodeDigits()));
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
@@ -566,7 +552,7 @@ public class GenericGcodeDriver extends LaserCutter {
       append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    sendLine("G1 X%s Y%s" + append, coordinateFormat.format(x), coordinateFormat.format(y));
+    sendLine("G1 X%s Y%s" + append, formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()));
   }
 
   private void writeInitializationCode() throws IOException {
@@ -1078,22 +1064,6 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
   public void setRasterPadding(double rasterPadding) {
     this.rasterPadding = rasterPadding;
   }
-
-  protected boolean rasterPaddingAllowNegativeSpace = false;
-
-  /**
-   * Whether padding is allowed to go into negative space or not
-   *
-   * @return the value of rasterPaddingAllowNegativeSpace
-   */
-  @Override
-  public boolean getRasterPaddingAllowNegativeSpace() {
-    return rasterPaddingAllowNegativeSpace;
-  }
-
-  public void setRasterPaddingAllowNegativeSpace(boolean allowNegativeSpace) {
-    this.rasterPaddingAllowNegativeSpace = allowNegativeSpace;
-  }
   
   private String apiKey;
 
@@ -1156,7 +1126,6 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     SETTING_FILE_EXPORT_PATH,
     SETTING_USE_BIDIRECTIONAL_RASTERING,
     SETTING_RASTER_PADDING,
-    SETTING_RASTER_PADDING_ALLOW_NEGATIVE_SPACE,
     SETTING_API_KEY,
     SETTING_GCODE_DIGITS,
     SETTING_SCODE_DIGITS
@@ -1221,8 +1190,6 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       return this.getUploadMethod();
     } else if (SETTING_RASTER_PADDING.equals(attribute)) {
       return this.getRasterPadding();
-    } else if (SETTING_RASTER_PADDING_ALLOW_NEGATIVE_SPACE.equals(attribute)) {
-      return this.getRasterPaddingAllowNegativeSpace();
     } else if (SETTING_API_KEY.equals(attribute)) {
       return this.getApiKey();
     } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
@@ -1288,8 +1255,6 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       this.setUploadMethod(value);
     } else if (SETTING_RASTER_PADDING.equals(attribute)) {
       this.setRasterPadding(Math.abs((Double)value));
-    } else if (SETTING_RASTER_PADDING_ALLOW_NEGATIVE_SPACE.equals(attribute)) {
-      this.setRasterPaddingAllowNegativeSpace((Boolean) value);
     } else if (SETTING_API_KEY.equals(attribute)) {
       this.setApiKey((String) value);
     } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
