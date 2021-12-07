@@ -1077,24 +1077,26 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     this.apiKey = apiKey;
   }
   
-  private int gCodeDigits = 6;
+  private Integer gCodeDigits = 6;
 
-  public int getGCodeDigits()
+  public Integer getGCodeDigits()
   {
+    if (gCodeDigits == null) gCodeDigits = 6;
     return gCodeDigits;
   }
-  public void setGCodeDigits(int gCodeDigits)
+  public void setGCodeDigits(Integer gCodeDigits)
   {
     this.gCodeDigits = gCodeDigits;
   }
   
-  private int sCodeDigits = 0;
+  private Integer sCodeDigits = 0;
 
-  public int getSCodeDigits()
+  public Integer getSCodeDigits()
   {
+    if (sCodeDigits == null) sCodeDigits = 0;
     return sCodeDigits;
   }
-  public void setSCodeDigits(int sCodeDigits)
+  public void setSCodeDigits(Integer sCodeDigits)
   {
     this.sCodeDigits = sCodeDigits;
   }
