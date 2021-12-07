@@ -531,7 +531,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
     if (blankLaserDuringRapids)
     {
-      currentPower = -1;
+      currentPower = -1; // set to invalid value to force new S-value at next G1
       sendLine("G0 X%s Y%s F%d S0", coordinateFormat.format(x), coordinateFormat.format(y), (int) (travel_speed));
     }
     else
