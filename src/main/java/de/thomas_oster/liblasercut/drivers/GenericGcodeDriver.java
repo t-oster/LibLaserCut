@@ -32,6 +32,7 @@ import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
+import static de.thomas_oster.liblasercut.utils.Assertion.assertThat;
 import net.sf.corn.httpclient.HttpClient;
 import net.sf.corn.httpclient.HttpResponse;
 import purejavacomm.CommPort;
@@ -56,6 +57,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -496,11 +498,11 @@ public class GenericGcodeDriver extends LaserCutter {
       }
     }
   }
-  protected double currentPower = -1;
-  protected double currentSpeed = -1;
-  private double nextPower = -1;
-  private double nextSpeed = -1;
-  private double currentFocus = 0;
+  protected double currentPower = Double.NaN;
+  protected double currentSpeed = Double.NaN;
+  private double nextPower = Double.NaN;
+  private double nextSpeed = Double.NaN;
+  private double currentFocus = Double.NaN;
 
   protected void setSpeed(double speedInPercent) {
     nextSpeed = speedInPercent;
@@ -509,7 +511,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void setPower(double powerInPercent) {
     nextPower = powerInPercent/100.0*spindleMax;
   }
-  
+
   protected void setFocus(PrintStream out, double focus) throws IOException {
 
     if (currentFocus != focus) {
@@ -519,7 +521,7 @@ public class GenericGcodeDriver extends LaserCutter {
            currentPower = -1; // set to invalid value to force new S-value at next G1
         }
         sendLine("G0 Z%s" + append, formatDouble(focus, getGCodeDigits()));
-        currentFocus = focus;
+      currentFocus = focus;
     }
   }
 
@@ -530,7 +532,7 @@ public class GenericGcodeDriver extends LaserCutter {
 
     if (blankLaserDuringRapids)
     {
-      currentPower = -1; // set to invalid value to force new S-value at next G1
+      currentPower = Double.NaN; // set to invalid value to force new S-value at next G1
       sendLine("G0 X%s Y%s F%d S0", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
     }
     else
@@ -543,12 +545,13 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
-
+    assertThat(!Double.isNaN(nextPower));
     if (nextPower != currentPower)
     {
       append += String.format(FORMAT_LOCALE, " S%s", formatDouble(nextPower, getSCodeDigits()));
       currentPower = nextPower;
     }
+    assertThat(!Double.isNaN(nextSpeed));
     if (nextSpeed != currentSpeed)
     {
       append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
@@ -912,31 +915,47 @@ public class GenericGcodeDriver extends LaserCutter {
 
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
-    pl.progressChanged(this, 0);
-    this.currentPower = -1;
-    this.currentSpeed = -1;
+    sendOrSaveJob(job, pl, warnings, null);
+  }
 
+  /***
+   * Send the job to the port or file.
+   * If a filePrintStream is given (!= null), write the job to the file.
+   * Else (filePrintStream = null), connect to the configured network port or serial port.
+   */
+  public void sendOrSaveJob(LaserJob job, ProgressListener pl, List<String> warnings, PrintStream filePrintStream) throws IllegalJobException, Exception {
+
+    pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
     checkJob(job);
     this.jobName = job.getName()+".gcode";
     job.applyStartPoint();
     pl.taskChanged(this, "connecting...");
+      if (filePrintStream != null) { // write to file
+        this.out = filePrintStream;
+    } else { // send to network
     connect(pl);
+    }
     pl.taskChanged(this, "sending");
     try {
       writeJobCode(job, pl);
-      disconnect(job.getName()+".gcode");
     }
-    catch (IOException e) {
+    finally {
       pl.taskChanged(this, "disconnecting");
+      if (filePrintStream != null) { // write to file
+        filePrintStream.close();
+      } else { // send to network
       disconnect(this.jobName);
-      throw e;
+      }
     }
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
   
   public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    currentPower = Double.NaN;
+    currentSpeed = Double.NaN;
+    currentFocus = Double.NaN;
     writeInitializationCode();
     pl.progressChanged(this, 20);
     int i = 0;
@@ -965,16 +984,12 @@ public class GenericGcodeDriver extends LaserCutter {
 
 @Override
 public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
-  this.currentPower = -1;
-  this.currentSpeed = -1;
-
 	checkJob(job);
 	boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
   try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
   {
-    this.out = ps;
     setWaitForOKafterEachLine( false );
-    writeJobCode(job, new ProgressListenerDummy());
+    sendOrSaveJob(job, new ProgressListenerDummy(), new ArrayList<String>(), ps);
   } finally {
     setWaitForOKafterEachLine(wasSetWaitingForOk);
   }

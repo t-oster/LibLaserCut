@@ -37,6 +37,7 @@ import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Rectangle;
 import de.thomas_oster.liblasercut.platform.Tuple;
 import de.thomas_oster.liblasercut.platform.Util;
+import static de.thomas_oster.liblasercut.utils.Assertion.assertThat;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -44,7 +45,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -509,7 +509,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
 
   private void setCurrentDPI(PrintStream out, double resolution, boolean isVectorActive) throws IOException
   {
-    myAssert(resolution == 500); // TODO: resolution is set with the "Prescale" command, not this PPI command. Fix this whole function.
+    assertThat(resolution == 500); // TODO: resolution is set with the "Prescale" command, not this PPI command. Fix this whole function.
 
     if (Math.abs(((int) resolution) - resolution) > 1e-10)
     {
@@ -862,14 +862,14 @@ public class LaserToolsTechnicsCutter extends LaserCutter
         // start point:
         // this case does not happen, we don't send the start point,
         // therefore we also don't send its speed (which is implicitly zero)
-        myAssert(false);
+        assertThat(false);
       } else if (i == points.size() - 1) {
         // end point:
         // zero speed at the end point by definition.
-        myAssert(speedPercent == 0);
+        assertThat(speedPercent == 0);
       } else {
         // normal points (neither start nor end) must have nonzero speed
-        myAssert(speedPercent > 0);
+        assertThat(speedPercent > 0);
       }
       writeU16(out, limit((int) Math.round(sentSpeed * 10), 1, 1000));
       line(out, x, y, resolution, prescalingY); // not actually a line, will be interpreted as smooth curve segment
@@ -906,7 +906,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     for (PointWithSpeed point : points.subList(1, points.size()))
     {
       double len = point.deltaToPrevious.hypot();
-      myAssert(len < 1e6 * maxDistance); // input points must not be more apart than 1e6*maxDistance
+      assertThat(len < 1e6 * maxDistance); // input points must not be more apart than 1e6*maxDistance
       if (len == 0) {
         continue;
       }
@@ -1423,15 +1423,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
    */
   private int yPxToDeviceCoordinate(double y, double resolution, double prescalingY, boolean isRelative, boolean isLength, boolean yIsRotaryAxis)
   {
-    myAssert(Double.isFinite(prescalingY));
-    myAssert(prescalingY > 0);
+    assertThat(Double.isFinite(prescalingY));
+    assertThat(prescalingY > 0);
     if (resolution == COORDINATE_IS_RAW_VALUE)
     {
-      myAssert(prescalingY == 1);
+      assertThat(prescalingY == 1);
       return (int) y;
     }
     if (isLength || !isRelative) {
-      myAssert(y >= 0);
+      assertThat(y >= 0);
     }
     int yRaw;
     int yMax;
@@ -1447,7 +1447,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       yMax = (int) Util.mm2px(bedHeight, maxDPI);
       yRaw = (int) Math.round(y / prescalingY * maxDPI / resolution);
     }
-    myAssert(yRaw <= yMax);
+    assertThat(yRaw <= yMax);
     if (yIsRotaryAxis)
     {
       return yRaw;
@@ -1480,9 +1480,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     int xRaw = (int) Math.round(x * maxDPI / resolution);
     final int xMax = (int) Util.mm2px(bedWidth, maxDPI);
     if (isLength || !isRelative) {
-      myAssert(x >= 0);
+      assertThat(x >= 0);
     }
-    myAssert(xRaw <= xMax);
+    assertThat(xRaw <= xMax);
     return xRaw;
   }
 
@@ -1532,8 +1532,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     if (isWidthHeight || !isRelative)
     {
       // absolute coordinates and dimensions must be positive
-      myAssert(xRaw >= 0);
-      myAssert(yRaw >= 0);
+      assertThat(xRaw >= 0);
+      assertThat(yRaw >= 0);
       writeU32(out, xRaw);
       writeU32(out, yRaw);
     }
@@ -1912,35 +1912,15 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       }
       else
       {
-        myAssert(runlength + COMPRESS_MAGIC_CONSTANT <= 0xFF);
+        assertThat(runlength + COMPRESS_MAGIC_CONSTANT <= 0xFF);
         // "repeat n times"
         compressed.add((byte) (COMPRESS_MAGIC_CONSTANT + runlength));
         compressed.add(currentByte);
       }
       i += runlength;
     }
-    myAssert(decompressData(compressed).equals(bytes));
+    assertThat(decompressData(compressed).equals(bytes));
     return compressed;
-  }
-
-  // somehow, "assert" has no effect, so we use this:
-  // TODO do it properly (TM)
-  public static void myAssert(boolean mustBeTrue)
-  {
-    if (!mustBeTrue)
-    {
-      // somehow, AssertionError is not caught!
-      RuntimeException ex = new RuntimeException("assertion failed");
-      try
-      {
-        ex = new RuntimeException("assertion failed: " + ex.getStackTrace()[1].toString());
-      }
-      catch (Exception ee)
-      {
-        // failed to set message...
-      }
-      throw ex;
-    }
   }
 
   public static ByteArrayList decompressData(ByteArrayList data)
@@ -1957,8 +1937,8 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       else
       {
         int repetitions = (b & 0xFF) - COMPRESS_MAGIC_CONSTANT;
-        myAssert(repetitions > 0);
-        myAssert(i < data.size());
+        assertThat(repetitions > 0);
+        assertThat(i < data.size());
         byte b2 = data.get(i++);
         for (int j = 0; j < repetitions; j++)
         {
@@ -1996,7 +1976,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       if (pixelsPerByte == 8) {
         bytes.reverseBits();
       } else {
-        myAssert(pixelsPerByte == 1);
+        assertThat(pixelsPerByte == 1);
         Collections.reverse(bytes);
       }
     }
@@ -2048,7 +2028,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     currentJobMode = -1;
     currentJobIsRotary = job.isRotaryAxisEnabled();
     rotaryRadius = job.isRotaryAxisEnabled() ? job.getRotaryAxisDiameterMm() / 2 : 42;
-    myAssert(!job.isRotaryAxisEnabled() || rotaryAxisSupported);
+    assertThat(!job.isRotaryAxisEnabled() || rotaryAxisSupported);
     if (rotaryRadius < 2.5)
     {
       // Check min. rotary diameter. This cannot be moved t setMaterialRadius()
@@ -2063,7 +2043,7 @@ public class LaserToolsTechnicsCutter extends LaserCutter
     out.print("LTT");
 
     // job.applyStartPoint() is not supported
-    myAssert(job.getTransformedOriginX() == 0 && job.getTransformedOriginY() == 0);
+    assertThat(job.getTransformedOriginX() == 0 && job.getTransformedOriginY() == 0);
 
     out.write(toBytes("1B 76 01 01 02")); // Format Version 1.1.1
 
