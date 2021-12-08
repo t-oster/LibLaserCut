@@ -528,17 +528,20 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
-    currentSpeed = getTravel_speed();
+
+    String append = "";
 
     if (blankLaserDuringRapids)
     {
       currentPower = Double.NaN; // set to invalid value to force new S-value at next G1
-      sendLine("G0 X%s Y%s F%d S0", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
-    }
-    else
+      append = " S0";    }
+    if (isSendFeedDuringRapids())
     {
-      sendLine("G0 X%s Y%s F%d", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
+      currentSpeed = getTravel_speed();
+      append += String.format(FORMAT_LOCALE, " F%f", currentSpeed);
     }
+      sendLine("G0 X%s Y%s " + append, formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
+
   }
 
   protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
@@ -589,6 +592,11 @@ public class GenericGcodeDriver extends LaserCutter {
 
   protected void sendLine(String text, Object... parameters) throws IOException
   {
+    if (text.startsWith("G0") || text.startsWith("G1")) {
+      // Remove spaces from all standard moves.
+      // Leave all other commands unchanged because they could be user-specific display messages from the init code.
+      text = text.replace(" ", "");
+    }
     out.format(FORMAT_LOCALE, text+LINEEND(), parameters);
     out.flush();
     if (isWaitForOKafterEachLine())
@@ -917,14 +925,14 @@ public class GenericGcodeDriver extends LaserCutter {
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
     sendOrSaveJob(job, pl, warnings, null);
   }
-
+  
   /***
    * Send the job to the port or file.
    * If a filePrintStream is given (!= null), write the job to the file.
    * Else (filePrintStream = null), connect to the configured network port or serial port.
    */
   public void sendOrSaveJob(LaserJob job, ProgressListener pl, List<String> warnings, PrintStream filePrintStream) throws IllegalJobException, Exception {
-
+    
     pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
     checkJob(job);
@@ -934,7 +942,7 @@ public class GenericGcodeDriver extends LaserCutter {
       if (filePrintStream != null) { // write to file
         this.out = filePrintStream;
     } else { // send to network
-    connect(pl);
+      connect(pl);
     }
     pl.taskChanged(this, "sending");
     try {
@@ -945,7 +953,7 @@ public class GenericGcodeDriver extends LaserCutter {
       if (filePrintStream != null) { // write to file
         filePrintStream.close();
       } else { // send to network
-      disconnect(this.jobName);
+        disconnect(this.jobName);
       }
     }
     pl.taskChanged(this, "sent.");
@@ -1320,6 +1328,18 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     GenericGcodeDriver clone = new GenericGcodeDriver();
     clone.copyProperties(this);
     return clone;
+  }
+
+  /**
+   * Send the F (travelFeed) during G0 rapid moves?
+   *
+   * true: Yes. Best for compatibility.
+   * false: No. Shorter G-Code and still works for standards-compliant G-Code interpreters. (Note that G0 means "move as fast as possible", so specifying a feed-speed makes no sense.)
+   */
+  // TODO: make configurable in the future
+  protected boolean isSendFeedDuringRapids()
+  {
+    return true;
   }
 
 }

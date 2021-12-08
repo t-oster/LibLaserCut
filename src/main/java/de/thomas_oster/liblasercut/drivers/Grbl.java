@@ -114,9 +114,12 @@ public class Grbl extends GenericGcodeDriver
   protected void sendLineWithoutWait(String text, Object... parameters) throws IOException
   {
     boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
-    setWaitForOKafterEachLine(false);
-    sendLine(text, parameters);
-    setWaitForOKafterEachLine(wasSetWaitingForOk);
+    try {
+      setWaitForOKafterEachLine(false);
+      sendLine(text, parameters);
+    } finally {
+      setWaitForOKafterEachLine(wasSetWaitingForOk);
+    }
   }
   
   /**
@@ -158,43 +161,11 @@ public class Grbl extends GenericGcodeDriver
     return null;
   }
   
-  /**
-   * Send a G0 rapid move to Grbl.
-   * Doesn't include travel speed since grbl ignores that anyway.
-   */
   @Override
-  protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
-    currentSpeed = getTravel_speed();
-    if (blankLaserDuringRapids)
+  protected boolean isSendFeedDuringRapids()
     {
-      currentPower = -1; // set to invalid value to force new S-value at next G1
-      sendLine("G0 X%f Y%f S0", x, y);
-    }
-    else
-    {
-      sendLine("G0 X%f Y%f", x, y);
-    }
-  }
-  
-  /**
-   * Send a line of gcode to the cutter, stripping out any whitespace in the process
-   */
-  @Override
-  protected void sendLine(String text, Object... parameters) throws IOException
-  {
-    out.format(FORMAT_LOCALE, text.replace(" ", "")+LINEEND(), parameters);
-    // System.out.println(String.format(FORMAT_LOCALE, "> "+text+LINEEND(), parameters));
-    out.flush();
-    if (isWaitForOKafterEachLine())
-    {
-      String line = waitForLine();
-      if (!"ok".equals(line))
-      {
-        throw new IOException("Lasercutter did not respond 'ok', but '"+line+"'instead.");
-      }
-    }
+    // Grbl ignores the F parameter during G0.
+    return false;
   }
 
   @Override
