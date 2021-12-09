@@ -169,7 +169,7 @@ public class Grbl extends GenericGcodeDriver
     currentSpeed = getTravel_speed();
     if (blankLaserDuringRapids)
     {
-      currentPower = 0.0;
+      currentPower = -1; // set to invalid value to force new S-value at next G1
       sendLine("G0 X%f Y%f S0", x, y);
     }
     else
