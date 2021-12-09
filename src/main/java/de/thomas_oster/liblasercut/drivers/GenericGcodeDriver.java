@@ -69,6 +69,9 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
  * It should contain all possible options and is inteded to be the superclass
@@ -105,6 +108,8 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
+  protected static final String SETTING_GCODE_DIGITS = "Decimal places used for XY coordinates";
+  protected static final String SETTING_SCODE_DIGITS = "Decimal places used for power (S) value";
 
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
@@ -458,6 +463,15 @@ public class GenericGcodeDriver extends LaserCutter {
     return new FloatPowerSpeedFocusProperty();
   }
 
+  protected String formatDouble(double value, int decimalPlaces)
+  {
+    Locale locale  = new Locale("en", "US");
+    DecimalFormat coordinateFormat = (DecimalFormat)NumberFormat.getNumberInstance(locale);
+    coordinateFormat.applyPattern("###.##");
+    coordinateFormat.setMaximumFractionDigits(decimalPlaces);
+    return coordinateFormat.format(value); 
+  }
+
   protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
@@ -494,12 +508,17 @@ public class GenericGcodeDriver extends LaserCutter {
   protected void setPower(double powerInPercent) {
     nextPower = powerInPercent/100.0*spindleMax;
   }
-
+  
   protected void setFocus(PrintStream out, double focus) throws IOException {
-    if (currentFocus != focus)
-    {
-      sendLine("G0 Z%f", focus);
-      currentFocus = focus;
+
+    if (currentFocus != focus) {
+        String append = "";
+        if (blankLaserDuringRapids) {
+           append = " S0";
+           currentPower = -1; // set to invalid value to force new S-value at next G1
+        }
+        sendLine("G0 Z%s" + append, formatDouble(focus, getGCodeDigits()));
+        currentFocus = focus;
     }
   }
 
@@ -507,14 +526,15 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
+
     if (blankLaserDuringRapids)
     {
-      currentPower = 0.0;
-      sendLine("G0 X%f Y%f F%d S0", x, y, (int) (travel_speed));
+      currentPower = -1; // set to invalid value to force new S-value at next G1
+      sendLine("G0 X%s Y%s F%d S0", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
     }
     else
     {
-      sendLine("G0 X%f Y%f F%d", x, y, (int) (travel_speed));
+      sendLine("G0 X%s Y%s F%d", formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()), (int) (travel_speed));
     }
   }
 
@@ -522,9 +542,10 @@ public class GenericGcodeDriver extends LaserCutter {
     x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
     y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
+
     if (nextPower != currentPower)
     {
-      append += String.format(FORMAT_LOCALE, " S%f", nextPower);
+      append += String.format(FORMAT_LOCALE, " S%s", formatDouble(nextPower, getSCodeDigits()));
       currentPower = nextPower;
     }
     if (nextSpeed != currentSpeed)
@@ -532,7 +553,7 @@ public class GenericGcodeDriver extends LaserCutter {
       append += String.format(FORMAT_LOCALE, " F%d", (int) (max_speed*nextSpeed/100.0));
       currentSpeed = nextSpeed;
     }
-    sendLine("G1 X%f Y%f"+append, x, y);
+    sendLine("G1 X%s Y%s" + append, formatDouble(x, getGCodeDigits()), formatDouble(y, getGCodeDigits()));
   }
 
   private void writeInitializationCode() throws IOException {
@@ -1057,6 +1078,30 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     this.apiKey = apiKey;
   }
   
+  private Integer gCodeDigits = 6;
+
+  public Integer getGCodeDigits()
+  {
+    if (gCodeDigits == null) gCodeDigits = 6;
+    return gCodeDigits;
+  }
+  public void setGCodeDigits(Integer gCodeDigits)
+  {
+    this.gCodeDigits = gCodeDigits;
+  }
+  
+  private Integer sCodeDigits = 0;
+
+  public Integer getSCodeDigits()
+  {
+    if (sCodeDigits == null) sCodeDigits = 0;
+    return sCodeDigits;
+  }
+  public void setSCodeDigits(Integer sCodeDigits)
+  {
+    this.sCodeDigits = sCodeDigits;
+  }
+  
   private static final String[] SETTINGS_LIST = new String[]{
     SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
@@ -1084,7 +1129,9 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     SETTING_FILE_EXPORT_PATH,
     SETTING_USE_BIDIRECTIONAL_RASTERING,
     SETTING_RASTER_PADDING,
-    SETTING_API_KEY
+    SETTING_API_KEY,
+    SETTING_GCODE_DIGITS,
+    SETTING_SCODE_DIGITS
   };
 
   @Override
@@ -1148,6 +1195,10 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       return this.getRasterPadding();
     } else if (SETTING_API_KEY.equals(attribute)) {
       return this.getApiKey();
+    } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
+      return this.getGCodeDigits();
+    } else if (SETTING_SCODE_DIGITS.equals(attribute)) {
+      return this.getSCodeDigits();
     }
 
     return null;
@@ -1209,6 +1260,10 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       this.setRasterPadding(Math.abs((Double)value));
     } else if (SETTING_API_KEY.equals(attribute)) {
       this.setApiKey((String) value);
+    } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
+      this.setGCodeDigits((Integer) value);
+    } else if (SETTING_SCODE_DIGITS.equals(attribute)) {
+      this.setSCodeDigits((Integer) value);
     }
   }
 
