@@ -315,7 +315,7 @@ public abstract class LaserCutter implements Cloneable, Customizable {
       return 5;
     }
 
-    public boolean getRasterPaddingAllowNegativeSpace() {
+    public boolean getRasterPaddingAllowOutsideMachineSpace() {
       return false;
     }
 
@@ -349,16 +349,18 @@ public abstract class LaserCutter implements Cloneable, Customizable {
       VectorPart result = new VectorPart(rp.getLaserProperty(), resolution);
 
       int leftLimitPx = 0;
-      if (this.getRasterPaddingAllowNegativeSpace())
+      int rightLimitPx = 0;
+      if (this.getRasterPaddingAllowOutsideMachineSpace())
       {
         leftLimitPx = (int) Util.mm2px(job.getTransformedOriginX() - this.getRasterPadding(), resolution);
+        rightLimitPx = (int) Util.mm2px(job.getTransformedOriginX() + getBedWidth() + this.getRasterPadding(), resolution);
       }
       else
       {
         leftLimitPx = (int) Util.mm2px(job.getTransformedOriginX(), resolution);
+        rightLimitPx = (int) Util.mm2px(job.getTransformedOriginX() + getBedWidth(), resolution);
       }
 
-      int rightLimitPx = (int) Util.mm2px(job.getTransformedOriginX() + getBedWidth(), resolution);
       for (int y = 0; y < rp.getRasterHeight(); y++)
       {
         if (rp.lineIsBlank(y)){
