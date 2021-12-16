@@ -107,6 +107,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_SPINDLE_MAX = "S value for 100% laser power";
   protected static final String SETTING_UPLOAD_METHOD = "Upload method";
   protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
+  protected static final String SETTING_RASTER_PADDING_ALLOW_OUTSIDE_MACHINE_SPACE = "Allow raster padding outside machine limits (negative and positive)";
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
   protected static final String SETTING_GCODE_DIGITS = "Decimal places used for XY coordinates";
   protected static final String SETTING_SCODE_DIGITS = "Decimal places used for power (S) value";
@@ -1065,6 +1066,22 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
   public void setRasterPadding(double rasterPadding) {
     this.rasterPadding = rasterPadding;
   }
+
+  protected boolean rasterPaddingAllowOutsideMachineSpace = false;
+
+  /**
+   * Whether padding is allowed to go into negative space or not
+   *
+   * @return the value of rasterPaddingAllowNegativeSpace
+   */
+  @Override
+  public boolean getRasterPaddingAllowOutsideMachineSpace() {
+    return rasterPaddingAllowOutsideMachineSpace;
+  }
+
+  public void setRasterPaddingAllowOutsideMachineSpace(boolean allowOutsideMachineSpace) {
+    this.rasterPaddingAllowOutsideMachineSpace = allowOutsideMachineSpace;
+  }
   
   private String apiKey;
 
@@ -1129,6 +1146,7 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     SETTING_FILE_EXPORT_PATH,
     SETTING_USE_BIDIRECTIONAL_RASTERING,
     SETTING_RASTER_PADDING,
+    SETTING_RASTER_PADDING_ALLOW_OUTSIDE_MACHINE_SPACE,
     SETTING_API_KEY,
     SETTING_GCODE_DIGITS,
     SETTING_SCODE_DIGITS
@@ -1193,6 +1211,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       return this.getUploadMethod();
     } else if (SETTING_RASTER_PADDING.equals(attribute)) {
       return this.getRasterPadding();
+    } else if (SETTING_RASTER_PADDING_ALLOW_OUTSIDE_MACHINE_SPACE.equals(attribute)) {
+      return this.getRasterPaddingAllowOutsideMachineSpace();
     } else if (SETTING_API_KEY.equals(attribute)) {
       return this.getApiKey();
     } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
@@ -1258,6 +1278,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       this.setUploadMethod(value);
     } else if (SETTING_RASTER_PADDING.equals(attribute)) {
       this.setRasterPadding(Math.abs((Double)value));
+    } else if (SETTING_RASTER_PADDING_ALLOW_OUTSIDE_MACHINE_SPACE.equals(attribute)) {
+      this.setRasterPaddingAllowOutsideMachineSpace((Boolean) value);
     } else if (SETTING_API_KEY.equals(attribute)) {
       this.setApiKey((String) value);
     } else if (SETTING_GCODE_DIGITS.equals(attribute)) {
