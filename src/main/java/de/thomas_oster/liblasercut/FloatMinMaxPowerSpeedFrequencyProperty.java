@@ -20,22 +20,22 @@
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.LaserProperty;
-import de.thomas_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.FloatPowerSpeedFrequencyProperty;
 import java.util.Arrays;
 import java.util.LinkedList;
 
 /*
- * Add 'min power' to FloatPowerSpeedFocusFrequencyProperty
+ * Add 'min power' to FloatPowerSpeedFrequencyProperty
  */
 
-public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFocusFrequencyProperty {
+public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequencyProperty {
 
   private float min_power = 10.0f;
   private static final String MIN_POWER = "min power";
 
   public FloatMinMaxPowerSpeedFrequencyProperty()
   {
-    super(true); /* hide focus */
+    super();
   }
 
   public FloatMinMaxPowerSpeedFrequencyProperty(LaserProperty o)
