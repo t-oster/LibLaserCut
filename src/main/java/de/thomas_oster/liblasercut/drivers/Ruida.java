@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 /* for class UpdStream: */
-import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -795,7 +794,6 @@ public class Ruida extends LaserCutter
 
   public void close(OutputStream output_stream) throws IOException, Exception
   {
-    System.out.println("Ruida.close()");
     try {
       serial.close();
     }
@@ -953,7 +951,7 @@ class ByteStream
       out.write(i & 0xff);
     }
     catch (IOException e) {
-      System.out.println("ByteStream.writeTo() failed");
+      System.out.printf("ByteStream.writeTo() failed: %s\n", e.getMessage());
     };
   }
 
@@ -1070,9 +1068,12 @@ class UdpStream extends OutputStream
   private InetAddress address;
   public static final int NETWORK_TIMEOUT = 3000;       // TODO
   public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
-  public static final int MTU = 1470; // max data length per datagram (minus checksum)
-  private ByteArrayOutputStream bos;
+  public static final int MTU = 998; // max data length per datagram (minus checksum)
+  public static final int BUFLEN = 16;
+
   byte[] receiveData = new byte[MTU+2];
+  byte[] buffer = new byte[BUFLEN];
+  int bsize = 0;
 
   private int checksum(byte[] data, int start, int length)
   {
@@ -1087,15 +1088,24 @@ class UdpStream extends OutputStream
   {
     this.hostname = hostname;
     this.port = port;
-    System.out.println("UdpStream(" + hostname + ", " + port + ")");
+//    System.out.println("UdpStream(" + hostname + ", " + port + ")");
     socket = new DatagramSocket(SOURCE_PORT);
     address = InetAddress.getByName(hostname);
-    bos = new ByteArrayOutputStream();
   }
 
   public void write(int i) throws IOException
   {
-    throw new IOException("UdpStream.write(int)");
+    buffer[bsize] = (byte)i;
+    bsize = bsize + 1;
+    if (bsize >= BUFLEN) {
+      flushbuf();
+    }
+  }
+
+  private void flushbuf() throws IOException
+  {
+    write(buffer);
+    bsize = 0;
   }
 
   public void write(byte[] data) throws IOException
@@ -1107,7 +1117,6 @@ class UdpStream extends OutputStream
       if (chunk > MTU) {
         chunk = MTU;
       }
-//    byte[] data = bos.toByteArray();
       int chksum = checksum(data, start, chunk);
       byte[] buf = new byte[2 + chunk];
       buf[0] = (byte)((chksum & 0xff00) >> 8);
@@ -1117,8 +1126,6 @@ class UdpStream extends OutputStream
       send(buf);
       start += chunk;
     } while (start < l);
-//    bos.reset();
-//    bos.write(data);
   }
 
   private void send(byte[] ary) throws IOException
@@ -1158,7 +1165,9 @@ class UdpStream extends OutputStream
 
   public void close() throws IOException
   {
-    System.out.println("UdpStream.close()");
+    if (bsize > 0) {
+      flushbuf();
+    }
     socket.close();
   }
 }
