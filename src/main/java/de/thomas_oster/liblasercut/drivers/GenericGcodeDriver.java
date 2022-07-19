@@ -1107,11 +1107,11 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     this.gCodeDigits = gCodeDigits;
   }
   
-  private Integer sCodeDigits = 0;
+  private Integer sCodeDigits = 3;
 
   public Integer getSCodeDigits()
   {
-    if (sCodeDigits == null) sCodeDigits = 0;
+    if (sCodeDigits == null) sCodeDigits = 3;
     return sCodeDigits;
   }
   public void setSCodeDigits(Integer sCodeDigits)
