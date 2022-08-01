@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/54ce385f7b624207b0611ccc7074f575)](https://app.codacy.com/manual/t-oster/LibLaserCut?utm_source=github.com&utm_medium=referral&utm_content=t-oster/LibLaserCut&utm_campaign=Badge_Grade_Settings)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/95930a2113c3429088513982fa46c4ec)](https://www.codacy.com/manual/t-oster/LibLaserCut?utm_source=github.com&utm_medium=referral&utm_content=t-oster/LibLaserCut&utm_campaign=Badge_Coverage)
-[![Build Status](https://travis-ci.org/t-oster/LibLaserCut.svg?branch=master)](https://travis-ci.org/t-oster/LibLaserCut)
+[![Build Status](https://app.travis-ci.com/t-oster/LibLaserCut.svg?branch=master)](https://app.travis-ci.com/github/t-oster/LibLaserCut)
 
 This is a library intended to provide suppport
 for Lasercutters on any platform.
