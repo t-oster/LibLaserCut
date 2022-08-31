@@ -577,8 +577,9 @@ public class Ruida extends LaserCutter
     try {
       stream = new ByteStream(out, (byte)0x88); // 0x11, 0x38
       if (UPLOAD_METHOD_SERIAL.equals(uploadMethod)) {
+        char[] inbuf = new char[16];
         stream.hex("DA000004"); // identify
-        in.read(16);
+        in.read(inbuf);
       }
     }
     catch (Exception e) {
