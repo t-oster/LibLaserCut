@@ -28,12 +28,13 @@ import de.thomas_oster.liblasercut.*;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
 import de.thomas_oster.liblasercut.VectorCommand.CmdType;
-import java.io.BufferedReader;
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -42,9 +43,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
 
 /* for class UpdStream: */
 import java.net.InetAddress;
@@ -53,12 +56,18 @@ import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /* for class Serial; */
-/** either gnu.io or purejavacomm implement the SerialPort. Same API. **/
-// import gnu.io.*;
 import java.util.concurrent.TimeUnit;
-import purejavacomm.*;
+import purejavacomm.CommPort;
+import purejavacomm.CommPortIdentifier;
+import purejavacomm.NoSuchPortException;
+import purejavacomm.PortInUseException;
+import purejavacomm.PureJavaIllegalStateException;
+import purejavacomm.SerialPort;
+import purejavacomm.UnsupportedCommOperationException;
 
 public class Ruida extends LaserCutter
 {
@@ -66,12 +75,15 @@ public class Ruida extends LaserCutter
   private static final int MAXFOCUS = 500; //Maximal focus value (not mm)
   private static final int MAXPOWER = 80;
   private static final double FOCUSWIDTH = 0.0252; //How much mm/unit the focus values are
-  protected static final String SETTING_USE_FILE = "Write to file";
-  protected static final String SETTING_FILE = "File name";
-  protected static final String SETTING_USE_NETWORK = "Write to network";
-  protected static final String SETTING_NETWORK = "IP address";
-  protected static final String SETTING_USE_USB = "Write to USB";
-  protected static final String SETTING_USB_DEVICE = "USB device";
+  protected static final String SETTING_HOST = "IP/Hostname";
+  protected static final String SETTING_COMPORT = "USB device";
+  protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
+  protected static final String SETTING_FILE_EXPORT_PATH = "Path to save exported code";
+  protected static final String SETTING_UPLOAD_METHOD = "Upload method";
+  protected static final String UPLOAD_METHOD_FILE = "File";
+  protected static final String UPLOAD_METHOD_IP = "IP";
+  protected static final String UPLOAD_METHOD_SERIAL = "USB";
+
   protected static final String SETTING_MAX_VECTOR_CUT_SPEED = "Max vector cutting speed (mm/s)";
   protected static final String SETTING_MAX_VECTOR_MOVE_SPEED = "Max vector move speed (mm/s)";
   protected static final String SETTING_MIN_POWER = "Min laser power (%)";
@@ -79,6 +91,7 @@ public class Ruida extends LaserCutter
   protected static final String SETTING_BED_WIDTH = "Bed width (mm)";
   protected static final String SETTING_BED_HEIGHT = "Bed height (mm)";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
+  protected static final Locale FORMAT_LOCALE = Locale.US;
   // config values
   private static final long[] JogAcceleration = {200000,50000,600000};
   private static final long[] JogMaxVelocity = {16,16,2048};
@@ -95,10 +108,17 @@ public class Ruida extends LaserCutter
   private static final long[] MaxSteps = {250,500,500};
   private static final long[] TableSize = {20000,12000,30000};
 
-  /* output */
-  private OutputStream output_stream;
+  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
+  public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
+  public static final int DEST_PORT = 50200; // fixed UDP port
+
   private ByteStream stream;
-  private Serial serial;
+  private transient InputStreamReader in;
+  private transient PrintStream out;
+  private transient DatagramSocket socket;
+  private transient InetAddress address;
+  private transient CommPort port;
+  private transient CommPortIdentifier portIdentifier;
 
   private int mm2focus(float mm)
   {
@@ -109,6 +129,60 @@ public class Ruida extends LaserCutter
   {
     return (float) (focus * FOCUSWIDTH);
   }
+
+  protected int baudRate = 921600;
+
+  public int getBaudRate()
+  {
+    return baudRate;
+  }
+
+  public void setBaudRate(int baudRate)
+  {
+    this.baudRate = baudRate;
+  }
+
+  /**
+   * Time to wait before firsts reads of serial port.
+   * See autoreset feature on arduinos.
+   */
+  protected int initDelay = 5;
+
+  public int getInitDelay()
+  {
+    return initDelay;
+  }
+
+  public void setInitDelay(int initDelay)
+  {
+    this.initDelay = initDelay;
+  }
+
+  protected String host = "192.168.1.1";
+
+  public String getHost()
+  {
+    return host;
+  }
+
+  public void setHost(String host)
+  {
+    this.host = host;
+  }
+
+  protected String comport = "auto";
+
+  public String getComport()
+  {
+    return comport;
+  }
+
+  public void setComport(String comport)
+  {
+    this.comport = comport;
+  }
+
+  /* -----------------------------------------------------------------------*/
 
   public Ruida()
   {
@@ -276,9 +350,9 @@ public class Ruida extends LaserCutter
     }
   }
 
-  private float min_power = 0.0f;
-  private float max_power = 0.0f;
-  private float speed = 0;
+  private float currentMinPower = 0.0f;
+  private float currentMaxPower = 0.0f;
+  private float currentSpeed = 0;
 
   private float cmd_absoluteMM(String cmd, float old_val, float new_val)
   {
@@ -312,6 +386,157 @@ public class Ruida extends LaserCutter
     return new_val;
   }
 
+  protected String connectSerial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
+  {
+    pl.taskChanged(this, "opening '"+i.getName()+"'");
+    if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
+    {
+      try
+      {
+        port = i.open("VisiCut", 1000);
+        try
+        {
+          port.enableReceiveTimeout(getSerialTimeout());
+        }
+        catch (UnsupportedCommOperationException e)
+        {
+          System.err.println("Serial timeout not supported. Driver may hang if device does not respond properly.");
+        }
+        if (this.getBaudRate() > 0 && port instanceof SerialPort)
+        {
+          SerialPort sp = (SerialPort) port;
+          sp.setSerialPortParams(getBaudRate(), 8, 1, 0);
+          sp.setDTR(true);
+        }
+        out = new PrintStream(port.getOutputStream());
+        in = new InputStreamReader(port.getInputStream());
+        // Wait 5 seconds since GRBL is long to wake up..
+        for (int rest = getInitDelay(); rest > 0; rest--) {
+          pl.taskChanged(this, String.format(FORMAT_LOCALE, "Waiting %ds", rest));
+          try
+          {
+            Thread.sleep(1000);
+          }
+          catch(InterruptedException ex)
+          {
+            Thread.currentThread().interrupt();
+          }
+        }
+        portIdentifier = i;
+        pl.taskChanged(this, "Connected");
+        return null;
+      }
+      catch (PortInUseException e)
+      {
+        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        return "Port in use: "+i.getName();
+      }
+      catch (IOException e)
+      {
+        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        return "IO Error from "+i.getName()+": "+e.getMessage();
+      }
+      catch (PureJavaIllegalStateException e)
+      {
+        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        return "Could not open "+i.getName()+": "+e.getMessage();
+      }
+    }
+    else
+    {
+      return "Not a serial Port "+comport;
+    }
+  }
+  /**
+   * Used to buffer the file before uploading via udp
+   */
+  private transient ByteArrayOutputStream outputBuffer;
+  private transient String jobName;
+  protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
+  {
+    outputBuffer = null;
+    if (UPLOAD_METHOD_IP.equals(uploadMethod))
+    {
+      if (getHost() == null || getHost().equals(""))
+      {
+        throw new IOException("IP/Hostname must be set to upload via IP method");
+      }
+      socket = new DatagramSocket(SOURCE_PORT);
+      address = InetAddress.getByName(getHost());
+    }
+    else if (UPLOAD_METHOD_SERIAL.equals(uploadMethod))
+    {
+      String error = "No serial port found";
+      if (portIdentifier == null && !getComport().equals("auto") && !getComport().equals(""))
+      {
+        try {
+          portIdentifier = CommPortIdentifier.getPortIdentifier(getComport());
+        }
+        catch (NoSuchPortException e) {
+          throw new IOException("No such port: "+getComport());
+        }
+      }
+
+      if (portIdentifier != null)
+      {//use port identifier we had last time
+        error = connectSerial(portIdentifier, pl);
+      }
+      else
+      {
+        Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers();
+        while (e.hasMoreElements())
+        {
+          CommPortIdentifier i = e.nextElement();
+          if (i.getPortType() == CommPortIdentifier.PORT_SERIAL)
+          {
+            error = connectSerial(i, pl);
+            if (error == null)
+            {
+              break;
+            }
+          }
+        }
+      }
+      if (error != null)
+      {
+        throw new IOException(error);
+      }
+    }
+    else if (UPLOAD_METHOD_FILE.equals(uploadMethod))
+    {
+      if (getExportPath() == null || getExportPath().equals(""))
+      {
+        throw new IOException("Export Path must be set to upload via File method.");
+      }
+      File file = new File(getExportPath(), this.jobName);
+      out = new PrintStream(new FileOutputStream(file));
+      in = null;
+    }
+    else
+    {
+      throw new IOException("Upload Method must be set");
+    }
+  }
+
+  protected void disconnect(String jobname) throws IOException, URISyntaxException
+  {
+    if (in != null)
+    {
+      in.close();
+    }
+    out.close();
+    if (this.socket != null)
+    {
+      socket.close();
+      socket = null;
+    }
+    else if (this.port != null)
+    {
+      this.port.close();
+      this.port = null;
+    }
+
+  }
   /**
    * It is called whenever VisiCut wants the driver to send a job to the lasercutter.
    * @param job This is an LaserJob object, containing all information on the job, which is to be sent
@@ -323,40 +548,42 @@ public class Ruida extends LaserCutter
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
-//    System.out.println("JOB title >" + job.getTitle() + "< name >" + job.getName() + "< user >"+ job.getUser() + "<");
+    pl.progressChanged(this, 0);
+    this.currentMinPower = -1;
+    this.currentMaxPower = -1;
+    this.currentSpeed = -1;
 
-//    pl.progressChanged(this, 0);
-//    pl.taskChanged(this, "checking job");
+    pl.taskChanged(this, "checking job");
     checkJob(job);
+    this.jobName = job.getName()+".ruida";
     job.applyStartPoint();
-
+    pl.taskChanged(this, "connecting...");
+    connect(pl);
+    pl.taskChanged(this, "sending");
     try {
-      if (getUseFilename()) {
-        output_stream = openFile(getFilename());
-      }
-      else if (getUseNetwork()) {
-        output_stream = openNetwork(getNetwork());
-      }
-      else if (getUseUsb()) {
-        output_stream = openUsb(getUsbDevice());
-      }
-      else {
-        pl.taskChanged(this, "** No output configured");
-        return;
-      }
+      writeJobCode(job, pl);
+      disconnect(job.getName()+".ruida");
+    }
+    catch (IOException e) {
+      pl.taskChanged(this, "disconnecting");
+      disconnect(this.jobName);
+      throw e;
+    }
+    pl.taskChanged(this, "sent.");
+    pl.progressChanged(this, 100);
+  }
 
-      stream = new ByteStream(output_stream, (byte)0x88); // 0x11, 0x38
-//      pl.taskChanged(this, "sending");
-      if (getUseUsb()) {
+  public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    try {
+      stream = new ByteStream(out, (byte)0x88); // 0x11, 0x38
+      if (UPLOAD_METHOD_SERIAL.equals(uploadMethod)) {
         stream.hex("DA000004"); // identify
-        serial.read(16);
+        in.read(16);
       }
     }
     catch (Exception e) {
       pl.taskChanged(this, "Fail: " + e.getMessage());
-      warnings.add("Fail: " + e.getMessage());
       throw e;
-//      throw new IllegalJobException("Fail: " + e.getMessage());
     }
 
     /* upload follows */
@@ -425,10 +652,10 @@ public class Ruida extends LaserCutter
                 stream.hex("ca0100");
                 stream.hex("ca02").byteint(part_number); // start_layer
                 stream.hex("ca0113"); // blow on
-                stream.hex("c902").longint((int)speed);
+                stream.hex("c902").longint((int)currentSpeed);
                 // power for laser #1
-                stream.hex("c601").percent((int)min_power);
-                stream.hex("c602").percent((int)max_power);
+                stream.hex("c601").percent((int)currentMinPower);
+                stream.hex("c602").percent((int)currentMaxPower);
 
                 /* start vector mode */
                 stream.hex("ca030f");
@@ -445,9 +672,9 @@ public class Ruida extends LaserCutter
                 FloatMinMaxPowerSpeedFrequencyProperty prop = (FloatMinMaxPowerSpeedFrequencyProperty) pr;
                 if (first_prop) {
                   first_prop = false;
-                  min_power = cmd_layer_percent("c631", part_number, min_power, prop.getMinPower());
-                  max_power = cmd_layer_percent("c632", part_number, max_power, prop.getPower());
-                  speed = cmd_layer_absoluteMM("c904", part_number, speed, prop.getSpeed());
+                  currentMinPower = cmd_layer_percent("c631", part_number, currentMinPower, prop.getMinPower());
+                  currentMaxPower = cmd_layer_percent("c632", part_number, currentMaxPower, prop.getPower());
+                  currentSpeed = cmd_layer_absoluteMM("c904", part_number, currentSpeed, prop.getSpeed());
                   // focus - n/a
                   // frequency
                   stream.hex("c660").byteint(part_number).hex("00").longint(prop.getFrequency());
@@ -458,9 +685,9 @@ public class Ruida extends LaserCutter
                   stream.hex("ca41").byteint(part_number).byteint(0);
                 }
                 else {
-                  min_power = cmd_percent("c601", min_power, prop.getMinPower());
-                  max_power = cmd_percent("c602", max_power, prop.getPower());
-                  speed = cmd_absoluteMM("c902", speed, prop.getSpeed());
+                  currentMinPower = cmd_percent("c601", currentMinPower, prop.getMinPower());
+                  currentMaxPower = cmd_percent("c602", currentMaxPower, prop.getPower());
+                  currentSpeed = cmd_absoluteMM("c902", currentSpeed, prop.getSpeed());
                 }
               }
               break;
@@ -472,11 +699,6 @@ public class Ruida extends LaserCutter
           }
         }
       }
-      else
-      {
-        warnings.add("Unknown Job part.");
-      }
-//      ruida.endPart();
     }
 
     /* work interval */
@@ -488,9 +710,21 @@ public class Ruida extends LaserCutter
     /* eof */
     stream.hex("D7");
 //    pl.progressChanged(this, 100);
-
-    close(output_stream);
   } /* sendJob */
+
+  @Override
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJobException, Exception {
+    this.currentMinPower = -1;
+    this.currentMaxPower = -1;
+    this.currentSpeed = -1;
+
+    checkJob(job);
+    try (PrintStream ps = new PrintStream(fileOutputStream))
+    {
+      this.out = ps;
+      writeJobCode(job, new ProgressListenerDummy());
+    }
+  }
 
   /**
    * Returns a list of all supported resolutions (in DPI)
@@ -646,177 +880,69 @@ public class Ruida extends LaserCutter
     this.MaxVectorMoveSpeed = MaxVectorMoveSpeed;
   }
 
-  protected boolean useFilename = false;
+  protected int serialTimeout= 15000;
 
-  public boolean getUseFilename()
+  public int getSerialTimeout()
   {
-    return useFilename;
+    return serialTimeout;
   }
 
-  public void setUseFilename(boolean useFilename)
+  public void setSerialTimeout(int serialTimeout)
   {
-    this.useFilename = useFilename;
+    this.serialTimeout = serialTimeout;
   }
 
-  protected String filename = "thunder.rd";
+  private String exportPath = "";
 
-  /**
-   * Get the value of output filename
-   *
-   * @return the value of filename
-   */
-  public String getFilename()
+  public void setExportPath(String path)
   {
-    return filename;
+    this.exportPath = path;
   }
 
-  /**
-   * Set the value of output filename
-   *
-   * @param filename new value of filename
-   */
-  public void setFilename(String filename)
+  public String getExportPath()
   {
-    this.filename = filename;
+    return exportPath;
   }
 
-  protected boolean useNetwork = false;
+  protected String uploadMethod = "";
 
-  public boolean getUseNetwork()
+  public void setUploadMethod(Object method)
   {
-    return useNetwork;
+    this.uploadMethod = String.valueOf(method);
   }
 
-  public void setUseNetwork(boolean useNetwork)
+  public OptionSelector getUploadMethod()
   {
-    this.useNetwork = useNetwork;
-  }
-
-  protected String network_addr = "192.168.1.1";
-
-  /**
-   * Get the value of output IP addr
-   *
-   * @return the value of IP addr
-   */
-  public String getNetwork()
-  {
-    return network_addr;
-  }
-
-  /**
-   * Set the value of output network
-   *
-   * @param filename new value of network addr
-   */
-  public void setNetwork(String network_addr)
-  {
-    this.network_addr = network_addr;
-  }
-
-
-  protected boolean useUsb = false;
-
-  public boolean getUseUsb()
-  {
-    return useUsb;
-  }
-
-  public void setUseUsb(boolean useUsb)
-  {
-    this.useUsb = useUsb;
-  }
-
-  protected String usb_device = "/dev/ttyUSB0";
-
-  /**
-   * Get the value of output usb device
-   *
-   * @return the value of use device
-   */
-  public String getUsbDevice()
-  {
-    return usb_device;
-  }
-
-  /**
-   * Set the value of output usb device
-   *
-   * @param filename new value of usb device
-   */
-  public void setUsbDevice(String usb_device)
-  {
-    this.usb_device = usb_device;
-  }
-
-  /**
-   * open file output connection
-   * @sets out
-   */
-  public OutputStream openFile(String filename) throws IOException, Exception
-  {
-    System.out.println("Ruida.open - normal disk file \"" + filename + "\"");
-    // a normal disk file
-    return new FileOutputStream(new File(filename));
-  }
-  
-  /**
-   * open network output connection
-   * @sets out
-   */
-  public static final int DEST_PORT = 50200; // fixed UDP port
-  public OutputStream openNetwork(String hostname) throws IOException, Exception
-  {
-    return new UdpStream(hostname, DEST_PORT);
-  }
-
-  /**
-   * open USB output connection
-   * @sets out
-   */
-  public OutputStream openUsb(String device) throws IOException, Exception
-  {
-    if (!(serial instanceof Serial)) { // not open yet
-      // the usb device, hopefully
-      //
-      try {
-        System.out.println("Ruida.open - serial " + device);
-        serial = new Serial();
-        serial.open(device);
+    if (uploadMethod == null || uploadMethod.length() == 0)
+    {
+      // Determine using original connect() logic
+      if (getHost() != null && getHost().length() > 0)
+      {
+        uploadMethod = UPLOAD_METHOD_IP;
       }
-      catch (Exception e) {
-        System.out.println("Looks like '" + device + "' is not a serial device");
-        throw e;
+      else if (getComport() != null && !getComport().equals(""))
+      {
+        uploadMethod = UPLOAD_METHOD_SERIAL;
+      }
+      else if (getExportPath() != null && getExportPath().length() > 0)
+      {
+        uploadMethod = UPLOAD_METHOD_FILE;
       }
     }
-    return serial.outputStream();
+
+    return new OptionSelector(uploadMethodList, uploadMethod);
   }
 
-  public void close(OutputStream output_stream) throws IOException, Exception
-  {
-    try {
-      serial.close();
-    }
-    catch (Exception e) {
-    }
-    serial = null;
-    try {
-      output_stream.close();
-    }
-    catch (Exception e) {
-    }
-  }
 
   /* ---------------------------------------------------------------- */
   /* device properties  */
 
   private static String[] settingAttributes = new String[]  {
-    SETTING_USE_FILE,
-    SETTING_FILE,
-    SETTING_USE_NETWORK,
-    SETTING_NETWORK,
-    SETTING_USE_USB,
-    SETTING_USB_DEVICE,
+    SETTING_UPLOAD_METHOD,
+    SETTING_HOST,
+    SETTING_COMPORT,
+    SETTING_SERIAL_TIMEOUT,
+    SETTING_FILE_EXPORT_PATH,
     SETTING_MAX_VECTOR_CUT_SPEED,
     SETTING_MAX_VECTOR_MOVE_SPEED,
     SETTING_MIN_POWER,
@@ -828,43 +954,29 @@ public class Ruida extends LaserCutter
 
   @Override
   public Object getProperty(String attribute) {
-    if (SETTING_USE_FILE.equals(attribute)) {
-      return this.getUseFilename();
-    }
-    else if (SETTING_FILE.equals(attribute)) {
-      return this.getFilename();
-    }
-    else if (SETTING_USE_NETWORK.equals(attribute)) {
-      return this.getUseNetwork();
-    }
-    else if (SETTING_NETWORK.equals(attribute)) {
-      return this.getNetwork();
-    }
-    else if (SETTING_USE_USB.equals(attribute)) {
-      return this.getUseUsb();
-    }
-    else if (SETTING_USB_DEVICE.equals(attribute)) {
-      return this.getUsbDevice();
-    }
-    else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)) {
+    if (SETTING_HOST.equals(attribute)) {
+      return this.getHost();
+    } else if (SETTING_COMPORT.equals(attribute)) {
+      return this.getComport();
+    } else if (SETTING_SERIAL_TIMEOUT.equals(attribute)) {
+      return this.getSerialTimeout();
+    } else if (SETTING_FILE_EXPORT_PATH.equals(attribute)) {
+      return this.getExportPath();
+    } else if (SETTING_UPLOAD_METHOD.equals(attribute)) {
+      return this.getUploadMethod();
+    } else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)) {
       return this.getMaxVectorCutSpeed();
-    }
-    else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)) {
+    } else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)) {
       return this.getMaxVectorMoveSpeed();
-    }
-    else if (SETTING_MIN_POWER.equals(attribute)) {
+    } else if (SETTING_MIN_POWER.equals(attribute)) {
       return this.getLaserPowerMin();
-    }
-    else if (SETTING_MAX_POWER.equals(attribute)) {
+    } else if (SETTING_MAX_POWER.equals(attribute)) {
       return this.getLaserPowerMax();
-    }
-    else if (SETTING_BED_WIDTH.equals(attribute)) {
+    } else if (SETTING_BED_WIDTH.equals(attribute)) {
       return this.getBedWidth();
-    }
-    else if (SETTING_BED_HEIGHT.equals(attribute)) {
+    } else if (SETTING_BED_HEIGHT.equals(attribute)) {
       return this.getBedHeight();
-    }
-    else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
+    } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
       return this.getUseBidirectionalRastering();
     }
     return null;
@@ -872,48 +984,34 @@ public class Ruida extends LaserCutter
 
   @Override
   public void setProperty(String attribute, Object value) {
-    if (SETTING_USE_FILE.equals(attribute)) {
-      this.setUseFilename((Boolean) value);
-    }
-    else if (SETTING_FILE.equals(attribute)) {
-      this.setFilename((String) value);
-    }
-    else if (SETTING_USE_NETWORK.equals(attribute)) {
-      this.setUseNetwork((Boolean) value);
-    }
-    else if (SETTING_NETWORK.equals(attribute)) {
-      this.setNetwork((String) value);
-    }
-    else if (SETTING_USE_USB.equals(attribute)) {
-      this.setUseUsb((Boolean) value);
-    }
-    else if (SETTING_USB_DEVICE.equals(attribute)) {
-      this.setUsbDevice((String) value);
-    }
-    else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)) {
+    if (SETTING_HOST.equals(attribute)) {
+      this.setHost((String) value);
+    } else if (SETTING_COMPORT.equals(attribute)) {
+      this.setComport((String) value);
+    } else if (SETTING_SERIAL_TIMEOUT.equals(attribute)) {
+      this.setSerialTimeout((Integer) value);
+    } else if (SETTING_FILE_EXPORT_PATH.equals(attribute)) {
+      this.setExportPath((String) value);
+    } else if (SETTING_UPLOAD_METHOD.equals(attribute)) {
+      this.setUploadMethod(value);
+    } else if (SETTING_MAX_VECTOR_CUT_SPEED.equals(attribute)) {
       this.setMaxVectorCutSpeed((Integer)value);
-    }
-    else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)) {
+    } else if (SETTING_MAX_VECTOR_MOVE_SPEED.equals(attribute)) {
       this.setMaxVectorMoveSpeed((Integer)value);
-    }
-    else if (SETTING_MIN_POWER.equals(attribute)) {
+    } else if (SETTING_MIN_POWER.equals(attribute)) {
       try {
         this.setLaserPowerMin((Integer)value);
       }
       catch (Exception e) {
         this.setLaserPowerMin(Integer.parseInt((String)value));
       }
-    }
-    else if (SETTING_MAX_POWER.equals(attribute)) {
+    } else if (SETTING_MAX_POWER.equals(attribute)) {
       this.setLaserPowerMax((Integer)value);
-    }
-    else if (SETTING_BED_HEIGHT.equals(attribute)) {
+    } else if (SETTING_BED_HEIGHT.equals(attribute)) {
       this.setBedHeigth((Double)value);
-    }
-    else if (SETTING_BED_WIDTH.equals(attribute)) {
+    } else if (SETTING_BED_WIDTH.equals(attribute)) {
       this.setBedWidth((Double)value);
-    }
-    else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
+    } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
       this.setUseBidirectionalRastering((Boolean) value);
     }
   }
