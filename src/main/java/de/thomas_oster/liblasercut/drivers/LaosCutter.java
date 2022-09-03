@@ -629,47 +629,58 @@ public class LaosCutter extends LaserCutter
     currentPurge = false;
     currentVentilation = false;
     pl.progressChanged(this, 0);
-    BufferedOutputStream out;
-    ByteArrayOutputStream buffer = null;
+
     pl.taskChanged(this, "checking job");
     checkJob(job);
     job.applyStartPoint();
-    if (!useTftp)
+
+    pl.taskChanged(this, "buffering");
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    try (BufferedOutputStream bufferOutStream = new BufferedOutputStream(buffer))
     {
-      pl.taskChanged(this, "connecting");
-      Socket connection = new Socket();
-      connection.connect(new InetSocketAddress(hostname, port), 3000);
-      out = new BufferedOutputStream(connection.getOutputStream());
-      pl.taskChanged(this, "sending");
+      this.writeJobCode(job, bufferOutStream, pl);
     }
-    else
-    {
-      buffer = new ByteArrayOutputStream();
-      out = new BufferedOutputStream(buffer);
-      pl.taskChanged(this, "buffering");
-    }
-    this.writeJobCode(job, out, pl);
-    if (this.isUseTftp())
-    {
-      pl.taskChanged(this, "connecting");
-      TFTPClient tftp = new TFTPClient();
-      tftp.setDefaultTimeout(5000);
-      //open a local UDP socket
-      tftp.open();
-      pl.taskChanged(this, "sending");
-      ByteArrayInputStream bain = new ByteArrayInputStream(buffer.toByteArray());
-      tftp.sendFile(job.getName().replace(" ", "") +".lgc", TFTP.BINARY_MODE, bain, this.getHostname(), this.getPort());
-      tftp.close();
-      bain.close();
-      if (debugFilename != null && !"".equals(debugFilename))
+
+    if (debugFilename != null && !"".equals(debugFilename))
       {
         pl.taskChanged(this, "writing "+debugFilename);
-        FileOutputStream o = new FileOutputStream(new File(debugFilename));
-        o.write(buffer.toByteArray());
-        o.close();
+        try (FileOutputStream o = new FileOutputStream(new File(debugFilename)))
+        {
+          o.write(buffer.toByteArray());
+        }
       }
-      pl.taskChanged(this, "sent.");
+
+    pl.taskChanged(this, "connecting");
+    if (this.isUseTftp())
+    {
+      TFTPClient tftp = new TFTPClient();
+      try {
+        tftp.setDefaultTimeout(5000);
+        //open a local UDP socket
+        tftp.open();
+        pl.taskChanged(this, "sending");
+        try (ByteArrayInputStream bain = new ByteArrayInputStream(buffer.toByteArray()))
+        {
+          tftp.sendFile(job.getName().replace(" ", "") +".lgc", TFTP.BINARY_MODE, bain, this.getHostname(), this.getPort());
+        }
+      }
+      finally
+      {
+        tftp.close();
+      }
+    } else {
+      try (Socket tcpConnection = new Socket())
+      {
+        tcpConnection.connect(new InetSocketAddress(hostname, port), 3000);
+        pl.taskChanged(this, "sending");
+        try (BufferedOutputStream outTcp = new BufferedOutputStream(tcpConnection.getOutputStream()))
+        {
+          outTcp.write(buffer.toByteArray());
+        }
+      }
     }
+
+    pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
   private List<Double> resolutions;
