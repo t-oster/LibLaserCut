@@ -398,7 +398,7 @@ public class Ruida extends LaserCutter
           sp.setDTR(true);
         }
         out = new PrintStream(port.getOutputStream());
-        in = new InputStreamReader(port.getInputStream());
+        in = new InputStreamReader(port.getInputStream(), Charset.defaultCharset());
         // Wait 5 seconds since GRBL is long to wake up..
         for (int rest = getInitDelay(); rest > 0; rest--) {
           pl.taskChanged(this, String.format(FORMAT_LOCALE, "Waiting %ds", rest));
