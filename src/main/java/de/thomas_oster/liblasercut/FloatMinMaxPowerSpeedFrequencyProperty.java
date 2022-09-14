@@ -130,16 +130,14 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
   public FloatMinMaxPowerSpeedFrequencyProperty clone()
   {
     FloatMinMaxPowerSpeedFrequencyProperty result = new FloatMinMaxPowerSpeedFrequencyProperty();
-    try {
-      for (String s:this.getPropertyKeys())
-      {
-        result.setProperty(s, this.getProperty(s));
+    Object p;
+    for (String s:this.getPropertyKeys())
+    {
+      p = this.getProperty(s);
+      if (p != null) {
+        result.setProperty(s, p);
       }
     }
-    catch (Exception e)
-    {
-    }
-
     return result;
   }
 
