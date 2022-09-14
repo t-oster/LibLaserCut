@@ -527,7 +527,7 @@ public class Ruida extends LaserCutter
    * @param pl Use this object to inform VisiCut about the progress of your sending action.
    * @param warnings If you there are warnings for the user, you can add them to this list, so they can be displayed by VisiCut
    * @throws IllegalJobException Throw this exception, when the job is not suitable for the current machine
-   * @throws Exception
+   * @throws Exception in all other error cases
    */
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
