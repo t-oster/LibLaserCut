@@ -129,22 +129,6 @@ public class Ruida extends LaserCutter
     this.baudRate = baudRate;
   }
 
-  /**
-   * Time to wait before firsts reads of serial port.
-   * See autoreset feature on arduinos.
-   */
-  protected int initDelay = 5;
-
-  public int getInitDelay()
-  {
-    return initDelay;
-  }
-
-  public void setInitDelay(int initDelay)
-  {
-    this.initDelay = initDelay;
-  }
-
   protected String host = "192.168.1.1";
 
   public String getHost()
@@ -208,7 +192,7 @@ public class Ruida extends LaserCutter
   @Override
   public boolean canEstimateJobDuration()
   {
-    return true;
+    return false;
   }
 
   /**
@@ -266,10 +250,10 @@ public class Ruida extends LaserCutter
   }
 
 
-  private double last_x = 0.0;
-  private double last_y = 0.0;
-  private int vector_count = 0;
-  private long travel_distance = 0;
+  private transient double last_x = 0.0;
+  private transient double last_y = 0.0;
+  private transient int vector_count = 0;
+  private transient long travel_distance = 0;
 
   private void vector(double x, double y, double dpi, boolean as_cut)
   {
@@ -335,9 +319,9 @@ public class Ruida extends LaserCutter
     }
   }
 
-  private float currentMinPower = 0.0f;
-  private float currentMaxPower = 0.0f;
-  private float currentSpeed = 0;
+  private transient float currentMinPower = 0.0f;
+  private transient float currentMaxPower = 0.0f;
+  private transient float currentSpeed = 0;
 
   private float cmd_absoluteMM(String cmd, float old_val, float new_val)
   {
