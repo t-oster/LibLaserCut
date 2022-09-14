@@ -99,14 +99,14 @@ public class Ruida extends LaserCutter
   private static final long[] EngraveMaxVelocity = {800,800,2048};
   private static final long[] VectorAcceleration = {100000,25000,20000};
   private static final long[] VectorMaxVelocity = {1000,1000,1000};
-  private static final byte FlipLaserPWMPower = 1;
-  private static final byte FlipLaserOutput = 0;
+//  private static final byte FlipLaserPWMPower = 1;
+//  private static final byte FlipLaserOutput = 0;
 
-  private static final byte HomeDirection = 1;
-  private static final byte[] FlipHomeDirection = {1,0,0};
-  private static final byte[] LimitContCondition = {0,0,0,0};
-  private static final long[] MaxSteps = {250,500,500};
-  private static final long[] TableSize = {20000,12000,30000};
+//  private static final byte HomeDirection = 1;
+//  private static final byte[] FlipHomeDirection = {1,0,0};
+//  private static final byte[] LimitContCondition = {0,0,0,0};
+//  private static final long[] MaxSteps = {250,500,500};
+//  private static final long[] TableSize = {20000,12000,30000};
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
   public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
