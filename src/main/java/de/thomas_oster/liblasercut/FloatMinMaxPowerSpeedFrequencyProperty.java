@@ -63,7 +63,7 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
   /**
    * Set the value of min power
    *
-   * @param new min power
+   * @param min power
    */
   public void setMinPower(float power)
   {
