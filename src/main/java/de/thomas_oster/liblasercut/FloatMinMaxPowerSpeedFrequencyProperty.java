@@ -42,12 +42,10 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
   {
     for (String k : o.getPropertyKeys())
     {
-      try
-      {
-        this.setProperty(k, o.getProperty(k));
-      }
-      catch (Exception e)
-      {
+      Object p;
+      p = o.getProperty(k);
+      if (p != null) {
+        this.setProperty(k, p);
       }
     }
   }
