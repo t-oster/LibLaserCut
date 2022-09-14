@@ -182,7 +182,7 @@ public class Ruida extends LaserCutter
   /**
    * Copies the current instance with all config settings, because
    * it is used for save- and restoring
-   * @return
+   * @return clone
    */
   @Override
   public Ruida clone() {
@@ -708,7 +708,7 @@ public class Ruida extends LaserCutter
 
   /**
    * Returns a list of all supported resolutions (in DPI)
-   * @return
+   * @return List of Double
    */
   @Override
   public List<Double> getResolutions()
@@ -719,7 +719,7 @@ public class Ruida extends LaserCutter
   protected Double BedWidth = 900.0;
   /**
    * Returns the width of the laser-bed in mm.
-   * @return
+   * @return bed width
    */
   @Override
   public double getBedWidth()
@@ -740,7 +740,7 @@ public class Ruida extends LaserCutter
   protected Double BedHeight = 600.0;
   /**
    * Returns the height of the laser-bed in mm.
-   * @return
+   * @return bed height
    */
   @Override
   public double getBedHeight()
