@@ -49,7 +49,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
-/* for class UpdStream: */
+/* for network i/o */
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -59,7 +59,7 @@ import java.net.UnknownHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/* for class Serial; */
+/* for serial/usb i/o */
 import java.util.concurrent.TimeUnit;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
@@ -109,14 +109,10 @@ public class Ruida extends LaserCutter
 //  private static final long[] TableSize = {20000,12000,30000};
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
-  public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
-  public static final int DEST_PORT = 50200; // fixed UDP port
 
   private ByteStream stream;
   private transient InputStreamReader in;
   private transient PrintStream out;
-  private transient DatagramSocket socket;
-  private transient InetAddress address;
   private transient CommPort port;
   private transient CommPortIdentifier portIdentifier;
 
@@ -454,8 +450,8 @@ public class Ruida extends LaserCutter
       {
         throw new IOException("IP/Hostname must be set to upload via IP method");
       }
-      socket = new DatagramSocket(SOURCE_PORT);
-      address = InetAddress.getByName(getHost());
+      out = new PrintStream(new UdpStream(getHost()));
+      in = null;
     }
     else if (UPLOAD_METHOD_SERIAL.equals(uploadMethod))
     {
@@ -518,12 +514,7 @@ public class Ruida extends LaserCutter
       in.close();
     }
     out.close();
-    if (this.socket != null)
-    {
-      socket.close();
-      socket = null;
-    }
-    else if (this.port != null)
+    if (this.port != null)
     {
       this.port.close();
       this.port = null;
@@ -1146,7 +1137,6 @@ class ByteStream
 }
 
 
-
 class UdpStream extends OutputStream
 {
   private Integer port = 80;
@@ -1155,6 +1145,7 @@ class UdpStream extends OutputStream
   private InetAddress address;
   public static final int NETWORK_TIMEOUT = 3000;       // TODO
   public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
+  public static final int DEST_PORT = 50200; // fixed UDP port
   public static final int MTU = 998; // max data length per datagram (minus checksum)
   public static final int BUFLEN = 16;
 
@@ -1171,10 +1162,10 @@ class UdpStream extends OutputStream
     return sum;
   }
 
-  public UdpStream(String hostname, Integer port) throws IOException
+  public UdpStream(String hostname) throws IOException
   {
     this.hostname = hostname;
-    this.port = port;
+    this.port = DEST_PORT;
 //    System.out.println("UdpStream(" + hostname + ", " + port + ")");
     socket = new DatagramSocket(SOURCE_PORT);
     address = InetAddress.getByName(hostname);
