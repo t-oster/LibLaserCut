@@ -120,11 +120,6 @@ public class Ruida extends LaserCutter
   private transient CommPort port;
   private transient CommPortIdentifier portIdentifier;
 
-  private int mm2focus(float mm)
-  {
-    return (int) (mm / FOCUSWIDTH);
-  }
-
   private float focus2mm(int focus)
   {
     return (float) (focus * FOCUSWIDTH);
@@ -293,9 +288,8 @@ public class Ruida extends LaserCutter
     /* compute distance to last known position */
     double dx = x_mm - last_x;
     double dy = y_mm - last_y;
-//    System.out.println("x " + x + ", y " + y + ",  dx " + dx + ", dy " + dy);
+
     if ((dx == 0.0) && (dy == 0.0)) {
-//      System.out.println("\tno move - skip");
       return;
     }
     if (vector_count % 10 == 0) {                  /* enforce absolute every 10 vectors */
@@ -307,7 +301,6 @@ public class Ruida extends LaserCutter
     vector_count += 1;
 
     long distance = (long)Math.sqrt(dx*dx + dy*dy);
-//    System.out.println("    distance " + distance + ", absolute? " + as_absolute);
     travel_distance += distance;
 
     // estimate the new real position
@@ -630,8 +623,6 @@ public class Ruida extends LaserCutter
         stream.hex("E753").byteint(part_number).absoluteMM(bottom_right_x).absoluteMM(bottom_right_y);
         stream.hex("E761").byteint(part_number).absoluteMM(top_left_x).absoluteMM(top_left_y);
         stream.hex("E762").byteint(part_number).absoluteMM(bottom_right_x).absoluteMM(bottom_right_y);  
-
-//        System.out.println("VectorPart(" + minX + ", " + minY + ", " + maxX + ", " + maxY + " @ " + p.getDPI() + "dpi)");
 
         VectorPart vp = (VectorPart) p;
           
