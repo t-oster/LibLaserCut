@@ -146,7 +146,7 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
     if (obj == null) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
+    if (!(obj instanceof FloatMinMaxPowerSpeedFrequencyProperty)) {
       return false;
     }
     final FloatMinMaxPowerSpeedFrequencyProperty other = (FloatMinMaxPowerSpeedFrequencyProperty) obj;
