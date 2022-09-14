@@ -115,6 +115,7 @@ public class Ruida extends LaserCutter
   private transient PrintStream out;
   private transient CommPort port;
   private transient CommPortIdentifier portIdentifier;
+  private transient String jobName;
 
   private float focus2mm(int focus)
   {
@@ -436,14 +437,9 @@ public class Ruida extends LaserCutter
       return "Not a serial Port "+comport;
     }
   }
-  /**
-   * Used to buffer the file before uploading via udp
-   */
-  private transient ByteArrayOutputStream outputBuffer;
-  private transient String jobName;
+
   protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
   {
-    outputBuffer = null;
     if (UPLOAD_METHOD_IP.equals(uploadMethod))
     {
       if (getHost() == null || getHost().equals(""))
@@ -507,7 +503,7 @@ public class Ruida extends LaserCutter
     }
   }
 
-  protected void disconnect(String jobname) throws IOException, URISyntaxException
+  protected void disconnect(String jobName) throws IOException, URISyntaxException
   {
     if (in != null)
     {
