@@ -117,11 +117,6 @@ public class Ruida extends LaserCutter
   private transient CommPortIdentifier portIdentifier;
   private transient String jobName;
 
-  private float focus2mm(int focus)
-  {
-    return (float) (focus * FOCUSWIDTH);
-  }
-
   protected int baudRate = 921600;
 
   public int getBaudRate()
