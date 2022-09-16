@@ -92,13 +92,6 @@ public class Ruida extends LaserCutter
   protected static final String SETTING_BED_HEIGHT = "Bed height (mm)";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
   protected static final Locale FORMAT_LOCALE = Locale.US;
-  // config values
-  private static final long[] JogAcceleration = {200000,50000,600000};
-  private static final long[] JogMaxVelocity = {16,16,2048};
-  private static final long[] EngraveAcceleration = {200000,50000,600000};
-  private static final long[] EngraveMaxVelocity = {800,800,2048};
-  private static final long[] VectorAcceleration = {100000,25000,20000};
-  private static final long[] VectorMaxVelocity = {1000,1000,1000};
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
 
