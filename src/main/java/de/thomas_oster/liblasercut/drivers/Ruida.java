@@ -95,7 +95,7 @@ public class Ruida extends LaserCutter
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
 
-  private ByteStream stream;
+  private transient ByteStream stream;
   private transient InputStreamReader in;
   private transient PrintStream out;
   private transient CommPort port;
