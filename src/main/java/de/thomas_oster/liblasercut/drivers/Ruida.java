@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.Math;
+import java.net.BindException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -196,7 +197,7 @@ public class Ruida extends LaserCutter
     this.useBidirectionalRastering = useBidirectionalRastering;
   }
 
-  private void find_and_write_bounding_box(LaserJob job)
+  private void find_and_write_bounding_box(LaserJob job) throws IOException
   {
     double minX = 0.0;
     double minY = 0.0;
@@ -240,7 +241,7 @@ public class Ruida extends LaserCutter
   private transient int vector_count = 0;
   private transient long travel_distance = 0;
 
-  private void vector(double x, double y, double dpi, boolean as_cut)
+  private void vector(double x, double y, double dpi, boolean as_cut) throws IOException
   {
     double x_mm = Util.px2mm(x, dpi);
     double y_mm = Util.px2mm(y, dpi);
@@ -308,7 +309,7 @@ public class Ruida extends LaserCutter
   private transient float currentMaxPower = 0.0f;
   private transient float currentSpeed = 0;
 
-  private float cmd_absoluteMM(String cmd, float old_val, float new_val)
+  private float cmd_absoluteMM(String cmd, float old_val, float new_val) throws IOException
   {
     if (old_val != new_val) {
       stream.hex(cmd).absoluteMM((int)new_val);
@@ -316,7 +317,7 @@ public class Ruida extends LaserCutter
     return new_val;
   }
 
-  private float cmd_percent(String cmd, float old_val, float new_val)
+  private float cmd_percent(String cmd, float old_val, float new_val) throws IOException
   {
     if (old_val != new_val) {
       stream.hex(cmd).percent((int)new_val);
@@ -324,7 +325,7 @@ public class Ruida extends LaserCutter
     return new_val;
   }
 
-  private float cmd_layer_absoluteMM(String cmd, int layer, float old_val, float new_val)
+  private float cmd_layer_absoluteMM(String cmd, int layer, float old_val, float new_val) throws IOException
   {
     if (old_val != new_val) {
       stream.hex(cmd).byteint(layer).absoluteMM((int)new_val);
@@ -332,7 +333,7 @@ public class Ruida extends LaserCutter
     return new_val;
   }
 
-  private float cmd_layer_percent(String cmd, int layer, float old_val, float new_val)
+  private float cmd_layer_percent(String cmd, int layer, float old_val, float new_val) throws IOException
   {
     if (old_val != new_val) {
       stream.hex(cmd).byteint(layer).percent((int)new_val);
@@ -965,7 +966,7 @@ class ByteStream
     this.magic = magic;
   }
 
-  public void write(byte b) {
+  public void write(byte b) throws IOException {
     int i = b & 0xff;
     i ^= (i >> 7) & 0xff;
     i ^= (i << 7) & 0xff;
@@ -973,13 +974,8 @@ class ByteStream
     i ^= this.magic;
     i = (i + 1) & 0xff;
  
-    try {
 //      System.out.printf("write b 0x%02X, i %d, v 0x%02X\n", b, i, v);
-      out.write(i & 0xff);
-    }
-    catch (IOException e) {
-      System.out.printf("ByteStream.writeTo() failed: %s\n", e.getMessage());
-    };
+    out.write(i & 0xff);
   }
 
   /**
@@ -988,7 +984,7 @@ class ByteStream
    * convert hex string to byte values
    * https://stackoverflow.com/questions/11208479/how-do-i-initialize-a-byte-array-in-java
    */
-  public ByteStream hex(String s) {
+  public ByteStream hex(String s) throws IOException {
     int len = s.length();
     for (int i = 0; i < len; i += 2) {
       byte value = (byte)((Character.digit(s.charAt(i), 16) << 4)
@@ -1001,7 +997,7 @@ class ByteStream
   /**
    * append single-byte integer value
    */
-  public ByteStream byteint(int i) {
+  public ByteStream byteint(int i) throws IOException {
     write((byte)(i & 0xff));
     return this;
   }
@@ -1009,18 +1005,20 @@ class ByteStream
   /**
    * append string value (as series of bytes)
    */
-  public ByteStream string(String s) {
-    s.chars().forEach(i -> this.byteint(i));
+  public ByteStream string(String s) throws IOException {
+    for (int i = 0; i < s.length(); i++) {
+      this.byteint(s.codePointAt(i));
+    }
     return this;
   }
 
   /**
    * append absolute value
    */
-  public ByteStream absoluteMM(double d) {
+  public ByteStream absoluteMM(double d) throws IOException {
     return longint((long)(d * 1000.0));
   }
-  public ByteStream longint(long val) {
+  public ByteStream longint(long val) throws IOException {
     long mask = 0x7f0000000L; /* 35 (5 * 7) bit total */
     /* output 7 bit wise, msb first */
     for (int i = 0; i <= 4; i++) {
@@ -1033,7 +1031,7 @@ class ByteStream
   /**
    * append relative value
    */
-  public ByteStream relative(double d, boolean signed) {
+  public ByteStream relative(double d, boolean signed) throws IOException {
     int val = (int)Math.floor(d);
 //    System.out.println("rel" + ((signed)?"Signed":"Unsigned") + "ValueToByteArray(" + d + " -> " + val + ")");
     if (signed) {
@@ -1062,22 +1060,22 @@ class ByteStream
     return this;
   }
 
-  public ByteStream relativeSignedMM(double d) {
+  public ByteStream relativeSignedMM(double d) throws IOException {
     return relativeSigned(d * 1000.0);
   }
-  private ByteStream relativeSigned(double d) {
+  private ByteStream relativeSigned(double d) throws IOException {
     return relative(d, true);
   }
-  public ByteStream relativeUnsignedMM(double d) {
+  public ByteStream relativeUnsignedMM(double d) throws IOException {
     return relativeUnsigned(d * 1000.0);
   }
-  private ByteStream relativeUnsigned(double d) {
+  private ByteStream relativeUnsigned(double d) throws IOException {
     return relative(d, false);
   }
   /**
    * append percent value
    */
-  public ByteStream percent(int percent) {
+  public ByteStream percent(int percent) throws IOException {
     double val = (double)percent / 0.006103516; // 100/2^14
 //    System.out.println("percentValueToByteArray(" + percent + " -> " + val + ")");
     return relativeUnsigned(val);
@@ -1092,7 +1090,7 @@ class UdpStream extends OutputStream
   private String hostname = "";
   private DatagramSocket socket;
   private InetAddress address;
-  public static final int NETWORK_TIMEOUT = 3000;       // TODO
+  public static final int NETWORK_TIMEOUT = 3000;
   public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
   public static final int DEST_PORT = 50200; // fixed UDP port
   public static final int MTU = 998; // max data length per datagram (minus checksum)
@@ -1116,14 +1114,22 @@ class UdpStream extends OutputStream
     this.hostname = hostname;
     this.port = DEST_PORT;
 //    System.out.println("UdpStream(" + hostname + ", " + port + ")");
-    socket = new DatagramSocket(SOURCE_PORT);
-    address = InetAddress.getByName(hostname);
+    try {
+      socket = new DatagramSocket(SOURCE_PORT);
+      socket.setSoTimeout(NETWORK_TIMEOUT);
+      address = InetAddress.getByName(hostname);
+    }
+    catch (BindException e) {
+      throw new IOException(e.getMessage());
+    }
   }
 
   public void write(int i) throws IOException
   {
-    buffer[bsize] = (byte)i;
-    bsize = bsize + 1;
+    if (bsize < BUFLEN) {
+      buffer[bsize] = (byte)i;
+      bsize = bsize + 1;
+    }
     if (bsize >= BUFLEN) {
       flushbuf();
     }
