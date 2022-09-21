@@ -74,7 +74,7 @@ public class Ruida extends LaserCutter
   private static final int MINFOCUS = -500; //Minimal focus value (not mm)
   private static final int MAXFOCUS = 500; //Maximal focus value (not mm)
   private static final int MAXPOWER = 80;
-  private static final double FOCUSWIDTH = 0.0252; //How much mm/unit the focus values are
+
   protected static final String SETTING_HOST = "IP/Hostname";
   protected static final String SETTING_COMPORT = "USB device";
   protected static final String SETTING_SERIAL_TIMEOUT = "Milliseconds to wait for response";
