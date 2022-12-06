@@ -101,7 +101,6 @@ public class Ruida extends LaserCutter
   private transient PrintStream out;
   private transient CommPort port;
   private transient CommPortIdentifier portIdentifier;
-  private transient String jobName;
 
   protected int baudRate = 921600;
 
@@ -372,17 +371,17 @@ public class Ruida extends LaserCutter
       }
       catch (PortInUseException e)
       {
-        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        try { disconnect(); } catch (Exception ex) { System.out.println(ex.getMessage()); }
         return "Port in use: "+i.getName();
       }
       catch (IOException e)
       {
-        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        try { disconnect(); } catch (Exception ex) { System.out.println(ex.getMessage()); }
         return "IO Error from "+i.getName()+": "+e.getMessage();
       }
       catch (PureJavaIllegalStateException e)
       {
-        try { disconnect(""); } catch (Exception ex) { System.out.println(ex.getMessage()); }
+        try { disconnect(); } catch (Exception ex) { System.out.println(ex.getMessage()); }
         return "Could not open "+i.getName()+": "+e.getMessage();
       }
     }
@@ -392,7 +391,7 @@ public class Ruida extends LaserCutter
     }
   }
 
-  protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
+  protected void connect(ProgressListener pl, String jobName) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
   {
     if (UPLOAD_METHOD_IP.equals(uploadMethod))
     {
@@ -447,7 +446,7 @@ public class Ruida extends LaserCutter
       {
         throw new IOException("Export Path must be set to upload via File method.");
       }
-      File file = new File(getExportPath(), this.jobName);
+      File file = new File(getExportPath(), jobName+".rd"); // LibLaserCut#183 says it must be .rd
       out = new PrintStream(new FileOutputStream(file));
       in = null;
     }
@@ -457,7 +456,7 @@ public class Ruida extends LaserCutter
     }
   }
 
-  protected void disconnect(String jobName) throws IOException, URISyntaxException
+  protected void disconnect() throws IOException, URISyntaxException
   {
     if (in != null)
     {
@@ -469,8 +468,8 @@ public class Ruida extends LaserCutter
       this.port.close();
       this.port = null;
     }
-
   }
+
   /**
    * It is called whenever VisiCut wants the driver to send a job to the lasercutter.
    * @param job This is an LaserJob object, containing all information on the job, which is to be sent
@@ -489,20 +488,19 @@ public class Ruida extends LaserCutter
 
     pl.taskChanged(this, "checking job");
     checkJob(job);
-    this.jobName = job.getName()+".ruida";
     job.applyStartPoint();
     pl.taskChanged(this, "connecting...");
-    connect(pl);
+    connect(pl, job.getName());
     pl.taskChanged(this, "sending");
     try {
       writeJobCode(job, pl);
-      disconnect(job.getName()+".ruida");
     }
     catch (IOException e) {
       pl.taskChanged(this, "disconnecting");
-      disconnect(this.jobName);
+      disconnect();
       throw e;
     }
+    disconnect();
     pl.taskChanged(this, "sent.");
     pl.progressChanged(this, 100);
   }
