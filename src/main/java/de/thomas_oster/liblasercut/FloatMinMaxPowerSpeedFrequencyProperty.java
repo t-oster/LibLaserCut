@@ -31,7 +31,9 @@ import java.util.LinkedList;
 public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequencyProperty {
 
   private float min_power = 10.0f;
+  private float speed = 500.0f;
   private static final String MIN_POWER = "min power";
+  private static final String SPEED = "speed";
 
   public FloatMinMaxPowerSpeedFrequencyProperty()
   {
@@ -88,9 +90,31 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
     if (MIN_POWER.equals(name)) {
       return (Float) this.getMinPower();
     }
+    else if (SPEED.equals(name)) {
+      return (Float) this.getSpeed();
+    }
     else {
       return super.getProperty(name);
     }
+  }
+
+  /**
+   * Must override since parent class only allows 0 < speed < 100
+   * 
+   */
+
+  @Override
+  public void setSpeed(float speed)
+  {
+    speed = speed < 0 ? 0 : speed;
+    speed = speed > 1000 ? 1000 : speed;
+    this.speed = speed;
+  }
+
+  @Override
+  public float getSpeed()
+  {
+    return speed;
   }
 
   @Override
@@ -120,6 +144,9 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
   {
     if (MIN_POWER.equals(name)) {
       this.setMinPower((Float) value);
+    }
+    else if (SPEED.equals(name)) {
+      this.setSpeed((Float) value);
     }
     else {
       super.setProperty(name, value);
