@@ -190,7 +190,8 @@ public class Ruida extends LaserCutter
 
   @Override
   public double getRasterPadding() {
-    return this.rasterPadding;
+    if (rasterPadding == null) rasterPadding = 20;
+    return rasterPadding;
   }
 
   public void setRasterPadding(double rasterPadding) {
