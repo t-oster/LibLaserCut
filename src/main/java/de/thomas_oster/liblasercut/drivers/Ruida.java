@@ -92,8 +92,8 @@ public class Ruida extends LaserCutter
   protected static final String SETTING_BED_WIDTH = "Bed width (mm)";
   protected static final String SETTING_BED_HEIGHT = "Bed height (mm)";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
-  protected static final String SETTING_RASTER_PADDING = "Padding per raster line (mm)";
-  protected static final String SETTING_RASTER_OUTSIDE = "Allow padding outside of specs";
+  protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
+  protected static final String SETTING_RASTER_OUTSIDE = "Allow raster padding outside machine limits (negative and positive)";
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
