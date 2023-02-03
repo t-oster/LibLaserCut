@@ -186,15 +186,15 @@ public class Ruida extends LaserCutter
    * 'runway' for laser to get up to speed when rastering (in mm)
    *
    */
-  private double rasterPadding = 20;
+  private Double rasterPadding = 20;
 
   @Override
-  public double getRasterPadding() {
+  public Double getRasterPadding() {
     if (rasterPadding == null) rasterPadding = 20;
     return rasterPadding;
   }
 
-  public void setRasterPadding(double rasterPadding) {
+  public void setRasterPadding(Double rasterPadding) {
     this.rasterPadding = rasterPadding;
   }
 
