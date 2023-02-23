@@ -1092,7 +1092,7 @@ class UdpStream extends OutputStream
   public static final int SOURCE_PORT = 40200; // used by rdworks in Windows
   public static final int DEST_PORT = 50200; // fixed UDP port
   public static final int MTU = 998; // max data length per datagram (minus checksum)
-  public static final int BUFLEN = 16;
+  public static final int BUFLEN = 4096;
 
   byte[] receiveData = new byte[MTU+2];
   byte[] buffer = new byte[BUFLEN];
