@@ -31,7 +31,6 @@ import java.util.LinkedList;
 public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequencyProperty {
 
   private float min_power = 10.0f;
-  private float speed = 500.0f;
   private static final String MIN_POWER = "min power";
 
   public FloatMinMaxPowerSpeedFrequencyProperty()
