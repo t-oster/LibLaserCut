@@ -1,7 +1,7 @@
 /**
  * This file is part of LibLaserCut.
  *
- * Copyright (c) 2018 - 2022 Klaus Kämpf <kkaempf@gmail.com>
+ * Copyright (c) 2018 - 2023 Klaus Kämpf <kkaempf@gmail.com>
  *
  * LibLaserCut is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -92,6 +92,8 @@ public class Ruida extends LaserCutter
   protected static final String SETTING_BED_WIDTH = "Bed width (mm)";
   protected static final String SETTING_BED_HEIGHT = "Bed height (mm)";
   protected static final String SETTING_USE_BIDIRECTIONAL_RASTERING = "Use bidirectional rastering";
+  protected static final String SETTING_RASTER_PADDING = "Extra padding at ends of raster scanlines (mm)";
+  protected static final String SETTING_RASTER_OUTSIDE = "Allow raster padding outside machine limits (negative and positive)";
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
@@ -178,6 +180,37 @@ public class Ruida extends LaserCutter
   public boolean canEstimateJobDuration()
   {
     return false;
+  }
+
+  /**
+   * 'runway' for laser to get up to speed when rastering (in mm)
+   *
+   */
+  private Double rasterPadding = 20.;
+
+  @Override
+  public double getRasterPadding() {
+    if (rasterPadding == null) rasterPadding = 20.;
+    return rasterPadding;
+  }
+
+  public void setRasterPadding(Double rasterPadding) {
+    this.rasterPadding = rasterPadding;
+  }
+
+  /*
+   * allow padding to move laser head outside of 'bed'
+   */
+
+  private boolean allowOutsidePadding;
+
+  @Override
+  public boolean getRasterPaddingAllowOutsideMachineSpace() {
+    return this.allowOutsidePadding;
+  }
+
+  public void setRasterPaddingAllowOutsideMachineSpace(boolean allowOutsidePadding) {
+    this.allowOutsidePadding = allowOutsidePadding;
   }
 
   /**
@@ -603,7 +636,8 @@ public class Ruida extends LaserCutter
                 first_prop = false;
                 currentMinPower = cmd_layer_percent("c631", part_number, currentMinPower, prop.getMinPower());
                 currentMaxPower = cmd_layer_percent("c632", part_number, currentMaxPower, prop.getPower());
-                currentSpeed = cmd_layer_absoluteMM("c904", part_number, currentSpeed, prop.getSpeed());
+                  // prop speed is in %, ruida speed is in mm/s (0..1000)
+                currentSpeed = cmd_layer_absoluteMM("c904", part_number, currentSpeed, prop.getSpeed() * 10);
                 // focus - n/a
                 // frequency
                 stream.hex("c660").byteint(part_number).hex("00").longint(prop.getFrequency());
@@ -616,7 +650,8 @@ public class Ruida extends LaserCutter
               else {
                 currentMinPower = cmd_percent("c601", currentMinPower, prop.getMinPower());
                 currentMaxPower = cmd_percent("c602", currentMaxPower, prop.getPower());
-                currentSpeed = cmd_absoluteMM("c902", currentSpeed, prop.getSpeed());
+                  // prop speed is in %, ruida speed is in mm/s (0..1000)
+                currentSpeed = cmd_absoluteMM("c902", currentSpeed, prop.getSpeed() * 10);
               }
               break;
             }
@@ -877,7 +912,9 @@ public class Ruida extends LaserCutter
     SETTING_MAX_POWER,
     SETTING_BED_WIDTH,
     SETTING_BED_HEIGHT,
-    SETTING_USE_BIDIRECTIONAL_RASTERING
+    SETTING_USE_BIDIRECTIONAL_RASTERING,
+    SETTING_RASTER_PADDING,
+    SETTING_RASTER_OUTSIDE
   };
 
   @Override
@@ -906,6 +943,10 @@ public class Ruida extends LaserCutter
       return this.getBedHeight();
     } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
       return this.getUseBidirectionalRastering();
+    } else if (SETTING_RASTER_PADDING.equals(attribute)) {
+      return this.getRasterPadding();
+    } else if (SETTING_RASTER_OUTSIDE.equals(attribute)) {
+      return this.getRasterPaddingAllowOutsideMachineSpace();
     }
     return null;
   }
@@ -941,6 +982,10 @@ public class Ruida extends LaserCutter
       this.setBedWidth((Double)value);
     } else if (SETTING_USE_BIDIRECTIONAL_RASTERING.equals(attribute)) {
       this.setUseBidirectionalRastering((Boolean) value);
+    } else if (SETTING_RASTER_PADDING.equals(attribute)) {
+      this.setRasterPadding((Double) value);
+    } else if (SETTING_RASTER_OUTSIDE.equals(attribute)) {
+      this.setRasterPaddingAllowOutsideMachineSpace((Boolean) value);
     }
   }
 
