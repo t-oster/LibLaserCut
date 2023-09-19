@@ -964,22 +964,6 @@ abstract class EpilogCutter extends LaserCutter
     return true;
   }
 
-  @Override
-  public int estimateJobDuration(LaserJob job)
-  {
-    // It's not entirely clear how these values were determined. They are probably calibrated for the Epilog Zing.
-    double PX2MM_500DPI = Util.px2mm(1, 500);
-    double VECTOR_MOVESPEED_X = PX2MM_500DPI * 20000d / 4.5;
-    double VECTOR_MOVESPEED_Y = PX2MM_500DPI * 10000d / 2.5;
-    double VECTOR_LINESPEED = PX2MM_500DPI * 20000d / 36.8;
-    double RASTER_LINEOFFSET = 0.08d;
-    double RASTER_LINESPEED = PX2MM_500DPI * 100000d / ((268d / 50) - RASTER_LINEOFFSET);
-    //TODO: The Raster3d values are not tested yet, theyre just copies
-    double RASTER3D_LINEOFFSET = RASTER_LINEOFFSET;
-    double RASTER3D_LINESPEED = RASTER_LINESPEED;
-    
-    return estimateJobDuration(job, VECTOR_MOVESPEED_X, VECTOR_MOVESPEED_Y, VECTOR_LINESPEED, RASTER_LINEOFFSET, RASTER_LINESPEED, RASTER3D_LINEOFFSET, RASTER3D_LINESPEED);
-  }
 
   @Override
   public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
