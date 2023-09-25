@@ -56,6 +56,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -529,8 +530,11 @@ public class Ruida extends LaserCutter
       writeJobCode(job, pl);
     }
     catch (IOException e) {
+      System.out.println("SendJob IOException " + e);
       pl.taskChanged(this, "disconnecting");
+      System.out.println("sendJob disconnect ...");
       disconnect();
+      System.out.println("sendJob disconnect done");
       throw e;
     }
     disconnect();
@@ -1158,7 +1162,9 @@ class UdpStream extends OutputStream
     this.port = DEST_PORT;
 //    System.out.println("UdpStream(" + hostname + ", " + port + ")");
     try {
-      socket = new DatagramSocket(SOURCE_PORT);
+      socket = new DatagramSocket(null);
+      socket.setReuseAddress(true); 	// allow to retry, after failure
+      socket.bind(new InetSocketAddress(SOURCE_PORT));
       socket.setSoTimeout(NETWORK_TIMEOUT);
       address = InetAddress.getByName(hostname);
     }
@@ -1215,6 +1221,7 @@ class UdpStream extends OutputStream
       socket.receive(receivePacket);
     }
     catch (SocketTimeoutException e) {
+      System.out.println("IOException: UdpStream.send Response timeout in UdpStream");
       throw new IOException("Response timeout in UdpStream");
     }
     int l = receivePacket.getLength();
