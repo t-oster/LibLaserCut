@@ -496,6 +496,15 @@ public class Ruida extends LaserCutter
       in.close();
     }
     out.close();
+    if (out.checkError())
+    {
+      /**
+       * https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html says:
+       * "Unlike other output streams, a PrintStream never throws an IOException; instead, exceptional
+       *  situations merely set an internal flag that can be tested via the checkError method."
+       */
+      throw new IOException("disconnect: send failed.");
+    }
     if (this.port != null)
     {
       this.port.close();
