@@ -672,8 +672,6 @@ public class Ruida extends LaserCutter
 
     /* work interval */
     stream.hex("DA010620").longint(travel_distance).longint(travel_distance);
-    /* finish */
-    stream.hex("EB");
     /* stop */
     stream.hex("E700");
     /* eof */
