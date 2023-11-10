@@ -668,6 +668,13 @@ public class Ruida extends LaserCutter
           }
         }
       }
+
+      part_number++;
+      first_prop = true;
+      first_vector = true;
+      currentMinPower = -1;
+      currentMaxPower = -1;
+      currentSpeed = -1;
     }
 
     /* work interval */
