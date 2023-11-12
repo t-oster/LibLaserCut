@@ -260,8 +260,8 @@ public class Ruida extends LaserCutter
   }
 
 
-  private transient double last_x = 0.0;
-  private transient double last_y = 0.0;
+  private transient double last_x = Double.NaN;
+  private transient double last_y = Double.NaN;
   private transient int vector_count = 0;
   private transient long travel_distance = 0;
 
@@ -278,7 +278,9 @@ public class Ruida extends LaserCutter
     if ((dx == 0.0) && (dy == 0.0)) {
       return;
     }
-    if (vector_count % 10 == 0 || force_abs) {                  /* enforce absolute every 10 vectors */
+
+    /* enforce absolute every 10 vectors */
+    if (vector_count % 10 == 0 || force_abs || Double.isNaN(dx) || Double.isNaN(dy)) {
       as_absolute = true;
     }
     else {
@@ -286,8 +288,10 @@ public class Ruida extends LaserCutter
     }
     vector_count += 1;
 
-    long distance = (long)Math.sqrt(dx*dx + dy*dy);
-    travel_distance += distance;
+    if (!Double.isNaN(dx) && !Double.isNaN(dy)) {
+      long distance = (long)Math.sqrt(dx*dx + dy*dy);
+      travel_distance += distance;
+    }
 
     // estimate the new real position
     last_x = x_mm;
@@ -543,6 +547,9 @@ public class Ruida extends LaserCutter
   }
 
   public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    last_x = Double.NaN;
+    last_y = Double.NaN;
+
     try {
       stream = new ByteStream(out, (byte)0x88); // 0x11, 0x38
       if (UPLOAD_METHOD_SERIAL.equals(uploadMethod)) {
@@ -617,8 +624,6 @@ public class Ruida extends LaserCutter
                * Move the laserhead (laser on) from the current position to the x/y position of this command.
                */
               if (first_vector) {
-                first_vector = false;
-
                 stream.hex("ca01").byteint(engrave ? 1 : 0); // processing mode (00: cut, 01: bidirectional x-sweep, 02: unidirectional x-sweep)
                 stream.hex("ca02").byteint(part_number); // start_layer
                 stream.hex("ca0113"); // blow on
@@ -631,7 +636,12 @@ public class Ruida extends LaserCutter
                 stream.hex("ca030f");
                 stream.hex("ca1000");
               }
+
               vector(cmd.getX(), cmd.getY(), p.getDPI(), cmd.getType() == CmdType.LINETO, engrave);
+
+              if (first_vector) {
+                first_vector = false;
+              }
               break;
             }
             case SETPROPERTY:
