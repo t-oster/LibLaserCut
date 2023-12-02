@@ -549,6 +549,8 @@ public class Ruida extends LaserCutter
   public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
     last_x = Double.NaN;
     last_y = Double.NaN;
+    vector_count = 0;
+    travel_distance = 0;
 
     try {
       stream = new ByteStream(out, (byte)0x88); // 0x11, 0x38
