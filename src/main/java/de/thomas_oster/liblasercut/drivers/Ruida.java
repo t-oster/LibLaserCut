@@ -622,7 +622,7 @@ public class Ruida extends LaserCutter
                 stream.hex("ca01").byteint(engrave ? 1 : 0); // processing mode (00: cut, 01: bidirectional x-sweep, 02: unidirectional x-sweep)
                 stream.hex("ca02").byteint(part_number); // start_layer
                 stream.hex("ca0113"); // blow on
-                stream.hex("c902").longint((int)currentSpeed);
+                stream.hex("c902").absoluteMM((int)currentSpeed);
                 // power for laser #1
                 stream.hex("c601").percent((int)currentMinPower);
                 stream.hex("c602").percent((int)currentMaxPower);
