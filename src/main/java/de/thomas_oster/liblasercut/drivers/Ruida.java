@@ -1066,7 +1066,7 @@ class ByteStream
    * append relative value
    */
   public ByteStream relative(double d, boolean signed) throws IOException {
-    int val = (int)Math.floor(d);
+    int val = (int)Math.round(d);
 //    System.out.println("rel" + ((signed)?"Signed":"Unsigned") + "ValueToByteArray(" + d + " -> " + val + ")");
     if (signed) {
       if (val > 8191) {
