@@ -208,7 +208,12 @@ public class Lasersaur extends LaserCutter {
     out.printf(Locale.US, "G1 X%f Y%f\n", Util.px2mm(isFlipXaxis() ? Util.mm2px(bedWidth, resolution) - x : x, resolution), Util.px2mm(y, resolution));
   }
 
+  /// generate startup code and reset internal states
   private byte[] generateInitializationCode() throws UnsupportedEncodingException {
+    // force output of speed and power in the next job part
+    currentSpeed = -1;
+    currentPower = -1;
+
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(result, true, StandardCharsets.US_ASCII);
     out.print("G54\n");//use table offset

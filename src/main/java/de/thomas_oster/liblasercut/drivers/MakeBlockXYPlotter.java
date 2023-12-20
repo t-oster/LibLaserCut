@@ -149,6 +149,11 @@ public class MakeBlockXYPlotter extends LaserCutter
 
   
   private void generateInitializationGCode() throws Exception {
+    // reset internal state
+    chosenDelay = 0;
+    chosenPower = 0;
+    toolState = null;
+
     toolOff();
     this.sendCommand("G28 X Y");//move to 0 0
   }

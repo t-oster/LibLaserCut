@@ -102,6 +102,15 @@ public class IModelaMill extends LaserCutter
   
   private void writeInitializationCode(PrintStream out)
   {
+    // Reset internal state
+    spindleOn = false;
+    linedepth = 0;
+    headdepth = 0;
+    spindleSpeed = 0;
+    feedRate = 0;
+    tool = 0;
+    parameters = "";
+
     out.println("%");
     out.println("O00000001");//program number 00000001 - can be changed to any number, must be 8 digits
     out.println("G90");//absolute positioning
