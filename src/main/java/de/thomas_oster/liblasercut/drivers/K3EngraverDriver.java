@@ -29,6 +29,8 @@ import de.thomas_oster.liblasercut.LaserJob;
 import de.thomas_oster.liblasercut.LaserProperty;
 import de.thomas_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
+import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.RasterPart;
@@ -36,10 +38,13 @@ import de.thomas_oster.liblasercut.RasterPart;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -192,6 +197,8 @@ public class K3EngraverDriver extends LaserCutter
   private transient CommPort port;
   private transient CommPortIdentifier portIdentifier;
   private transient ByteArrayOutputStream outputBuffer;
+  /// True while writing to file (instead of sending to machine). Ugly hack, should be a function parameter instead.
+  private transient boolean writingToFile;
 
   protected String connectSerial(CommPortIdentifier i, ProgressListener pl) throws PortInUseException, IOException, UnsupportedCommOperationException
   {
@@ -282,6 +289,11 @@ public class K3EngraverDriver extends LaserCutter
 
   protected int waitForACK() throws IOException, Exception
   {
+    if (writingToFile)
+    {
+      // writing to file - fake ACK response
+      return 0x09;
+    }
     int rec = 0;
     char[] inBuf = new char[128];
     int trys = 0;
@@ -345,7 +357,10 @@ public class K3EngraverDriver extends LaserCutter
       head_abs_pos_x = 0;
       head_abs_pos_y = 0;
     }
-    Thread.sleep(TRAVEL_TIME_DELAY * (long) Math.sqrt(BOUNDING_BOX_MAX_X * BOUNDING_BOX_MAX_Y));
+    if (!writingToFile)
+    {
+      Thread.sleep(TRAVEL_TIME_DELAY * (long) Math.sqrt(BOUNDING_BOX_MAX_X * BOUNDING_BOX_MAX_Y));
+    }
     return ret;
   }
 
@@ -357,7 +372,10 @@ public class K3EngraverDriver extends LaserCutter
       head_abs_pos_x = 0;
       head_abs_pos_y = 0;
     }
-    Thread.sleep(TRAVEL_TIME_DELAY * (long) Math.sqrt(BOUNDING_BOX_MAX_X * BOUNDING_BOX_MAX_Y));
+    if (!writingToFile)
+    {
+      Thread.sleep(TRAVEL_TIME_DELAY * (long) Math.sqrt(BOUNDING_BOX_MAX_X * BOUNDING_BOX_MAX_Y));
+    }
     return ret;
   }
 
@@ -373,7 +391,7 @@ public class K3EngraverDriver extends LaserCutter
     int ret = sendLine(sendBuffer, 0, 7);
     long tt = (long) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) * TRAVEL_TIME_DELAY; //calc travel time
 
-    if (tt > TRAVE_TRIME_THRESHOLD)
+    if (tt > TRAVE_TRIME_THRESHOLD && !writingToFile)
     {
       Thread.sleep(tt);
     }
@@ -464,9 +482,17 @@ public class K3EngraverDriver extends LaserCutter
 
   }
 
-  protected void connect(ProgressListener pl) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
+  protected void connect(ProgressListener pl, OutputStream fileOutputStream) throws IOException, PortInUseException, NoSuchPortException, UnsupportedCommOperationException
   {
     outputBuffer = null;
+
+    if (fileOutputStream != null)
+    {
+      // writing to file -- create fake connection
+      out = new PrintStream(fileOutputStream, true, StandardCharsets.US_ASCII);
+      inStream = new InputStreamReader(InputStream.nullInputStream());
+      return;
+    }
 
     String error = "No serial port found";
     if (portIdentifier == null && !getComport().equals("auto") && !getComport().equals(""))
@@ -514,19 +540,16 @@ public class K3EngraverDriver extends LaserCutter
     {
       out.close();
     }
-    else
-    {
-      if (in != null)
-      {
-        in.close();
-      }
-      out.close();
 
-      if (this.port != null)
-      {
-        this.port.close();
-        this.port = null;
-      }
+    if (in != null)
+    {
+      in.close();
+    }
+
+    if (port != null)
+    {
+      port.close();
+      port = null;
     }
 
   }
@@ -542,12 +565,26 @@ public class K3EngraverDriver extends LaserCutter
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
+    sendOrWriteJob(job, pl, warnings, null);
+  }
+
+  @Override
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception
+  {
+    sendOrWriteJob(job, new ProgressListenerDummy(), new ArrayList<>(), fileOutputStream);
+  }
+
+  /// Write job to file (if filename is given), else send it to the laser
+  public void sendOrWriteJob(LaserJob job, ProgressListener pl, List<String> warnings, OutputStream fileOutputStream)  throws IllegalJobException, Exception
+  {
+    writingToFile = (fileOutputStream != null);
+
     //let's check the job for some errors
     pl.taskChanged(this, "checking job");
     checkJob(job);
 
     pl.taskChanged(this, "connecting...");
-    connect(pl);
+    connect(pl, fileOutputStream);
     sendConnectSequence();
 
     if (this.getAutoHome())
@@ -555,7 +592,10 @@ public class K3EngraverDriver extends LaserCutter
       sendHomeCommand();
     }
 
-    Thread.sleep(500);
+    if (!writingToFile)
+    {
+      Thread.sleep(500);
+    }
     pl.taskChanged(this, "waiting ...");
 
     byte[] imageBuffer = new byte[10000];
@@ -584,6 +624,9 @@ public class K3EngraverDriver extends LaserCutter
 
         }
 
+      }
+      else if (p instanceof Raster3dPart) {
+        warnings.add("This driver is not able to handle 3D raster engrave");
       }
       else
       {
