@@ -355,9 +355,7 @@ public class IModelaMill extends LaserCutter
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
-    pl.taskChanged(this, "checking...");
-    checkJob(job);
-    pl.progressChanged(this, 20);
+    pl.taskChanged(this, "processing...");
     byte[] gcode = generateGCode(job, pl);
     pl.progressChanged(this, 50);
     pl.taskChanged(this, "sending...");
@@ -366,8 +364,9 @@ public class IModelaMill extends LaserCutter
     pl.taskChanged(this, "done");
   }
   
-  private byte[] generateGCode(LaserJob job, ProgressListener pl)
+  private byte[] generateGCode(LaserJob job, ProgressListener pl) throws IllegalJobException
   {
+    checkJob(job);
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     PrintStream out = new LinefeedPrintStream(result, true, StandardCharsets.US_ASCII);
     pl.taskChanged(this, "generating...");
@@ -395,7 +394,7 @@ public class IModelaMill extends LaserCutter
   }
   
   @Override
-  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IOException
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IOException, IllegalJobException
   {
     fileOutputStream.write(generateGCode(job, new ProgressListenerDummy()));
   }

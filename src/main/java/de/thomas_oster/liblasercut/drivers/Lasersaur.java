@@ -24,6 +24,7 @@ import de.thomas_oster.liblasercut.LaserCutter;
 import de.thomas_oster.liblasercut.LaserJob;
 import de.thomas_oster.liblasercut.LaserProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
 import de.thomas_oster.liblasercut.RasterizableJobPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
@@ -234,12 +235,9 @@ public class Lasersaur extends LaserCutter {
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
     pl.progressChanged(this, 0);
-    this.currentPower = -1;
-    this.currentSpeed = -1;
+
     BufferedOutputStream out;
-    pl.taskChanged(this, "checking job");
-    checkJob(job);
-    job.applyStartPoint();
+
     pl.taskChanged(this, "connecting");
     CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(this.getComPort());
     CommPort tmp = cpi.open("VisiCut", 10000);
@@ -255,11 +253,18 @@ public class Lasersaur extends LaserCutter {
     port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
     port.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
     out = new BufferedOutputStream(port.getOutputStream());
-    pl.taskChanged(this, "sending");
+
     writeJob(out, job, pl, port);
   }
 
   private void writeJob(BufferedOutputStream out, LaserJob job, ProgressListener pl, SerialPort port) throws IllegalJobException, Exception {
+    this.currentPower = -1;
+    this.currentSpeed = -1;
+    pl.taskChanged(this, "checking job");
+    checkJob(job);
+    job.applyStartPoint();
+
+    pl.taskChanged(this, "sending");
     out.write(this.generateInitializationCode());
     if (pl != null) pl.progressChanged(this, 20);
     int i = 0;
@@ -402,6 +407,6 @@ public class Lasersaur extends LaserCutter {
 
   @Override
   public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
-      writeJob(new BufferedOutputStream(fileOutputStream), job, null, null);
+      writeJob(new BufferedOutputStream(fileOutputStream), job, new ProgressListenerDummy(), null);
   }
 }

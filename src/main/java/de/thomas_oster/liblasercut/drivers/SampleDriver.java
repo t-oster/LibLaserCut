@@ -184,7 +184,7 @@ public class SampleDriver extends LaserCutter
   public LaserCutter clone()
   {
     SampleDriver clone = new SampleDriver();
-    //TODO: copy all settings to the clone if present.
+    clone.copyProperties(this);
     return clone;
   }
 

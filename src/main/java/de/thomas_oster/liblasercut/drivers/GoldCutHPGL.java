@@ -27,6 +27,7 @@ import de.thomas_oster.liblasercut.LaserCutter;
 import de.thomas_oster.liblasercut.LaserJob;
 import de.thomas_oster.liblasercut.LaserProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
 import de.thomas_oster.liblasercut.RasterizableJobPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
@@ -223,65 +224,75 @@ public class GoldCutHPGL extends LaserCutter {
   
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception {
+    writeJob(false, null, job, pl);
+  }
+
+  /**
+   * Send job or write it to file
+   *
+   * @param writeToFile true when writing to file)
+   * @param out output stream (use 'null' when writing to serial port)
+   * @param job laser job
+   * @param pl progress listener or ProgressListenerDummy as placeholder
+   */
+  private void writeJob(boolean writeToFile, BufferedOutputStream out, LaserJob job, ProgressListener pl) throws IllegalJobException, Exception {
     pl.progressChanged(this, 0);
-    this.currentPower = -1;
-    this.currentSpeed = -1;
-    BufferedOutputStream out;
-    SerialPort port = null;
     pl.taskChanged(this, "checking job");
     checkJob(job);
     job.applyStartPoint();
+
     pl.taskChanged(this, "connecting");
-    if (this.getComPort().startsWith("file://"))
+    SerialPort port = null;
+    if (!writeToFile)
     {
-	out = new BufferedOutputStream(new FileOutputStream(new File(new URI(this.getComPort()))));
-    }
-    else
-    {
+      if (this.getComPort().startsWith("file://"))
+      {
+        out = new BufferedOutputStream(new FileOutputStream(new File(new URI(this.getComPort()))));
+      }
+      else
+      {
         String ComPortName = this.getComPort();
         if (ComPortName.startsWith("/dev/"))
-	{
-	  // allow "/dev/ttyUSB0", although we need only "ttyUSB0"
- 	  ComPortName = ComPortName.substring(5);
-	}
-	CommPortIdentifier cpi = null;
-	//since the CommPortIdentifier.getPortIdentifier(String name) method
-	//is not working as expected, we have to manually find our port.
-	Enumeration<CommPortIdentifier> en = CommPortIdentifier.getPortIdentifiers();
-	while (en.hasMoreElements())
-	{
-	  CommPortIdentifier o = en.nextElement();
-	  if (o.getName().equals(ComPortName))
-	  {
-	    cpi = o;
-	    break;
-	  }
-	}
-	if (cpi == null)
-	{
-	  throw new Exception("Error: No such COM-Port '"+this.getComPort()+"'");
-	}
-	CommPort tmp = cpi.open("VisiCut", 10000);
-	if (tmp == null)
-	{
-	  throw new Exception("Error: Could not Open COM-Port '"+this.getComPort()+"'");
-	}
-	if (!(tmp instanceof SerialPort))
-	{
-	  throw new Exception("Port '"+this.getComPort()+"' is not a serial port.");
-	}
-	port = (SerialPort) tmp;
-	port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
-	port.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-	out = new BufferedOutputStream(port.getOutputStream());
-	pl.taskChanged(this, "sending");
+        {
+          // allow "/dev/ttyUSB0", although we need only "ttyUSB0"
+          ComPortName = ComPortName.substring(5);
+        }
+        CommPortIdentifier cpi = null;
+        //since the CommPortIdentifier.getPortIdentifier(String name) method
+        //is not working as expected, we have to manually find our port.
+        Enumeration<CommPortIdentifier> en = CommPortIdentifier.getPortIdentifiers();
+        while (en.hasMoreElements())
+        {
+          CommPortIdentifier o = en.nextElement();
+          if (o.getName().equals(ComPortName))
+          {
+            cpi = o;
+            break;
+          }
+        }
+        if (cpi == null)
+        {
+          throw new Exception("Error: No such COM-Port '" + this.getComPort() + "'");
+        }
+        CommPort tmp = cpi.open("VisiCut", 10000);
+        if (tmp == null)
+        {
+          throw new Exception("Error: Could not Open COM-Port '" + this.getComPort() + "'");
+        }
+        if (!(tmp instanceof SerialPort))
+        {
+          throw new Exception("Port '" + this.getComPort() + "' is not a serial port.");
+        }
+        port = (SerialPort) tmp;
+        port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+        port.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+        out = new BufferedOutputStream(port.getOutputStream());
+      }
     }
-    writeJob(out, job, pl, port);
-  }
 
-  private void writeJob(BufferedOutputStream out, LaserJob job, ProgressListener pl, SerialPort port) throws IllegalJobException, Exception {
+    pl.taskChanged(this, "sending");
     out.write(this.generateInitializationCode());
-    if (pl != null) pl.progressChanged(this, 20);
+    pl.progressChanged(this, 20);
     int i = 0;
     int max = job.getParts().size();
     for (JobPart p : job.getParts())
@@ -293,7 +304,7 @@ public class GoldCutHPGL extends LaserCutter {
       
       out.write(this.generateVectorGCode((VectorPart) p, p.getDPI()));
       i++;
-      if (pl != null) pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
+      pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
     }
     out.write(this.generateShutdownCode());
     out.close();
@@ -301,11 +312,8 @@ public class GoldCutHPGL extends LaserCutter {
     {
       port.close();
     }
-    if (pl != null)
-    {
-      pl.taskChanged(this, "sent.");
-      pl.progressChanged(this, 100);
-    }
+    pl.taskChanged(this, "sent.");
+    pl.progressChanged(this, 100);
   }
 
   @Override
@@ -435,6 +443,6 @@ public class GoldCutHPGL extends LaserCutter {
 
   @Override
   public void saveJob(OutputStream fileOutputStream, LaserJob job) throws UnsupportedOperationException, IllegalJobException, Exception {
-      writeJob(new BufferedOutputStream(fileOutputStream), job, null, null);
+      writeJob(true, new BufferedOutputStream(fileOutputStream), job, new ProgressListenerDummy());
   }
 }

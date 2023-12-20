@@ -35,6 +35,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,8 +78,11 @@ public class AllDriversTest {
   
   /**
    * Generate a laser job that uses most features.
+   *
+   * @param lc Lasercutter to send the job.
+   * @param tooLarge if true, the job is deliberately made larger than the laser bed size.
    */
-  public LaserJob generateDummyJob(LaserCutter lc)
+  public LaserJob generateDummyJob(LaserCutter lc, boolean tooLarge)
   {
     LaserProperty prop = lc.getLaserPropertyForVectorPart();
     setPropertyToExampleValues(prop);
@@ -86,11 +90,18 @@ public class AllDriversTest {
     // vector cut
     double dpi = lc.getResolutions().get(lc.getResolutions().size()/2);
     // The following cutting test data assumes that the laser bed size is W > 2000 and H > 1000 pixels.
-    // If the bed is smaller, scale down the test data accordingly.
+    // If the bed is smaller, scale down the test data accordingly so that the job fits on the laser bed.
     double scaling = 0.99 * Math.min(Util.mm2px(lc.getBedWidth(), dpi) / 2000, Util.mm2px(lc.getBedHeight(), dpi) / 1000);
-    if (scaling > 1)
-    {
-      scaling = 1;
+    if (tooLarge) {
+      // special case: caller requested to explicitly generate a job that exceeds the bed size
+      scaling = scaling * 2;
+    } else {
+      // generate a job that will be smaller than the bed size.
+      // Leave scaling at 100% if possible.
+      if (scaling > 1)
+      {
+        scaling = 1;
+      }
     }
     VectorPart vp = new VectorPart(prop, dpi);
     // draw something looking roughly like "VC"
@@ -136,7 +147,7 @@ public class AllDriversTest {
       // Should give the same output as in the first run.
       // Otherwise the laser driver is probably missing some re-initialization code.
       for (boolean repeated : new boolean[] {false, true}) {
-        LaserJob job = generateDummyJob(lc);
+        LaserJob job = generateDummyJob(lc, false);
 
         File newResult = new File(getOutputFilename(c, true, repeated));
         try (PrintStream fs = new PrintStream(newResult)) {
@@ -197,6 +208,35 @@ public class AllDriversTest {
         msg.append("\n");
       }
       throw new Exception(msg.toString());
+    }
+  }
+
+  @Test
+  public void checkErrorOnTooLargeJobs() throws Exception
+  {
+    for (var c: LibInfo.getSupportedDrivers())
+    {
+      System.out.println("Hallo " + c.getName());
+      LaserCutter lc = c.getDeclaredConstructor().newInstance();
+      LaserJob job = generateDummyJob(lc, true);
+
+      try (PrintStream fs = new PrintStream(OutputStream.nullOutputStream());) {
+        lc.saveJob(fs, job);
+      } catch (UnsupportedOperationException e) {
+        if ("Your driver does not implement saveJob(LaserJob job)".equals(e.getMessage())) {
+          System.err.println("Warning: Cannot test driver " + c.getName() + " because it does not support saveJob()");
+          continue;
+        } else {
+          throw e;
+        }
+      } catch (IllegalJobException e) {
+        // expected exception --> good
+        continue;
+      } catch (Exception e) {
+        var ex = new Exception("Driver " + c.getName() + " threw the wrong exception type when given a job larger than the laser bed.");
+        ex.addSuppressed(e);
+      }
+      throw new Exception("Driver " + c.getName() + " should have thrown an IllegalJobException for a job larger than the laser bed, but it did not throw any exception. Forgot to call checkJob()?");
     }
   }
 }

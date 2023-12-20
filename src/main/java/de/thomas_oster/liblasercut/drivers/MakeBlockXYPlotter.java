@@ -149,11 +149,6 @@ public class MakeBlockXYPlotter extends LaserCutter
 
   
   private void generateInitializationGCode() throws Exception {
-    // reset internal state
-    chosenDelay = 0;
-    chosenPower = 0;
-    toolState = null;
-
     toolOff();
     this.sendCommand("G28 X Y");//move to 0 0
   }
@@ -406,6 +401,11 @@ public class MakeBlockXYPlotter extends LaserCutter
   
   public void sendGCode(LaserJob job, ProgressListener pl) throws Exception
   {
+    chosenPower = 0;
+    chosenDelay = 0;
+    toolState = ToolState.ON; // assume worst case, set to OFF in initialization code
+    checkJob(job);
+    job.applyStartPoint();
     this.generateInitializationGCode();
     int startProgress = 20;
     pl.progressChanged(this, startProgress);
@@ -432,13 +432,7 @@ public class MakeBlockXYPlotter extends LaserCutter
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException, Exception
   {
-    this.chosenPower = 0;
-    this.chosenDelay = 0;
-    this.toolState = ToolState.ON; // assume worst case, set to OFF in initialization code
     pl.progressChanged(this, 0); 
-    pl.taskChanged(this, "checking job");
-    checkJob(job);
-    job.applyStartPoint();
     pl.taskChanged(this, "connecting");
     this.connect();
     pl.taskChanged(this, "sending");

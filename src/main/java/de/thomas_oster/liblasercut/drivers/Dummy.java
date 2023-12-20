@@ -25,6 +25,7 @@ import de.thomas_oster.liblasercut.LaserJob;
 import de.thomas_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
 import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
 import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
@@ -40,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -282,6 +284,27 @@ public class Dummy extends LaserCutter {
 
   @Override
   public void sendJob(LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException {
+    sendOrSaveJob(null, job, pl, warnings);
+  }
+  
+  /**
+   * save job as SVG to file
+   */
+  @Override
+  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJobException
+  {
+    sendOrSaveJob(fileOutputStream, job, new ProgressListenerDummy(), new ArrayList<>());
+  }
+
+  /**
+   * Save job to disk or send to machine
+   * @param fileOutputStream stream for saving to file (null when sending to machine)
+   * @param job laser job
+   * @param pl progress listener or ProgressListenerDummy()
+   * @param warnings list to store warnings
+   */
+  public void sendOrSaveJob(OutputStream fileOutputStream, LaserJob job, ProgressListener pl, List<String> warnings) throws IllegalJobException
+  {
     pl.progressChanged(this, 0);
     pl.taskChanged(this, "checking job");
     checkJob(job);
@@ -291,22 +314,22 @@ public class Dummy extends LaserCutter {
     pl.taskChanged(this, "sending");
     pl.taskChanged(this, "sent.");
     SVGWriter svg = jobToSVG(job);
-    System.out.println("end of job.");
-    svg.store(svgOutdir);
-    pl.progressChanged(this, 100);
-  }
-  
-  /**
-   * save job as SVG to file
-   */
-  @Override
-  public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJobException
-  {
-    SVGWriter svg = jobToSVG(job);
-    try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
+
+    if (fileOutputStream == null)
     {
-      ps.print(svg.getSVG());
+      // "send to machine" (here: store to output directory with custom filename)
+      svg.store(svgOutdir);
     }
+    else
+    {
+      // export to file
+      try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
+      {
+        ps.print(svg.getSVG());
+      }
+    }
+    System.out.println("end of job.");
+    pl.progressChanged(this, 100);
   }
 
   @Override
