@@ -29,6 +29,7 @@ import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.RasterizableJobPartTest;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
+import de.thomas_oster.liblasercut.platform.Util;
 import org.junit.Test;
 
 import java.io.File;
@@ -66,11 +67,12 @@ public class AllDriversTest {
   /**
    * filename for storing the test output
    * @param c Class of lasercutter driver
-   * @param isNew temporary file for storing the new results / False: "old" file with known-good result
+   * @param isNew True: temporary file for storing the new results / False: "old" file with known-good result
+   * @param isNewRepeated: True (only for isNew==True) : file was created by printing to file a second time / False: everything else
   */
-  private String getOutputFilename(Class<? extends LaserCutter> c, boolean isNew)
+  private String getOutputFilename(Class<? extends LaserCutter> c, boolean isNew, boolean isNewRepeated)
   {
-    return "./test-output/" + c.getName() + ".out" + (isNew ? ".new": "");
+    return "./test-output/" + c.getName() + ".out" + (isNew ? ".new": "") + (isNewRepeated ? "2": "");
   }
   
   /**
@@ -83,20 +85,27 @@ public class AllDriversTest {
     LaserJob job = new LaserJob("test", "aaaa", "bbb");
     // vector cut
     double dpi = lc.getResolutions().get(lc.getResolutions().size()/2);
+    // The following cutting test data assumes that the laser bed size is W > 2000 and H > 1000 pixels.
+    // If the bed is smaller, scale down the test data accordingly.
+    double scaling = 0.99 * Math.min(Util.mm2px(lc.getBedWidth(), dpi) / 2000, Util.mm2px(lc.getBedHeight(), dpi) / 1000);
+    if (scaling > 1)
+    {
+      scaling = 1;
+    }
     VectorPart vp = new VectorPart(prop, dpi);
     // draw something looking roughly like "VC"
-    vp.moveto(10, 10);
-    vp.lineto(500, 1000);
-    vp.lineto(1000, 0);
-    vp.moveto(2000, 0);
-    vp.lineto(1500, 100);
+    vp.moveto(10 * scaling, 10 * scaling);
+    vp.lineto(500 * scaling, 1000 * scaling);
+    vp.lineto(1000 * scaling, 0 * scaling);
+    vp.moveto(2000 * scaling, 0 * scaling);
+    vp.lineto(1500 * scaling, 100 * scaling);
     // "smooth" segment to test drivers with own speed/acceleration computation
-    vp.lineto(1499, 400);
-    vp.lineto(1499.42, 450.1337); // non-integer coordinates are also permitted
-    vp.lineto(1498, 500);
-    vp.lineto(1499, 600);
-    vp.lineto(1500, 900);
-    vp.lineto(2000, 1000);
+    vp.lineto(1499 * scaling, 400 * scaling);
+    vp.lineto(1499.42 * scaling, 450.1337 * scaling); // non-integer coordinates are also permitted
+    vp.lineto(1498 * scaling, 500 * scaling);
+    vp.lineto(1499 * scaling, 600 * scaling);
+    vp.lineto(1500 * scaling, 900 * scaling);
+    vp.lineto(2000 * scaling, 1000 * scaling);
     job.addPart(vp);
     // raster engrave
     prop = lc.getLaserPropertyForRasterPart();
@@ -120,36 +129,63 @@ public class AllDriversTest {
     {
       System.out.println("Generating test output for driver " + c.getSimpleName());
       LaserCutter lc = c.getDeclaredConstructor().newInstance();
-      LaserJob job = generateDummyJob(lc);
-      
-      File newResult = new File(getOutputFilename(c, true));
-      try (PrintStream fs = new PrintStream(newResult)) {
-        lc.saveJob(fs, job);
-      } catch (UnsupportedOperationException e) {
-        if ("Your driver does not implement saveJob(LaserJob job)".equals(e.getMessage())) {
-          System.err.println("Warning: Cannot test driver " + c.getName() + " because it does not support saveJob()");
-        } else {
-          throw e;
+
+      // Send laser job to file twice.
+      // repeated=false: first run.
+      // repeated=true: second run.
+      // Should give the same output as in the first run.
+      // Otherwise the laser driver is probably missing some re-initialization code.
+      for (boolean repeated : new boolean[] {false, true}) {
+        LaserJob job = generateDummyJob(lc);
+
+        File newResult = new File(getOutputFilename(c, true, repeated));
+        try (PrintStream fs = new PrintStream(newResult)) {
+          lc.saveJob(fs, job);
+        } catch (UnsupportedOperationException e) {
+          if ("Your driver does not implement saveJob(LaserJob job)".equals(e.getMessage())) {
+            if (!repeated)
+            {
+              System.err.println("Warning: Cannot test driver " + c.getName() + " because it does not support saveJob()");
+            }
+          } else {
+            throw e;
+          }
         }
       }
     }
+    
     // compare the results
     List<String> comparisonResults = new ArrayList<>();
     for (Class<? extends LaserCutter> c: LibInfo.getSupportedDrivers())
     {
-      File newResult = new File(getOutputFilename(c, true));
-      File previousResult = new File(getOutputFilename(c, false));
-      if (previousResult.exists())
+      File expectedResult = new File(getOutputFilename(c, false, false));
+      File newResult = new File(getOutputFilename(c, true, false));
+      File newResultRepeated = new File(getOutputFilename(c, true, true));
+      if (expectedResult.exists())
       {
-        if (!Arrays.equals(new FileInputStream(previousResult).readAllBytes(), new FileInputStream(newResult).readAllBytes()))
+        if (newResult.exists() && newResultRepeated.exists())
         {
-          comparisonResults.add("Output for " + c.getName() + " changed. For details, compare the files " + previousResult + " and " + newResult + " manually. If this change is okay, delete the old file " + previousResult +  " , rerun the tests twice and then don't forget to commit the changed file.");
+          // Check: new output (from driver) == expected output (from git)
+          if (!Arrays.equals(new FileInputStream(expectedResult).readAllBytes(), new FileInputStream(newResult).readAllBytes()))
+          {
+            comparisonResults.add("Output for " + c.getName() + " changed. For details, compare the files " + expectedResult + " and " + newResult + " manually. If this change is okay, delete the old file " + expectedResult +  " , rerun the tests twice and then don't forget to commit the changed file.");
+          }
+          // Check: new output == new output when run again
+          else if (!Arrays.equals(new FileInputStream(newResult).readAllBytes(), new FileInputStream(newResultRepeated).readAllBytes())) {
+            comparisonResults.add("Output for " + c.getName() + " is different when sending the same laser job a second time. Probably the driver code does not correctly internal states. For details, compare the files " + newResult + " and " + newResultRepeated );
+          }
+        }
+        else
+        {
+          // new output file missing.
+          // This can only occur 
         }
       } else {
-        if (! newResult.renameTo(previousResult)) {
+        // Expected output file missing
+        if (! newResult.renameTo(expectedResult)) {
           throw new RuntimeException("Renaming of file failed");
         }
-        comparisonResults.add("No previous known output found for " + c.getName() + ". Saving current output. Please re-run the tests and don't forget to commit the test output file to the repository.");
+        comparisonResults.add("No expected known output found for " + c.getName() + ". Saving current output. Please re-run the tests and don't forget to commit the test output file to the repository.");
       }
     }
     if (!comparisonResults.isEmpty())
