@@ -67,8 +67,10 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
    */
   public void setMinPower(float power)
   {
+    power = power < 0 ? 0 : power;
+    power = power > 100 ? 100 : power;
     if (power > this.getPower()) { /* minimum must not be larger than maximum */
-      power = this.getPower();
+      this.setPower(power);	 /* increase max power, so that user can first enter min, then max power */
     }
     this.min_power = power;
   }

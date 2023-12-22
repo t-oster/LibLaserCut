@@ -1100,7 +1100,7 @@ class ByteStream
     }
     else {
       if (val > 16383) {
-        throw new IllegalArgumentException("Relative unsigned value > 16383");
+        throw new IllegalArgumentException("Relative unsigned value " + val + " > 16383");
       }
       else if (val < 0) {
         throw new IllegalArgumentException("Relative unsigned value < 0");
@@ -1127,8 +1127,8 @@ class ByteStream
    * append percent value
    */
   public ByteStream percent(int percent) throws IOException {
-    double val = (double)percent / 0.006103516; // 100/2^14
-//    System.out.println("percentValueToByteArray(" + percent + " -> " + val + ")");
+    double val = (double)percent / 0.0061038881767686; // 100/(2^14-1)
+    // System.out.println("percentValueToByteArray(" + percent + " -> " + val + ")");
     return relativeUnsigned(val);
   }
 
