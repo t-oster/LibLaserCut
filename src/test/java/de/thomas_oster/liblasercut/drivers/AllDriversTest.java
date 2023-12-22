@@ -216,7 +216,6 @@ public class AllDriversTest {
   {
     for (var c: LibInfo.getSupportedDrivers())
     {
-      System.out.println("Hallo " + c.getName());
       LaserCutter lc = c.getDeclaredConstructor().newInstance();
       LaserJob job = generateDummyJob(lc, true);
 
