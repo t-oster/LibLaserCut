@@ -28,47 +28,7 @@ package de.thomas_oster.liblasercut.platform;
  */
 public class Rectangle {
   private double x1, x2, y1, y2;
-
-  /**
-   * Interval helper class
-   * represents the closed interval {@code min <= x <= max}
-   * 
-   * min must be < max
-   */
-  private static class Interval
-  {
-
-    private final double min;
-    private final double max;
-
-    private Interval(double min, double max)
-    {
-      this.min = min;
-      this.max = max;
-      if (min>max) {
-        throw new RuntimeException("Interval: min must be < max");
-      }
-    }
-
-    /**
-     * @return true if the other interval is equal or is a subset
-     */
-    private boolean isSubsetOf(Interval o)
-    {
-      return o.min <= min && o.max >= max;
-    }
-
-    /**
-     * @return true if the other interval has at least one element in common with this
-     */
-    private boolean intersects(Interval o)
-    {
-      return (o.min >= min && o.min <= max) || (o.max >= min && o.max <= max);
-    }
-
-  }
-
-  /**
+ /**
    * construct a rectangle with the corners (x1,y1) and (x2,y2)
    */
   public Rectangle(double x1, double y1, double x2, double y2)
@@ -154,20 +114,6 @@ public class Rectangle {
     return y2;
   }
 
-  /**
-   * X interval from left to right
-   */
-  private Interval getXInterval() {
-    return new Interval(x1, x2);
-  }
-
-  /**
-   * Y interval from top to bottom
-   */
-  private Interval getYInterval() {
-    return new Interval(y1, y2);
-  }
-
   @Override
   public String toString() {
     return "Rectangle(x1="+x1+",y1="+y1+",x2="+x2+",y2="+y2+")";
@@ -179,26 +125,4 @@ public class Rectangle {
     return new Rectangle(x1,y1,x2,y2);
   }
 
-  public Rectangle scale(double c)
-  {
-    return new Rectangle(x1 * c, y1 * c, x2 * c, y2 * c);
-  }
-
-  /**
-   * check if this is inside of (or equal) another rectangle
-   * @return true if this rectangle is equal to or inside of the other one
-   */
-  public boolean isInsideOf(Rectangle other) {
-    return this.getXInterval().isSubsetOf(other.getXInterval())
-                    && this.getYInterval().isSubsetOf(other.getYInterval());
-  }
-
-  /**
-   * check if the intersection of this rectangle with another one is not empty
-   * @return true if rectangles have at least one point in common
-   */
-  public boolean intersects(Rectangle other) {
-    return this.getXInterval().intersects(other.getXInterval())
-            && this.getYInterval().intersects(other.getYInterval());
-  }
 }
