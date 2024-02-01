@@ -34,6 +34,7 @@ import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
 import net.sf.corn.httpclient.HttpClient;
 import net.sf.corn.httpclient.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.NoSuchPortException;
@@ -51,15 +52,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.math.BigInteger;
+import java.net.*;
+import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -119,8 +119,9 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String UPLOAD_METHOD_IP = "IP";
   protected static final String UPLOAD_METHOD_SERIAL = "Serial";
   protected static final String UPLOAD_METHOD_OCTOPRINT = "Octoprint";
+  protected static final String UPLOAD_METHOD_GRBLHAL = "grblHAL";
 
-  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL, UPLOAD_METHOD_OCTOPRINT};
+  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL, UPLOAD_METHOD_OCTOPRINT, UPLOAD_METHOD_GRBLHAL};
 
   private String lineend = "LF";
 
@@ -603,9 +604,38 @@ public class GenericGcodeDriver extends LaserCutter {
     HttpClient client = new HttpClient(url);
     client.putAdditionalRequestProperty("X-Filename", filename);
     HttpResponse response = client.sendData(HttpClient.HTTP_METHOD.POST, data);
-    if (response == null || response.hasError())
-    {
+    if (response == null || response.hasError()) {
       throw new IOException("Error during POST Request");
+    }
+  }
+
+  private void http_upload_grblhal(String baseUri, byte[] data, String jobname) throws IOException {
+    // Implement https://github.com/grblHAL/Plugin_networking/blob/master/http_upload.c
+    // see also https://esp3d.io/esp3d-webui/v3.x/documentation/api/fileupload/index.html
+
+    String filename = jobname;
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    HttpPost uploadFile = new HttpPost(baseUri + "?t=" + Long.toString(System.currentTimeMillis()));
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+    builder.addTextBody("path", "/");
+    builder.addTextBody(filename + "S", Integer.toString(data.length));
+    builder.addTextBody(filename + "T", DateTimeFormatter.ofPattern("yyyy-MM-hh'T'hh:mm:ss").format(LocalDateTime.now()));
+
+    builder.addBinaryBody(
+            "myfiles",
+            data,
+            ContentType.create("text/x.gcode"),
+            filename
+    );
+
+    HttpEntity multipart = builder.build();
+    uploadFile.setEntity(multipart);
+    try (CloseableHttpResponse response = httpClient.execute(uploadFile))
+    {
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new IOException("Error: grblHAL returned "+response.getStatusLine().getReasonPhrase());
+      }
     }
   }
 
@@ -626,13 +656,32 @@ public class GenericGcodeDriver extends LaserCutter {
 
   protected void http_command(String command) throws IOException, URISyntaxException
   {
-    command = command + "\n";
-    URI url = new URI(getHttpUploadUrl().replace("upload", "command"));
-    HttpClient client = new HttpClient(url);
-    HttpResponse response = client.sendData(HttpClient.HTTP_METHOD.POST, command);
-    if (response == null || response.hasError())
+    if (UPLOAD_METHOD_HTTP.equals(uploadMethod))
     {
-      throw new IOException("Error during POST Request");
+      command = command + "\n";
+      URI url = new URI(getHttpUploadUrl().replace("upload", "command"));
+      HttpClient client = new HttpClient(url);
+      HttpResponse response = client.sendData(HttpClient.HTTP_METHOD.POST, command);
+      if (response == null || response.hasError())
+      {
+        throw new IOException("Error during POST Request");
+      }
+    }
+    else if (UPLOAD_METHOD_GRBLHAL.equals(uploadMethod))
+    {
+      CloseableHttpClient httpClient = HttpClients.createDefault();
+      String encodedCommand = URLEncoder.encode(command, StandardCharsets.UTF_8.toString());
+
+      String baseUrl = getHttpUploadUrl().replace("sdfiles", "command");
+      String completeUrl = baseUrl + "?cmd=" + encodedCommand;
+
+      HttpGet httpGet = new HttpGet(completeUrl);
+      try (CloseableHttpResponse response = httpClient.execute(httpGet))
+      {
+        if (response.getStatusLine().getStatusCode() != 200) {
+          throw new IOException("Error: grblHAL returned "+response.getStatusLine().getReasonPhrase());
+        }
+      }
     }
   }
   
@@ -829,7 +878,7 @@ public class GenericGcodeDriver extends LaserCutter {
         throw new IOException(error);
       }
     }
-    else if (UPLOAD_METHOD_HTTP.equals(uploadMethod))
+    else if (UPLOAD_METHOD_HTTP.equals(uploadMethod) || UPLOAD_METHOD_GRBLHAL.equals(uploadMethod))
     {
       if (getHttpUploadUrl() == null || getHttpUploadUrl().equals(""))
       {
@@ -888,6 +937,16 @@ public class GenericGcodeDriver extends LaserCutter {
     else if (UPLOAD_METHOD_OCTOPRINT.equals(uploadMethod)) {
       out.close();
       octoprint_upload(getHost(), getApiKey(), outputBuffer.toByteArray(), jobname, this.isAutoPlay());
+    }
+    else if (UPLOAD_METHOD_GRBLHAL.equals(uploadMethod))
+    {
+      out.close();
+      http_upload_grblhal(getHttpUploadUrl(), outputBuffer.toByteArray(), jobname);
+      if (this.getPostHttpUploadGcode() != null && !this.getPostHttpUploadGcode().equals(""))
+      {
+        http_commands(this.getPostHttpUploadGcode(), jobname);
+      }
+      // Autoplay can be implemented by adding "$F=$filename" to PostHttpUploadGcode
     }
     else
     {
