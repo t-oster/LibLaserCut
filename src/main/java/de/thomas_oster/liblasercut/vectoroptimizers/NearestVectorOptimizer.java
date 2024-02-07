@@ -32,17 +32,30 @@ public class NearestVectorOptimizer extends VectorOptimizer
   @Override
   protected List<Element> sort(List<Element> e)
   {
+    // nothing to do if input is empty
     List<Element> result = new LinkedList<>();
     if (e.isEmpty())
     {
       return result;
     }
 
+    // Join "broken lines" if the gap is < 1 pixel (according to current DPI).
+    // This is needed to avoid that the final result contains many MOVETO
+    // commands that do (almost) zero moving but confuse the lasercutter's
+    // motion controller.
+    // (Possible performance improvement:
+    // we could do this joining at the very end, when the paths are already
+    // sorted nicely and we just need to compare if one end point is very close
+    // to the previous start and all properties (laser power etc.) also match.)
+    e = OptimizerUtils.joinContiguousLoopElements(e, 0.9);
+
+    // Sort paths so that the gap between one endpoint and the next startpoint is minimized greedily.
+    // Start at the first path.
     result.add(e.remove(0));
     while (!e.isEmpty())
     {
       Point end = result.get(result.size() - 1).getEnd();
-      //find nearest element
+      //find the start (or end) point nearest to the end point of the current path
       int next = 0;
       //invert element direction if endpoint is nearer
       boolean invert = false;
