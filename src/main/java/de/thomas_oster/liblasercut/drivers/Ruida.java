@@ -180,20 +180,7 @@ public class Ruida extends LaserCutter
     return false;
   }
 
-  @Override
-  public double getRasterPadding() {
-    return 0;
-  }
-
-  @Override
-  public boolean getRasterPaddingAllowOutsideMachineSpace() {
-    return false;
-  }
-
-  /**
-   * When rastering, whether to always cut from left to right, or to cut in both
-   * directions? (i.e. use the return stroke to raster as well)
-   */
+  // Kept to retain compatibility with older configs
   @Deprecated
   protected transient boolean useBidirectionalRastering = true;
   @Deprecated
@@ -201,15 +188,10 @@ public class Ruida extends LaserCutter
   @Deprecated
   private transient boolean allowOutsidePadding;
 
-  public boolean getUseBidirectionalRastering()
-  {
-    // currently only bidirectional rastering is supported (work mode has to be tested for unidirectional rastering)
-    return true;
-  }
-
-  public void setUseBidirectionalRastering(boolean useBidirectionalRastering)
-  {
-    this.useBidirectionalRastering = useBidirectionalRastering;
+  // fixed value of 0 because the x-sweep processing mode adds all necessary padding. See writeJobCode().
+  @Override
+  public double getRasterPadding() {
+    return 0;
   }
 
   private void find_and_write_bounding_box(LaserJob job) throws IOException
@@ -587,7 +569,7 @@ public class Ruida extends LaserCutter
       if ((p instanceof RasterPart) || (p instanceof Raster3dPart))
       {
         engrave = true;
-        p = convertRasterizableToVectorPart((RasterizableJobPart)p, job, getUseBidirectionalRastering(), true, true);
+        p = convertRasterizableToVectorPart((RasterizableJobPart)p, job, true, true, true);
       }
       /* FALLTHRU */
       if (p instanceof VectorPart)
