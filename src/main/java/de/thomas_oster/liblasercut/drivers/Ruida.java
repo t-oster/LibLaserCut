@@ -24,45 +24,22 @@
 
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.*;
-import de.thomas_oster.liblasercut.platform.Point;
-import de.thomas_oster.liblasercut.platform.Util;
+import de.thomas_oster.liblasercut.FloatMinMaxPowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.IllegalJobException;
+import de.thomas_oster.liblasercut.JobPart;
+import de.thomas_oster.liblasercut.LaserCutter;
+import de.thomas_oster.liblasercut.LaserJob;
+import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.OptionSelector;
+import de.thomas_oster.liblasercut.ProgressListener;
+import de.thomas_oster.liblasercut.ProgressListenerDummy;
+import de.thomas_oster.liblasercut.Raster3dPart;
+import de.thomas_oster.liblasercut.RasterPart;
+import de.thomas_oster.liblasercut.RasterizableJobPart;
+import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorCommand.CmdType;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.Math;
-import java.net.BindException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-
-/* for network i/o */
-import java.net.InetAddress;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-/* for serial/usb i/o */
-import java.util.concurrent.TimeUnit;
+import de.thomas_oster.liblasercut.VectorPart;
+import de.thomas_oster.liblasercut.platform.Util;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.NoSuchPortException;
@@ -70,6 +47,27 @@ import purejavacomm.PortInUseException;
 import purejavacomm.PureJavaIllegalStateException;
 import purejavacomm.SerialPort;
 import purejavacomm.UnsupportedCommOperationException;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.BindException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class Ruida extends LaserCutter
 {
@@ -159,19 +157,19 @@ public class Ruida extends LaserCutter
   @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
   public LaserProperty getLaserPropertyForRasterPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
   public LaserProperty getLaserPropertyForRaster3dPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
@@ -612,7 +610,7 @@ public class Ruida extends LaserCutter
             case SETPROPERTY:
             {
               LaserProperty pr = cmd.getProperty();
-              FloatMinMaxPowerSpeedFrequencyProperty prop = (FloatMinMaxPowerSpeedFrequencyProperty) pr;
+              FloatMinMaxPowerSpeedFocusFrequencyProperty prop = (FloatMinMaxPowerSpeedFocusFrequencyProperty) pr;
               if (first_prop) {
                 first_prop = false;
                 currentMinPower = cmd_layer_percent("c631", part_number, currentMinPower, prop.getMinPower());
@@ -898,6 +896,7 @@ public class Ruida extends LaserCutter
     SETTING_MAX_POWER,
     SETTING_BED_WIDTH,
     SETTING_BED_HEIGHT,
+    SETTING_FOCUS_WITH_Z_AXIS,
   };
 
   @Override
@@ -924,6 +923,8 @@ public class Ruida extends LaserCutter
       return this.getBedWidth();
     } else if (SETTING_BED_HEIGHT.equals(attribute)) {
       return this.getBedHeight();
+    } else if (SETTING_FOCUS_WITH_Z_AXIS.equals(attribute)) {
+      return this.getFocusWithZAxis();
     }
     return null;
   }
@@ -957,6 +958,8 @@ public class Ruida extends LaserCutter
       this.setBedHeigth((Double)value);
     } else if (SETTING_BED_WIDTH.equals(attribute)) {
       this.setBedWidth((Double)value);
+    } else if (SETTING_FOCUS_WITH_Z_AXIS.equals(attribute)) {
+      this.setFocusWithZAxis((Boolean) value);
     }
   }
 
@@ -965,6 +968,13 @@ public class Ruida extends LaserCutter
     return settingAttributes;
   }
 
+  public void setFocusWithZAxis(Boolean focusWithZAxis) {
+    this.focusWithZAxis = focusWithZAxis;
+  }
+
+  public Boolean getFocusWithZAxis() {
+    return focusWithZAxis;
+  }
 }
 
 

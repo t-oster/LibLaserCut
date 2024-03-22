@@ -27,26 +27,14 @@ import java.util.LinkedList;
  * Add 'min power' to FloatPowerSpeedFrequencyProperty
  */
 
-public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequencyProperty {
+public class FloatMinMaxPowerSpeedFocusFrequencyProperty extends FloatPowerSpeedFocusFrequencyProperty {
 
   private float min_power = 10.0f;
   private static final String MIN_POWER = "min power";
 
-  public FloatMinMaxPowerSpeedFrequencyProperty()
+  public FloatMinMaxPowerSpeedFocusFrequencyProperty()
   {
     super();
-  }
-
-  public FloatMinMaxPowerSpeedFrequencyProperty(LaserProperty o)
-  {
-    for (String k : o.getPropertyKeys())
-    {
-      Object p;
-      p = o.getProperty(k);
-      if (p != null) {
-        this.setProperty(k, p);
-      }
-    }
   }
   
   /**
@@ -128,9 +116,9 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
   }
 
   @Override
-  public FloatMinMaxPowerSpeedFrequencyProperty clone()
+  public FloatMinMaxPowerSpeedFocusFrequencyProperty clone()
   {
-    FloatMinMaxPowerSpeedFrequencyProperty result = new FloatMinMaxPowerSpeedFrequencyProperty();
+    FloatMinMaxPowerSpeedFocusFrequencyProperty result = new FloatMinMaxPowerSpeedFocusFrequencyProperty();
     Object p;
     for (String s:this.getPropertyKeys())
     {
@@ -147,10 +135,10 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
     if (obj == null) {
       return false;
     }
-    if (!(obj instanceof FloatMinMaxPowerSpeedFrequencyProperty)) {
+    if (!(obj instanceof FloatMinMaxPowerSpeedFocusFrequencyProperty)) {
       return false;
     }
-    final FloatMinMaxPowerSpeedFrequencyProperty other = (FloatMinMaxPowerSpeedFrequencyProperty) obj;
+    final FloatMinMaxPowerSpeedFocusFrequencyProperty other = (FloatMinMaxPowerSpeedFocusFrequencyProperty) obj;
     if (this.min_power != other.min_power) {
       return false;
     }
