@@ -180,23 +180,10 @@ public class Ruida extends LaserCutter
     return false;
   }
 
-  /**
-   * 'runway' for laser to get up to speed when rastering (in mm)
-   *
-   */
-  @Deprecated
-  private transient Double rasterPadding = 0.;
-
   @Override
   public double getRasterPadding() {
     return 0;
   }
-
-  /*
-   * allow padding to move laser head outside of 'bed'
-   */
-  @Deprecated
-  private transient boolean allowOutsidePadding;
 
   @Override
   public boolean getRasterPaddingAllowOutsideMachineSpace() {
@@ -209,6 +196,10 @@ public class Ruida extends LaserCutter
    */
   @Deprecated
   protected transient boolean useBidirectionalRastering = true;
+  @Deprecated
+  private transient Double rasterPadding = 0.;
+  @Deprecated
+  private transient boolean allowOutsidePadding;
 
   public boolean getUseBidirectionalRastering()
   {
