@@ -17,10 +17,9 @@
  * along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.LaserProperty;
-import de.thomas_oster.liblasercut.FloatPowerSpeedFrequencyProperty;
+package de.thomas_oster.liblasercut;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 
