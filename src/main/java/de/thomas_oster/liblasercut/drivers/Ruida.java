@@ -184,7 +184,7 @@ public class Ruida extends LaserCutter
   @Deprecated
   protected transient boolean useBidirectionalRastering = true;
   @Deprecated
-  protected transient Double rasterPadding = 0.;
+  private transient Double rasterPadding = 0.;
   @Deprecated
   private transient boolean allowOutsidePadding;
 
