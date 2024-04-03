@@ -56,6 +56,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,6 +73,8 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -111,6 +115,7 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String SETTING_API_KEY = "Api-Key/Password for Octoprint";
   protected static final String SETTING_GCODE_DIGITS = "Decimal places used for XY coordinates";
   protected static final String SETTING_SCODE_DIGITS = "Decimal places used for power (S) value";
+  protected static final String SETTING_STATIC_JOBNAME = "Static job (file) name";
 
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
@@ -119,8 +124,9 @@ public class GenericGcodeDriver extends LaserCutter {
   protected static final String UPLOAD_METHOD_IP = "IP";
   protected static final String UPLOAD_METHOD_SERIAL = "Serial";
   protected static final String UPLOAD_METHOD_OCTOPRINT = "Octoprint";
+  protected static final String UPLOAD_METHOD_GRBLHAL = "grblHAL";
 
-  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL, UPLOAD_METHOD_OCTOPRINT};
+  protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_HTTP, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL, UPLOAD_METHOD_OCTOPRINT, UPLOAD_METHOD_GRBLHAL};
 
   private String lineend = "LF";
 
@@ -609,6 +615,36 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
+  private void http_upload_grblhal(String baseUri, byte[] data, String jobname) throws IOException {
+    // Implement https://github.com/grblHAL/Plugin_networking/blob/master/http_upload.c
+    // see also https://esp3d.io/esp3d-webui/v3.x/documentation/api/fileupload/index.html
+
+    String filename = jobname;
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    HttpPost uploadFile = new HttpPost(baseUri + "?t=" + Long.toString(System.currentTimeMillis()));
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+
+    builder.addTextBody("path", "/");
+    builder.addTextBody(filename + "S", Integer.toString(data.length));
+    builder.addTextBody(filename + "T", DateTimeFormatter.ofPattern("yyyy-MM-hh'T'hh:mm:ss").format(LocalDateTime.now()));
+
+    builder.addBinaryBody(
+            "myfiles",
+            data,
+            ContentType.create("text/x.gcode"),
+            filename
+    );
+
+    HttpEntity multipart = builder.build();
+    uploadFile.setEntity(multipart);
+    try (CloseableHttpResponse response = httpClient.execute(uploadFile))
+    {
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new IOException("Error: grblHAL returned "+response.getStatusLine().getReasonPhrase());
+      }
+    }
+  }
+
   protected void http_play(String filename) throws IOException, URISyntaxException
   {
     String command = "play /sd/"+filename;
@@ -829,7 +865,7 @@ public class GenericGcodeDriver extends LaserCutter {
         throw new IOException(error);
       }
     }
-    else if (UPLOAD_METHOD_HTTP.equals(uploadMethod))
+    else if (UPLOAD_METHOD_HTTP.equals(uploadMethod) || UPLOAD_METHOD_GRBLHAL.equals(uploadMethod))
     {
       if (getHttpUploadUrl() == null || getHttpUploadUrl().equals(""))
       {
@@ -889,6 +925,11 @@ public class GenericGcodeDriver extends LaserCutter {
       out.close();
       octoprint_upload(getHost(), getApiKey(), outputBuffer.toByteArray(), jobname, this.isAutoPlay());
     }
+    else if (UPLOAD_METHOD_GRBLHAL.equals(uploadMethod))
+    {
+      out.close();
+      http_upload_grblhal(getHttpUploadUrl(), outputBuffer.toByteArray(), jobname);
+    }
     else
     {
       if (in != null)
@@ -918,14 +959,18 @@ public class GenericGcodeDriver extends LaserCutter {
 
     pl.taskChanged(this, "checking job");
     checkJob(job);
-    this.jobName = job.getName()+".gcode";
+    if (getStaticJobName() != null && !getStaticJobName().isEmpty()) {
+      this.jobName = getStaticJobName();
+    } else {
+      this.jobName = job.getName() + ".gcode";
+    }
     job.applyStartPoint();
     pl.taskChanged(this, "connecting...");
     connect(pl);
     pl.taskChanged(this, "sending");
     try {
       writeJobCode(job, pl);
-      disconnect(job.getName()+".gcode");
+      disconnect(this.jobName);
     }
     catch (IOException e) {
       pl.taskChanged(this, "disconnecting");
@@ -968,8 +1013,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
   this.currentPower = -1;
   this.currentSpeed = -1;
 
-	checkJob(job);
-	boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
+  checkJob(job);
+  boolean wasSetWaitingForOk = isWaitForOKafterEachLine();
   try (PrintStream ps = new LinefeedPrintStream(fileOutputStream))
   {
     this.out = ps;
@@ -1118,7 +1163,18 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
   {
     this.sCodeDigits = sCodeDigits;
   }
-  
+
+  private String staticJobName;
+
+  public String getStaticJobName()
+  {
+    return staticJobName;
+  }
+
+  public void setStaticJobName(String staticJobName)
+  {
+    this.staticJobName = staticJobName;
+  }
   private static final String[] SETTINGS_LIST = new String[]{
     SETTING_UPLOAD_METHOD,
     SETTING_BAUDRATE,
@@ -1149,7 +1205,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
     SETTING_RASTER_PADDING_ALLOW_OUTSIDE_MACHINE_SPACE,
     SETTING_API_KEY,
     SETTING_GCODE_DIGITS,
-    SETTING_SCODE_DIGITS
+    SETTING_SCODE_DIGITS,
+    SETTING_STATIC_JOBNAME
   };
 
   @Override
@@ -1219,6 +1276,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       return this.getGCodeDigits();
     } else if (SETTING_SCODE_DIGITS.equals(attribute)) {
       return this.getSCodeDigits();
+    } else if (SETTING_STATIC_JOBNAME.equals(attribute)) {
+      return this.getStaticJobName();
     }
 
     return null;
@@ -1286,6 +1345,8 @@ public void saveJob(OutputStream fileOutputStream, LaserJob job) throws IllegalJ
       this.setGCodeDigits((Integer) value);
     } else if (SETTING_SCODE_DIGITS.equals(attribute)) {
       this.setSCodeDigits((Integer) value);
+    } else if (SETTING_STATIC_JOBNAME.equals(attribute)) {
+      this.setStaticJobName((String) value);
     }
   }
 
