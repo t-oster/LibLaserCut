@@ -27,17 +27,17 @@ import java.util.LinkedList;
  * Add 'min power' to FloatPowerSpeedFrequencyProperty
  */
 
-public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequencyProperty {
+public class FloatMinMaxPowerSpeedFocusFrequencyProperty extends FloatPowerSpeedFocusFrequencyProperty {
 
   private float min_power = 10.0f;
   private static final String MIN_POWER = "min power";
 
-  public FloatMinMaxPowerSpeedFrequencyProperty()
+  public FloatMinMaxPowerSpeedFocusFrequencyProperty()
   {
     super();
   }
 
-  public FloatMinMaxPowerSpeedFrequencyProperty(LaserProperty o)
+  public FloatMinMaxPowerSpeedFocusFrequencyProperty(LaserProperty o)
   {
     for (String k : o.getPropertyKeys())
     {
@@ -48,7 +48,7 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
       }
     }
   }
-  
+
   /**
    * Get the value of min power
    *
@@ -128,9 +128,9 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
   }
 
   @Override
-  public FloatMinMaxPowerSpeedFrequencyProperty clone()
+  public FloatMinMaxPowerSpeedFocusFrequencyProperty clone()
   {
-    FloatMinMaxPowerSpeedFrequencyProperty result = new FloatMinMaxPowerSpeedFrequencyProperty();
+    FloatMinMaxPowerSpeedFocusFrequencyProperty result = new FloatMinMaxPowerSpeedFocusFrequencyProperty();
     Object p;
     for (String s:this.getPropertyKeys())
     {
@@ -147,10 +147,10 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
     if (obj == null) {
       return false;
     }
-    if (!(obj instanceof FloatMinMaxPowerSpeedFrequencyProperty)) {
+    if (!(obj instanceof FloatMinMaxPowerSpeedFocusFrequencyProperty)) {
       return false;
     }
-    final FloatMinMaxPowerSpeedFrequencyProperty other = (FloatMinMaxPowerSpeedFrequencyProperty) obj;
+    final FloatMinMaxPowerSpeedFocusFrequencyProperty other = (FloatMinMaxPowerSpeedFocusFrequencyProperty) obj;
     if (this.min_power != other.min_power) {
       return false;
     }
@@ -167,7 +167,7 @@ public class FloatMinMaxPowerSpeedFrequencyProperty extends FloatPowerSpeedFrequ
 
   public String toString()
   {
-      return "FloatMinMaxPowerSpeedFrequencyProperty(min power="+getMinPower()+", max power="+getPower()+", speed="+getSpeed()+", frequency="+getFrequency()+")";
+    return "FloatMinMaxPowerSpeedFocusFrequencyProperty(min power="+getMinPower()+", max power="+getPower()+", speed="+getSpeed()+", focus="+getFocus()+", frequency="+getFrequency()+")";
   }
 
 }
