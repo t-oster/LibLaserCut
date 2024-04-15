@@ -257,10 +257,10 @@ public class Ruida extends LaserCutter
     /* compute bounding box */
     for (JobPart p : job.getParts())
     {
-      double min_x = Util.px2mm(p.getMinX(), p.getDPI());
-      double min_y = Util.px2mm(p.getMinY(), p.getDPI());
-      double max_x = Util.px2mm(p.getMaxX(), p.getDPI());
-      double max_y = Util.px2mm(p.getMaxY(), p.getDPI());
+      double min_x = isFlipXaxis() ? getBedWidth() - Util.px2mm(p.getMinX(), p.getDPI()) : Util.px2mm(p.getMinX(), p.getDPI());
+      double min_y = isFlipYaxis() ? getBedHeight() - Util.px2mm(p.getMinY(), p.getDPI()) : Util.px2mm(p.getMinY(), p.getDPI());
+      double max_x = isFlipXaxis() ? getBedWidth() - Util.px2mm(p.getMaxX(), p.getDPI()) : Util.px2mm(p.getMaxX(), p.getDPI());
+      double max_y = isFlipYaxis() ? getBedHeight() - Util.px2mm(p.getMaxY(), p.getDPI()) : Util.px2mm(p.getMaxY(), p.getDPI());
       if (first) {
         minX = min_x;
         maxX = max_x;
