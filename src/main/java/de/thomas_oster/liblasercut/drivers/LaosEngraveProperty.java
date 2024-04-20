@@ -19,7 +19,7 @@
 
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import java.util.Arrays;
 import java.util.LinkedList;
 

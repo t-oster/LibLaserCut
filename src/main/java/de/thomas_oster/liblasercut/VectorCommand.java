@@ -22,6 +22,8 @@
  */
 package de.thomas_oster.liblasercut;
 
+import de.thomas_oster.liblasercut.properties.LaserProperty;
+
 /**
  *
  * @author Thomas Oster <thomas.oster@rwth-aachen.de>

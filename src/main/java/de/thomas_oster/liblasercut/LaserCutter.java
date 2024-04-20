@@ -24,6 +24,10 @@ package de.thomas_oster.liblasercut;
 
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
+import de.thomas_oster.liblasercut.properties.PowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.properties.PowerSpeedFocusProperty;
+
 import java.io.OutputStream;
 
 import java.util.LinkedList;

@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.properties.PowerSpeedFocusProperty;
 import java.util.Arrays;
 import java.util.LinkedList;
 

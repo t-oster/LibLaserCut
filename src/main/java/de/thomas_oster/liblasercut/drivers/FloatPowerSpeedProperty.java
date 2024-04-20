@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 
 /**
  * Based upon PowerSpeedFocusProperty by Thomas Oster <thomas.oster@rwth-aachen.de>

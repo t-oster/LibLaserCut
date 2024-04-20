@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.FloatPowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.properties.FloatPowerSpeedFocusFrequencyProperty;
 import java.util.Arrays;
 import java.util.LinkedList;
 

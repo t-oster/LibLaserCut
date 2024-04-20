@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.vectoroptimizers;
 
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.vectoroptimizers.VectorOptimizer.Element;
 import java.util.ArrayList;

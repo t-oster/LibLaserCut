@@ -22,7 +22,7 @@ import de.thomas_oster.liblasercut.GreyRaster;
 import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.LaserCutter;
 import de.thomas_oster.liblasercut.LaserJob;
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.LibInfo;
 import de.thomas_oster.liblasercut.Raster3dPart;
 import de.thomas_oster.liblasercut.RasterPart;

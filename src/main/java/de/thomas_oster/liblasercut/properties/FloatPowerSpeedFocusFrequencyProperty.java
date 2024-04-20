@@ -16,7 +16,7 @@
   along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
 
  */
-package de.thomas_oster.liblasercut;
+package de.thomas_oster.liblasercut.properties;
 
 /**
  * The LaserProperty holds all the parameters for parts of the LaserJob.
@@ -24,14 +24,15 @@ package de.thomas_oster.liblasercut;
  *
  * @author oster
  */
-public class FloatPowerSpeedFocusProperty implements LaserProperty
+public class FloatPowerSpeedFocusFrequencyProperty implements LaserProperty
 {
 
   private float power = 0;
   private float speed = 100;
   private float focus = 0;
+  private int frequency = 500;
 
-  public FloatPowerSpeedFocusProperty()
+  public FloatPowerSpeedFocusFrequencyProperty()
   {
   }
 
@@ -39,6 +40,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
    * Sets the Laserpower. Valid values are from 0 to 100.
    * In 3d-Raster mode, the intensity is scaled to this power setting
    */
+  @Override
   public void setPower(float power)
   {
     power = power < 0 ? 0 : power;
@@ -46,6 +48,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
     this.power = power;
   }
 
+  @Override
   public float getPower()
   {
     return power;
@@ -61,6 +64,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
     this.speed = speed;
   }
 
+  @Override
   public float getSpeed()
   {
     return speed;
@@ -87,18 +91,29 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
   {
     return this.focus;
   }
+  
+  public void setFrequency(int f)
+  {
+    this.frequency = f;
+  }
+  
+  public int getFrequency()
+  {
+    return this.frequency;
+  }
 
   @Override
-  public FloatPowerSpeedFocusProperty clone()
+  public FloatPowerSpeedFocusFrequencyProperty clone()
   {
-    FloatPowerSpeedFocusProperty p = new FloatPowerSpeedFocusProperty();
+    FloatPowerSpeedFocusFrequencyProperty p = new FloatPowerSpeedFocusFrequencyProperty();
     p.focus = focus;
+    p.frequency = frequency;
     p.power = power;
     p.speed = speed;
     return p;
   }
 
-  private static final String[] propertyNames = new String[]{"power", "speed", "focus"};
+  private static final String[] propertyNames = new String[]{"power", "speed", "focus", "frequency"};
   
   @Override
   public String[] getPropertyKeys()
@@ -121,6 +136,10 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
     {
       return this.getFocus();
     }
+    else if ("frequency".equals(name))
+    {
+      return this.getFrequency();
+    }
     return null;
   }
 
@@ -138,6 +157,10 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
     else if ("focus".equals(name))
     {
       this.setFocus((Float) value);
+    }
+    else if ("frequency".equals(name))
+    {
+      this.setFrequency((Integer) value);
     }
     else
     {
@@ -209,14 +232,17 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final FloatPowerSpeedFocusProperty other = (FloatPowerSpeedFocusProperty) obj;
+        final FloatPowerSpeedFocusFrequencyProperty other = (FloatPowerSpeedFocusFrequencyProperty) obj;
         if (Float.floatToIntBits(this.power) != Float.floatToIntBits(other.power)) {
             return false;
         }
         if (Float.floatToIntBits(this.speed) != Float.floatToIntBits(other.speed)) {
             return false;
         }
-        return Float.floatToIntBits(this.focus) == Float.floatToIntBits(other.focus);
+        if (Float.floatToIntBits(this.focus) != Float.floatToIntBits(other.focus)) {
+            return false;
+        }
+        return this.frequency == other.frequency;
     }
 
     @Override
@@ -225,6 +251,7 @@ public class FloatPowerSpeedFocusProperty implements LaserProperty
         hash = 67 * hash + Float.floatToIntBits(this.power);
         hash = 67 * hash + Float.floatToIntBits(this.speed);
         hash = 67 * hash + Float.floatToIntBits(this.focus);
+        hash = 67 * hash + this.frequency;
         return hash;
     }
   

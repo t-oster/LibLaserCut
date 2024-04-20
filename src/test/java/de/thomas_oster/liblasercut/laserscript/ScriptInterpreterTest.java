@@ -18,11 +18,9 @@
  */
 package de.thomas_oster.liblasercut.laserscript;
 
-import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.properties.PowerSpeedFocusProperty;
 import de.thomas_oster.liblasercut.VectorPart;
-import de.thomas_oster.liblasercut.laserscript.ScriptInterface;
-import de.thomas_oster.liblasercut.laserscript.ScriptInterpreter;
-import de.thomas_oster.liblasercut.laserscript.VectorPartScriptInterface;
+
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;

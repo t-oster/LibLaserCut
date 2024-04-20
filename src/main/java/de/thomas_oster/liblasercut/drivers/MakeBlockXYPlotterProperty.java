@@ -23,7 +23,7 @@
 
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.PowerSpeedFocusFrequencyProperty;
+import de.thomas_oster.liblasercut.properties.PowerSpeedFocusFrequencyProperty;
 import java.util.Arrays;
 import java.util.LinkedList;
 

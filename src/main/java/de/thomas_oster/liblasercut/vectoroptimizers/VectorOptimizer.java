@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.vectoroptimizers;
 
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
