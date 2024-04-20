@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.laserscript;
 
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.VectorPart;
 import java.awt.geom.AffineTransform;
 

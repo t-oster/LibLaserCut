@@ -19,6 +19,8 @@
 package de.thomas_oster.liblasercut;
 
 import de.thomas_oster.liblasercut.platform.Point;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
+
 import java.util.List;
 
 /**

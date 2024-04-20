@@ -17,7 +17,7 @@
 
  */
 
-package de.thomas_oster.liblasercut;
+package de.thomas_oster.liblasercut.properties;
 
 import java.util.ArrayList;
 import java.util.HashMap;

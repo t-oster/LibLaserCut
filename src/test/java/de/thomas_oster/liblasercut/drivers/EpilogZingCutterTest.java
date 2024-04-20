@@ -21,7 +21,7 @@ package de.thomas_oster.liblasercut.drivers;
 import static org.junit.Assert.assertEquals;
 
 import de.thomas_oster.liblasercut.LaserJob;
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Util;
 import java.util.Arrays;

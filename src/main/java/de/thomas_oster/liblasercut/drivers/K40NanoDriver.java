@@ -19,12 +19,12 @@
 
 package de.thomas_oster.liblasercut.drivers;
 
-import de.thomas_oster.liblasercut.AbstractLaserProperty;
+import de.thomas_oster.liblasercut.properties.AbstractLaserProperty;
 import de.thomas_oster.liblasercut.IllegalJobException;
 import de.thomas_oster.liblasercut.JobPart;
 import de.thomas_oster.liblasercut.LaserCutter;
 import de.thomas_oster.liblasercut.LaserJob;
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.ProgressListener;
 import de.thomas_oster.liblasercut.RasterBuilder;
 import de.thomas_oster.liblasercut.RasterElement;
@@ -32,7 +32,7 @@ import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.VectorCommand;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.utils.LinefeedPrintStream;
-import java.io.FileOutputStream;
+
 import java.io.OutputStream;
 
 import java.io.PrintStream;

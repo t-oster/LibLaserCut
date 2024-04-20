@@ -16,7 +16,7 @@
   along with LibLaserCut. If not, see <http://www.gnu.org/licenses/>.
 
  */
-package de.thomas_oster.liblasercut;
+package de.thomas_oster.liblasercut.properties;
 
 /**
  * The LaserProperty holds all the parameters for parts of the LaserJob.

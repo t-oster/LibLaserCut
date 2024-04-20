@@ -20,6 +20,8 @@
 package de.thomas_oster.liblasercut;
 
 import de.thomas_oster.liblasercut.VectorCommand.CmdType;
+import de.thomas_oster.liblasercut.properties.AbstractLaserProperty;
+
 import java.util.Iterator;
 
 /**

@@ -19,6 +19,9 @@
 package de.thomas_oster.liblasercut;
 
 import de.thomas_oster.liblasercut.platform.Point;
+import de.thomas_oster.liblasercut.properties.AbstractLaserProperty;
+import de.thomas_oster.liblasercut.properties.FloatPowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.utils.BufferedImageAdapter;
 import java.awt.image.BufferedImage;
 import java.util.List;

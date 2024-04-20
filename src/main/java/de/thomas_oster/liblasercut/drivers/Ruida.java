@@ -25,27 +25,20 @@
 package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.*;
-import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Util;
 import de.thomas_oster.liblasercut.VectorCommand.CmdType;
-import java.io.ByteArrayOutputStream;
+
 import java.io.InputStreamReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.Math;
 import java.net.BindException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
@@ -54,15 +47,15 @@ import java.util.Locale;
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 /* for serial/usb i/o */
 import java.util.concurrent.TimeUnit;
+
+import de.thomas_oster.liblasercut.properties.FloatMinMaxPowerSpeedFrequencyProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.NoSuchPortException;

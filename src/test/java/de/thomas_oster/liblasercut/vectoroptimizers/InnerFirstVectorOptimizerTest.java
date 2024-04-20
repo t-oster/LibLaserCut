@@ -18,7 +18,7 @@
  */
 package de.thomas_oster.liblasercut.vectoroptimizers;
 
-import de.thomas_oster.liblasercut.PowerSpeedFocusProperty;
+import de.thomas_oster.liblasercut.properties.PowerSpeedFocusProperty;
 import de.thomas_oster.liblasercut.platform.Point;
 import de.thomas_oster.liblasercut.platform.Rectangle;
 import de.thomas_oster.liblasercut.vectoroptimizers.VectorOptimizer.Element;

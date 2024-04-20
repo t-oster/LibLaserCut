@@ -20,7 +20,7 @@ package de.thomas_oster.liblasercut.drivers;
 
 import de.thomas_oster.liblasercut.GreyRaster;
 import de.thomas_oster.liblasercut.LaserJob;
-import de.thomas_oster.liblasercut.LaserProperty;
+import de.thomas_oster.liblasercut.properties.LaserProperty;
 import de.thomas_oster.liblasercut.RasterPart;
 import de.thomas_oster.liblasercut.VectorPart;
 import de.thomas_oster.liblasercut.platform.Point;
