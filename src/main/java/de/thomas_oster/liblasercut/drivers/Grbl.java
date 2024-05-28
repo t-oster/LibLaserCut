@@ -163,9 +163,9 @@ public class Grbl extends GenericGcodeDriver
    * Doesn't include travel speed since grbl ignores that anyway.
    */
   @Override
-  protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+  protected void move(PrintStream out, double x, double y, double resolution, boolean flipShouldAlsoTranslate) throws IOException {
+    x = isFlipXaxis() ? (flipShouldAlsoTranslate ? getBedWidth() : 0) - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? (flipShouldAlsoTranslate ? getBedHeight() : 0) - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
     if (blankLaserDuringRapids)
     {
