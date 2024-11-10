@@ -36,7 +36,11 @@ public class Grbl extends GenericGcodeDriver
   public Grbl()
   {
     //set some grbl-specific defaults
-    setLineend("CR");
+    // Line ending
+    // Grbl accepts CR, CRLF and LF.
+    // FluidNC accepts CRLF and LF.
+    // So we use CRLF for best compatibility.
+    setLineend("CRLF");
     setIdentificationLine("Grbl");
     // Grbl uses "ok" flow control
     setWaitForOKafterEachLine(true);
