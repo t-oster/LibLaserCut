@@ -54,7 +54,7 @@ import java.net.URISyntaxException;
 /* for serial/usb i/o */
 import java.util.concurrent.TimeUnit;
 
-import de.thomas_oster.liblasercut.properties.FloatMinMaxPowerSpeedFrequencyProperty;
+import de.thomas_oster.liblasercut.properties.FloatMinMaxPowerSpeedFocusFrequencyProperty;
 import de.thomas_oster.liblasercut.properties.LaserProperty;
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
@@ -178,19 +178,19 @@ public class Ruida extends LaserCutter
   @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
   public LaserProperty getLaserPropertyForRasterPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
   public LaserProperty getLaserPropertyForRaster3dPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
@@ -582,7 +582,6 @@ public class Ruida extends LaserCutter
 
     for (JobPart p : job.getParts())
     {
-      float focus;
       boolean engrave = false;
 
       if ((p instanceof RasterPart) || (p instanceof Raster3dPart))
@@ -641,14 +640,28 @@ public class Ruida extends LaserCutter
             case SETPROPERTY:
             {
               LaserProperty pr = cmd.getProperty();
-              FloatMinMaxPowerSpeedFrequencyProperty prop = (FloatMinMaxPowerSpeedFrequencyProperty) pr;
+              FloatMinMaxPowerSpeedFocusFrequencyProperty prop = (FloatMinMaxPowerSpeedFocusFrequencyProperty) pr;
+              float focus = prop.getFocus();
               if (first_prop) {
                 first_prop = false;
                 currentMinPower = cmd_layer_percent("c631", part_number, currentMinPower, prop.getMinPower());
                 currentMaxPower = cmd_layer_percent("c632", part_number, currentMaxPower, prop.getPower());
                   // prop speed is in %, ruida speed is in mm/s (0..1000)
                 currentSpeed = cmd_layer_absoluteMM("c904", part_number, currentSpeed, prop.getSpeed() * getMaxVectorCutSpeed() / 100);
-                // focus - n/a
+
+                // negative focus is not applicable on the test device (uses 6442s)
+                if (focus <= 0) {
+                  focus = 0;
+                }
+
+                // configure axis velocity, affects move speed of Z axis
+                stream.hex("c903").absoluteMM(5);
+                // move Z axis to desired focus valueu
+                // the value depends on the device
+                // on an OMTech Polar, for instance, focus needs to be set to 17 - <thickness>
+                // for instance, for a 3mm thick material, one needs to configure a focus of 14.0
+                stream.hex("800B").absoluteMM(focus);
+
                 // frequency
                 stream.hex("c660").byteint(part_number).hex("00").longint(prop.getFrequency());
                 // color - red for now
@@ -680,6 +693,11 @@ public class Ruida extends LaserCutter
       currentMaxPower = -1;
       currentSpeed = -1;
     }
+
+    // configure axis velocity, affects move speed of Z axis
+    stream.hex("c903").absoluteMM(5);
+    // move Z axis back to 0
+    stream.hex("800B").absoluteMM(0);
 
     /* work interval */
     stream.hex("DA010620").longint(travel_distance).longint(travel_distance);
