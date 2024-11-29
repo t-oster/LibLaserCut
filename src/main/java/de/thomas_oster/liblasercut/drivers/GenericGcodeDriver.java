@@ -73,8 +73,6 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * This class implements a driver for a generic GRBL GCode Lasercutter.
@@ -479,19 +477,19 @@ public class GenericGcodeDriver extends LaserCutter {
     return coordinateFormat.format(value); 
   }
 
-  protected void writeVectorGCode(VectorPart vp, double resolution) throws UnsupportedEncodingException, IOException {
+  protected void writeVectorGCode(VectorPart vp, double resolution, boolean flipShouldAlsoTranslate) throws UnsupportedEncodingException, IOException {
     for (VectorCommand cmd : vp.getCommandList()) {
       switch (cmd.getType()) {
         // TODO: x,y should be changed to double because GCode has infinite vector resolution anyway
         case MOVETO:
           int x = (int) cmd.getX();
           int y = (int) cmd.getY();
-          move(out, x, y, resolution);
+          move(out, x, y, resolution, flipShouldAlsoTranslate);
           break;
         case LINETO:
           x = (int) cmd.getX();
           y = (int) cmd.getY();
-          line(out, x, y, resolution);
+          line(out, x, y, resolution, flipShouldAlsoTranslate);
           break;
         case SETPROPERTY:
           FloatPowerSpeedFocusProperty p = (FloatPowerSpeedFocusProperty) cmd.getProperty();
@@ -529,9 +527,9 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
-  protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+  protected void move(PrintStream out, double x, double y, double resolution, boolean flipShouldAlsoTranslate) throws IOException {
+    x = isFlipXaxis() ? (flipShouldAlsoTranslate ? getBedWidth() : 0) - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? (flipShouldAlsoTranslate ? getBedHeight() : 0) - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
 
     if (blankLaserDuringRapids)
@@ -545,9 +543,9 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
-  protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+  protected void line(PrintStream out, double x, double y, double resolution, boolean flipShouldAlsoTranslate) throws IOException {
+    x = isFlipXaxis() ? (flipShouldAlsoTranslate ? getBedWidth() : 0) - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? (flipShouldAlsoTranslate ? getBedHeight() : 0) - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
 
     if (nextPower != currentPower)
@@ -982,6 +980,12 @@ public class GenericGcodeDriver extends LaserCutter {
   }
   
   public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    
+    boolean flipShouldAlsoTranslate = true;
+    if (job.getTransformedOriginX() != 0 || job.getTransformedOriginY() != 0) {
+      flipShouldAlsoTranslate = false;
+    }
+
     writeInitializationCode();
     pl.progressChanged(this, 20);
     int i = 0;
@@ -1000,7 +1004,7 @@ public class GenericGcodeDriver extends LaserCutter {
       {
         //TODO: in direct mode use progress listener to indicate progress
         //of individual job
-        writeVectorGCode((VectorPart) p, p.getDPI());
+        writeVectorGCode((VectorPart) p, p.getDPI(), flipShouldAlsoTranslate);
       }
       i++;
       pl.progressChanged(this, 20 + (int) (i*(double) 60/max));
