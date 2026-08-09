@@ -529,9 +529,15 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
+  // Mirror pivot for a flipped axis: bedWidth/bedHeight when the job is referenced to the machine's
+  // homed origin, but 0 once applyStartPoint() has re-referenced it to a manually-jogged start point
+  // (there's no bed-width-away home corner to mirror around anymore). Set per job in sendJob().
+  protected transient double flipPivotX = 0;
+  protected transient double flipPivotY = 0;
+
   protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    x = isFlipXaxis() ? flipPivotX - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? flipPivotY - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
 
     if (blankLaserDuringRapids)
@@ -546,8 +552,8 @@ public class GenericGcodeDriver extends LaserCutter {
   }
 
   protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    x = isFlipXaxis() ? flipPivotX - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? flipPivotY - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
 
     if (nextPower != currentPower)
@@ -982,6 +988,8 @@ public class GenericGcodeDriver extends LaserCutter {
   }
   
   public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    flipPivotX = job.getTransformedOriginX() == 0 ? getBedWidth() : 0;
+    flipPivotY = job.getTransformedOriginY() == 0 ? getBedHeight() : 0;
     writeInitializationCode();
     pl.progressChanged(this, 20);
     int i = 0;
