@@ -76,7 +76,7 @@ public class LaserJob
   {
     return startY;
   }
-  
+
   /**
    * Get the X-coordinate of the origin (top-left corner of laser bed) in mm.
    * Initially 0, but changes if applyStartPoint() is used.
@@ -166,6 +166,9 @@ public class LaserJob
               c.setY((int) (c.getY() - Util.mm2inch(startY)*p.getDPI()));
             }
           }
+          // keep the cached bounding box (built incrementally as points were added) in sync,
+          // otherwise getMinX/Y()/getMaxX/Y() - and anything sent from them, e.g. Ruida's frame/outline - go stale
+          ((VectorPart) p).shiftBounds(Util.mm2inch(startX) * p.getDPI(), Util.mm2inch(startY) * p.getDPI());
         }
         else if (p instanceof RasterPart)
         {

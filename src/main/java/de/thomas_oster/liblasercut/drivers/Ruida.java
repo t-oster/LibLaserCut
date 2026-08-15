@@ -213,9 +213,11 @@ public class Ruida extends LaserCutter
     return 0;
   }
 
-  // Mirror pivot for a flipped axis: bedWidth/bedHeight when the job is referenced to the machine's
-  // homed origin, but 0 once applyStartPoint() has re-referenced it to a manually-jogged start point
-  // (there's no bed-width-away home corner to mirror around anymore). Set per job in writeJobCode().
+  // Pivot for mirroring a flipped axis: bedWidth/bedHeight when the job spans the whole bed (home-referenced,
+  // absolute execution) - but applyStartPoint() re-references coordinates to a local offset from the start
+  // point (0..a few mm, not 0..bedWidth), so mirroring around the far bed edge is meaningless there and pins
+  // the start point at the wrong end of travel. Pivot is 0 in that case, so the start point lands at machine
+  // home (0) instead. Set per job in writeJobCode().
   private transient double flipPivotX = 0;
   private transient double flipPivotY = 0;
 
