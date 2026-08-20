@@ -529,9 +529,17 @@ public class GenericGcodeDriver extends LaserCutter {
     }
   }
 
+  // Pivot for mirroring a flipped axis: bedWidth/bedHeight when the job spans the whole bed (home-referenced,
+  // absolute execution) - but applyStartPoint() re-references coordinates to a local offset from the start
+  // point (0..a few mm, not 0..bedWidth), so mirroring around the far bed edge is meaningless there and pins
+  // the start point at the wrong end of travel. Pivot is 0 in that case, so the start point lands at machine
+  // home (0) instead. Set per job in sendJob().
+  protected transient double flipPivotX = 0;
+  protected transient double flipPivotY = 0;
+
   protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    x = isFlipXaxis() ? flipPivotX - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? flipPivotY - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
 
     if (blankLaserDuringRapids)
@@ -546,8 +554,8 @@ public class GenericGcodeDriver extends LaserCutter {
   }
 
   protected void line(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    x = isFlipXaxis() ? flipPivotX - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? flipPivotY - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     String append = "";
 
     if (nextPower != currentPower)
@@ -982,6 +990,8 @@ public class GenericGcodeDriver extends LaserCutter {
   }
   
   public void writeJobCode(LaserJob job, ProgressListener pl) throws IOException {
+    flipPivotX = job.getTransformedOriginX() == 0 ? getBedWidth() : 0;
+    flipPivotY = job.getTransformedOriginY() == 0 ? getBedHeight() : 0;
     writeInitializationCode();
     pl.progressChanged(this, 20);
     int i = 0;

@@ -213,6 +213,14 @@ public class Ruida extends LaserCutter
     return 0;
   }
 
+  // Pivot for mirroring a flipped axis: bedWidth/bedHeight when the job spans the whole bed (home-referenced,
+  // absolute execution) - but applyStartPoint() re-references coordinates to a local offset from the start
+  // point (0..a few mm, not 0..bedWidth), so mirroring around the far bed edge is meaningless there and pins
+  // the start point at the wrong end of travel. Pivot is 0 in that case, so the start point lands at machine
+  // home (0) instead. Set per job in writeJobCode().
+  private transient double flipPivotX = 0;
+  private transient double flipPivotY = 0;
+
   private void find_and_write_bounding_box(LaserJob job) throws IOException
   {
     double minX = 0.0;
@@ -223,10 +231,15 @@ public class Ruida extends LaserCutter
     /* compute bounding box */
     for (JobPart p : job.getParts())
     {
-      double min_x = isFlipXaxis() ? getBedWidth() - Util.px2mm(p.getMinX(), p.getDPI()) : Util.px2mm(p.getMinX(), p.getDPI());
-      double min_y = isFlipYaxis() ? getBedHeight() - Util.px2mm(p.getMinY(), p.getDPI()) : Util.px2mm(p.getMinY(), p.getDPI());
-      double max_x = isFlipXaxis() ? getBedWidth() - Util.px2mm(p.getMaxX(), p.getDPI()) : Util.px2mm(p.getMaxX(), p.getDPI());
-      double max_y = isFlipYaxis() ? getBedHeight() - Util.px2mm(p.getMaxY(), p.getDPI()) : Util.px2mm(p.getMaxY(), p.getDPI());
+      // flipping reverses min/max order, so re-sort instead of flipping each bound independently
+      double x1 = isFlipXaxis() ? flipPivotX - Util.px2mm(p.getMinX(), p.getDPI()) : Util.px2mm(p.getMinX(), p.getDPI());
+      double x2 = isFlipXaxis() ? flipPivotX - Util.px2mm(p.getMaxX(), p.getDPI()) : Util.px2mm(p.getMaxX(), p.getDPI());
+      double y1 = isFlipYaxis() ? flipPivotY - Util.px2mm(p.getMinY(), p.getDPI()) : Util.px2mm(p.getMinY(), p.getDPI());
+      double y2 = isFlipYaxis() ? flipPivotY - Util.px2mm(p.getMaxY(), p.getDPI()) : Util.px2mm(p.getMaxY(), p.getDPI());
+      double min_x = Math.min(x1, x2);
+      double max_x = Math.max(x1, x2);
+      double min_y = Math.min(y1, y2);
+      double max_y = Math.max(y1, y2);
       if (first) {
         minX = min_x;
         maxX = max_x;
@@ -259,8 +272,8 @@ public class Ruida extends LaserCutter
 
   private void vector(double x, double y, double dpi, boolean as_cut, boolean force_abs) throws IOException
   {
-    double x_mm = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, dpi) : Util.px2mm(x, dpi);
-    double y_mm = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, dpi) : Util.px2mm(y, dpi);
+    double x_mm = isFlipXaxis() ? flipPivotX - Util.px2mm(x, dpi) : Util.px2mm(x, dpi);
+    double y_mm = isFlipYaxis() ? flipPivotY - Util.px2mm(y, dpi) : Util.px2mm(y, dpi);
     boolean as_absolute;
 
     /* compute distance to last known position */
@@ -543,6 +556,8 @@ public class Ruida extends LaserCutter
     last_y = Double.NaN;
     vector_count = 0;
     travel_distance = 0;
+    flipPivotX = job.getTransformedOriginX() == 0 ? getBedWidth() : 0;
+    flipPivotY = job.getTransformedOriginY() == 0 ? getBedHeight() : 0;
 
     try {
       stream = new ByteStream(out, (byte)0x88); // 0x11, 0x38
@@ -593,10 +608,15 @@ public class Ruida extends LaserCutter
       /* FALLTHRU */
       if (p instanceof VectorPart)
       {
-        double top_left_x = Util.px2mm(p.getMinX(), p.getDPI());
-        double top_left_y = Util.px2mm(p.getMinY(), p.getDPI());
-        double bottom_right_x = Util.px2mm(p.getMaxX(), p.getDPI());
-        double bottom_right_y = Util.px2mm(p.getMaxY(), p.getDPI());
+        // must match the flip applied to the actual move commands in vector()
+        double lx1 = isFlipXaxis() ? flipPivotX - Util.px2mm(p.getMinX(), p.getDPI()) : Util.px2mm(p.getMinX(), p.getDPI());
+        double lx2 = isFlipXaxis() ? flipPivotX - Util.px2mm(p.getMaxX(), p.getDPI()) : Util.px2mm(p.getMaxX(), p.getDPI());
+        double ly1 = isFlipYaxis() ? flipPivotY - Util.px2mm(p.getMinY(), p.getDPI()) : Util.px2mm(p.getMinY(), p.getDPI());
+        double ly2 = isFlipYaxis() ? flipPivotY - Util.px2mm(p.getMaxY(), p.getDPI()) : Util.px2mm(p.getMaxY(), p.getDPI());
+        double top_left_x = Math.min(lx1, lx2);
+        double top_left_y = Math.min(ly1, ly2);
+        double bottom_right_x = Math.max(lx1, lx2);
+        double bottom_right_y = Math.max(ly1, ly2);
         /* write dimensions */
         stream.hex("E752").byteint(part_number).absoluteMM(top_left_x).absoluteMM(top_left_y);
         stream.hex("E753").byteint(part_number).absoluteMM(bottom_right_x).absoluteMM(bottom_right_y);

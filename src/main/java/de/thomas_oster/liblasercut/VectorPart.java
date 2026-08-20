@@ -73,6 +73,22 @@ public class VectorPart extends JobPart
     return commands.toArray(new VectorCommand[0]);
   }
 
+  /**
+   * Shifts the cached bounding box by (dx,dy). Used by LaserJob.applyStartPoint(), which shifts
+   * every command's coordinates directly and must keep this cache (built incrementally as points
+   * are added, see checkMin()/checkMax()) in sync - otherwise getMinX/Y()/getMaxX/Y() go stale.
+   */
+  void shiftBounds(double dx, double dy)
+  {
+    if (minX != Double.POSITIVE_INFINITY)
+    {
+      minX -= dx;
+      maxX -= dx;
+      minY -= dy;
+      maxY -= dy;
+    }
+  }
+
   private void checkMin(double x, double y)
   {
     if (x < minX)

@@ -168,8 +168,8 @@ public class Grbl extends GenericGcodeDriver
    */
   @Override
   protected void move(PrintStream out, double x, double y, double resolution) throws IOException {
-    x = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
-    y = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
+    x = isFlipXaxis() ? flipPivotX - Util.px2mm(x, resolution) : Util.px2mm(x, resolution);
+    y = isFlipYaxis() ? flipPivotY - Util.px2mm(y, resolution) : Util.px2mm(y, resolution);
     currentSpeed = getTravel_speed();
     if (blankLaserDuringRapids)
     {
