@@ -41,7 +41,7 @@ public class Ordered extends DitheringAlgorithm
         64, 192, 32, 160
       },
       {
-        256, 128, 224, 96
+        255, 128, 224, 96
       },
     };
   }
