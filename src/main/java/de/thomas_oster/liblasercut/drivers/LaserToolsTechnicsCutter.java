@@ -1792,6 +1792,13 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       lineStart.y += line;
       rp.getRasterLine(line, bytes);
 
+      if (pixelsPerByte == 1) {
+        // 8bit per pixel ("engrave 3D") -- high/low is inverted.
+        // Invert before removing the zeroes so that only white pixels
+        // (no power) are removed, not black ones (full power).
+        bytes.invertBits();
+      }
+
       //remove heading zeroes
       while (bytes.size() > 0 && bytes.get(0) == 0)
       {
@@ -1814,11 +1821,6 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       final double offsetPixelsDirRight = this.getEngraveShiftPixels(speedPercent, resolution);
       if (bytes.size() > 0)
       {
-        if (pixelsPerByte == 1) {
-          // 8bit per pixel ("engrave 3D") -- high/low is inverted
-          bytes.invertBits();
-        }
-        
         //add space on the left side
         int space = overscan;
         // but not too much: there must still be space for the pixel offset.
