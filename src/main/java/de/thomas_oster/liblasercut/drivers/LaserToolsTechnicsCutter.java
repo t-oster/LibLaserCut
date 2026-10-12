@@ -2000,7 +2000,9 @@ public class LaserToolsTechnicsCutter extends LaserCutter
       }
     }
     int bitsPerPixel = 8 / pixelsPerByte;
-    bytes.leftShiftBits((int) (-pixelOffset * bitsPerPixel));
+    // Shift by whole pixels only: a fraction of a pixel would mix the bits
+    // of neighbouring 8 bit power values ("engrave 3D").
+    bytes.leftShiftBits(((int) -pixelOffset) * bitsPerPixel);
     ByteArrayList compressed = compressData(bytes);
 
     // length
